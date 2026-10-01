@@ -10,6 +10,7 @@
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:[],events:[],setlists:[]};
   let authSubscription = null;
   let realtimeGeneration = 0;
+  let subscriptionCallback = null;
 
   /* Durable offline cache: per-account snapshot + latest pending sync. */
   const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=1, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue';
@@ -231,7 +232,9 @@
     timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
   }
   function subscribe(onState) {
-    if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
+    if(!currentSession?.user)return ()=>{};
+    subscriptionCallback=onState;
+    const uid=currentSession.user.id;
     disposeRealtime();
     const generation = realtimeGeneration;
     const handleStatus = (label, status, error) => {
@@ -268,7 +271,18 @@
   window.addEventListener('online',async()=>{
     if(!currentSession?.user)return;
     try{await hydrateLocalCache();}catch(e){console.warn('BandPlan durable queue restore failed:',e);}
-    if(pending){const snap=JSON.parse(JSON.stringify(pending));saveNow(snap).catch(e=>{console.warn('BandPlan reconnect sync failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});}
+    if(pending){
+      const snap=JSON.parse(JSON.stringify(pending));
+      try{
+        await saveNow(snap);
+        if(subscriptionCallback)subscribe(subscriptionCallback);
+      }catch(e){
+        console.warn('BandPlan reconnect sync failed:',e);
+        window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));
+      }
+    } else if(subscriptionCallback && activeGroupId && !groupChannel){
+      subscribe(subscriptionCallback);
+    }
   });
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
   window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode,hydrateLocalCache};
