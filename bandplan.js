@@ -2325,6 +2325,7 @@ function init() {
   else if (!had || !state.onboardingDone) openOnboarding();
 }
 async function startBandPlan() {
+  window.__bandplanStarted = true;
   /*
     The UI must never remain a blank shell when the optional cloud SDK fails
     to load. Start the local application first; cloud sync is attached when
@@ -2341,14 +2342,35 @@ async function startBandPlan() {
   }
   const user = await window.BandPlanCloud.initialize();
   if (!user) return;
+
+  /*
+    One-time migration for installations that stored the user's real work in
+    the pre-account local key. We only seed the new account-scoped key when
+    the account has no durable snapshot yet; remote cloud data remains the
+    source of truth when it already exists.
+  */
+  let legacyState = null;
+  try {
+    const legacyRaw = localStorage.getItem('bandplan.premium.v6');
+    if (legacyRaw) {
+      const parsed = JSON.parse(legacyRaw);
+      if (hasMeaningfulState(parsed) && !isKnownDemoState(parsed)) legacyState = parsed;
+    }
+  } catch (e) {}
+
   KEY = 'bandplan.premium.v6:' + user.id;
   try {
     window.__bandplanDurable = await window.BandPlanCloud.hydrateLocalCache();
     if (window.__bandplanDurable?.state) {
       try { localStorage.setItem(KEY, JSON.stringify(window.__bandplanDurable.state)); } catch (e) {}
+    } else if (legacyState) {
+      try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (e) {}
     }
   } catch (e) {
     window.__bandplanDurable = null;
+    if (legacyState) {
+      try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (storageError) {}
+    }
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
   init();
