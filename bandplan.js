@@ -1054,8 +1054,7 @@ function vSettings() {
     h += '<div class="memb-row"><div class="avatar" style="background:' + esc(m.color || 'var(--accent)') + '" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
-      '<button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button>' +
-      '<button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></div>';
+      (m.accountId ? '<span class="t-xs t-muted" title="Профиль участника управляется его аккаунтом">Аккаунт</span>' : '<button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button>') + '</div>';
   });
   h += '</section>';
 
