@@ -753,8 +753,10 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
   .content{padding:0 var(--s4) calc(var(--bn) + var(--s6))}
   body[data-actionbar="1"] .content{padding-bottom:calc(var(--bn) + 92px)}
   .topbar{padding:var(--s3) var(--s4) var(--s2)}
-  body:not([data-route="calendar"]) .topbar .tb-inner{display:none}
-  body:not([data-route="calendar"]) .topbar{padding-bottom:0}
+  .topbar .tb-inner{display:flex;gap:8px}
+  .topbar{padding-bottom:var(--s2)}
+  .tb-search{min-width:0;flex:1}
+  .tb-kbd{display:none}
   .page-head{padding:var(--s4) var(--s4) var(--s3)}
   .page-head h1{font-size:28px}
   .card{padding:var(--s5);border-radius:var(--r-18)}
@@ -1355,3 +1357,32 @@ button,a,input,select,textarea { touch-action: manipulation; }
 .bp-auth-links{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:var(--text-2,#666)}
 .bp-auth-links button{border:0;background:transparent;color:#2547d0;font:inherit;font-weight:650;padding:6px 0;cursor:pointer}
 @media(max-width:480px){.bp-auth-card{padding:26px 20px;border-radius:20px}}
+
+
+/* BandPlan usability hotfix: neutral, high-contrast light surfaces */
+:root[data-theme="light"]{
+  --bg:#F4F5F7; --bg-deep:#ECEEF2;
+  --surf-1:#F8F9FB; --surf-2:#FFFFFF; --surf-3:#EEF0F4; --surf-4:#FFFFFF;
+  --border:#DDE1E8; --border-2:#C8CED8; --border-3:#AEB6C4;
+  --text:#18202B; --text-2:#3E4858; --muted:#626D7D; --inverse:#FFFFFF;
+  --clay-out:0 2px 8px rgba(25,35,50,.07);
+  --clay-sm:0 1px 4px rgba(25,35,50,.06);
+  --clay-in:inset 0 1px 2px rgba(25,35,50,.05);
+  --clay-press:inset 0 1px 3px rgba(25,35,50,.10);
+}
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .song-card,
+:root[data-theme="light"] .cal-cell,
+:root[data-theme="light"] .sl-item,
+:root[data-theme="light"] .hero{
+  border-color:var(--border); box-shadow:0 1px 4px rgba(25,35,50,.05);
+}
+:root[data-theme="light"] input,
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] select{
+  color:var(--text); background:#FFFFFF; border-color:var(--border-2);
+}
+:root[data-theme="light"] .muted,
+:root[data-theme="light"] .hint,
+:root[data-theme="light"] .field-hint{color:var(--text-2)}
+@media(max-width:900px){.content{touch-action:pan-y}}
