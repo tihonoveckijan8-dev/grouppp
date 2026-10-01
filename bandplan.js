@@ -1065,7 +1065,14 @@ function moveItem(slId, itemId, at) {
 /* ═══ 14. SETTINGS ═══ */
 function vSettings() {
   const s = state.settings, p = state.profile;
+  const ap = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
   let h = '<div class="split2">';
+  if (ap) {
+    h += '<section class="card rise" style="grid-column:1/-1"><div class="card-h"><div><h2>Аккаунт</h2><div class="sub">Личный аккаунт BandPlan и друзья</div></div><button class="btn btn-secondary btn-sm" type="button" data-act="auth-logout">Выйти</button></div>' +
+      '<div class="account-line"><div class="avatar">' + esc((ap.username || '?').charAt(0).toUpperCase()) + '</div><div class="grow"><div class="account-name">@' + esc(ap.username) + '</div><div class="t-xs t-muted">Ваш код друга: <b class="friend-code">' + esc(ap.friend_code) + '</b></div></div><button class="btn btn-secondary btn-sm" type="button" data-act="friend-copy-code">Копировать код</button></div>' +
+      '<div class="f2 friend-tools"><div class="field"><label class="field-label" for="friendCode">Добавить друга по коду</label><input class="input" id="friendCode" maxlength="12" autocomplete="off" placeholder="A1B2C3D4E5F6"></div><div class="field" style="display:flex;align-items:end"><button class="btn btn-primary btn-block" type="button" data-act="friend-add">Добавить друга</button></div></div>' +
+      '<div id="friendsList" class="friends-list"><div class="t-sm t-muted">Загрузка друзей…</div></div></section>';
+  }
   h += '<section class="card rise"><div class="card-h"><div><h2>Профиль и роль</h2><div class="sub">Роль определяет, какая динамика песни подсвечивается</div></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
@@ -1128,7 +1135,16 @@ function vSettings() {
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">← →</kbd><span class="t-sm t-muted">сцена: песни · календарь: навигация</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Space</kbd><span class="t-sm t-muted">автопрокрутка на сцене</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Esc</kbd><span class="t-sm t-muted">закрыть окно или выйти со сцены</span></div></section>';
+  setTimeout(renderFriendsAccount, 0);
   return h + '</div>';
+}
+async function renderFriendsAccount() {
+  const box = $('#friendsList');
+  if (!box || !window.BandPlanAuth) return;
+  try {
+    const friends = await window.BandPlanAuth.getFriends();
+    box.innerHTML = friends.length ? '<div class="field-label" style="margin-bottom:8px">Друзья · ' + friends.length + '</div>' + friends.map(f => '<div class="friend-row"><div class="avatar">' + esc((f.username || '?').charAt(0).toUpperCase()) + '</div><div class="grow"><b>@' + esc(f.username) + '</b><div class="t-xs t-muted">Код: ' + esc(f.friend_code) + '</div></div></div>').join('') : '<div class="t-sm t-muted">Пока нет друзей. Передайте другу свой код и добавьте его код здесь.</div>';
+  } catch (e) { box.innerHTML = '<div class="t-sm t-muted">Не удалось загрузить список друзей</div>'; }
 }
 function mini(v, l) { return '<div class="stat-mini"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function kb() { try { return (new Blob([JSON.stringify(state)]).size / 1024).toFixed(1); } catch (e) { return '0'; } }
@@ -1929,6 +1945,27 @@ document.addEventListener('click', function (e) {
       }, 'Удалить участника', true);
       break;
     }
+    case 'auth-logout': {
+      stop();
+      if (window.BandPlanAuth) await window.BandPlanAuth.signOut();
+      break;
+    }
+    case 'friend-copy-code': {
+      stop();
+      const ap2 = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
+      if (ap2 && navigator.clipboard) navigator.clipboard.writeText(ap2.friend_code).then(() => toast('Код друга скопирован', 'ok')).catch(() => toast('Не удалось скопировать код', 'warn'));
+      break;
+    }
+    case 'friend-add': {
+      stop();
+      try {
+        const friend = await window.BandPlanAuth.addFriendByCode($('#friendCode') ? $('#friendCode').value : '');
+        if ($('#friendCode')) $('#friendCode').value = '';
+        toast('@' + friend.username + ' добавлен в друзья', 'ok');
+        render();
+      } catch (e) { toast(e.message || 'Не удалось добавить друга', 'err'); }
+      break;
+    }
     case 'invite': {
       stop();
       const txt = 'Присоединяйся к ' + (state.profile.bandName || 'группе') + ' в BandPlan: ' + location.href;
@@ -2214,6 +2251,8 @@ async function bootCloudSync(hadLocal) {
   }
   try {
     const local = JSON.parse(JSON.stringify(state));
+    const authProfile = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
+    const localOwner = !!(authProfile && localStorage.getItem('bandplan.auth.userId') === authProfile.id);
     const remote = await window.BandPlanCloud.load();
     const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
     if (remoteState && hasMeaningfulState(remoteState)) {
@@ -2226,7 +2265,7 @@ async function bootCloudSync(hadLocal) {
         normalizeCloudState(defaults());
         await window.BandPlanCloud.saveNow(state);
       }
-    } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
+    } else if (localOwner && hasMeaningfulState(local) && !isKnownDemoState(local)) {
       normalizeCloudState(local);
       await window.BandPlanCloud.saveNow(state);
     } else {
@@ -2234,6 +2273,7 @@ async function bootCloudSync(hadLocal) {
       await window.BandPlanCloud.saveNow(state);
     }
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    try { const ap3 = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null; if (ap3) localStorage.setItem('bandplan.auth.userId', ap3.id); } catch (e) {}
     applyTheme();
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
@@ -2254,7 +2294,7 @@ async function bootCloudSync(hadLocal) {
   }
 }
 
-function init() {
+function initApp() {
   const had = load();
   applyTheme(); applyAccentVars();
   ui.calView = state.settings.calView || 'month';
@@ -2276,6 +2316,14 @@ function init() {
   });
   if (window.BandPlanCloud) bootCloudSync(had);
   else if (!had || !state.onboardingDone) openOnboarding();
+}
+async function init() {
+  if (window.BandPlanAuth) {
+    const ok = await window.BandPlanAuth.ready;
+    if (!ok) { window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_IN') location.reload(); }); return; }
+    window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_OUT') location.reload(); });
+  }
+  initApp();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
