@@ -536,11 +536,8 @@ function render() {
   document.body.setAttribute('data-actionbar', actionBarHTML ? '1' : '0');
 
   const v = $('#view');
-  if (ui.skeleton) {
-    v.innerHTML = skeletonHTML(r.name === 'songs' ? 6 : 3);
-    setTimeout(function () { ui.skeleton = false; render(); }, 170);
-    return;
-  }
+  // Не блокируем навигацию искусственным skeleton-таймером: сразу показываем актуальный раздел.
+  ui.skeleton = false;
   try {
     let html = '';
     if (r.name === 'calendar') html = vCalendar();
@@ -2088,11 +2085,11 @@ function wireSwipe() {
   el.addEventListener('touchmove', function (e) {
     if (!tracking) return;
     const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-    if (Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 1.6) el.style.opacity = String(clamp(1 - Math.abs(dx) / 900, .65, 1));
+    /* Не меняем opacity на каждом touchmove: это вызывает лишнюю перерисовку на слабых GPU. */
   }, { passive: true });
   el.addEventListener('touchend', function (e) {
     if (!tracking) return;
-    tracking = false; el.style.opacity = '';
+    tracking = false;
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy, dt = Date.now() - st;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6 || dt > 900) return;
     const order = TABS.map(x => x.k), cur = navKey(parseHash().name);
