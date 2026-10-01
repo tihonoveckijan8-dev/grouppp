@@ -2351,10 +2351,14 @@ async function startBandPlan() {
   */
   let legacyState = null;
   try {
-    const legacyRaw = localStorage.getItem('bandplan.premium.v6');
-    if (legacyRaw) {
+    for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) {
+      const legacyRaw = localStorage.getItem(legacyKey);
+      if (!legacyRaw) continue;
       const parsed = JSON.parse(legacyRaw);
-      if (hasMeaningfulState(parsed) && !isKnownDemoState(parsed)) legacyState = parsed;
+      if (hasMeaningfulState(parsed) && !isKnownDemoState(parsed)) {
+        legacyState = parsed;
+        break;
+      }
     }
   } catch (e) {}
 
