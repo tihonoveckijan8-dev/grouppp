@@ -2230,7 +2230,6 @@ async function bootCloudSync(hadLocal, durableInfo) {
       }
     } else {
       const remote = await window.BandPlanCloud.load();
-    const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
       const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
       if (remoteState && hasMeaningfulState(remoteState)) {
         if (isKnownDemoState(remoteState) && hasMeaningfulState(local) && !isKnownDemoState(local)) {
@@ -2255,7 +2254,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
-      if (!state.onboardingDone) openOnboarding();
+    if (!state.onboardingDone) openOnboarding();
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
       normalizeCloudState(incoming);
