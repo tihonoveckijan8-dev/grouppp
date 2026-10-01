@@ -2198,38 +2198,62 @@ function isKnownDemoState(s) {
   return songs.some(x => titles.indexOf(String(x && x.title || '')) >= 0 || String(x && x.artist || '') === 'Neon Coast') ||
     mems.some(x => members.indexOf(String(x && x.name || '')) >= 0);
 }
-async function bootCloudSync(hadLocal) {
+async function bootCloudSync(hadLocal, durableInfo) {
   if (!window.BandPlanCloud) {
     if (!hadLocal || !state.onboardingDone) openOnboarding();
     return;
   }
   try {
     const local = JSON.parse(JSON.stringify(state));
-    const remote = await window.BandPlanCloud.load();
+    /*
+      If IndexedDB contains a pending snapshot, it is newer than the last
+      confirmed cloud state. Never overwrite it with remote data on boot.
+    */
+    if (durableInfo?.pendingSync && durableInfo.state) {
+      normalizeCloudState(durableInfo.state);
+      if (navigator.onLine !== false) {
+        try {
+          await window.BandPlanCloud.saveNow(state);
+        } catch (syncError) {
+          console.warn('BandPlan pending offline sync deferred:', syncError);
+        }
+      }
+      if (!durableInfo.pendingSync || navigator.onLine !== false) {
+        try {
+          const confirmed = await window.BandPlanCloud.load();
+          if (confirmed?.state && hasMeaningfulState(confirmed.state)) normalizeCloudState(confirmed.state);
+        } catch (loadError) {
+          console.warn('BandPlan remote confirmation deferred:', loadError);
+        }
+      }
+    } else {
+      const remote = await window.BandPlanCloud.load();
     const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
-    if (remoteState && hasMeaningfulState(remoteState)) {
-      if (isKnownDemoState(remoteState) && hasMeaningfulState(local) && !isKnownDemoState(local)) {
+      const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
+      if (remoteState && hasMeaningfulState(remoteState)) {
+        if (isKnownDemoState(remoteState) && hasMeaningfulState(local) && !isKnownDemoState(local)) {
+          normalizeCloudState(local);
+          await window.BandPlanCloud.saveNow(state);
+        } else if (!isKnownDemoState(remoteState)) {
+          normalizeCloudState(remoteState);
+        } else {
+          normalizeCloudState(defaults());
+          await window.BandPlanCloud.saveNow(state);
+        }
+      } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
         normalizeCloudState(local);
         await window.BandPlanCloud.saveNow(state);
-      } else if (!isKnownDemoState(remoteState)) {
-        normalizeCloudState(remoteState);
       } else {
         normalizeCloudState(defaults());
         await window.BandPlanCloud.saveNow(state);
       }
-    } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
-      normalizeCloudState(local);
-      await window.BandPlanCloud.saveNow(state);
-    } else {
-      normalizeCloudState(defaults());
-      await window.BandPlanCloud.saveNow(state);
     }
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     applyTheme();
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
-    if (!state.onboardingDone) openOnboarding();
+      if (!state.onboardingDone) openOnboarding();
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
       normalizeCloudState(incoming);
@@ -2264,13 +2288,22 @@ function init() {
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
   ui.skeleton = true;
   render();
-  if (window.BandPlanCloud) bootCloudSync(had);
+  if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
   else if (!had || !state.onboardingDone) openOnboarding();
 }
 async function startBandPlan() {
   const user = await window.BandPlanCloud.initialize();
   if (!user) return;
   KEY = 'bandplan.premium.v6:' + user.id;
+  try {
+    window.__bandplanDurable = await window.BandPlanCloud.hydrateLocalCache();
+    if (window.__bandplanDurable?.state) {
+      try { localStorage.setItem(KEY, JSON.stringify(window.__bandplanDurable.state)); } catch (e) {}
+    }
+  } catch (e) {
+    window.__bandplanDurable = null;
+    console.warn('BandPlan durable offline hydration unavailable:', e);
+  }
   init();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
