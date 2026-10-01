@@ -103,8 +103,8 @@
     const roster=Array.isArray(shared.members)?shared.members.slice():(pstate.members||[]);
     accounts.forEach(a=>{
       if(!a.display_name)return;
-      const existing=roster.find(m=>String(m.name||'').trim().toLowerCase()===a.display_name.trim().toLowerCase());
-      if(existing){existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
+      const existing=roster.find(m=>m.accountId===a.user_id||m.id===a.user_id||String(m.name||'').trim().toLowerCase()===a.display_name.trim().toLowerCase());
+      if(existing){existing.name=a.display_name;existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
     });
     return {state:Object.assign({},pstate,{songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
