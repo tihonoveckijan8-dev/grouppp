@@ -990,13 +990,12 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
 
 /* ═══ V7: светлая тема, переполнение, динамика, PWA ═══ */
 :root[data-theme="light"]{
-  --bg:#D9D3EA; --bg-deep:#CEC7E2; --surf-1:#E9E5F5; --surf-2:#FCFBFF; --surf-3:#D0C9E4; --surf-4:#FCFBFF;
-  --border:rgba(76,60,132,.26); --border-2:rgba(76,60,132,.42); --border-3:rgba(76,60,132,.58);
-  --text:#12162A; --text-2:#343A55; --muted:#535B78;
-  --clay-out:9px 11px 22px rgba(70,52,130,.40),-7px -7px 16px rgba(255,255,255,1);
-  --clay-sm:5px 6px 12px rgba(70,52,130,.36),-4px -4px 10px rgba(255,255,255,1);
-  --clay-in:inset 3px 3px 5px rgba(255,255,255,1),inset -4px -5px 9px rgba(70,52,130,.20);
-  --clay-press:inset 5px 6px 11px rgba(70,52,130,.40),inset -4px -4px 9px rgba(255,255,255,.9);
+  color-scheme:light;
+  --bg:#F3F5F8; --bg-deep:#E9EDF2; --surf-1:#F8FAFC; --surf-2:#FFFFFF; --surf-3:#EEF2F6; --surf-4:#FFFFFF;
+  --border:#DCE2EA; --border-2:#C7D0DC; --border-3:#AAB6C5;
+  --text:#17212F; --text-2:#344255; --muted:#596779; --inverse:#FFFFFF;
+  --clay-out:0 2px 8px rgba(24,39,58,.07); --clay-sm:0 1px 4px rgba(24,39,58,.06);
+  --clay-in:inset 0 1px 2px rgba(24,39,58,.04); --clay-press:inset 0 1px 3px rgba(24,39,58,.08);
 }
 :root[data-theme="light"] .card,:root[data-theme="light"] .song-card,:root[data-theme="light"] .cal-cell,:root[data-theme="light"] .sl-item,:root[data-theme="light"] .hero{border-color:var(--border-2)}
 :root[data-theme="light"] .btn-secondary,:root[data-theme="light"] .chip,:root[data-theme="light"] .icon-btn{border-color:var(--border-2)}
@@ -1386,3 +1385,18 @@ button,a,input,select,textarea { touch-action: manipulation; }
 :root[data-theme="light"] .hint,
 :root[data-theme="light"] .field-hint{color:var(--text-2)}
 @media(max-width:900px){.content{touch-action:pan-y}}
+
+/* Light mode: enforce readable contrast on common controls and content */
+:root[data-theme="light"] body{background:var(--bg);color:var(--text)}
+:root[data-theme="light"] .card,:root[data-theme="light"] .hero,:root[data-theme="light"] .cal-cell,
+:root[data-theme="light"] .song-card,:root[data-theme="light"] .sl-item,:root[data-theme="light"] .modal-card,
+:root[data-theme="light"] .search-drop,:root[data-theme="light"] .side-profile{
+ background:var(--surf-2);color:var(--text);border-color:var(--border);box-shadow:0 1px 4px rgba(24,39,58,.06)
+}
+:root[data-theme="light"] .input,:root[data-theme="light"] .select,:root[data-theme="light"] .textarea,
+:root[data-theme="light"] input,:root[data-theme="light"] textarea,:root[data-theme="light"] select{
+ background:#fff;color:var(--text);border-color:var(--border-2)
+}
+:root[data-theme="light"] .muted,:root[data-theme="light"] .hint,:root[data-theme="light"] .field-hint,
+:root[data-theme="light"] .cal-cell.out{color:var(--text-2)}
+:root[data-theme="light"] .cal-cell.out{opacity:.78}

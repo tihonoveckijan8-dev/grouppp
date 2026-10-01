@@ -418,10 +418,10 @@ const navKey = n => n === 'song' ? 'songs' : n === 'setlist' ? 'setlists' : n;
 function buildChrome() {
   const up = upcoming().length, cur = navKey(parseHash().name);
   $('#sideNav').innerHTML = TABS.map(n =>
-    '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 19) +
+    '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 19) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
   $('#botNav').innerHTML = TABS.map(n =>
-    '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 21) +
+    '<a href="' + n.h + '" data-nav="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 21) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
 
   const p = state.profile;
@@ -1630,7 +1630,6 @@ document.addEventListener('click', function (e) {
     case 'account-logout': { stop(); const b=el; b.disabled=true; window.BandPlanCloud.signOut().then(()=>location.reload()).catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');}); break; }
     case 'confirm-yes': { stop(); const cb = confirmCb; hardClose(modalRoot); if (cb) cb(); break; }
     case 'reload-view': stop(); ui.skeleton = true; render(); break;
-    case 'nav': stop(); ui.skeleton = true; go('#/' + el.getAttribute('data-to')); break;
     case 'theme-toggle': stop(); cycleTheme(); break;
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
