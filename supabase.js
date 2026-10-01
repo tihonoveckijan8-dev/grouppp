@@ -171,7 +171,26 @@
     ]);
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
     const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
-    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data?{state:pstate,updatedAt:lastUpdated}:null;}
+
+    /*
+      The account row is the durable identity source for the member's name and
+      roles. Keep the personal snapshot as the primary source, but hydrate
+      missing/stale role data from the account so a fresh device never asks
+      the member to choose the role again.
+    */
+    let accountProfile=null;
+    try{
+      const account=await client.from('bandplan_accounts').select('display_name,roles').eq('user_id',uid).maybeSingle();
+      if(!account.error) accountProfile=account.data||null;
+    }catch(e){ console.warn('BandPlan account profile hydration skipped:',e); }
+    const profile=Object.assign({},pstate.profile||{});
+    if(accountProfile?.display_name) profile.name=accountProfile.display_name;
+    if(Array.isArray(accountProfile?.roles)&&accountProfile.roles.length){
+      profile.roles=accountProfile.roles.slice();
+      profile.role=profile.roles[0]||'';
+    }
+    const hydratedPersonal=Object.assign({},pstate,{profile});
+    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data||accountProfile?{state:hydratedPersonal,updatedAt:lastUpdated}:null;}
     const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
