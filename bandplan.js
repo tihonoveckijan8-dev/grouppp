@@ -207,7 +207,36 @@ function load() {
     return true;
   } catch (e) { return false; }
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
+function eventHasPassed(ev, now) {
+  if (!ev || !ev.date) return false;
+  const repeat = ev.repeat || 'none';
+  if (repeat !== 'none') {
+    return !!(ev.repeatUntil && ev.repeatUntil < today());
+  }
+  if (ev.date < today()) return true;
+  if (ev.date > today()) return false;
+  if (!ev.time) return false;
+  const endTime = ev.end || ev.time;
+  const end = new Date(ev.date + 'T' + endTime + ':00');
+  return end.getTime() <= now.getTime();
+}
+function cleanupExpiredEvents() {
+  const now = new Date();
+  const before = state.events.length;
+  state.events = state.events.filter(ev => !eventHasPassed(ev, now));
+  const changed = state.events.length !== before;
+  if (changed) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
+  }
+  return changed;
+}
+function save() {
+  cleanupExpiredEvents();
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); }
+  if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
+}
 function commit() { save(); render(); }
 const songById = id => state.songs.find(s => s.id === id);
 const evById = id => state.events.find(e => e.id === id);
@@ -2156,6 +2185,7 @@ function normalizeCloudState(d) {
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
+  cleanupExpiredEvents();
   return state;
 }
 function hasMeaningfulState(s) {
@@ -2239,6 +2269,11 @@ function init() {
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
   ui.skeleton = true;
   render();
+  cleanupExpiredEvents();
+  setInterval(cleanupExpiredEvents, 60000);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) cleanupExpiredEvents();
+  });
   if (window.BandPlanCloud) bootCloudSync(had);
   else if (!had || !state.onboardingDone) openOnboarding();
 }
