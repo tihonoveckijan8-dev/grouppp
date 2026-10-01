@@ -79,7 +79,7 @@
         pending = null;
         activeGroupId = null;
         lastUpdated = '';
-        sharedBaseline = {songs:[],events:[],setlists:[]};
+        sharedBaseline = {songs:{},events:{},setlists:{}};
         disposeRealtime();
         mode = 'login';
         renderGate();
