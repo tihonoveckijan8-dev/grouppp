@@ -723,10 +723,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .bottom-nav .nb{position:absolute;top:3px;right:calc(50% - 24px);min-width:17px;height:17px;border-radius:var(--r-pill);
   background:var(--danger);color:#fff;font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:var(--fw-bold)}
 .actionbar{display:none}
-.swipe-hint{position:fixed;bottom:calc(var(--bn) + 20px);left:50%;transform:translateX(-50%);z-index:290;background:var(--surf-4);
-  border:1px solid var(--border);box-shadow:var(--shadow-md);border-radius:var(--r-pill);padding:9px var(--s5);font-size:var(--fs-caption);
-  font-weight:var(--fw-semi);color:var(--text-2);display:none;align-items:center;gap:var(--s2);pointer-events:none}
-.swipe-hint.on{display:flex;animation:dropIn var(--t-pop) both}
 .print-area{display:none}
 
 /* ─── 21. RESPONSIVE ─────────────────────────────────────────────────── */
