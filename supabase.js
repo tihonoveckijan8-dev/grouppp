@@ -409,10 +409,14 @@
     saveNow: offlineAwareSave,
     schedule: function (state) {
       if (!currentSession) return;
-      cacheOfflineState(state).catch(function () {});
+      /* Сразу фиксируем последнюю версию в IndexedDB и очереди.
+         Если страницу закроют до сетевого запроса, она отправится при следующем запуске. */
+      const snapshot = JSON.parse(JSON.stringify(state || {}));
+      cacheOfflineState(snapshot).catch(function () {});
+      queueOfflineState(snapshot).catch(function () {});
       clearTimeout(window.__bandPlanCloudTimer);
       window.__bandPlanCloudTimer = setTimeout(function () {
-        offlineAwareSave(state).catch(function (e) { console.warn('BandPlan cloud save queued:', e); });
+        flushOfflineQueue().catch(function (e) { console.warn('BandPlan cloud save queued:', e); });
       }, 350);
     },
     subscribe,
