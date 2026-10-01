@@ -52,6 +52,7 @@
     if (error) throw error;
     currentSession = data.session;
     await loadProfile();
+    if (currentSession && currentSession.user) localStorage.setItem('bandplan.auth.userId', currentSession.user.id);
     return currentProfile;
   }
 
@@ -72,7 +73,10 @@
     await client.auth.signOut();
     currentSession = null;
     currentProfile = null;
-    try { localStorage.removeItem('bandplan.premium.v6'); } catch (e) {}
+    try {
+      localStorage.removeItem('bandplan.premium.v6');
+      localStorage.removeItem('bandplan.auth.userId');
+    } catch (e) {}
     emit('SIGNED_OUT', null);
   }
 
