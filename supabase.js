@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:[],events:[],setlists:[]};
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
   let authSubscription = null;
   let realtimeGeneration = 0;
   let subscriptionCallback = null;
@@ -171,7 +171,7 @@
     ]);
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
     const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
-    if(!activeGroupId){sharedBaseline={songs:[],events:[],setlists:[]};return personal.data?{state:pstate,updatedAt:lastUpdated}:null;}
+    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data?{state:pstate,updatedAt:lastUpdated}:null;}
     const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
@@ -181,7 +181,8 @@
       client.from('bandplan_groups').select('name').eq('id',activeGroupId).maybeSingle()
     ]);
     for(const q of [songs,events,setlists,gs,memberRows,groupInfo])if(q.error)throw q.error;
-    sharedBaseline={songs:(songs.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),events:(events.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),setlists:(setlists.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean)};
+    const toSharedMap=rows=>Object.fromEntries((rows||[]).map(x=>{const data=x.data||{};const id=String(data.id||'').trim();return id?[id,JSON.stringify(data)]:null;}).filter(Boolean));
+    sharedBaseline={songs:toSharedMap(songs.data),events:toSharedMap(events.data),setlists:toSharedMap(setlists.data)};
     const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
     let accounts=[];
     if(ids.length){const a=await client.from('bandplan_accounts').select('user_id,display_name,roles').in('user_id',ids);if(a.error)throw a.error;accounts=a.data||[];}
@@ -212,10 +213,44 @@
     if(activeGroupId){
       if(String(snapshot.profile?.bandName||'').trim().length>=3){const renamed=await client.rpc('bandplan_rename_group',{p_name:snapshot.profile.bandName});if(renamed.error){pending=snapshot;throw renamed.error;}}
       const songs=snapshot.songs||[],events=snapshot.events||[],setlists=snapshot.setlists||[];
-      const removed=(base,current)=>base.filter(id=>!current.some(x=>String(x.id)===id));
-      const sync=await client.rpc('bandplan_sync_group',{p_songs:songs,p_events:events,p_setlists:setlists,p_roster:snapshot.members||[],p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),p_personal_settings:snapshot.settings||{},p_delete_songs:removed(sharedBaseline.songs,songs),p_delete_events:removed(sharedBaseline.events,events),p_delete_setlists:removed(sharedBaseline.setlists,setlists)});
+      /*
+        Shared records are synchronized as deltas, not as the entire local
+        snapshot. This prevents a stale client from overwriting another
+        member's newer song/event/setlist when it saves unrelated changes.
+      */
+      const delta=(baseline,current)=>{
+        const rows=[],currentIds=new Set();
+        (current||[]).forEach(row=>{
+          const id=String(row?.id||'').trim();
+          if(!id)return;
+          currentIds.add(id);
+          const serialized=JSON.stringify(row);
+          if(baseline[id]!==serialized)rows.push(row);
+        });
+        const deleted=Object.keys(baseline).filter(id=>!currentIds.has(id));
+        return {rows,deleted};
+      };
+      const songDelta=delta(sharedBaseline.songs,songs);
+      const eventDelta=delta(sharedBaseline.events,events);
+      const setlistDelta=delta(sharedBaseline.setlists,setlists);
+      const sync=await client.rpc('bandplan_sync_group',{
+        p_songs:songDelta.rows,
+        p_events:eventDelta.rows,
+        p_setlists:setlistDelta.rows,
+        p_roster:snapshot.members||[],
+        p_display_name:snapshot.profile?.name||'',
+        p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),
+        p_personal_settings:snapshot.settings||{},
+        p_delete_songs:songDelta.deleted,
+        p_delete_events:eventDelta.deleted,
+        p_delete_setlists:setlistDelta.deleted
+      });
       if(sync.error){pending=snapshot;throw sync.error;}
-      sharedBaseline={songs:songs.map(x=>String(x.id)),events:events.map(x=>String(x.id)),setlists:setlists.map(x=>String(x.id))};
+      sharedBaseline={
+        songs:Object.fromEntries(songs.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id)),
+        events:Object.fromEntries(events.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id)),
+        setlists:Object.fromEntries(setlists.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id))
+      };
     }
     const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
