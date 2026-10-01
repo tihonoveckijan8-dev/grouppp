@@ -8,6 +8,8 @@
   const LEGACY_TABLE = 'bandplan_state';
   const PROFILE_TABLE = 'bandplan_profiles';
   const FRIEND_TABLE = 'bandplan_friendships';
+  const GROUP_STATE_TABLE = 'bandplan_group_state';
+  const GROUP_ACTIVE_PREFIX = 'bandplan.activeGroup:';
   const REGISTER_FN = URL + '/functions/v1/bandplan-register';
 
   const client = window.supabase.createClient(URL, KEY, {
@@ -170,23 +172,77 @@
     return profiles || [];
   }
 
+  function activeGroupId() {
+    if (!currentSession || !currentSession.user) return null;
+    try { return localStorage.getItem(GROUP_ACTIVE_PREFIX + currentSession.user.id) || null; }
+    catch (_) { return null; }
+  }
+
+  function groupPayload(snapshot) {
+    return {
+      members: Array.isArray(snapshot.members) ? snapshot.members : [],
+      events: Array.isArray(snapshot.events) ? snapshot.events : [],
+      songs: Array.isArray(snapshot.songs) ? snapshot.songs : [],
+      setlists: Array.isArray(snapshot.setlists) ? snapshot.setlists : []
+    };
+  }
+
+  async function joinGroup(name, initialState) {
+    if (!currentSession) throw new Error('AUTH_REQUIRED');
+    const groupName = String(name || '').trim();
+    if (groupName.length < 3 || groupName.length > 50) throw new Error('Название группы должно содержать от 3 до 50 символов');
+    const { data, error } = await client.rpc('bandplan_join_group_by_name', { p_name: groupName });
+    if (error) throw error;
+    const group = Array.isArray(data) ? data[0] : data;
+    if (!group || !group.group_id) throw new Error('Сервер не вернул группу');
+    try { localStorage.setItem(GROUP_ACTIVE_PREFIX + currentSession.user.id, group.group_id); } catch (_) {}
+
+    const { data: row, error: readError } = await client.from(GROUP_STATE_TABLE)
+      .select('state').eq('group_id', group.group_id).maybeSingle();
+    if (readError) throw readError;
+    const existing = row && row.state ? row.state : {};
+    const hasSharedContent = ['songs','events','setlists','members'].some(k => Array.isArray(existing[k]) && existing[k].length);
+    if (!hasSharedContent && initialState && ['songs','events','setlists','members'].some(k => Array.isArray(initialState[k]) && initialState[k].length)) {
+      const payload = groupPayload(initialState);
+      const { error: seedError } = await client.from(GROUP_STATE_TABLE).upsert({
+        group_id: group.group_id, state: payload, updated_at: new Date().toISOString()
+      }, { onConflict: 'group_id' });
+      if (seedError) throw seedError;
+    }
+    const loaded = await loadState();
+    return { group, ...(loaded || {}) };
+  }
+
+  function leaveGroup() {
+    if (!currentSession || !currentSession.user) return;
+    try { localStorage.removeItem(GROUP_ACTIVE_PREFIX + currentSession.user.id); } catch (_) {}
+  }
+
   async function loadState() {
     if (!currentSession) throw new Error('AUTH_REQUIRED');
     const { data, error } = await client
-      .from(STATE_TABLE)
-      .select('state,updated_at')
-      .eq('user_id', currentSession.user.id)
-      .maybeSingle();
+      .from(STATE_TABLE).select('state,updated_at')
+      .eq('user_id', currentSession.user.id).maybeSingle();
     if (error) throw error;
-    if (data) return { state: data.state || {}, updatedAt: data.updated_at || '' };
+    const personal = data ? (data.state || {}) : null;
+    const groupId = activeGroupId();
+    if (groupId) {
+      const { data: groupRow, error: groupError } = await client.from(GROUP_STATE_TABLE)
+        .select('state,updated_at').eq('group_id', groupId).maybeSingle();
+      if (groupError) throw groupError;
+      if (groupRow && groupRow.state) {
+        const shared = groupRow.state;
+        const merged = Object.assign({}, personal || {});
+        ['members','events','songs','setlists'].forEach(k => {
+          if (Array.isArray(shared[k])) merged[k] = shared[k];
+        });
+        return { state: merged, updatedAt: groupRow.updated_at || (data && data.updated_at) || '', sharedGroup: true };
+      }
+    }
+    if (data) return { state: personal, updatedAt: data.updated_at || '' };
 
-    /* Однократный перенос данных старой версии, где состояние лежало
-       в общей строке bandplan_state(id=1), в личное хранилище аккаунта. */
-    const legacy = await client
-      .from(LEGACY_TABLE)
-      .select('state,updated_at')
-      .eq('id', 1)
-      .maybeSingle();
+    /* Legacy migration for accounts without a personal state row. */
+    const legacy = await client.from(LEGACY_TABLE).select('state,updated_at').eq('id', 1).maybeSingle();
     if (legacy.error) throw legacy.error;
     return legacy.data && legacy.data.state
       ? { state: legacy.data.state, updatedAt: legacy.data.updated_at || '', legacy: true }
@@ -196,40 +252,40 @@
   async function saveState(state) {
     if (!currentSession) throw new Error('AUTH_REQUIRED');
     const snapshot = JSON.parse(JSON.stringify(state || {}));
-    const { data, error } = await client
-      .from(STATE_TABLE)
-      .upsert({
-        user_id: currentSession.user.id,
-        state: snapshot,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' })
-      .select('updated_at')
-      .single();
+    const stamp = new Date().toISOString();
+    const { data, error } = await client.from(STATE_TABLE).upsert({
+      user_id: currentSession.user.id, state: snapshot, updated_at: stamp
+    }, { onConflict: 'user_id' }).select('updated_at').single();
     if (error) throw error;
+    const groupId = activeGroupId();
+    if (groupId) {
+      const { error: groupError } = await client.from(GROUP_STATE_TABLE).upsert({
+        group_id: groupId, state: groupPayload(snapshot), updated_at: stamp
+      }, { onConflict: 'group_id' });
+      if (groupError) throw groupError;
+    }
     return data && data.updated_at;
   }
 
   function subscribe(onState) {
     if (!currentSession) return function () {};
-    const channel = client.channel('bandplan-user-state-' + currentSession.user.id)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: STATE_TABLE,
-        filter: 'user_id=eq.' + currentSession.user.id
-      }, function (payload) {
+    const groupId = activeGroupId();
+    const table = groupId ? GROUP_STATE_TABLE : STATE_TABLE;
+    const filter = groupId ? 'group_id=eq.' + groupId : 'user_id=eq.' + currentSession.user.id;
+    const channel = client.channel('bandplan-state-' + (groupId || currentSession.user.id))
+      .on('postgres_changes', { event: '*', schema: 'public', table, filter }, function (payload) {
         const row = payload && payload.new;
-        if (row && row.state) onState(row.state, row.updated_at || '');
+        if (!row) return;
+        if (groupId) {
+          loadState().then(latest => {
+            if (latest && latest.state) onState(latest.state, latest.updatedAt || '');
+          }).catch(e => console.warn('BandPlan shared group refresh:', e));
+        } else if (row.state) onState(row.state, row.updated_at || '');
       })
       .subscribe(function (status, err) {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn('BandPlan Realtime:', status, err || '');
-        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('BandPlan Realtime:', status, err || '');
       });
-
-    realtimeStop = function () {
-      try { client.removeChannel(channel); } catch (e) {}
-    };
+    realtimeStop = function () { try { client.removeChannel(channel); } catch (e) {} };
     return realtimeStop;
   }
 
@@ -500,6 +556,9 @@
   window.BandPlanCloud = {
     load: offlineAwareLoad,
     saveNow: offlineAwareSave,
+    joinGroup: joinGroup,
+    leaveGroup: leaveGroup,
+    getActiveGroupId: activeGroupId,
     schedule: function (state) {
       if (!currentSession) return;
       /* Сразу фиксируем последнюю версию в IndexedDB и очереди.
