@@ -23,6 +23,7 @@
   let currentSession = null;
   let currentProfile = null;
   let realtimeStop = null;
+  let realtimeCallback = null;
   const listeners = [];
 
   function usernameEmail(username) {
@@ -196,6 +197,8 @@
     const group = Array.isArray(data) ? data[0] : data;
     if (!group || !group.group_id) throw new Error('Сервер не вернул группу');
     try { localStorage.setItem(GROUP_ACTIVE_PREFIX + currentSession.user.id, group.group_id); } catch (_) {}
+    if (realtimeStop) { try { realtimeStop(); } catch (_) {} realtimeStop = null; }
+    if (realtimeCallback) subscribe(realtimeCallback);
 
     const { data: row, error: readError } = await client.from(GROUP_STATE_TABLE)
       .select('state').eq('group_id', group.group_id).maybeSingle();
@@ -216,6 +219,8 @@
   function leaveGroup() {
     if (!currentSession || !currentSession.user) return;
     try { localStorage.removeItem(GROUP_ACTIVE_PREFIX + currentSession.user.id); } catch (_) {}
+    if (realtimeStop) { try { realtimeStop(); } catch (_) {} realtimeStop = null; }
+    if (realtimeCallback) subscribe(realtimeCallback);
   }
 
   async function loadState() {
@@ -269,6 +274,8 @@
 
   function subscribe(onState) {
     if (!currentSession) return function () {};
+    realtimeCallback = onState;
+    if (realtimeStop) { try { realtimeStop(); } catch (_) {} realtimeStop = null; }
     const groupId = activeGroupId();
     const table = groupId ? GROUP_STATE_TABLE : STATE_TABLE;
     const filter = groupId ? 'group_id=eq.' + groupId : 'user_id=eq.' + currentSession.user.id;
