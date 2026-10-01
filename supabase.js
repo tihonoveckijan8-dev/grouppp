@@ -13,7 +13,7 @@
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: false
+      detectSessionInUrl: true
     }
   });
 
@@ -53,6 +53,37 @@
     currentSession = data.session;
     await loadProfile();
     if (currentSession && currentSession.user) localStorage.setItem('bandplan.auth.userId', currentSession.user.id);
+    return currentProfile;
+  }
+
+  function redirectUrl() {
+    return window.location.origin + window.location.pathname;
+  }
+
+  async function signInWithProvider(provider) {
+    const { data, error } = await client.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: redirectUrl(),
+        queryParams: provider === 'google' ? { access_type: 'offline', prompt: 'select_account' } : undefined
+      }
+    });
+    if (error) throw error;
+    return data;
+  }
+
+  async function ensureOAuthProfile() {
+    if (!currentSession || !currentSession.access_token) return null;
+    const existing = await loadProfile();
+    if (existing) return existing;
+    const res = await fetch(REGISTER_FN, {
+      method: 'POST',
+      headers: { apikey: KEY, Authorization: 'Bearer ' + currentSession.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'oauth' })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Не удалось создать профиль OAuth');
+    await loadProfile();
     return currentProfile;
   }
 
@@ -212,9 +243,19 @@
     const root = document.getElementById('authScreen');
     if (!root) return;
     renderAuth();
-    root.addEventListener('click', function (e) {
+    root.addEventListener('click', async function (e) {
       const mode = e.target.closest('[data-auth-mode]');
-      if (mode) { e.preventDefault(); switchAuth(mode.getAttribute('data-auth-mode')); }
+      if (mode) { e.preventDefault(); switchAuth(mode.getAttribute('data-auth-mode')); return; }
+      const providerButton = e.target.closest('[data-auth-provider]');
+      if (providerButton) {
+        e.preventDefault();
+        const provider = providerButton.getAttribute('data-auth-provider');
+        const err = document.getElementById('authError');
+        if (err) err.textContent = '';
+        providerButton.disabled = true;
+        try { await signInWithProvider(provider); }
+        catch (error) { if (err) err.textContent = authErrorMessage(error); providerButton.disabled = false; }
+      }
     });
     const form = document.getElementById('authForm');
     if (!form) return;
@@ -255,7 +296,11 @@
     const { data } = await client.auth.getSession();
     currentSession = data && data.session ? data.session : null;
     if (currentSession) {
-      try { await loadProfile(); } catch (e) { console.warn('BandPlan profile:', e); }
+      try {
+        await loadProfile();
+        if (!currentProfile) await ensureOAuthProfile();
+        if (currentSession.user) localStorage.setItem('bandplan.auth.userId', currentSession.user.id);
+      } catch (e) { console.warn('BandPlan profile:', e); }
     }
     mountAuth();
     renderAuth();
@@ -275,23 +320,103 @@
   window.BandPlanAuth = {
     client, ready,
     isAuthenticated: () => !!currentSession,
+    signInWithProvider,
+    ensureOAuthProfile,
     getSession: () => currentSession,
     getProfile: () => currentProfile,
     onChange: fn => { if (typeof fn === 'function') listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
     signIn, register, signOut, addFriendByCode, getFriends, loadProfile
   };
 
+  const OFFLINE_DB = 'bandplan-offline-v1';
+  let offlineDbPromise = null;
+  let offlineQueueTimer = null;
+  function offlineDb() {
+    if (!('indexedDB' in window)) return Promise.resolve(null);
+    if (offlineDbPromise) return offlineDbPromise;
+    offlineDbPromise = new Promise(function (resolve) {
+      const req = indexedDB.open(OFFLINE_DB, 1);
+      req.onupgradeneeded = function () { if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv'); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { resolve(null); };
+    });
+    return offlineDbPromise;
+  }
+  async function idbGet(key) {
+    const db = await offlineDb(); if (!db) return null;
+    return new Promise(function (resolve) {
+      const tx = db.transaction('kv', 'readonly'), req = tx.objectStore('kv').get(key);
+      req.onsuccess = function () { resolve(req.result || null); }; req.onerror = function () { resolve(null); };
+    });
+  }
+  async function idbPut(key, value) {
+    const db = await offlineDb(); if (!db) return false;
+    return new Promise(function (resolve) {
+      const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(value, key);
+      tx.oncomplete = function () { resolve(true); }; tx.onerror = function () { resolve(false); };
+    });
+  }
+  async function idbDelete(key) {
+    const db = await offlineDb(); if (!db) return false;
+    return new Promise(function (resolve) {
+      const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').delete(key);
+      tx.oncomplete = function () { resolve(true); }; tx.onerror = function () { resolve(false); };
+    });
+  }
+  async function cacheOfflineState(state) {
+    const id = currentSession && currentSession.user ? currentSession.user.id : 'guest';
+    return idbPut('state:' + id, { state: JSON.parse(JSON.stringify(state || {})), updatedAt: new Date().toISOString() });
+  }
+  async function queueOfflineState(state) {
+    const id = currentSession && currentSession.user ? currentSession.user.id : 'guest';
+    return idbPut('pending:' + id, { state: JSON.parse(JSON.stringify(state || {})), queuedAt: new Date().toISOString() });
+  }
+  async function flushOfflineQueue() {
+    if (!currentSession || !navigator.onLine) return false;
+    const id = currentSession.user.id, pending = await idbGet('pending:' + id);
+    if (!pending || !pending.state) return false;
+    try { await saveState(pending.state); await cacheOfflineState(pending.state); await idbDelete('pending:' + id); return true; }
+    catch (e) { console.warn('BandPlan offline queue retry:', e); return false; }
+  }
+  async function offlineAwareLoad() {
+    const id = currentSession && currentSession.user ? currentSession.user.id : 'guest';
+    if (!navigator.onLine) return await idbGet('state:' + id);
+    try {
+      const remote = await loadState();
+      if (remote && remote.state) await cacheOfflineState(remote.state);
+      const pending = await idbGet('pending:' + id);
+      if (pending && pending.state) { await flushOfflineQueue(); return { state: pending.state, updatedAt: pending.queuedAt || '' }; }
+      return remote;
+    } catch (e) {
+      const cached = await idbGet('state:' + id);
+      if (cached) return cached;
+      throw e;
+    }
+  }
+  async function offlineAwareSave(state) {
+    if (!currentSession) throw new Error('AUTH_REQUIRED');
+    await cacheOfflineState(state);
+    if (!navigator.onLine) { await queueOfflineState(state); return 'offline'; }
+    try { const stamp = await saveState(state); await idbDelete('pending:' + currentSession.user.id); return stamp; }
+    catch (e) { await queueOfflineState(state); throw e; }
+  }
+  window.addEventListener('online', function () {
+    clearTimeout(offlineQueueTimer);
+    offlineQueueTimer = setTimeout(function () { flushOfflineQueue().catch(function () {}); }, 300);
+  });
   window.BandPlanCloud = {
-    load: loadState,
-    saveNow: saveState,
+    load: offlineAwareLoad,
+    saveNow: offlineAwareSave,
     schedule: function (state) {
       if (!currentSession) return;
+      cacheOfflineState(state).catch(function () {});
       clearTimeout(window.__bandPlanCloudTimer);
       window.__bandPlanCloudTimer = setTimeout(function () {
-        saveState(state).catch(function (e) { console.warn('BandPlan cloud save failed:', e); });
+        offlineAwareSave(state).catch(function (e) { console.warn('BandPlan cloud save queued:', e); });
       }, 350);
     },
     subscribe,
-    retry: function () {}
+    retry: flushOfflineQueue,
+    isOffline: function () { return !navigator.onLine; }
   };
 })();
