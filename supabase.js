@@ -93,7 +93,8 @@
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_setlists').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle(),
-      client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId)
+      client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId),
+      client.from('bandplan_groups').select('name').eq('id',activeGroupId).maybeSingle()
     ]);
     for(const q of [songs,events,setlists,gs,memberRows,groupInfo])if(q.error)throw q.error;
     sharedBaseline={songs:(songs.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),events:(events.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),setlists:(setlists.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean)};
