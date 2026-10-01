@@ -1067,8 +1067,8 @@ function vSettings() {
     '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></section>';
 
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
-    '<button class="btn btn-primary btn-sm" type="button" data-act="mem-add">' + ic('plus', 15) + 'Добавить</button></div>';
-  if (!state.members.length) h += stateHTML('empty', 'Участники не добавлены', 'Добавьте музыкантов и их роли — роли используются для динамики партий и отметок участия.', '<button class="btn btn-primary btn-sm" type="button" data-act="mem-add">Добавить участника</button>');
+    '<span class="t-xs t-muted">Участники подключаются по коду</span></div>';
+  if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
     h += '<div class="memb-row"><div class="avatar" style="background:' + esc(m.color || 'var(--accent)') + '" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
@@ -1548,9 +1548,8 @@ function drawOnb() {
       ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '"></button>').join('') + '</div></div>';
   } else if (onbStep === 2) {
     h += '<div class="onb-hero">' + ic('wave', 28) + '</div><h2>Состав группы</h2>' +
-      '<p class="lead">По этим ролям расписывается динамика партий в песнях: каждый участник увидит только свою строку.</p>' +
-      '<div id="ob_members">' + onbData.members.map((m, i) => memberRowHTML(m, i)).join('') + '</div>' +
-      '<button class="btn btn-secondary btn-sm mt-s" type="button" id="ob_add_mem">' + ic('plus', 15) + 'Добавить участника</button>';
+      '<p class="lead">Группа создастся с вашим аккаунтом. Остальных участников не нужно вводить вручную: пригласите их кодом после запуска, и их имена и роли появятся у всех автоматически.</p>' +
+      '<div class="onb-callout"><strong>Сейчас вы добавляете только себя.</strong><br>Другие участники присоединяются через «Код приглашения».</div>';
   } else {
     h += '<div class="onb-hero">' + ic('check', 28) + '</div><h2>Всё готово</h2>' +
       '<p class="lead">Оформление, роли и данные можно изменить в любой момент в разделе «Настройки».</p>' +
@@ -1573,14 +1572,7 @@ function drawOnb() {
     $$('.sw', el).forEach(b => b.addEventListener('click', () => { onbData.accent = b.getAttribute('data-a'); $$('.sw', el).forEach(x => x.classList.toggle('on', x === b)); }));
   }
   if (onbStep === 2) {
-    bindMemberInputs(el);
-    bind('ob_add_mem', 'click', () => { collectMembers(el); onbData.members.push({ name: '', role: ROLES[onbData.members.length % ROLES.length].k, color: PALETTE[onbData.members.length % PALETTE.length] }); drawOnb(); });
-    $$('[data-ob-del]', el).forEach(b => b.addEventListener('click', function () {
-      collectMembers(el);
-      onbData.members.splice(+b.getAttribute('data-ob-del'), 1);
-      if (!onbData.members.length) onbData.members.push({ name: '', role: 'vocal', color: PALETTE[0] });
-      drawOnb();
-    }));
+    // Membership is account-driven. No local roster editing is performed during onboarding.
   }
   if (onbStep === 3) {
     $$('#ob_theme button', el).forEach(b => b.addEventListener('click', () => { onbData.theme = b.getAttribute('data-v'); $$('#ob_theme button', el).forEach(x => x.classList.toggle('on', x === b)); }));
@@ -1621,7 +1613,7 @@ function collectMembers(el) { onbData.members.forEach(function (m, i) { const in
 function collectStep(el) {
   if (onbStep === 0) { const n = $('#ob_name', el); if (n) onbData.name = n.value; }
   if (onbStep === 1) { const b = $('#ob_band', el); if (b) onbData.bandName = b.value; const d = $('#ob_banddesc', el); if (d) onbData.bandDesc = d.value; }
-  if (onbStep === 2) collectMembers(el);
+  if (onbStep === 2) { /* roster is account-driven */ }
 }
 function finishOnboarding() {
   state.profile.name = onbData.name.trim() || 'Участник';
@@ -1630,8 +1622,7 @@ function finishOnboarding() {
   state.profile.bandDesc = onbData.bandDesc;
   state.profile.defaultParticipation = onbData.participation;
   state.settings.theme = onbData.theme; state.settings.accent = onbData.accent;
-  state.members = onbData.members.filter(m => m.name.trim()).map(function (m, i) { return { id: uid('m'), name: m.name.trim(), role: m.role, color: m.color || PALETTE[i % PALETTE.length], note: '' }; });
-  if (!state.members.some(m => m.name === state.profile.name)) state.members.unshift({ id: uid('m'), name: state.profile.name, role: state.profile.role, roles: myRoles(), color: onbData.accent, note: 'это вы' });
+  state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), color: onbData.accent, note: 'это вы' }];
   state.onboardingDone = true;
   applyTheme(); applyAccentVars(); save();
   $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
