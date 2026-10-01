@@ -24,7 +24,27 @@
   const listeners = [];
 
   function usernameEmail(username) {
-    return String(username || '').trim().toLowerCase() + '@users.bandplan.local';
+    const normalized = String(username || '').trim().toLowerCase();
+    // Keep compatibility with existing Latin accounts; encode Unicode nicks
+    // into an ASCII-only synthetic email accepted by Supabase Auth.
+    if (/^[a-z0-9_.-]+$/.test(normalized)) return normalized + '@users.bandplan.local';
+    const hex = Array.from(new TextEncoder().encode(normalized), b => b.toString(16).padStart(2, '0')).join('');
+    return 'bp-' + hex + '@users.bandplan.local';
+  }
+
+  async function checkUsername(username) {
+    const normalized = String(username || '').trim().toLowerCase();
+    if (!/^[a-zа-яё0-9_.-]{3,24}$/i.test(normalized)) {
+      return { available: false, error: 'Ник: 3–24 символа, только буквы, цифры, _, ., -' };
+    }
+    const res = await fetch(REGISTER_FN, {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'check_username', username: normalized })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Не удалось проверить ник');
+    return body;
   }
 
   function emit(event, session) {
@@ -338,7 +358,7 @@
     getSession: () => currentSession,
     getProfile: () => currentProfile,
     onChange: fn => { if (typeof fn === 'function') listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
-    signIn, register, signOut, addFriendByCode, getFriends, loadProfile
+    signIn, register, checkUsername, signOut, addFriendByCode, getFriends, loadProfile
   };
 
   const OFFLINE_DB = 'bandplan-offline-v1';
