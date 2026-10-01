@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#E9E5F3">
+<meta name="theme-color" content="#F5F3EF">
+<style id="bandplan-boot-theme">
+  html,body{background:#F5F3EF;color:#1E232B}
+  body{min-height:100%;margin:0}
+  .app{min-height:100vh}
+  #view:empty::before{content:"BandPlan";display:block;padding:48px 32px;font:600 24px/1.2 system-ui,sans-serif;color:#1E232B;opacity:.72}
+  @media(prefers-color-scheme:dark){
+    html[data-theme="dark"],html[data-theme="amoled"]{background:#14161C;color:#ECEEF3}
+    html[data-theme="dark"] body{background:#14161C;color:#ECEEF3}
+    html[data-theme="amoled"] body{background:#000;color:#F1F2F6}
+  }
+</style>
 <meta name="description" content="BandPlan — операционная система музыкального коллектива: расписание, репертуар с аккордами и динамикой партий, сет-листы и сценический режим. Работает офлайн.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
