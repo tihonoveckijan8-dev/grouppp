@@ -1400,3 +1400,61 @@ button,a,input,select,textarea { touch-action: manipulation; }
 :root[data-theme="light"] .muted,:root[data-theme="light"] .hint,:root[data-theme="light"] .field-hint,
 :root[data-theme="light"] .cal-cell.out{color:var(--text-2)}
 :root[data-theme="light"] .cal-cell.out{opacity:.78}
+
+
+/* Light theme contrast repair: preserve distinct surface levels and readable controls. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg:#F1F3F6;
+  --bg-deep:#E7EAF0;
+  --surf-1:#F7F8FA;
+  --surf-2:#FFFFFF;
+  --surf-3:#E9EDF2;
+  --surf-4:#FFFFFF;
+  --border:#D7DDE6;
+  --border-2:#BFC8D5;
+  --border-3:#9EABBC;
+  --text:#17202D;
+  --text-2:#394657;
+  --muted:#596779;
+}
+:root[data-theme="light"] .sidebar,
+:root[data-theme="light"] .topbar,
+:root[data-theme="light"] .page-head,
+:root[data-theme="light"] .bottom-nav { background:#F7F8FA; color:#17202D; }
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .song-card,
+:root[data-theme="light"] .sl-item,
+:root[data-theme="light"] .hero,
+:root[data-theme="light"] .modal-card,
+:root[data-theme="light"] .search-drop,
+:root[data-theme="light"] .side-profile {
+  background:#FFFFFF !important;
+  color:#17202D !important;
+  border:1px solid #D7DDE6 !important;
+  box-shadow:0 2px 8px rgba(23,32,45,.07);
+}
+:root[data-theme="light"] .cal-cell { background:#FFFFFF; color:#17202D; border-color:#D7DDE6; }
+:root[data-theme="light"] .cal-cell:hover,
+:root[data-theme="light"] .nav-item:hover,
+:root[data-theme="light"] .bottom-nav a:hover,
+:root[data-theme="light"] .sd-item:hover { background:#E9EDF2; }
+:root[data-theme="light"] .input,
+:root[data-theme="light"] .textarea,
+:root[data-theme="light"] .select,
+:root[data-theme="light"] input,
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] select {
+  background:#FFFFFF !important;
+  color:#17202D !important;
+  border:1px solid #BFC8D5 !important;
+}
+:root[data-theme="light"] button:not(.btn-primary):not(.chip),
+:root[data-theme="light"] a { color:inherit; }
+:root[data-theme="light"] .muted,
+:root[data-theme="light"] .hint,
+:root[data-theme="light"] .field-hint,
+:root[data-theme="light"] .t-muted { color:#596779; }
+:root[data-theme="light"] .nav-item.active,
+:root[data-theme="light"] .bottom-nav a.active { color:var(--accent); background:#E7ECFC; }
+:root[data-theme="light"] .toolbar { background:transparent; }
