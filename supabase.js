@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null;
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, sharedBaseline = {songs:[],events:[],setlists:[]};
   let mode = 'login';
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -87,7 +87,7 @@
     ]);
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
     const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
-    if(!activeGroupId)return personal.data?{state:pstate,updatedAt:lastUpdated}:null;
+    if(!activeGroupId){sharedBaseline={songs:[],events:[],setlists:[]};return personal.data?{state:pstate,updatedAt:lastUpdated}:null;}
     const [songs,events,setlists,gs,memberRows]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
@@ -96,6 +96,7 @@
       client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId)
     ]);
     for(const q of [songs,events,setlists,gs,memberRows])if(q.error)throw q.error;
+    sharedBaseline={songs:(songs.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),events:(events.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),setlists:(setlists.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean)};
     const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
     let accounts=[];
     if(ids.length){const a=await client.from('bandplan_accounts').select('user_id,display_name,roles').in('user_id',ids);if(a.error)throw a.error;accounts=a.data||[];}
@@ -113,7 +114,13 @@
     const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();pending=null;
     if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
     if(!activeGroupId&&snapshot.onboardingDone){const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});if(made.error)throw made.error;activeGroupId=made.data?.[0]?.group_id||made.data?.group_id||null;}
-    if(activeGroupId){const sync=await client.rpc('bandplan_sync_group',{p_songs:snapshot.songs||[],p_events:snapshot.events||[],p_setlists:snapshot.setlists||[],p_roster:snapshot.members||[],p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),p_personal_settings:snapshot.settings||{}});if(sync.error){pending=snapshot;throw sync.error;}}
+    if(activeGroupId){
+      const songs=snapshot.songs||[],events=snapshot.events||[],setlists=snapshot.setlists||[];
+      const removed=(base,current)=>base.filter(id=>!current.some(x=>String(x.id)===id));
+      const sync=await client.rpc('bandplan_sync_group',{p_songs:songs,p_events:events,p_setlists:setlists,p_roster:snapshot.members||[],p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),p_personal_settings:snapshot.settings||{},p_delete_songs:removed(sharedBaseline.songs,songs),p_delete_events:removed(sharedBaseline.events,events),p_delete_setlists:removed(sharedBaseline.setlists,setlists)});
+      if(sync.error){pending=snapshot;throw sync.error;}
+      sharedBaseline={songs:songs.map(x=>String(x.id)),events:events.map(x=>String(x.id)),setlists:setlists.map(x=>String(x.id))};
+    }
     const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
     if(error){pending=snapshot;throw error;}lastUpdated=data?.updated_at||updatedAt;return lastUpdated;
