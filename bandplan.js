@@ -1666,7 +1666,7 @@ function finishOnboarding() {
 }
 
 /* ═══ 21. ACTIONS ═══ */
-document.addEventListener('click', function (e) {
+document.addEventListener('click', async function (e) {
   const el = e.target.closest('[data-act]');
   if (!el) { if (!e.target.closest('#searchWrap')) closeSearch(); return; }
   const a = el.getAttribute('data-act'), id = el.getAttribute('data-id');
