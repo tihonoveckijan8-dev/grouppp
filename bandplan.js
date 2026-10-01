@@ -1658,7 +1658,7 @@ document.addEventListener('click', function (e) {
     }
     case 'cal-today': stop(); ui.month = new Date(); ui.selDate = today(); if (parseHash().name !== 'calendar') go('#/calendar'); else render(); break;
     case 'cal-view': stop(); ui.calView = el.getAttribute('data-v'); state.settings.calView = ui.calView; save(); render(); break;
-    case 'cal-day': { stop(); if (e.target.closest('[data-act="event-edit"]')) break; ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); render(); break; }
+    case 'cal-day': { stop(); ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); eventModal(null, ui.selDate); break; }
     case 'tg-day': stop(); ui.selDate = el.getAttribute('data-date'); ui.calView = 'day'; render(); break;
     case 'tg-col': stop(); if (e.target.closest('.tg-ev')) break; ui.selDate = el.getAttribute('data-date'); eventModal(null, el.getAttribute('data-date')); break;
     case 'new-event': stop(); eventModal(null, el.getAttribute('data-date') || ui.selDate); break;
