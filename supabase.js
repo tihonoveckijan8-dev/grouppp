@@ -380,14 +380,23 @@
   }
   async function offlineAwareLoad() {
     const id = currentSession && currentSession.user ? currentSession.user.id : 'guest';
-    if (!navigator.onLine) return await idbGet('state:' + id);
+    if (!navigator.onLine) {
+      return (await idbGet('pending:' + id)) || (await idbGet('state:' + id));
+    }
     try {
+      /* Сначала отправляем локальные изменения, затем заново читаем сервер.
+         Так устаревшая очередь не подменит более свежие данные с другого устройства. */
+      const pending = await idbGet('pending:' + id);
+      if (pending && pending.state) {
+        const flushed = await flushOfflineQueue();
+        if (!flushed) return pending;
+      }
       const remote = await loadState();
       if (remote && remote.state) await cacheOfflineState(remote.state);
-      const pending = await idbGet('pending:' + id);
-      if (pending && pending.state) { await flushOfflineQueue(); return { state: pending.state, updatedAt: pending.queuedAt || '' }; }
       return remote;
     } catch (e) {
+      const pending = await idbGet('pending:' + id);
+      if (pending && pending.state) return pending;
       const cached = await idbGet('state:' + id);
       if (cached) return cached;
       throw e;
