@@ -2318,7 +2318,7 @@ function init() {
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake(); });
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => { console.warn('BandPlan service worker registration failed:', err); window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'})); }); });
   ui.skeleton = true;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
