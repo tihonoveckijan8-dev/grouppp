@@ -5,6 +5,7 @@
   const URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
   const KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
   const STATE_TABLE = 'bandplan_user_state';
+  const LEGACY_TABLE = 'bandplan_state';
   const PROFILE_TABLE = 'bandplan_profiles';
   const FRIEND_TABLE = 'bandplan_friendships';
   const REGISTER_FN = URL + '/functions/v1/bandplan-register';
@@ -157,7 +158,19 @@
       .eq('user_id', currentSession.user.id)
       .maybeSingle();
     if (error) throw error;
-    return data ? { state: data.state || {}, updatedAt: data.updated_at || '' } : null;
+    if (data) return { state: data.state || {}, updatedAt: data.updated_at || '' };
+
+    /* Однократный перенос данных старой версии, где состояние лежало
+       в общей строке bandplan_state(id=1), в личное хранилище аккаунта. */
+    const legacy = await client
+      .from(LEGACY_TABLE)
+      .select('state,updated_at')
+      .eq('id', 1)
+      .maybeSingle();
+    if (legacy.error) throw legacy.error;
+    return legacy.data && legacy.data.state
+      ? { state: legacy.data.state, updatedAt: legacy.data.updated_at || '', legacy: true }
+      : null;
   }
 
   async function saveState(state) {
@@ -384,14 +397,24 @@
       return (await idbGet('pending:' + id)) || (await idbGet('state:' + id));
     }
     try {
-      /* Сначала отправляем локальные изменения, затем заново читаем сервер.
-         Так устаревшая очередь не подменит более свежие данные с другого устройства. */
+      /* Сначала читаем сервер, чтобы старая очередь с этого устройства
+         не перезаписала более свежие данные, созданные на другом устройстве. */
+      const remote = await loadState();
       const pending = await idbGet('pending:' + id);
       if (pending && pending.state) {
-        const flushed = await flushOfflineQueue();
-        if (!flushed) return pending;
+        const pendingAt = Date.parse(pending.queuedAt || 0) || 0;
+        const remoteAt = Date.parse(remote && remote.updatedAt || 0) || 0;
+        if (!remote || pendingAt >= remoteAt) {
+          const flushed = await flushOfflineQueue();
+          if (flushed) {
+            const latest = await loadState();
+            if (latest && latest.state) await cacheOfflineState(latest.state);
+            return latest || pending;
+          }
+          return pending;
+        }
+        await idbDelete('pending:' + id);
       }
-      const remote = await loadState();
       if (remote && remote.state) await cacheOfflineState(remote.state);
       return remote;
     } catch (e) {
