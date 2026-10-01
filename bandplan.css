@@ -1333,15 +1333,6 @@ button,a,input,select,textarea { touch-action: manipulation; }
    The page header is outside the scrollable content, so keep it visible.
    Search/filter toolbars stay pinned to the top edge of the content viewport. */
 @media (max-width: 900px) {
-  body.hdr-hide .topbar,
-  body.hdr-hide .page-head {
-    max-height: none;
-    padding-top: revert;
-    padding-bottom: revert;
-    opacity: 1;
-    pointer-events: auto;
-    border: revert;
-  }
   body:not([data-route="settings"]) .content .toolbar {
     position: sticky;
     top: 0;
