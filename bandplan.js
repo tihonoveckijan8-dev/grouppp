@@ -187,82 +187,35 @@ function defaults() {
   };
 }
 let state = defaults();
-
-function normalizeState(d) {
-  const base = defaults();
-  const x = d && typeof d === 'object' ? d : {};
-  state = Object.assign(base, x);
-  state.profile = Object.assign(base.profile, x.profile || {});
-  state.settings = Object.assign(base.settings, x.settings || {});
-  state.members = Array.isArray(x.members) ? x.members : [];
-  state.events = Array.isArray(x.events) ? x.events : [];
-  state.songs = Array.isArray(x.songs) ? x.songs : [];
-  state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
-  if (!state.settings.accent || ['#6c5ce7', '#2f55d4'].indexOf(String(state.settings.accent).toLowerCase()) >= 0) state.settings.accent = '#2547D0';
-  return state;
-}
-
+const ui = {
+  month: new Date(), selDate: today(), calView: 'month',
+  evQuery: '', evTypes: [], evMine: false, evRepeat: false,
+  songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
+  libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false
+};
 function load() {
   try {
     const raw = localStorage.getItem(KEY) || localStorage.getItem('bandplan.premium.v5') || localStorage.getItem('bandplan.premium.v4');
     if (!raw) return false;
-    normalizeState(JSON.parse(raw));
+    const d = JSON.parse(raw);
+    state = Object.assign(defaults(), d);
+    state.profile = Object.assign(defaults().profile, d.profile || {});
+    state.settings = Object.assign(defaults().settings, d.settings || {});
+    if (!state.settings.accent || ['#6c5ce7', '#2f55d4'].indexOf(state.settings.accent.toLowerCase()) >= 0) state.settings.accent = '#2547D0';
+    state.members = d.members || []; state.events = d.events || [];
+    state.songs = d.songs || []; state.setlists = d.setlists || [];
     return true;
   } catch (e) { return false; }
 }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } }
+function cloudSave() { if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
+function commit() { save(); cloudSave(); render(); }
+const songById = id => state.songs.find(s => s.id === id);
+const evById = id => state.events.find(e => e.id === id);
+const slById = id => state.setlists.find(s => s.id === id);
+const memById = id => state.members.find(m => m.id === id);
 
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); }
-  if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
-}
-
-function commit() { save(); render(); }
-
-function isKnownDemo(s) {
-  const demoTitles = ['Город не спит', 'Северный ветер', 'Эхо', 'Тише воды', '220 вольт', 'Маршрут построен'];
-  const demoMembers = ['Аня Соколова', 'Марк Гринёв', 'Тимур Валеев', 'Лена Ким'];
-  const songs = Array.isArray(s && s.songs) ? s.songs : [];
-  const members = Array.isArray(s && s.members) ? s.members : [];
-  return songs.some(x => demoTitles.indexOf(String(x && x.title || '')) >= 0 || String(x && x.artist || '') === 'Neon Coast') ||
-    members.some(x => demoMembers.indexOf(String(x && x.name || '')) >= 0);
-}
-
-function hasMeaningfulData(s) {
-  return !!(s && ((s.profile && (s.profile.name || s.profile.bandName !== 'Моя группа')) ||
-    (s.members && s.members.length) || (s.events && s.events.length) ||
-    (s.songs && s.songs.length) || (s.setlists && s.setlists.length)));
-}
-
-async function bootCloudSync() {
-  if (!window.BandPlanCloud) return;
-  try {
-    const remote = await window.BandPlanCloud.load();
-    const local = state;
-    if (remote && hasMeaningfulData(remote.state)) {
-      normalizeState(remote.state);
-      if (isKnownDemo(state)) normalizeState(defaults());
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-      applyTheme(); applyAccentVars(); render();
-    } else if (hasMeaningfulData(local) && !isKnownDemo(local)) {
-      await window.BandPlanCloud.saveNow(local);
-    } else {
-      normalizeState(defaults());
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-      await window.BandPlanCloud.saveNow(state);
-      applyTheme(); applyAccentVars(); render();
-    }
-    window.BandPlanCloud.subscribe(function (incoming) {
-      if (isKnownDemo(incoming)) return;
-      normalizeState(incoming);
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-      applyTheme(); applyAccentVars(); render();
-    });
-  } catch (e) {
-    console.warn('BandPlan cloud sync unavailable:', e);
-  }
-}
-
+/* ═══ 6. DEMO ═══ */
 function seedDemo() {
   const d0 = new Date();
   const off = (n, h, m) => { const x = new Date(d0); x.setDate(x.getDate() + n); return { date: iso(x), time: pad(h) + ':' + pad(m || 0) }; };
@@ -2195,6 +2148,40 @@ function wireStickyHeader() {
 }
 
 /* ═══ 26. INIT ═══ */
+
+async function bootCloudSync() {
+  if (!window.BandPlanCloud) return;
+  try {
+    const remote = await window.BandPlanCloud.load();
+    if (remote && remote.state && typeof remote.state === 'object') {
+      state = Object.assign(defaults(), remote.state);
+      state.profile = Object.assign(defaults().profile, remote.state.profile || {});
+      state.settings = Object.assign(defaults().settings, remote.state.settings || {});
+      state.members = Array.isArray(remote.state.members) ? remote.state.members : [];
+      state.events = Array.isArray(remote.state.events) ? remote.state.events : [];
+      state.songs = Array.isArray(remote.state.songs) ? remote.state.songs : [];
+      state.setlists = Array.isArray(remote.state.setlists) ? remote.state.setlists : [];
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      applyTheme(); applyAccentVars(); ui.calView = state.settings.calView || 'month'; render();
+    } else {
+      await window.BandPlanCloud.saveNow(state);
+    }
+    window.BandPlanCloud.subscribe(function (incoming) {
+      if (!incoming || typeof incoming !== 'object') return;
+      state = Object.assign(defaults(), incoming);
+      state.profile = Object.assign(defaults().profile, incoming.profile || {});
+      state.settings = Object.assign(defaults().settings, incoming.settings || {});
+      state.members = Array.isArray(incoming.members) ? incoming.members : [];
+      state.events = Array.isArray(incoming.events) ? incoming.events : [];
+      state.songs = Array.isArray(incoming.songs) ? incoming.songs : [];
+      state.setlists = Array.isArray(incoming.setlists) ? incoming.setlists : [];
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      applyTheme(); applyAccentVars(); ui.calView = state.settings.calView || 'month'; render();
+    });
+  } catch (e) {
+    console.warn('BandPlan cloud sync unavailable:', e);
+  }
+}
 function init() {
   const had = load();
   applyTheme(); applyAccentVars();
@@ -2208,6 +2195,7 @@ function init() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake(); });
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
+  bootCloudSync();
   ui.skeleton = true;
   render();
   if (!had || !state.onboardingDone) openOnboarding();
