@@ -1280,3 +1280,26 @@ h1,h2,h3,h4,p,.sub,.nm,.rl,.ev-title,.ev-meta,.sd-t,.sd-m,.brand-name,.brand-sub
 
 /* тёмные темы: цвет типа события чуть светлее */
 [data-theme="dark"] .ev-row[style*="--info"],[data-theme="amoled"] .ev-row[style*="--info"]{--ev-c:#7C97F5!important}
+
+/* ══ AUTH ══ */
+.auth-screen{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(37,71,208,.08),transparent 42%),var(--bg);overflow:auto}
+.auth-screen[hidden]{display:none}
+.auth-card{width:min(440px,100%);padding:28px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:0 24px 70px rgba(20,25,45,.12)}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.auth-brand .brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--accent);color:#fff;font-weight:800;letter-spacing:-.05em}
+.auth-brand-name{font-size:18px;font-weight:700}
+.auth-brand-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--bg2);margin-bottom:24px}
+.auth-tabs button{min-height:42px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer}
+.auth-tabs button.on{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(20,25,45,.07)}
+.auth-copy h1{margin:0 0 7px;font-size:28px;letter-spacing:-.035em}
+.auth-copy p{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.55}
+.auth-field{display:block;margin-bottom:14px}
+.auth-field span{display:block;margin:0 0 7px;font-size:12px;font-weight:700;color:var(--muted)}
+.auth-field input{width:100%;min-height:46px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text);padding:0 13px;font:inherit;outline:none}
+.auth-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 14%,transparent)}
+.auth-submit{width:100%;min-height:48px;margin-top:4px}
+.auth-submit.loading{opacity:.65;pointer-events:none}
+.auth-error{min-height:20px;margin:4px 0 8px;color:var(--danger,#b83b35);font-size:12px;line-height:1.45}
+.auth-note{margin:16px 0 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.5}
+@media(max-width:520px){.auth-screen{padding:14px}.auth-card{padding:22px;border-radius:20px}.auth-copy h1{font-size:25px}}
