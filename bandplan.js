@@ -1903,7 +1903,7 @@ document.addEventListener('click', function (e) {
     }
     case 'invite': {
       stop();el.disabled=true;
-      window.BandPlanCloud.getInviteCode().then(code=>{
+      window.BandPlanCloud.saveNow(state).then(()=>window.BandPlanCloud.getInviteCode()).then(code=>{
         const txt='Код группы '+(state.profile.bandName||'BandPlan')+': '+code;
         if(navigator.clipboard?.writeText)return navigator.clipboard.writeText(code).then(()=>toast('Код приглашения скопирован: '+code,'ok',6000));
         toast(txt,'info',8000);
