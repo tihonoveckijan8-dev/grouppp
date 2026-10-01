@@ -2325,6 +2325,20 @@ function init() {
   else if (!had || !state.onboardingDone) openOnboarding();
 }
 async function startBandPlan() {
+  /*
+    The UI must never remain a blank shell when the optional cloud SDK fails
+    to load. Start the local application first; cloud sync is attached when
+    the Supabase client is available.
+  */
+  if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
+    console.error('BandPlan: Supabase client is unavailable; starting in local/offline mode.');
+    KEY = 'bandplan.premium.v6';
+    const hadLocal = load();
+    init();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
+    return;
+  }
   const user = await window.BandPlanCloud.initialize();
   if (!user) return;
   KEY = 'bandplan.premium.v6:' + user.id;
