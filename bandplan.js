@@ -2230,6 +2230,7 @@ async function bootCloudSync(hadLocal) {
 }
 
 function init() {
+  window.addEventListener('bandplan:sync-error', e => toast('Не удалось синхронизировать данные: ' + (e.detail || 'проверьте подключение'), 'err', 6500));
   const had = load();
   applyTheme(); applyAccentVars();
   ui.calView = state.settings.calView || 'month';
