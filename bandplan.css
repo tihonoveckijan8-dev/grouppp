@@ -1301,6 +1301,8 @@ h1,h2,h3,h4,p,.sub,.nm,.rl,.ev-title,.ev-meta,.sd-t,.sd-m,.brand-name,.brand-sub
 .auth-submit{width:100%;min-height:48px;margin-top:4px}
 .auth-submit.loading{opacity:.65;pointer-events:none}
 .auth-error{min-height:20px;margin:4px 0 8px;color:var(--danger,#b83b35);font-size:12px;line-height:1.45}
+.auth-username-status{display:block;min-height:16px;margin:6px 2px 0;font-size:11px;line-height:1.4;color:var(--muted)}
+.auth-username-status.available{color:#23834f}.auth-username-status.taken,.auth-username-status.invalid{color:var(--danger,#b83b35)}
 .auth-note{margin:16px 0 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.5}
 @media(max-width:520px){.auth-screen{padding:14px}.auth-card{padding:22px;border-radius:20px}.auth-copy h1{font-size:25px}}
 
