@@ -207,7 +207,7 @@ function load() {
     return true;
   } catch (e) { return false; }
 }
-function save() {\n  try { localStorage.setItem(KEY, JSON.stringify(state)); }\n  catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); }\n  if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);\n}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
 function commit() { save(); render(); }
 const songById = id => state.songs.find(s => s.id === id);
 const evById = id => state.events.find(e => e.id === id);
@@ -2147,6 +2147,7 @@ function wireStickyHeader() {
 }
 
 /* ═══ 26. INIT ═══ */
+
 function normalizeCloudState(d) {
   const base = defaults(), x = d && typeof d === 'object' ? d : {};
   state = Object.assign(base, x);
