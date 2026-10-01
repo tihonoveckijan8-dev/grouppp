@@ -491,6 +491,9 @@ function skeletonHTML(n) {
   return h + '</div>';
 }
 let actionBarHTML = '';
+/* Prevent the delegated nav click and the following native hashchange from
+   rendering the same route twice. */
+let skipNextHashRoute = false;
 function render() {
   const r = parseHash(), hd = HEADERS[r.name] || HEADERS.calendar;
   document.body.setAttribute('data-route', r.name);
@@ -1651,7 +1654,21 @@ document.addEventListener('click', function (e) {
     case 'account-logout': { stop(); const b=el; b.disabled=true; window.BandPlanCloud.signOut().then(()=>location.reload()).catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');}); break; }
     case 'confirm-yes': { stop(); const cb = confirmCb; hardClose(modalRoot); if (cb) cb(); break; }
     case 'reload-view': stop(); ui.skeleton = true; render(); break;
-    case 'nav': stop(); ui.skeleton = true; go('#/' + el.getAttribute('data-to')); break;
+    case 'nav': {
+      /* Native anchor navigation is allowed, but the new route is rendered
+         synchronously from the first click so no second click is ever needed. */
+      e.preventDefault();
+      e.stopPropagation();
+      const target = '#/' + el.getAttribute('data-to');
+      ui.skeleton = false;
+      skipNextHashRoute = true;
+      if (location.hash === target) routeTransition();
+      else {
+        location.hash = target;
+        routeTransition();
+      }
+      break;
+    }
     case 'theme-toggle': stop(); cycleTheme(); break;
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
@@ -2287,7 +2304,11 @@ function init() {
   ui.calView = state.settings.calView || 'month';
   if (!location.hash) location.hash = '#/calendar';
   window.addEventListener('hashchange', function () {
-    ui.skeleton = true;
+    if (skipNextHashRoute) {
+      skipNextHashRoute = false;
+      return;
+    }
+    ui.skeleton = false;
     routeTransition();
   });
   wireSearch(); wireSwipe(); wireImport(); wireNet(); wireStickyHeader();
