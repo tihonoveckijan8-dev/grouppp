@@ -69,6 +69,7 @@ grant select on public.bandplan_groups, public.bandplan_group_members, public.ba
 grant insert,update on public.bandplan_group_state to authenticated;
 revoke delete on public.bandplan_group_state from authenticated;
 
+drop function if exists public.bandplan_join_group_by_name(text);
 create or replace function public.bandplan_join_group_by_name(p_name text, p_initial_state jsonb default null)
 returns table(group_id uuid, group_name text, member_count bigint)
 language plpgsql security definer set search_path=public,auth
