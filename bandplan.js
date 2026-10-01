@@ -1185,10 +1185,12 @@ function bindSettings() {
       const result = await window.BandPlanCloud.joinGroup(name, state);
       const localProfile = Object.assign({}, state.profile);
       const localSettings = Object.assign({}, state.settings);
+      const localOnboardingDone = state.onboardingDone;
       if (result && result.state) {
         normalizeCloudState(result.state);
         state.profile = Object.assign({}, state.profile, localProfile);
         state.settings = Object.assign({}, state.settings, localSettings);
+        state.onboardingDone = localOnboardingDone;
       }
       if (result && result.group && result.group.group_name) state.profile.bandName = result.group.group_name;
       await window.BandPlanCloud.saveNow(state);
@@ -1719,11 +1721,13 @@ async function finishOnboarding() {
     try {
       const ownProfile = Object.assign({}, state.profile);
       const ownSettings = Object.assign({}, state.settings);
+      const ownOnboardingDone = state.onboardingDone;
       const joined = await window.BandPlanCloud.joinGroup(state.profile.bandName, state);
       if (joined && joined.state) {
         normalizeCloudState(joined.state);
         state.profile = Object.assign({}, state.profile, ownProfile);
         state.settings = Object.assign({}, state.settings, ownSettings);
+        state.onboardingDone = ownOnboardingDone;
         if (joined.group && joined.group.group_name) state.profile.bandName = joined.group.group_name;
         await window.BandPlanCloud.saveNow(state);
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
