@@ -412,7 +412,27 @@ function parseHash() {
   const p = h.split('/').filter(Boolean);
   return { name: p[0] || 'calendar', id: p[1] || null };
 }
-function go(h) { if (location.hash === h) render(); else location.hash = h; }
+function go(h) {
+  if (location.hash === h) { routeTransition(); return; }
+  location.hash = h;
+}
+function routeTransition() {
+  const view = $('#view');
+  if (!view) { render(); return; }
+  if (view.dataset.transitioning === '1') return;
+  view.dataset.transitioning = '1';
+  view.classList.remove('route-enter');
+  void view.offsetWidth;
+  view.classList.add('route-enter');
+  render();
+  requestAnimationFrame(() => {
+    view.classList.add('route-enter-active');
+    setTimeout(() => {
+      view.classList.remove('route-enter', 'route-enter-active');
+      delete view.dataset.transitioning;
+    }, 260);
+  });
+}
 const navKey = n => n === 'song' ? 'songs' : n === 'setlist' ? 'setlists' : n;
 
 function buildChrome() {
@@ -1437,7 +1457,14 @@ function drawSearch() {
   $('#globalSearch').setAttribute('aria-expanded', 'true');
   $('#searchWrap').classList.toggle('has-q', !!q);
 }
-function closeSearch() { const d = $('#searchDrop'); if (d) { d.classList.remove('open'); $('#globalSearch').setAttribute('aria-expanded', 'false'); } }
+function closeSearch() {
+  const d = $('#searchDrop');
+  const inp = $('#globalSearch');
+  if (d) d.classList.remove('open');
+  if (inp) inp.setAttribute('aria-expanded', 'false');
+  const wrap = $('#searchWrap');
+  if (wrap) wrap.classList.remove('has-q');
+}
 function moveSearch(d) {
   const items = $$('#searchDrop .sd-item'); if (!items.length) return;
   items.forEach(x => { x.classList.remove('sel'); x.setAttribute('aria-selected', 'false'); });
@@ -2240,7 +2267,10 @@ function init() {
   applyTheme(); applyAccentVars();
   ui.calView = state.settings.calView || 'month';
   if (!location.hash) location.hash = '#/calendar';
-  window.addEventListener('hashchange', function () { ui.skeleton = true; render(); });
+  window.addEventListener('hashchange', function () {
+    ui.skeleton = true;
+    routeTransition();
+  });
   wireSearch(); wireSwipe(); wireImport(); wireNet(); wireStickyHeader();
   $('#scBody').addEventListener('scroll', updateBar, { passive: true });
   $('#scBody').addEventListener('wheel', () => { if (scene.auto) setAuto(false); }, { passive: true });

@@ -1386,3 +1386,79 @@ button,a,input,select,textarea { touch-action: manipulation; }
 :root[data-theme="light"] .hint,
 :root[data-theme="light"] .field-hint{color:var(--text-2)}
 @media(max-width:900px){.content{touch-action:pan-y}}
+
+/* V8 repair: high-contrast light surfaces + reliable route transitions */
+:root[data-theme="light"]{
+  --bg:#F3F5F8;
+  --bg-deep:#E9EDF3;
+  --surf-1:#F7F9FC;
+  --surf-2:#FFFFFF;
+  --surf-3:#EEF2F6;
+  --surf-4:#FFFFFF;
+  --border:rgba(20,32,52,.14);
+  --border-2:rgba(20,32,52,.22);
+  --border-3:rgba(20,32,52,.34);
+  --text:#111827;
+  --text-2:#334155;
+  --muted:#64748B;
+  --clay-out:0 8px 22px rgba(15,23,42,.08);
+  --clay-sm:0 4px 12px rgba(15,23,42,.07);
+  --clay-in:none;
+  --clay-press:inset 0 1px 3px rgba(15,23,42,.08);
+}
+:root[data-theme="light"] body{background:var(--bg);color:var(--text)}
+:root[data-theme="light"] .sidebar,
+:root[data-theme="light"] .topbar,
+:root[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.96);border-color:var(--border)}
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .hero,
+:root[data-theme="light"] .song-card,
+:root[data-theme="light"] .sl-item,
+:root[data-theme="light"] .stat-mini,
+:root[data-theme="light"] .cal-cell,
+:root[data-theme="light"] .modal-card,
+:root[data-theme="light"] .search-drop,
+:root[data-theme="light"] .filter-pop{
+  background:var(--surf-2);
+  border-color:var(--border);
+  box-shadow:0 8px 24px rgba(15,23,42,.07);
+}
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-tertiary,
+:root[data-theme="light"] .icon-btn,
+:root[data-theme="light"] .chip{
+  background:var(--surf-2);
+  color:var(--text-2);
+  border-color:var(--border-2);
+  box-shadow:0 2px 8px rgba(15,23,42,.05);
+}
+:root[data-theme="light"] .input,
+:root[data-theme="light"] .select,
+:root[data-theme="light"] .textarea,
+:root[data-theme="light"] .tb-search{
+  background:var(--surf-2);
+  color:var(--text);
+  border-color:var(--border-2);
+}
+:root[data-theme="light"] .nav-item{color:var(--text-2)}
+:root[data-theme="light"] .nav-item.active{background:rgba(37,71,208,.10);color:var(--accent);border-color:rgba(37,71,208,.16)}
+:root[data-theme="light"] .sd-item:hover,
+:root[data-theme="light"] .sd-item.sel{background:#E9EEF9}
+:root[data-theme="light"] .sd-t{color:var(--text)}
+:root[data-theme="light"] .sd-m{color:var(--muted)}
+:root[data-theme="light"] .page-head h1,
+:root[data-theme="light"] h2,
+:root[data-theme="light"] h3,
+:root[data-theme="light"] h4{color:var(--text);text-shadow:none}
+:root[data-theme="light"] .sub,
+:root[data-theme="light"] .ev-meta,
+:root[data-theme="light"] .rl,
+:root[data-theme="light"] .muted{color:var(--muted)}
+:root[data-theme="light"] .search-drop{z-index:1200}
+
+/* Route transition: one predictable enter animation, no layout jump */
+#view.route-enter{opacity:0;transform:translateY(6px)}
+#view.route-enter-active{opacity:1;transform:none;transition:opacity 220ms ease,transform 220ms ease}
+@media (prefers-reduced-motion:reduce){
+  #view.route-enter,#view.route-enter-active{opacity:1;transform:none;transition:none}
+}
