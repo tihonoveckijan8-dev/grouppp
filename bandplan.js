@@ -2032,7 +2032,7 @@ function wireSwipe() {
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6 || dt > 900) return;
     const order = TABS.map(x => x.k), cur = navKey(parseHash().name);
     let i = order.indexOf(cur); if (i < 0) i = 0;
-    const next = dx < 0 ? order[Math.min(order.length - 1, i + 1)] : order[Math.max(0, i - 1)];
+    const next = dx < 0 ? order[(i + 1) % order.length] : order[(i - 1 + order.length) % order.length];
     if (next !== cur) { ui.skeleton = true; go('#/' + next); }
   }, { passive: true });
 }
