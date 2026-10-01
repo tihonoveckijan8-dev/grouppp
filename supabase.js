@@ -8,7 +8,39 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:[],events:[],setlists:[]};
+  let authSubscription = null;
+  let realtimeGeneration = 0;
   let mode = 'login';
+  function disposeRealtime() {
+    realtimeGeneration += 1;
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+    if (channel) { client.removeChannel(channel); channel = null; }
+    if (groupChannel) { client.removeChannel(groupChannel); groupChannel = null; }
+  }
+  function bindAuthLifecycle() {
+    if (authSubscription) return;
+    const result = client.auth.onAuthStateChange((event, session) => {
+      const previousUserId = currentSession?.user?.id || null;
+      currentSession = session || null;
+      if (event === 'SIGNED_OUT') {
+        clearTimeout(timer);
+        pending = null;
+        activeGroupId = null;
+        lastUpdated = '';
+        sharedBaseline = {songs:[],events:[],setlists:[]};
+        disposeRealtime();
+        mode = 'login';
+        renderGate();
+        return;
+      }
+      if (event === 'SIGNED_IN' && previousUserId && previousUserId !== session?.user?.id) {
+        disposeRealtime();
+        location.reload();
+      }
+    });
+    authSubscription = result?.data?.subscription || null;
+  }
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function gate() {
@@ -71,6 +103,7 @@
     }
   }
   async function initialize() {
+    bindAuthLifecycle();
     renderGate('Проверяем сессию…');
     const {data,error}=await client.auth.getSession();
     if(error) {renderGate('Не удалось проверить сессию: '+error.message,true);return null;}
@@ -143,11 +176,20 @@
   }
   function subscribe(onState) {
     if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
+    disposeRealtime();
+    const generation = realtimeGeneration;
+    const handleStatus = (label, status, error) => {
+      if (generation !== realtimeGeneration) return;
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn('BandPlan realtime '+label+' '+status, error || '');
+        window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:'Realtime-синхронизация временно недоступна'}));
+      }
+    };
     channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'*',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{
       const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;
       lastUpdated=row.updated_at||'';
       load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));
-    }).subscribe();
+    }).subscribe(status => handleStatus('personal', status));
     let live=client.channel('bp-shared-'+uid);
     const refreshShared=()=>{if(!activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{
       load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e));
@@ -162,12 +204,12 @@
     // Membership and account changes must refresh the roster on every participant's device.
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
-    groupChannel=live.subscribe();
-    return ()=>{clearTimeout(refreshTimer);if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
+    groupChannel=live.subscribe(status => handleStatus('shared', status));
+    return ()=>disposeRealtime();
   }
   async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
   async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
   window.addEventListener('online',()=>{if(pending){const snap=pending;saveNow(snap).catch(e=>{console.warn('BandPlan reconnect sync failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});}});
-  async function signOut(){clearTimeout(timer);pending=null;await client.auth.signOut();}
+  async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
   window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode};
 })();
