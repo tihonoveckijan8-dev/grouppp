@@ -1261,13 +1261,7 @@ h1,h2,h3,h4,p,.sub,.nm,.rl,.ev-title,.ev-meta,.sd-t,.sd-m,.brand-name,.brand-sub
 
 /* ═══ Шапка на телефоне: компактнее и прячется при прокрутке вниз ═══ */
 @media(max-width:900px){
-  .topbar,.page-head{transition:max-height .28s ease,padding .28s ease,opacity .2s ease;overflow:hidden}
-  .topbar{max-height:140px}
-  .page-head{max-height:340px}
-  body.hdr-hide .topbar,body.hdr-hide .page-head{max-height:0;padding-top:0;padding-bottom:0;opacity:0;pointer-events:none;border:0}
-  /* поиск в календаре: выпадающий список не должен обрезаться */
-  .topbar{overflow:visible}
-  body.hdr-hide .topbar{overflow:hidden}
+  .topbar,.page-head{max-height:none;opacity:1;overflow:visible;transition:none}
 }
 @media(max-width:640px){
   .page-head .sub{font-size:13.5px;line-height:1.4;margin-top:4px}
