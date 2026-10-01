@@ -1462,3 +1462,14 @@ button,a,input,select,textarea { touch-action: manipulation; }
 @media (prefers-reduced-motion:reduce){
   #view.route-enter,#view.route-enter-active{opacity:1;transform:none;transition:none}
 }
+
+/* Keep selected role/instrument chips visibly selected in the light theme.
+   The light-theme surface rule intentionally comes earlier, so this more
+   specific state rule must win without changing any other component. */
+:root[data-theme="light"] .chip.on{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(37,71,208,.12);
+  font-weight:var(--fw-semi);
+}
