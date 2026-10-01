@@ -29,7 +29,11 @@ alter table public.bandplan_groups enable row level security;
 alter table public.bandplan_group_members enable row level security;
 alter table public.bandplan_group_state enable row level security;
 
-create or replace function public.bandplan_is_group_member(p_group_id uuid)
+create schema if not exists private;
+revoke all on schema private from public,anon,authenticated;
+grant usage on schema private to authenticated;
+
+create or replace function private.bandplan_is_group_member(p_group_id uuid)
 returns boolean language sql stable security definer set search_path=public,auth
 as $$
   select exists(
@@ -37,29 +41,29 @@ as $$
     where m.group_id=p_group_id and m.user_id=auth.uid()
   );
 $$;
-revoke all on function public.bandplan_is_group_member(uuid) from public;
-grant execute on function public.bandplan_is_group_member(uuid) to authenticated;
+revoke all on function private.bandplan_is_group_member(uuid) from public,anon;
+grant execute on function private.bandplan_is_group_member(uuid) to authenticated;
 
 drop policy if exists "group members can view their groups" on public.bandplan_groups;
 create policy "group members can view their groups" on public.bandplan_groups
-for select to authenticated using (public.bandplan_is_group_member(id));
+for select to authenticated using (private.bandplan_is_group_member(id));
 
 drop policy if exists "members can view group membership" on public.bandplan_group_members;
 create policy "members can view group membership" on public.bandplan_group_members
-for select to authenticated using (public.bandplan_is_group_member(group_id));
+for select to authenticated using (private.bandplan_is_group_member(group_id));
 
 drop policy if exists "members can read shared group state" on public.bandplan_group_state;
 create policy "members can read shared group state" on public.bandplan_group_state
-for select to authenticated using (public.bandplan_is_group_member(group_id));
+for select to authenticated using (private.bandplan_is_group_member(group_id));
 
 drop policy if exists "members can insert shared group state" on public.bandplan_group_state;
 create policy "members can insert shared group state" on public.bandplan_group_state
-for insert to authenticated with check (public.bandplan_is_group_member(group_id));
+for insert to authenticated with check (private.bandplan_is_group_member(group_id));
 
 drop policy if exists "members can update shared group state" on public.bandplan_group_state;
 create policy "members can update shared group state" on public.bandplan_group_state
-for update to authenticated using (public.bandplan_is_group_member(group_id))
-with check (public.bandplan_is_group_member(group_id));
+for update to authenticated using (private.bandplan_is_group_member(group_id))
+with check (private.bandplan_is_group_member(group_id));
 
 grant select on public.bandplan_groups, public.bandplan_group_members, public.bandplan_group_state to authenticated;
 grant insert,update on public.bandplan_group_state to authenticated;
@@ -95,7 +99,7 @@ begin
     from public.bandplan_groups g where g.id=v_id;
 end;
 $$;
-revoke all on function public.bandplan_join_group_by_name(text) from public;
+revoke all on function public.bandplan_join_group_by_name(text) from public,anon;
 grant execute on function public.bandplan_join_group_by_name(text) to authenticated;
 
 do $$
