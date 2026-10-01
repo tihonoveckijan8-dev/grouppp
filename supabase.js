@@ -190,6 +190,14 @@
 
   async function joinGroup(name, initialState) {
     if (!currentSession) throw new Error('AUTH_REQUIRED');
+    clearTimeout(offlineQueueTimer);
+    clearTimeout(window.__bandPlanCloudTimer);
+    await offlineQueueWrite;
+    const pendingBeforeSwitch = await idbGet('pending:' + currentSession.user.id);
+    if (pendingBeforeSwitch) {
+      const flushed = await flushOfflineQueue();
+      if (!flushed) throw new Error('Есть несинхронизированные изменения. Проверьте соединение и повторите подключение.');
+    }
     const groupName = String(name || '').trim();
     if (groupName.length < 3 || groupName.length > 50) throw new Error('Название группы должно содержать от 3 до 50 символов');
     const { data, error } = await client.rpc('bandplan_join_group_by_name', { p_name: groupName });
@@ -468,6 +476,7 @@
   const OFFLINE_DB = 'bandplan-offline-v1';
   let offlineDbPromise = null;
   let offlineQueueTimer = null;
+  let offlineQueueWrite = Promise.resolve();
   function offlineDb() {
     if (!('indexedDB' in window)) return Promise.resolve(null);
     if (offlineDbPromise) return offlineDbPromise;
@@ -572,11 +581,14 @@
          Если страницу закроют до сетевого запроса, она отправится при следующем запуске. */
       const snapshot = JSON.parse(JSON.stringify(state || {}));
       cacheOfflineState(snapshot).catch(function () {});
-      queueOfflineState(snapshot).catch(function () {});
-      clearTimeout(window.__bandPlanCloudTimer);
-      window.__bandPlanCloudTimer = setTimeout(function () {
-        flushOfflineQueue().catch(function (e) { console.warn('BandPlan cloud save queued:', e); });
-      }, 350);
+      offlineQueueWrite = offlineQueueWrite.then(function () {
+        return queueOfflineState(snapshot);
+      }).then(function () {
+        clearTimeout(window.__bandPlanCloudTimer);
+        window.__bandPlanCloudTimer = setTimeout(function () {
+          flushOfflineQueue().catch(function (e) { console.warn('BandPlan cloud save queued:', e); });
+        }, 350);
+      }).catch(function (e) { console.warn('BandPlan queue write:', e); });
     },
     subscribe,
     retry: flushOfflineQueue,
