@@ -128,7 +128,7 @@
   function schedule(state) {
     if(!currentSession?.user)return;
     pending=JSON.parse(JSON.stringify(state||{}));clearTimeout(timer);
-    timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>console.warn('BandPlan account save failed:',e));},350);
+    timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
   }
   function subscribe(onState) {
     if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
@@ -140,6 +140,6 @@
   }
   async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
   async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
-  async function signOut(){clearTimeout(timer);pending=null;await client.auth.signOut();}
+  window.addEventListener('online',()=>{if(pending){const snap=pending;saveNow(snap).catch(e=>{console.warn('BandPlan reconnect sync failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});}});\n  async function signOut(){clearTimeout(timer);pending=null;await client.auth.signOut();}
   window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode};
 })();
