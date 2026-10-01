@@ -36,6 +36,28 @@
 
 <a class="skip-link" href="#view">Перейти к содержимому</a>
 
+<div class="auth-screen" id="authScreen" hidden>
+  <div class="auth-card">
+    <div class="auth-brand"><div class="brand-mark">BP</div><div><div class="auth-brand-name">BandPlan</div><div class="auth-brand-sub">Music Group OS</div></div></div>
+    <div class="auth-tabs" role="tablist">
+      <button type="button" class="on" data-auth-mode="login">Войти</button>
+      <button type="button" data-auth-mode="register">Регистрация</button>
+    </div>
+    <div class="auth-copy">
+      <h1 id="authTitle">С возвращением</h1>
+      <p id="authSubtitle">Введите ник и пароль, чтобы продолжить работу с BandPlan.</p>
+    </div>
+    <form id="authForm" autocomplete="on">
+      <label class="auth-field"><span>Ник</span><input id="authUsername" name="username" type="text" minlength="3" maxlength="24" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="например, tihon" required></label>
+      <label class="auth-field"><span>Пароль</span><input id="authPassword" name="password" type="password" minlength="8" maxlength="128" autocomplete="current-password" placeholder="Минимум 8 символов" required></label>
+      <label class="auth-field" id="authPassword2Wrap" hidden><span>Повторите пароль</span><input id="authPassword2" name="password2" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Повторите пароль"></label>
+      <div class="auth-error" id="authError" role="alert"></div>
+      <button class="btn btn-primary auth-submit" id="authSubmit" type="submit">Войти</button>
+    </form>
+    <p class="auth-note">Аккаунт синхронизирует ваши данные между устройствами.</p>
+  </div>
+</div>
+
 <div class="app" id="app">
   <!-- ══ SIDEBAR (≥1024px) ══ -->
   <aside class="sidebar" aria-label="Основная навигация">
