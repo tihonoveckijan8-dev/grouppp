@@ -174,7 +174,7 @@ const PALETTE = ['#2547D0', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80
 const ACCENTS = ['#2547D0', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
 
 /* ═══ 5. STATE ═══ */
-const KEY = 'bandplan.premium.v6';
+let KEY = 'bandplan.premium.v6';
 function defaults() {
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
@@ -1629,6 +1629,7 @@ document.addEventListener('click', function (e) {
   const btnLoading = b => { if (b) { b.classList.add('loading'); setTimeout(() => b.classList.remove('loading'), 500); } };
   switch (a) {
     case 'modal-close': stop(); closeModal(); break;
+    case 'account-logout': { stop(); const b=el; b.disabled=true; window.BandPlanCloud.signOut().then(()=>location.reload()).catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');}); break; }
     case 'confirm-yes': { stop(); const cb = confirmCb; hardClose(modalRoot); if (cb) cb(); break; }
     case 'reload-view': stop(); ui.skeleton = true; render(); break;
     case 'nav': stop(); ui.skeleton = true; go('#/' + el.getAttribute('data-to')); break;
@@ -2234,7 +2235,13 @@ function init() {
   if (window.BandPlanCloud) bootCloudSync(had);
   else if (!had || !state.onboardingDone) openOnboarding();
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+async function startBandPlan() {
+  const user = await window.BandPlanCloud.initialize();
+  if (!user) return;
+  KEY = 'bandplan.premium.v6:' + user.id;
+  init();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
 })();
 
 
