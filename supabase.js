@@ -212,8 +212,8 @@
       if(existing){existing.name=a.display_name;existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
     });
-    const profile=Object.assign({},pstate.profile||{});if(groupInfo.data?.name)profile.bandName=groupInfo.data.name;
-    return {state:Object.assign({},pstate,{profile,songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
+    const groupProfile=Object.assign({},profile);if(groupInfo.data?.name)groupProfile.bandName=groupInfo.data.name;
+    return {state:Object.assign({},pstate,{profile:groupProfile,songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
