@@ -10,6 +10,57 @@
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:[],events:[],setlists:[]};
   let authSubscription = null;
   let realtimeGeneration = 0;
+  let subscriptionCallback = null;
+
+  /* Durable offline cache: per-account snapshot + latest pending sync. */
+  const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=1, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue';
+  let idbPromise=null;
+  function openOfflineDb(){
+    if(!('indexedDB' in window)) return Promise.resolve(null);
+    if(idbPromise) return idbPromise;
+    idbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open(IDB_NAME,IDB_VERSION);
+      req.onupgradeneeded=()=>{const db=req.result;
+        if(!db.objectStoreNames.contains(IDB_SNAPSHOT))db.createObjectStore(IDB_SNAPSHOT,{keyPath:'user_id'});
+        if(!db.objectStoreNames.contains(IDB_QUEUE))db.createObjectStore(IDB_QUEUE,{keyPath:'user_id'});
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('IndexedDB недоступен'));
+    }).catch(error=>{console.warn('BandPlan IndexedDB unavailable:',error);return null;});
+    return idbPromise;
+  }
+  function idbRequest(storeName,mode,operation){
+    return openOfflineDb().then(db=>new Promise((resolve,reject)=>{
+      if(!db)return resolve(null);
+      let tx;try{tx=db.transaction(storeName,mode);}catch(error){reject(error);return;}
+      const request=operation(tx.objectStore(storeName));
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>reject(request.error||new Error('IndexedDB operation failed'));
+      tx.onerror=()=>reject(tx.error||new Error('IndexedDB transaction failed'));
+    })).catch(error=>{console.warn('BandPlan IndexedDB operation failed:',error);return null;});
+  }
+  async function durableSnapshot(userId){return idbRequest(IDB_SNAPSHOT,'readonly',store=>store.get(userId));}
+  async function durableQueue(userId){return idbRequest(IDB_QUEUE,'readonly',store=>store.get(userId));}
+  async function writeDurableState(userId,state,updatedAt,pendingSync){
+    const record={user_id:userId,state:JSON.parse(JSON.stringify(state||{})),updated_at:updatedAt||new Date().toISOString(),pending_sync:!!pendingSync};
+    await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(record));
+    if(pendingSync)await idbRequest(IDB_QUEUE,'readwrite',store=>store.put({user_id:userId,state:record.state,updated_at:record.updated_at}));
+    else await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(userId));
+  }
+  async function hydrateLocalCache(){
+    const uid=currentSession?.user?.id;if(!uid)return null;
+    const queued=await durableQueue(uid),snapshot=await durableSnapshot(uid),record=queued||snapshot;
+    if(!record?.state)return null;
+    const state=JSON.parse(JSON.stringify(record.state)),pendingSync=!!queued||!!record.pending_sync;
+    if(pendingSync)pending=state;
+    return {state,updatedAt:record.updated_at||'',pendingSync};
+  }
+  async function clearDurableQueue(userId){
+    await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(userId));
+    const snapshot=await durableSnapshot(userId);
+    if(snapshot)await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(Object.assign({},snapshot,{pending_sync:false})));
+  }
+
   let mode = 'login';
   function disposeRealtime() {
     realtimeGeneration += 1;
@@ -146,7 +197,8 @@
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();clearTimeout(timer);pending=null;
+    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();clearTimeout(timer);pending=snapshot;
+    await writeDurableState(uid,snapshot,updatedAt,true);
     if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
     if(!activeGroupId&&snapshot.onboardingDone){
       if(!groupSetupPromise)groupSetupPromise=(async()=>{
@@ -167,7 +219,12 @@
     }
     const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
-    if(error){pending=snapshot;throw error;}lastUpdated=data?.updated_at||updatedAt;return lastUpdated;
+    if(error){pending=snapshot;await writeDurableState(uid,snapshot,updatedAt,true);throw error;}
+    lastUpdated=data?.updated_at||updatedAt;
+    const latestPending=pending&&JSON.stringify(pending)!==JSON.stringify(snapshot)?JSON.parse(JSON.stringify(pending)):null;
+    if(latestPending)await writeDurableState(uid,latestPending,new Date().toISOString(),true);
+    else{pending=null;await clearDurableQueue(uid);}
+    return lastUpdated;
   }
   function schedule(state) {
     if(!currentSession?.user)return;
@@ -175,7 +232,9 @@
     timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
   }
   function subscribe(onState) {
-    if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
+    if(!currentSession?.user)return ()=>{};
+    subscriptionCallback=onState;
+    const uid=currentSession.user.id;
     disposeRealtime();
     const generation = realtimeGeneration;
     const handleStatus = (label, status, error) => {
@@ -209,7 +268,22 @@
   }
   async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
   async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
-  window.addEventListener('online',()=>{if(pending){const snap=pending;saveNow(snap).catch(e=>{console.warn('BandPlan reconnect sync failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});}});
+  window.addEventListener('online',async()=>{
+    if(!currentSession?.user)return;
+    try{await hydrateLocalCache();}catch(e){console.warn('BandPlan durable queue restore failed:',e);}
+    if(pending){
+      const snap=JSON.parse(JSON.stringify(pending));
+      try{
+        await saveNow(snap);
+        if(subscriptionCallback)subscribe(subscriptionCallback);
+      }catch(e){
+        console.warn('BandPlan reconnect sync failed:',e);
+        window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));
+      }
+    } else if(subscriptionCallback && activeGroupId && !groupChannel){
+      subscribe(subscriptionCallback);
+    }
+  });
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode,hydrateLocalCache};
 })();
