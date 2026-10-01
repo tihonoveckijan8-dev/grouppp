@@ -125,6 +125,7 @@
       await groupSetupPromise;
     }
     if(activeGroupId){
+      if(String(snapshot.profile?.bandName||'').trim().length>=3){const renamed=await client.rpc('bandplan_rename_group',{p_name:snapshot.profile.bandName});if(renamed.error){pending=snapshot;throw renamed.error;}}
       const songs=snapshot.songs||[],events=snapshot.events||[],setlists=snapshot.setlists||[];
       const removed=(base,current)=>base.filter(id=>!current.some(x=>String(x.id)===id));
       const sync=await client.rpc('bandplan_sync_group',{p_songs:songs,p_events:events,p_setlists:setlists,p_roster:snapshot.members||[],p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),p_personal_settings:snapshot.settings||{},p_delete_songs:removed(sharedBaseline.songs,songs),p_delete_events:removed(sharedBaseline.events,events),p_delete_setlists:removed(sharedBaseline.setlists,setlists)});
