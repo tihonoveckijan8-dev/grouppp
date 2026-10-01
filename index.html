@@ -54,7 +54,12 @@
       <div class="auth-error" id="authError" role="alert"></div>
       <button class="btn btn-primary auth-submit" id="authSubmit" type="submit">Войти</button>
     </form>
-    <p class="auth-note">Аккаунт синхронизирует ваши данные между устройствами.</p>
+    <div class="auth-divider"><span>или продолжить через</span></div>
+    <div class="auth-oauth">
+      <button class="auth-oauth-btn auth-google" type="button" data-auth-provider="google"><span class="oauth-logo">G</span><span>Google</span></button>
+      <button class="auth-oauth-btn auth-apple" type="button" data-auth-provider="apple"><span class="oauth-logo oauth-apple-logo">●</span><span>Apple</span></button>
+    </div>
+    <p class="auth-note">Аккаунт синхронизирует ваши данные между устройствами. OAuth-пользователь автоматически получает профиль и код друга.</p>
   </div>
 </div>
 
