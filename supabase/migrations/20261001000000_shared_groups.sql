@@ -69,7 +69,7 @@ grant select on public.bandplan_groups, public.bandplan_group_members, public.ba
 grant insert,update on public.bandplan_group_state to authenticated;
 revoke delete on public.bandplan_group_state from authenticated;
 
-create or replace function public.bandplan_join_group_by_name(p_name text)
+create or replace function public.bandplan_join_group_by_name(p_name text, p_initial_state jsonb default null)
 returns table(group_id uuid, group_name text, member_count bigint)
 language plpgsql security definer set search_path=public,auth
 as $$
@@ -77,30 +77,50 @@ declare
   v_uid uuid := auth.uid();
   v_name text := trim(coalesce(p_name,''));
   v_id uuid;
+  v_created boolean := false;
+  v_shared jsonb;
 begin
   if v_uid is null then raise exception 'AUTH_REQUIRED'; end if;
   if char_length(v_name) < 3 or char_length(v_name) > 50 then
     raise exception 'GROUP_NAME_INVALID';
   end if;
+
   insert into public.bandplan_groups(name,owner_id)
   values(v_name,v_uid)
-  on conflict(normalized_name) do update set name=public.bandplan_groups.name
+  on conflict(normalized_name) do nothing
   returning id into v_id;
+
+  if v_id is null then
+    select g.id into v_id from public.bandplan_groups g
+    where g.normalized_name=lower(trim(v_name));
+  else
+    v_created := true;
+  end if;
 
   insert into public.bandplan_group_members(group_id,user_id)
   values(v_id,v_uid) on conflict do nothing;
 
-  insert into public.bandplan_group_state(group_id,state)
-  values(v_id,'{"members":[],"events":[],"songs":[],"setlists":[]}'::jsonb)
-  on conflict(group_id) do nothing;
+  if v_created then
+    v_shared := jsonb_build_object(
+      'members', case when jsonb_typeof(p_initial_state->'members')='array' then p_initial_state->'members' else '[]'::jsonb end,
+      'events', case when jsonb_typeof(p_initial_state->'events')='array' then p_initial_state->'events' else '[]'::jsonb end,
+      'songs', case when jsonb_typeof(p_initial_state->'songs')='array' then p_initial_state->'songs' else '[]'::jsonb end,
+      'setlists', case when jsonb_typeof(p_initial_state->'setlists')='array' then p_initial_state->'setlists' else '[]'::jsonb end
+    );
+    insert into public.bandplan_group_state(group_id,state) values(v_id,v_shared);
+  else
+    insert into public.bandplan_group_state(group_id,state)
+    values(v_id,'{"members":[],"events":[],"songs":[],"setlists":[]}'::jsonb)
+    on conflict(group_id) do nothing;
+  end if;
 
   return query select g.id,g.name,
     (select count(*) from public.bandplan_group_members m where m.group_id=g.id)
     from public.bandplan_groups g where g.id=v_id;
 end;
 $$;
-revoke all on function public.bandplan_join_group_by_name(text) from public,anon;
-grant execute on function public.bandplan_join_group_by_name(text) to authenticated;
+revoke all on function public.bandplan_join_group_by_name(text,jsonb) from public,anon;
+grant execute on function public.bandplan_join_group_by_name(text,jsonb) to authenticated;
 
 do $$
 begin
