@@ -1,126 +1,293 @@
-/* BandPlan cloud sync — Supabase REST + Realtime */
+/* BandPlan — Supabase Auth + per-user cloud sync */
 (function () {
   'use strict';
 
   const URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
   const KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
-  const TABLE = 'bandplan_state';
-  const REST = URL + '/rest/v1/' + TABLE;
-  const HEADERS = {
-    apikey: KEY,
-    Authorization: 'Bearer ' + KEY,
-    'Content-Type': 'application/json',
-    Accept: 'application/json'
-  };
+  const STATE_TABLE = 'bandplan_user_state';
+  const PROFILE_TABLE = 'bandplan_profiles';
+  const FRIEND_TABLE = 'bandplan_friendships';
+  const REGISTER_FN = URL + '/functions/v1/bandplan-register';
 
-  let timer = null;
-  let pending = null;
-  let lastRemoteAt = '';
-  let stopPolling = null;
+  const client = window.supabase.createClient(URL, KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false
+    }
+  });
+
+  let currentSession = null;
+  let currentProfile = null;
   let realtimeStop = null;
+  const listeners = [];
 
-  async function request(path, options) {
-    const res = await fetch(REST + path, Object.assign({ headers: HEADERS, cache: 'no-store' }, options || {}));
-    const text = await res.text();
-    let data = null;
-    try { data = text ? JSON.parse(text) : null; } catch (e) { data = null; }
-    if (!res.ok) {
-      const message = data && data.message ? data.message : (text || ('HTTP ' + res.status));
-      throw new Error('Supabase ' + res.status + ': ' + message);
-    }
-    return data;
+  function usernameEmail(username) {
+    return String(username || '').trim().toLowerCase() + '@users.bandplan.local';
   }
 
-  async function load() {
-    const rows = await request('?id=eq.1&select=state,updated_at&limit=1');
-    const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row) return null;
-    lastRemoteAt = row.updated_at || '';
-    return { state: row.state || {}, updatedAt: row.updated_at || '' };
+  function emit(event, session) {
+    listeners.slice().forEach(fn => {
+      try { fn(event, session); } catch (e) { console.warn('BandPlan auth listener:', e); }
+    });
   }
 
-  async function saveNow(state) {
+  async function loadProfile() {
+    if (!currentSession) { currentProfile = null; return null; }
+    const { data, error } = await client
+      .from(PROFILE_TABLE)
+      .select('id,username,friend_code,created_at')
+      .eq('id', currentSession.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    currentProfile = data || null;
+    return currentProfile;
+  }
+
+  async function signIn(username, password) {
+    const { data, error } = await client.auth.signInWithPassword({
+      email: usernameEmail(username),
+      password
+    });
+    if (error) throw error;
+    currentSession = data.session;
+    await loadProfile();
+    return currentProfile;
+  }
+
+  async function register(username, password) {
+    const res = await fetch(REGISTER_FN, {
+      method: 'POST',
+      headers: { apikey: KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Не удалось зарегистрировать аккаунт');
+    await signIn(username, password);
+    return body;
+  }
+
+  async function signOut() {
+    if (realtimeStop) { try { realtimeStop(); } catch (e) {} realtimeStop = null; }
+    await client.auth.signOut();
+    currentSession = null;
+    currentProfile = null;
+    try { localStorage.removeItem('bandplan.premium.v6'); } catch (e) {}
+    emit('SIGNED_OUT', null);
+  }
+
+  async function addFriendByCode(code) {
+    if (!currentSession) throw new Error('Сначала войдите в аккаунт');
+    const normalized = String(code || '').trim().toUpperCase();
+    if (!/^[A-F0-9]{12}$/.test(normalized)) throw new Error('Код должен содержать 12 символов');
+    const { data: friend, error: findError } = await client
+      .from(PROFILE_TABLE)
+      .select('id,username,friend_code')
+      .eq('friend_code', normalized)
+      .maybeSingle();
+    if (findError) throw findError;
+    if (!friend) throw new Error('Пользователь с таким кодом не найден');
+    if (friend.id === currentSession.user.id) throw new Error('Нельзя добавить самого себя');
+
+    const { error } = await client.from(FRIEND_TABLE).insert({
+      user_id: currentSession.user.id,
+      friend_id: friend.id
+    });
+    if (error && error.code !== '23505') throw error;
+    return friend;
+  }
+
+  async function getFriends() {
+    if (!currentSession) return [];
+    const { data: links, error } = await client
+      .from(FRIEND_TABLE)
+      .select('user_id,friend_id,created_at')
+      .or('user_id.eq.' + currentSession.user.id + ',friend_id.eq.' + currentSession.user.id);
+    if (error) throw error;
+    const ids = (links || []).map(x => x.user_id === currentSession.user.id ? x.friend_id : x.user_id);
+    if (!ids.length) return [];
+    const { data: profiles, error: profileError } = await client
+      .from(PROFILE_TABLE)
+      .select('id,username,friend_code')
+      .in('id', ids);
+    if (profileError) throw profileError;
+    return profiles || [];
+  }
+
+  async function loadState() {
+    if (!currentSession) throw new Error('AUTH_REQUIRED');
+    const { data, error } = await client
+      .from(STATE_TABLE)
+      .select('state,updated_at')
+      .eq('user_id', currentSession.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? { state: data.state || {}, updatedAt: data.updated_at || '' } : null;
+  }
+
+  async function saveState(state) {
+    if (!currentSession) throw new Error('AUTH_REQUIRED');
     const snapshot = JSON.parse(JSON.stringify(state || {}));
-    const updatedAt = new Date().toISOString();
-    pending = null;
-
-    try {
-      const rows = await request('?on_conflict=id', {
-        method: 'POST',
-        headers: Object.assign({}, HEADERS, {
-          Prefer: 'resolution=merge-duplicates,return=representation'
-        }),
-        body: JSON.stringify({ id: 1, state: snapshot, updated_at: updatedAt })
-      });
-      const row = Array.isArray(rows) ? rows[0] : null;
-      lastRemoteAt = (row && row.updated_at) || updatedAt;
-      return lastRemoteAt;
-    } catch (e) {
-      pending = snapshot;
-      throw e;
-    }
-  }
-
-  function schedule(state) {
-    pending = JSON.parse(JSON.stringify(state || {}));
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      if (pending && navigator.onLine !== false) {
-        saveNow(pending).catch(function (e) {
-          console.warn('BandPlan cloud save failed:', e);
-        });
-      }
-    }, 350);
-  }
-
-  function retry() {
-    if (!pending || navigator.onLine === false) return;
-    clearTimeout(timer);
-    timer = setTimeout(function () {
-      if (pending) saveNow(pending).catch(function (e) { console.warn('BandPlan cloud retry failed:', e); });
-    }, 150);
-  }
-
-  function applyRemote(row, onState) {
-    if (!row || !row.state) return;
-    if (row.updated_at && row.updated_at === lastRemoteAt) return;
-    lastRemoteAt = row.updated_at || lastRemoteAt;
-    onState(row.state, row.updated_at || '');
+    const { data, error } = await client
+      .from(STATE_TABLE)
+      .upsert({
+        user_id: currentSession.user.id,
+        state: snapshot,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' })
+      .select('updated_at')
+      .single();
+    if (error) throw error;
+    return data && data.updated_at;
   }
 
   function subscribe(onState) {
-    if (window.supabase && window.supabase.createClient) {
-      const client = window.supabase.createClient(URL, KEY, {
-        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-      });
-      const channel = client.channel('bandplan-state-sync').on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: TABLE, filter: 'id=eq.1' },
-        function (payload) { applyRemote(payload && payload.new, onState); }
-      ).subscribe(function (status, err) {
+    if (!currentSession) return function () {};
+    const channel = client.channel('bandplan-user-state-' + currentSession.user.id)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: STATE_TABLE,
+        filter: 'user_id=eq.' + currentSession.user.id
+      }, function (payload) {
+        const row = payload && payload.new;
+        if (row && row.state) onState(row.state, row.updated_at || '');
+      })
+      .subscribe(function (status, err) {
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.warn('BandPlan Realtime:', status, err || '');
         }
       });
-      realtimeStop = function () { try { client.removeChannel(channel); } catch (e) {} };
-      return realtimeStop;
-    }
 
-    let active = true;
-    const poll = async function () {
-      if (!active || navigator.onLine === false) return;
-      try {
-        const remote = await load();
-        if (remote) applyRemote({ state: remote.state, updated_at: remote.updatedAt }, onState);
-      } catch (e) {
-        console.warn('BandPlan cloud polling failed:', e);
-      }
+    realtimeStop = function () {
+      try { client.removeChannel(channel); } catch (e) {}
     };
-    const id = setInterval(poll, 15000);
-    stopPolling = function () { active = false; clearInterval(id); };
-    return stopPolling;
+    return realtimeStop;
   }
 
-  window.addEventListener('online', retry);
-  window.BandPlanCloud = { load, saveNow, schedule, subscribe, retry };
+  function renderAuth() {
+    const root = document.getElementById('authScreen');
+    if (!root) return;
+    root.hidden = !!currentSession;
+  }
+
+  function authErrorMessage(error) {
+    const msg = String(error && error.message || error || '');
+    if (/invalid login credentials/i.test(msg)) return 'Неверный ник или пароль';
+    if (/weak password|password/i.test(msg) && msg.length < 180) return 'Пароль должен содержать минимум 8 символов';
+    return msg || 'Произошла ошибка. Попробуйте ещё раз.';
+  }
+
+  function setAuthBusy(busy) {
+    document.querySelectorAll('#authScreen button[type="submit"]').forEach(b => {
+      b.disabled = busy;
+      b.classList.toggle('loading', busy);
+    });
+  }
+
+  function switchAuth(mode) {
+    const login = mode === 'login';
+    const title = document.getElementById('authTitle');
+    const subtitle = document.getElementById('authSubtitle');
+    const submit = document.getElementById('authSubmit');
+    const confirm = document.getElementById('authPassword2Wrap');
+    const tabs = document.querySelectorAll('[data-auth-mode]');
+    if (title) title.textContent = login ? 'С возвращением' : 'Создайте аккаунт';
+    if (subtitle) subtitle.textContent = login ? 'Введите ник и пароль, чтобы продолжить работу с BandPlan.' : 'Ваши песни, события и настройки будут привязаны к аккаунту.';
+    if (submit) submit.textContent = login ? 'Войти' : 'Создать аккаунт';
+    if (confirm) confirm.hidden = login;
+    tabs.forEach(t => t.classList.toggle('on', t.getAttribute('data-auth-mode') === mode));
+    rootAuthMode = mode;
+    const err = document.getElementById('authError');
+    if (err) err.textContent = '';
+  }
+
+  let rootAuthMode = 'login';
+
+  function mountAuth() {
+    const root = document.getElementById('authScreen');
+    if (!root) return;
+    renderAuth();
+    root.addEventListener('click', function (e) {
+      const mode = e.target.closest('[data-auth-mode]');
+      if (mode) { e.preventDefault(); switchAuth(mode.getAttribute('data-auth-mode')); }
+    });
+    const form = document.getElementById('authForm');
+    if (!form) return;
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const username = String(document.getElementById('authUsername').value || '').trim();
+      const password = String(document.getElementById('authPassword').value || '');
+      const password2 = String(document.getElementById('authPassword2').value || '');
+      const err = document.getElementById('authError');
+      if (err) err.textContent = '';
+      if (!/^[A-Za-zА-Яа-яЁё0-9_.-]{3,24}$/.test(username)) {
+        if (err) err.textContent = 'Ник: 3–24 символа, только буквы, цифры, _, ., -';
+        return;
+      }
+      if (password.length < 8) {
+        if (err) err.textContent = 'Пароль должен содержать минимум 8 символов';
+        return;
+      }
+      if (rootAuthMode === 'register' && password !== password2) {
+        if (err) err.textContent = 'Пароли не совпадают';
+        return;
+      }
+      setAuthBusy(true);
+      try {
+        if (rootAuthMode === 'register') await register(username, password);
+        else await signIn(username, password);
+        renderAuth();
+        emit('SIGNED_IN', currentSession);
+      } catch (error) {
+        if (err) err.textContent = authErrorMessage(error);
+      } finally {
+        setAuthBusy(false);
+      }
+    });
+  }
+
+  const ready = (async function () {
+    const { data } = await client.auth.getSession();
+    currentSession = data && data.session ? data.session : null;
+    if (currentSession) {
+      try { await loadProfile(); } catch (e) { console.warn('BandPlan profile:', e); }
+    }
+    mountAuth();
+    renderAuth();
+    return !!currentSession;
+  })();
+
+  client.auth.onAuthStateChange(function (event, session) {
+    currentSession = session || null;
+    if (!session) currentProfile = null;
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+      loadProfile().catch(() => {});
+    }
+    emit(event, session);
+    renderAuth();
+  });
+
+  window.BandPlanAuth = {
+    client, ready,
+    isAuthenticated: () => !!currentSession,
+    getSession: () => currentSession,
+    getProfile: () => currentProfile,
+    onChange: fn => { if (typeof fn === 'function') listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
+    signIn, register, signOut, addFriendByCode, getFriends, loadProfile
+  };
+
+  window.BandPlanCloud = {
+    load: loadState,
+    saveNow: saveState,
+    schedule: function (state) {
+      if (!currentSession) return;
+      clearTimeout(window.__bandPlanCloudTimer);
+      window.__bandPlanCloudTimer = setTimeout(function () {
+        saveState(state).catch(function (e) { console.warn('BandPlan cloud save failed:', e); });
+      }, 350);
+    },
+    subscribe,
+    retry: function () {}
+  };
 })();
