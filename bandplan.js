@@ -2211,14 +2211,16 @@ async function bootCloudSync(hadLocal, durableInfo) {
     */
     if (durableInfo?.pendingSync && durableInfo.state) {
       normalizeCloudState(durableInfo.state);
+      let pendingConfirmed = false;
       if (navigator.onLine !== false) {
         try {
           await window.BandPlanCloud.saveNow(state);
+          pendingConfirmed = true;
         } catch (syncError) {
           console.warn('BandPlan pending offline sync deferred:', syncError);
         }
       }
-      if (!durableInfo.pendingSync || navigator.onLine !== false) {
+      if (pendingConfirmed) {
         try {
           const confirmed = await window.BandPlanCloud.load();
           if (confirmed?.state && hasMeaningfulState(confirmed.state)) normalizeCloudState(confirmed.state);
