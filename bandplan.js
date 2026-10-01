@@ -1091,6 +1091,7 @@ function vSettings() {
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
     '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
+    '<div class="field"><div class="row" style="align-items:center;justify-content:space-between;gap:10px"><div class="t-xs t-muted" style="max-width:420px">Одна и та же группа объединяет песни, расписание, состав и сет-листы участников.</div><button class="btn btn-primary btn-sm" id="groupJoinBtn" type="button">Создать / подключить</button></div><div id="sharedGroupStatus" class="t-xs t-muted" role="status" style="margin-top:8px">' + (window.BandPlanCloud && window.BandPlanCloud.getActiveGroupId && window.BandPlanCloud.getActiveGroupId() ? 'Вы подключены к общей группе' : 'Введите одинаковое название группы и подключитесь к ней на каждом аккаунте') + '</div></div>' +
     '<div class="field"><span class="field-label">Ваши роли / инструменты (можно несколько)</span><div class="row" style="gap:6px">' +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
@@ -1167,6 +1168,43 @@ function bindSettings() {
   on('setName', 'input', debounce(e => { state.profile.name = e.target.value; save(); buildChrome(); }));
   on('setBand', 'input', debounce(e => { state.profile.bandName = e.target.value || 'Моя группа'; save(); buildChrome(); }));
   on('setBandDesc', 'input', debounce(e => { state.profile.bandDesc = e.target.value; save(); }));
+  on('groupJoinBtn', 'click', async function () {
+    const button = $('#groupJoinBtn'), status = $('#sharedGroupStatus');
+    const name = String($('#setBand') && $('#setBand').value || '').trim();
+    if (!window.BandPlanCloud || !window.BandPlanCloud.joinGroup) {
+      if (status) status.textContent = 'Облачная синхронизация недоступна';
+      return;
+    }
+    if (name.length < 3 || name.length > 50) {
+      if (status) status.textContent = 'Название группы должно содержать от 3 до 50 символов';
+      return;
+    }
+    if (button) { button.disabled = true; button.textContent = 'Подключаем…'; }
+    if (status) status.textContent = 'Ищем группу и подключаем аккаунт…';
+    try {
+      const result = await window.BandPlanCloud.joinGroup(name, state);
+      const localProfile = Object.assign({}, state.profile);
+      const localSettings = Object.assign({}, state.settings);
+      if (result && result.state) {
+        normalizeCloudState(result.state);
+        state.profile = Object.assign({}, state.profile, localProfile);
+        state.settings = Object.assign({}, state.settings, localSettings);
+      }
+      if (result && result.group && result.group.group_name) state.profile.bandName = result.group.group_name;
+      await window.BandPlanCloud.saveNow(state);
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+      applyTheme(); applyAccentVars(); render();
+      const statusAfter = $('#sharedGroupStatus');
+      if (statusAfter) statusAfter.textContent = 'Подключено: «' + (result.group.group_name || name) + '». Общие песни и события синхронизируются.';
+      toast('Общая группа подключена', 'ok');
+    } catch (error) {
+      if (status) status.textContent = error && error.message ? error.message : 'Не удалось подключиться к группе';
+      toast('Не удалось подключить группу', 'err');
+    } finally {
+      const currentButton = $('#groupJoinBtn');
+      if (currentButton) { currentButton.disabled = false; currentButton.textContent = 'Создать / подключить'; }
+    }
+  });
   on('lsRange', 'input', e => { state.settings.lyricsSize = +e.target.value; $('#lsVal').textContent = e.target.value + 'px'; document.documentElement.style.setProperty('--lsize', e.target.value + 'px'); save(); });
   on('scRange', 'input', e => { state.settings.sceneSize = +e.target.value; $('#scValS').textContent = e.target.value + 'px'; save(); });
   on('spRange', 'input', e => { state.settings.sceneSpeed = +e.target.value; $('#spValS').textContent = e.target.value + ' px/с'; scene.speed = +e.target.value; save(); });
