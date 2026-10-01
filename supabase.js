@@ -88,14 +88,14 @@
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
     const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
     if(!activeGroupId){sharedBaseline={songs:[],events:[],setlists:[]};return personal.data?{state:pstate,updatedAt:lastUpdated}:null;}
-    const [songs,events,setlists,gs,memberRows]=await Promise.all([
+    const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_setlists').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle(),
       client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId)
     ]);
-    for(const q of [songs,events,setlists,gs,memberRows])if(q.error)throw q.error;
+    for(const q of [songs,events,setlists,gs,memberRows,groupInfo])if(q.error)throw q.error;
     sharedBaseline={songs:(songs.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),events:(events.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean),setlists:(setlists.data||[]).map(x=>String(x.data?.id||'')).filter(Boolean)};
     const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
     let accounts=[];
@@ -107,7 +107,7 @@
       if(existing){existing.name=a.display_name;existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
     });
-    return {state:Object.assign({},pstate,{songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
+    const profile=Object.assign({},pstate.profile||{});if(groupInfo.data?.name)profile.bandName=groupInfo.data.name;\n    return {state:Object.assign({},pstate,{profile,songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
@@ -142,7 +142,7 @@
     if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
     channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;lastUpdated=row.updated_at||'';load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));}).subscribe();
     let live=client.channel('bp-shared-'+uid);
-    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
+    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state','bandplan_groups'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id||payload?.new?.id||payload?.old?.id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
     groupChannel=live.subscribe();
     return ()=>{if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
   }
