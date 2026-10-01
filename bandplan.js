@@ -155,24 +155,7 @@ const rolesOf = m => Array.isArray(m.roles) && m.roles.length ? m.roles : (m.rol
 const rolesLabel = list => { const a = (list || []).map(k => roleLabel(k)); return a.length ? a.join(', ') : '—'; };
 let deferredInstall = null;
 const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent || '') && !window.MSStream;
-function doInstall() {
-  if (!deferredInstall) {
-    if (isIOS()) {
-      openModal({
-        title: 'Установить BandPlan',
-        body: '<div style="display:grid;gap:12px;line-height:1.6"><p>На iPhone и iPad установка выполняется через меню браузера.</p><ol style="padding-left:20px"><li>Откройте BandPlan в Safari.</li><li>Нажмите «Поделиться».</li><li>Выберите «На экран Домой».</li><li>Подтвердите добавление.</li></ol><p class="t-sm t-muted">После установки BandPlan открывается отдельно и продолжает работать без сети.</p></div>',
-        footer: '<button class="btn btn-primary" type="button" data-act="modal-close">Понятно</button>',
-        guard: false
-      });
-    } else {
-      toast('Браузер пока не предоставил системное окно установки. Откройте меню браузера и выберите «Установить приложение».', 'info');
-    }
-    return;
-  }
-  deferredInstall.prompt();
-  deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => { });
-}
+function doInstall() { if (!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => { }); }
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#pwaBtn'); if (b) b.hidden = false; });
 window.addEventListener('appinstalled', () => { deferredInstall = null; });
 function syncSceneChords() { const b = $('#scChords'); if (b) { const on = state.settings.showChords !== false; b.setAttribute('aria-pressed', on); b.classList.toggle('off', !on); } }
@@ -224,36 +207,7 @@ function load() {
     return true;
   } catch (e) { return false; }
 }
-function eventHasPassed(ev, now) {
-  if (!ev || !ev.date) return false;
-  const repeat = ev.repeat || 'none';
-  if (repeat !== 'none') {
-    return !!(ev.repeatUntil && ev.repeatUntil < today());
-  }
-  if (ev.date < today()) return true;
-  if (ev.date > today()) return false;
-  if (!ev.time) return false;
-  const endTime = ev.end || ev.time;
-  const end = new Date(ev.date + 'T' + endTime + ':00');
-  return end.getTime() <= now.getTime();
-}
-function cleanupExpiredEvents() {
-  const now = new Date();
-  const before = state.events.length;
-  state.events = state.events.filter(ev => !eventHasPassed(ev, now));
-  const changed = state.events.length !== before;
-  if (changed) {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-    if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
-  }
-  return changed;
-}
-function save() {
-  cleanupExpiredEvents();
-  try { localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); }
-  if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
-}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
 function commit() { save(); render(); }
 const songById = id => state.songs.find(s => s.id === id);
 const evById = id => state.events.find(e => e.id === id);
@@ -536,8 +490,11 @@ function render() {
   document.body.setAttribute('data-actionbar', actionBarHTML ? '1' : '0');
 
   const v = $('#view');
-  // Не блокируем навигацию искусственным skeleton-таймером: сразу показываем актуальный раздел.
-  ui.skeleton = false;
+  if (ui.skeleton) {
+    v.innerHTML = skeletonHTML(r.name === 'songs' ? 6 : 3);
+    setTimeout(function () { ui.skeleton = false; render(); }, 170);
+    return;
+  }
   try {
     let html = '';
     if (r.name === 'calendar') html = vCalendar();
@@ -1079,19 +1036,11 @@ function moveItem(slId, itemId, at) {
 /* ═══ 14. SETTINGS ═══ */
 function vSettings() {
   const s = state.settings, p = state.profile;
-  const ap = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
   let h = '<div class="split2">';
-  if (ap) {
-    h += '<section class="card rise" style="grid-column:1/-1"><div class="card-h"><div><h2>Аккаунт</h2><div class="sub">Личный аккаунт BandPlan и друзья</div></div><button class="btn btn-secondary btn-sm" type="button" data-act="auth-logout">Выйти</button></div>' +
-      '<div class="account-line"><div class="avatar">' + esc((ap.username || '?').charAt(0).toUpperCase()) + '</div><div class="grow"><div class="account-name">@' + esc(ap.username) + '</div><div class="t-xs t-muted">Ваш код друга: <b class="friend-code">' + esc(ap.friend_code) + '</b></div></div><button class="btn btn-secondary btn-sm" type="button" data-act="friend-copy-code">Копировать код</button></div>' +
-      '<div class="f2 friend-tools"><div class="field"><label class="field-label" for="friendCode">Добавить друга по коду</label><input class="input" id="friendCode" maxlength="12" autocomplete="off" placeholder="A1B2C3D4E5F6"></div><div class="field" style="display:flex;align-items:end"><button class="btn btn-primary btn-block" type="button" data-act="friend-add">Добавить друга</button></div></div>' +
-      '<div id="friendsList" class="friends-list"><div class="t-sm t-muted">Загрузка друзей…</div></div></section>';
-  }
   h += '<section class="card rise"><div class="card-h"><div><h2>Профиль и роль</h2><div class="sub">Роль определяет, какая динамика песни подсвечивается</div></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
     '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
-    '<div class="field"><div class="row" style="align-items:center;justify-content:space-between;gap:10px"><div class="t-xs t-muted" style="max-width:420px">Одинаковое название объединяет песни, расписание, состав и сет-листы. Название не является секретом: его знают — могут присоединиться.</div><button class="btn btn-primary btn-sm" id="groupJoinBtn" type="button">Создать / подключить</button></div><div id="sharedGroupStatus" class="t-xs t-muted" role="status" style="margin-top:8px">' + (window.BandPlanCloud && window.BandPlanCloud.getActiveGroupId && window.BandPlanCloud.getActiveGroupId() ? 'Вы подключены к общей группе' : 'Введите одинаковое название группы и подключитесь к ней на каждом аккаунте') + '</div></div>' +
     '<div class="field"><span class="field-label">Ваши роли / инструменты (можно несколько)</span><div class="row" style="gap:6px">' +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
@@ -1132,7 +1081,7 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div><span class="hint">Сообщения вроде «Сохранено» можно полностью отключить или оставить только ошибки.</span></div></div></div></section>';
 
-  h += '<section class="card rise"><div class="card-h"><div><h2>Установка как приложение</h2><div class="sub">' + (isStandalone() ? 'BandPlan уже установлен и запущен отдельно от браузера' : 'Отдельное окно, быстрый запуск и работа без сети') + '</div></div></div>' + (isStandalone() ? '<div class="state state-ok"><div class="state-ic">' + ic('checkCircle', 22) + '</div><h4>Приложение установлено</h4><p>Открывайте BandPlan с домашнего экрана — он сохранит локальные данные и синхронизирует их после подключения.</p></div>' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install">' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">' + (isIOS() ? 'iPhone/iPad: нажмите «Установить приложение», чтобы увидеть пошаговую инструкцию Safari.' : 'Android/Chrome/Edge: используйте системное окно установки. Если оно недоступно, откройте меню браузера → «Установить приложение» или «Добавить на главный экран».') + '</p>') + '</section>';
+  h += '<section class="card rise"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
   h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Всё хранится локально в этом браузере</div></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
@@ -1150,16 +1099,7 @@ function vSettings() {
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">← →</kbd><span class="t-sm t-muted">сцена: песни · календарь: навигация</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Space</kbd><span class="t-sm t-muted">автопрокрутка на сцене</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Esc</kbd><span class="t-sm t-muted">закрыть окно или выйти со сцены</span></div></section>';
-  setTimeout(renderFriendsAccount, 0);
   return h + '</div>';
-}
-async function renderFriendsAccount() {
-  const box = $('#friendsList');
-  if (!box || !window.BandPlanAuth) return;
-  try {
-    const friends = await window.BandPlanAuth.getFriends();
-    box.innerHTML = friends.length ? '<div class="field-label" style="margin-bottom:8px">Друзья · ' + friends.length + '</div>' + friends.map(f => '<div class="friend-row"><div class="avatar">' + esc((f.username || '?').charAt(0).toUpperCase()) + '</div><div class="grow"><b>@' + esc(f.username) + '</b><div class="t-xs t-muted">Код: ' + esc(f.friend_code) + '</div></div></div>').join('') : '<div class="t-sm t-muted">Пока нет друзей. Передайте другу свой код и добавьте его код здесь.</div>';
-  } catch (e) { box.innerHTML = '<div class="t-sm t-muted">Не удалось загрузить список друзей</div>'; }
 }
 function mini(v, l) { return '<div class="stat-mini"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function kb() { try { return (new Blob([JSON.stringify(state)]).size / 1024).toFixed(1); } catch (e) { return '0'; } }
@@ -1168,45 +1108,6 @@ function bindSettings() {
   on('setName', 'input', debounce(e => { state.profile.name = e.target.value; save(); buildChrome(); }));
   on('setBand', 'input', debounce(e => { state.profile.bandName = e.target.value || 'Моя группа'; save(); buildChrome(); }));
   on('setBandDesc', 'input', debounce(e => { state.profile.bandDesc = e.target.value; save(); }));
-  on('groupJoinBtn', 'click', async function () {
-    const button = $('#groupJoinBtn'), status = $('#sharedGroupStatus');
-    const name = String($('#setBand') && $('#setBand').value || '').trim();
-    if (!window.BandPlanCloud || !window.BandPlanCloud.joinGroup) {
-      if (status) status.textContent = 'Облачная синхронизация недоступна';
-      return;
-    }
-    if (name.length < 3 || name.length > 50) {
-      if (status) status.textContent = 'Название группы должно содержать от 3 до 50 символов';
-      return;
-    }
-    if (button) { button.disabled = true; button.textContent = 'Подключаем…'; }
-    if (status) status.textContent = 'Ищем группу и подключаем аккаунт…';
-    try {
-      const result = await window.BandPlanCloud.joinGroup(name, state);
-      const localProfile = Object.assign({}, state.profile);
-      const localSettings = Object.assign({}, state.settings);
-      const localOnboardingDone = state.onboardingDone;
-      if (result && result.state) {
-        normalizeCloudState(result.state);
-        state.profile = Object.assign({}, state.profile, localProfile);
-        state.settings = Object.assign({}, state.settings, localSettings);
-        state.onboardingDone = localOnboardingDone;
-      }
-      if (result && result.group && result.group.group_name) state.profile.bandName = result.group.group_name;
-      await window.BandPlanCloud.saveNow(state);
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
-      applyTheme(); applyAccentVars(); render();
-      const statusAfter = $('#sharedGroupStatus');
-      if (statusAfter) statusAfter.textContent = 'Подключено: «' + (result.group.group_name || name) + '». Общие песни и события синхронизируются.';
-      toast('Общая группа подключена', 'ok');
-    } catch (error) {
-      if (status) status.textContent = error && error.message ? error.message : 'Не удалось подключиться к группе';
-      toast('Не удалось подключить группу', 'err');
-    } finally {
-      const currentButton = $('#groupJoinBtn');
-      if (currentButton) { currentButton.disabled = false; currentButton.textContent = 'Создать / подключить'; }
-    }
-  });
   on('lsRange', 'input', e => { state.settings.lyricsSize = +e.target.value; $('#lsVal').textContent = e.target.value + 'px'; document.documentElement.style.setProperty('--lsize', e.target.value + 'px'); save(); });
   on('scRange', 'input', e => { state.settings.sceneSize = +e.target.value; $('#scValS').textContent = e.target.value + 'px'; save(); });
   on('spRange', 'input', e => { state.settings.sceneSpeed = +e.target.value; $('#spValS').textContent = e.target.value + ' px/с'; scene.speed = +e.target.value; save(); });
@@ -1617,7 +1518,7 @@ function drawOnb() {
   } else if (onbStep === 1) {
     h += '<div class="onb-hero">' + ic('users', 28) + '</div><h2>Ваш коллектив</h2>' +
       '<p class="lead">Название появится в шапке, на главном экране и в печатных сет-листах.</p>' +
-      '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="hint">Одинаковое название объединяет участников в общее пространство с одними песнями и расписанием. Любой, кто знает название, сможет присоединиться.</span><span class="err"></span></div>' +
+      '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="err"></span></div>' +
       '<div class="field"><label class="field-label" for="ob_banddesc">О группе</label><textarea class="input" id="ob_banddesc" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(onbData.bandDesc) + '</textarea></div>' +
       '<div class="field"><span class="field-label">Акцентный цвет интерфейса</span><div class="swatches">' +
       ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '"></button>').join('') + '</div></div>';
@@ -1702,7 +1603,7 @@ function collectStep(el) {
   if (onbStep === 1) { const b = $('#ob_band', el); if (b) onbData.bandName = b.value; const d = $('#ob_banddesc', el); if (d) onbData.bandDesc = d.value; }
   if (onbStep === 2) collectMembers(el);
 }
-async function finishOnboarding() {
+function finishOnboarding() {
   state.profile.name = onbData.name.trim() || 'Участник';
   state.profile.roles = (onbData.roles || []).slice(); state.profile.role = state.profile.roles[0] || onbData.role;
   state.profile.bandName = onbData.bandName.trim() || 'Моя группа';
@@ -1714,36 +1615,13 @@ async function finishOnboarding() {
   state.onboardingDone = true;
   if (onbData.demo) seedDemo();
   applyTheme(); applyAccentVars(); save();
-
-  // По завершении обычной настройки подключаем участника к общей группе
-  // с таким же названием. В деморежиме общие данные не создаём.
-  if (!onbData.demo && window.BandPlanCloud && window.BandPlanCloud.joinGroup) {
-    try {
-      const ownProfile = Object.assign({}, state.profile);
-      const ownSettings = Object.assign({}, state.settings);
-      const ownOnboardingDone = state.onboardingDone;
-      const joined = await window.BandPlanCloud.joinGroup(state.profile.bandName, state);
-      if (joined && joined.state) {
-        normalizeCloudState(joined.state);
-        state.profile = Object.assign({}, state.profile, ownProfile);
-        state.settings = Object.assign({}, state.settings, ownSettings);
-        state.onboardingDone = ownOnboardingDone;
-        if (joined.group && joined.group.group_name) state.profile.bandName = joined.group.group_name;
-        await window.BandPlanCloud.saveNow(state);
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
-      }
-    } catch (error) {
-      console.warn('BandPlan group onboarding:', error);
-      toast('Профиль создан. Общую группу можно подключить в настройках.', 'warn');
-    }
-  }
   $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
   go('#/calendar'); render();
   toast('BandPlan готов · роль: ' + roleLabel(state.profile.role), 'ok');
 }
 
 /* ═══ 21. ACTIONS ═══ */
-document.addEventListener('click', async function (e) {
+document.addEventListener('click', function (e) {
   const el = e.target.closest('[data-act]');
   if (!el) { if (!e.target.closest('#searchWrap')) closeSearch(); return; }
   const a = el.getAttribute('data-act'), id = el.getAttribute('data-id');
@@ -2022,27 +1900,6 @@ document.addEventListener('click', async function (e) {
       }, 'Удалить участника', true);
       break;
     }
-    case 'auth-logout': {
-      stop();
-      if (window.BandPlanAuth) await window.BandPlanAuth.signOut();
-      break;
-    }
-    case 'friend-copy-code': {
-      stop();
-      const ap2 = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
-      if (ap2 && navigator.clipboard) navigator.clipboard.writeText(ap2.friend_code).then(() => toast('Код друга скопирован', 'ok')).catch(() => toast('Не удалось скопировать код', 'warn'));
-      break;
-    }
-    case 'friend-add': {
-      stop();
-      try {
-        const friend = await window.BandPlanAuth.addFriendByCode($('#friendCode') ? $('#friendCode').value : '');
-        if ($('#friendCode')) $('#friendCode').value = '';
-        toast('@' + friend.username + ' добавлен в друзья', 'ok');
-        render();
-      } catch (e) { toast(e.message || 'Не удалось добавить друга', 'err'); }
-      break;
-    }
     case 'invite': {
       stop();
       const txt = 'Присоединяйся к ' + (state.profile.bandName || 'группе') + ' в BandPlan: ' + location.href;
@@ -2148,11 +2005,11 @@ function wireSwipe() {
   el.addEventListener('touchmove', function (e) {
     if (!tracking) return;
     const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-    /* Не меняем opacity на каждом touchmove: это вызывает лишнюю перерисовку на слабых GPU. */
+    if (Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 1.6) el.style.opacity = String(clamp(1 - Math.abs(dx) / 900, .65, 1));
   }, { passive: true });
   el.addEventListener('touchend', function (e) {
     if (!tracking) return;
-    tracking = false;
+    tracking = false; el.style.opacity = '';
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy, dt = Date.now() - st;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6 || dt > 900) return;
     const order = TABS.map(x => x.k), cur = navKey(parseHash().name);
@@ -2271,15 +2128,22 @@ function wireNet() {
 function wireStickyHeader() {
   const c = $('#view'), tb = $('#topbar');
   if (!c || !tb) return;
-  /* Шапка находится вне прокручиваемой области контента: не скрываем её
-     при движении вниз, чтобы поиск и основные действия всегда оставались доступны. */
+  const mq = window.matchMedia('(max-width:900px)');
+  let last = 0, up = 0;
   c.addEventListener('scroll', function () {
-    tb.classList.toggle('stuck', c.scrollTop > 6);
+    const t = c.scrollTop;
+    tb.classList.toggle('stuck', t > 6);
+    /* на телефоне шапка уезжает при прокрутке вниз и возвращается при прокрутке вверх */
+    if (!mq.matches) { document.body.classList.remove('hdr-hide'); last = t; return; }
+    const hidden = document.body.classList.contains('hdr-hide'), d = t - last;
+    if (!hidden && d > 0 && t > 90 && c.scrollHeight - c.clientHeight > 420) { document.body.classList.add('hdr-hide'); up = 0; }
+    else if (hidden) {
+      up = d < 0 ? up - d : 0;
+      if (t < 8 || up > 40) { document.body.classList.remove('hdr-hide'); up = 0; }
+    }
+    last = t;
   }, { passive: true });
-  window.addEventListener('hashchange', function () {
-    document.body.classList.remove('hdr-hide');
-    tb.classList.remove('stuck');
-  });
+  window.addEventListener('hashchange', function () { document.body.classList.remove('hdr-hide'); });
 }
 
 /* ═══ 26. INIT ═══ */
@@ -2292,7 +2156,6 @@ function normalizeCloudState(d) {
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
-  cleanupExpiredEvents();
   return state;
 }
 function hasMeaningfulState(s) {
@@ -2321,8 +2184,6 @@ async function bootCloudSync(hadLocal) {
   }
   try {
     const local = JSON.parse(JSON.stringify(state));
-    const authProfile = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null;
-    const localOwner = !!(authProfile && localStorage.getItem('bandplan.auth.userId') === authProfile.id);
     const remote = await window.BandPlanCloud.load();
     const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
     if (remoteState && hasMeaningfulState(remoteState)) {
@@ -2335,48 +2196,19 @@ async function bootCloudSync(hadLocal) {
         normalizeCloudState(defaults());
         await window.BandPlanCloud.saveNow(state);
       }
-    } else if (localOwner && hasMeaningfulState(local) && !isKnownDemoState(local)) {
+    } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
       normalizeCloudState(local);
       await window.BandPlanCloud.saveNow(state);
     } else {
       normalizeCloudState(defaults());
       await window.BandPlanCloud.saveNow(state);
     }
-    /* Если загрузка пришла из старой общей таблицы, закрепляем её
-       в личной таблице текущего аккаунта, не изменяя исходную запись. */
-    if (remote && remote.legacy && hasMeaningfulState(state) && !isKnownDemoState(state)) {
-      await window.BandPlanCloud.saveNow(state);
-    }
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-    try { const ap3 = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null; if (ap3) localStorage.setItem('bandplan.auth.userId', ap3.id); } catch (e) {}
     applyTheme();
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
     if (!state.onboardingDone) openOnboarding();
-    let refreshInProgress = false;
-    async function refreshFromServer() {
-      if (refreshInProgress || !navigator.onLine || !window.BandPlanCloud) return;
-      refreshInProgress = true;
-      try {
-        const latest = await window.BandPlanCloud.load();
-        const incoming = latest && latest.state && typeof latest.state === 'object' ? latest.state : null;
-        if (!incoming || isKnownDemoState(incoming)) return;
-        const currentJson = JSON.stringify(state);
-        const incomingJson = JSON.stringify(incoming);
-        if (currentJson === incomingJson) return;
-        normalizeCloudState(incoming);
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-        applyTheme();
-        applyAccentVars();
-        ui.calView = state.settings.calView || 'month';
-        render();
-      } catch (e) {
-        console.warn('BandPlan refresh from server:', e);
-      } finally {
-        refreshInProgress = false;
-      }
-    }
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
       normalizeCloudState(incoming);
@@ -2386,20 +2218,13 @@ async function bootCloudSync(hadLocal) {
       ui.calView = state.settings.calView || 'month';
       render();
     });
-    /* Повторно сверяемся с облаком при возврате во вкладку/приложение.
-       Первичная загрузка при старте уже выполнена выше. */
-    window.addEventListener('focus', refreshFromServer);
-    window.addEventListener('pageshow', refreshFromServer);
-    document.addEventListener('visibilitychange', function () {
-      if (!document.hidden) refreshFromServer();
-    });
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
     if (!hadLocal || !state.onboardingDone) openOnboarding();
   }
 }
 
-function initApp() {
+function init() {
   const had = load();
   applyTheme(); applyAccentVars();
   ui.calView = state.settings.calView || 'month';
@@ -2414,31 +2239,8 @@ function initApp() {
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { }); });
   ui.skeleton = true;
   render();
-  cleanupExpiredEvents();
-  setInterval(cleanupExpiredEvents, 60000);
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) cleanupExpiredEvents();
-  });
   if (window.BandPlanCloud) bootCloudSync(had);
   else if (!had || !state.onboardingDone) openOnboarding();
-}
-async function init() {
-  if (window.BandPlanAuth) {
-    const ok = await window.BandPlanAuth.ready;
-    const hasLocalAccount = !!(localStorage.getItem('bandplan.auth.userId') && localStorage.getItem(KEY));
-    if (!ok && !(navigator.onLine === false && hasLocalAccount)) {
-      window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_IN') location.reload(); });
-      return;
-    }
-    if (!ok && navigator.onLine === false && hasLocalAccount) {
-      const authScreen = document.getElementById('authScreen');
-      if (authScreen) authScreen.hidden = true;
-      window.addEventListener('online', function () { location.reload(); }, { once: true });
-    } else {
-      window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_OUT') location.reload(); });
-    }
-  }
-  initApp();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
