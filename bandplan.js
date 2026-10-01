@@ -2286,6 +2286,29 @@ async function bootCloudSync(hadLocal) {
     ui.calView = state.settings.calView || 'month';
     render();
     if (!state.onboardingDone) openOnboarding();
+    let refreshInProgress = false;
+    async function refreshFromServer() {
+      if (refreshInProgress || !navigator.onLine || !window.BandPlanCloud) return;
+      refreshInProgress = true;
+      try {
+        const latest = await window.BandPlanCloud.load();
+        const incoming = latest && latest.state && typeof latest.state === 'object' ? latest.state : null;
+        if (!incoming || isKnownDemoState(incoming)) return;
+        const currentJson = JSON.stringify(state);
+        const incomingJson = JSON.stringify(incoming);
+        if (currentJson === incomingJson) return;
+        normalizeCloudState(incoming);
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        applyTheme();
+        applyAccentVars();
+        ui.calView = state.settings.calView || 'month';
+        render();
+      } catch (e) {
+        console.warn('BandPlan refresh from server:', e);
+      } finally {
+        refreshInProgress = false;
+      }
+    }
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
       normalizeCloudState(incoming);
@@ -2294,6 +2317,13 @@ async function bootCloudSync(hadLocal) {
       applyAccentVars();
       ui.calView = state.settings.calView || 'month';
       render();
+    });
+    /* Повторно сверяемся с облаком при возврате во вкладку/приложение.
+       Первичная загрузка при старте уже выполнена выше. */
+    window.addEventListener('focus', refreshFromServer);
+    window.addEventListener('pageshow', refreshFromServer);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) refreshFromServer();
     });
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
