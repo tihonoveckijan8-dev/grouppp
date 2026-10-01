@@ -2208,22 +2208,15 @@ function wireNet() {
 function wireStickyHeader() {
   const c = $('#view'), tb = $('#topbar');
   if (!c || !tb) return;
-  const mq = window.matchMedia('(max-width:900px)');
-  let last = 0, up = 0;
+  /* Шапка находится вне прокручиваемой области контента: не скрываем её
+     при движении вниз, чтобы поиск и основные действия всегда оставались доступны. */
   c.addEventListener('scroll', function () {
-    const t = c.scrollTop;
-    tb.classList.toggle('stuck', t > 6);
-    /* на телефоне шапка уезжает при прокрутке вниз и возвращается при прокрутке вверх */
-    if (!mq.matches) { document.body.classList.remove('hdr-hide'); last = t; return; }
-    const hidden = document.body.classList.contains('hdr-hide'), d = t - last;
-    if (!hidden && d > 0 && t > 90 && c.scrollHeight - c.clientHeight > 420) { document.body.classList.add('hdr-hide'); up = 0; }
-    else if (hidden) {
-      up = d < 0 ? up - d : 0;
-      if (t < 8 || up > 40) { document.body.classList.remove('hdr-hide'); up = 0; }
-    }
-    last = t;
+    tb.classList.toggle('stuck', c.scrollTop > 6);
   }, { passive: true });
-  window.addEventListener('hashchange', function () { document.body.classList.remove('hdr-hide'); });
+  window.addEventListener('hashchange', function () {
+    document.body.classList.remove('hdr-hide');
+    tb.classList.remove('stuck');
+  });
 }
 
 /* ═══ 26. INIT ═══ */
