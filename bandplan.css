@@ -1309,3 +1309,21 @@ h1,h2,h3,h4,p,.sub,.nm,.rl,.ev-title,.ev-meta,.sd-t,.sd-m,.brand-name,.brand-sub
 
 /* AUTH OAUTH + OFFLINE */
 .auth-divider{display:flex;align-items:center;gap:10px;margin:18px 0 12px;color:var(--muted);font-size:11px}.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--line)}.auth-oauth{display:grid;grid-template-columns:1fr 1fr;gap:9px}.auth-oauth-btn{min-height:46px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--text);font:inherit;font-weight:650;display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.auth-oauth-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(20,25,45,.08);border-color:color-mix(in srgb,var(--accent) 25%,var(--line))}.auth-oauth-btn:disabled{opacity:.55;cursor:wait;transform:none}.oauth-logo{width:22px;height:22px;display:grid;place-items:center;font-size:17px;font-weight:800;font-family:Arial,sans-serif}.auth-apple .oauth-logo{font-size:18px}@media(max-width:420px){.auth-oauth{grid-template-columns:1fr}.auth-oauth-btn{min-height:48px}}
+/* ══ PERFORMANCE & VISUAL COMFORT ══ */
+/* Сдержанные движения и меньше дорогих эффектов на устройствах с запросом reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media (max-width: 900px), (pointer: coarse) {
+  .overlay { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .card-interactive:hover { transform: none; }
+  .rise { animation-duration: 160ms; }
+}
+/* Сохраняем стабильность компоновки при длинных списках, не меняя их размеры и логику. */
+.ev-row,.song-row,.sl-item,.friend-row { overflow-wrap: anywhere; }
+button,a,input,select,textarea { touch-action: manipulation; }
