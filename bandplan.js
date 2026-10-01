@@ -419,7 +419,17 @@ function go(h) {
 function routeTransition() {
   const view = $('#view');
   if (!view) { render(); return; }
-  if (view.dataset.transitioning === '1') return;
+  /*
+    A navigation click must never be swallowed by an animation that is
+    already running. Previously the guard returned while transitioning,
+    leaving location.hash changed but the old screen rendered until a
+    second click. Cancel the previous transition and render the new route
+    immediately instead.
+  */
+  if (view.dataset.transitioning === '1') {
+    view.classList.remove('route-enter', 'route-enter-active');
+    delete view.dataset.transitioning;
+  }
   view.dataset.transitioning = '1';
   view.classList.remove('route-enter');
   void view.offsetWidth;
