@@ -155,7 +155,24 @@ const rolesOf = m => Array.isArray(m.roles) && m.roles.length ? m.roles : (m.rol
 const rolesLabel = list => { const a = (list || []).map(k => roleLabel(k)); return a.length ? a.join(', ') : '—'; };
 let deferredInstall = null;
 const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-function doInstall() { if (!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => { }); }
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent || '') && !window.MSStream;
+function doInstall() {
+  if (!deferredInstall) {
+    if (isIOS()) {
+      openModal({
+        title: 'Установить BandPlan',
+        body: '<div style="display:grid;gap:12px;line-height:1.6"><p>На iPhone и iPad установка выполняется через меню браузера.</p><ol style="padding-left:20px"><li>Откройте BandPlan в Safari.</li><li>Нажмите «Поделиться».</li><li>Выберите «На экран Домой».</li><li>Подтвердите добавление.</li></ol><p class="t-sm t-muted">После установки BandPlan открывается отдельно и продолжает работать без сети.</p></div>',
+        footer: '<button class="btn btn-primary" type="button" data-act="modal-close">Понятно</button>',
+        guard: false
+      });
+    } else {
+      toast('Браузер пока не предоставил системное окно установки. Откройте меню браузера и выберите «Установить приложение».', 'info');
+    }
+    return;
+  }
+  deferredInstall.prompt();
+  deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => { });
+}
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#pwaBtn'); if (b) b.hidden = false; });
 window.addEventListener('appinstalled', () => { deferredInstall = null; });
 function syncSceneChords() { const b = $('#scChords'); if (b) { const on = state.settings.showChords !== false; b.setAttribute('aria-pressed', on); b.classList.toggle('off', !on); } }
@@ -1117,7 +1134,7 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div><span class="hint">Сообщения вроде «Сохранено» можно полностью отключить или оставить только ошибки.</span></div></div></div></section>';
 
-  h += '<section class="card rise"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
+  h += '<section class="card rise"><div class="card-h"><div><h2>Установка как приложение</h2><div class="sub">' + (isStandalone() ? 'BandPlan уже установлен и запущен отдельно от браузера' : 'Отдельное окно, быстрый запуск и работа без сети') + '</div></div></div>' + (isStandalone() ? '<div class="state state-ok"><div class="state-ic">' + ic('checkCircle', 22) + '</div><h4>Приложение установлено</h4><p>Открывайте BandPlan с домашнего экрана — он сохранит локальные данные и синхронизирует их после подключения.</p></div>' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install">' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">' + (isIOS() ? 'iPhone/iPad: нажмите «Установить приложение», чтобы увидеть пошаговую инструкцию Safari.' : 'Android/Chrome/Edge: используйте системное окно установки. Если оно недоступно, откройте меню браузера → «Установить приложение» или «Добавить на главный экран».') + '</p>') + '</section>';
   h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Всё хранится локально в этом браузере</div></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
