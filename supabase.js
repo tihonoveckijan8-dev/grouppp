@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, lastUpdated = '';
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '';
   let mode = 'login';
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -80,18 +80,33 @@
   }
   async function load() {
     if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
-    const {data,error}=await client.from(TABLE).select('state,updated_at').eq('user_id',currentSession.user.id).maybeSingle();
-    if(error) throw error;
-    lastUpdated=data?.updated_at || '';
-    return data ? {state:data.state || {},updatedAt:data.updated_at || ''} : null;
+    const uid=currentSession.user.id;
+    const [personal,membership]=await Promise.all([
+      client.from(TABLE).select('state,updated_at').eq('user_id',uid).maybeSingle(),
+      client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle()
+    ]);
+    if(personal.error) throw personal.error;if(membership.error) throw membership.error;
+    const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
+    if(!activeGroupId)return personal.data?{state:pstate,updatedAt:lastUpdated}:null;
+    const [songs,events,setlists,gs]=await Promise.all([
+      client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
+      client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
+      client.from('bandplan_setlists').select('data').eq('group_id',activeGroupId),
+      client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle()
+    ]);
+    for(const q of [songs,events,setlists,gs])if(q.error)throw q.error;
+    const shared=gs.data?.state||{};
+    return {state:Object.assign({},pstate,{songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:Array.isArray(shared.members)?shared.members:(pstate.members||[])}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
-    if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
-    const snapshot=JSON.parse(JSON.stringify(state || {})), updatedAt=new Date().toISOString();
-    pending=null;
-    const {data,error}=await client.from(TABLE).upsert({user_id:currentSession.user.id,state:snapshot,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
-    if(error){pending=snapshot;throw error;}
-    lastUpdated=data?.updated_at || updatedAt;return lastUpdated;
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();pending=null;
+    if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
+    if(!activeGroupId&&snapshot.onboardingDone){const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});if(made.error)throw made.error;activeGroupId=made.data?.[0]?.group_id||made.data?.group_id||null;}
+    if(activeGroupId){const sync=await client.rpc('bandplan_sync_group',{p_songs:snapshot.songs||[],p_events:snapshot.events||[],p_setlists:snapshot.setlists||[],p_roster:snapshot.members||[],p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),p_personal_settings:snapshot.settings||{}});if(sync.error){pending=snapshot;throw sync.error;}}
+    const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone};
+    const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
+    if(error){pending=snapshot;throw error;}lastUpdated=data?.updated_at||updatedAt;return lastUpdated;
   }
   function schedule(state) {
     if(!currentSession?.user)return;
@@ -99,14 +114,15 @@
     timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>console.warn('BandPlan account save failed:',e));},350);
   }
   function subscribe(onState) {
-    if(!currentSession?.user)return ()=>{};
-    const userId=currentSession.user.id;
-    channel=client.channel('bandplan-user-'+userId).on('postgres_changes',{event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+userId},payload=>{
-      const row=payload?.new;if(!row?.state || (row.updated_at && row.updated_at===lastUpdated))return;
-      lastUpdated=row.updated_at || '';onState(row.state,row.updated_at||'');
-    }).subscribe();
-    return ()=>{if(channel){client.removeChannel(channel);channel=null;}};
+    if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
+    channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;lastUpdated=row.updated_at||'';load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));}).subscribe();
+    let live=client.channel('bp-shared-'+uid);
+    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(timer);timer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
+    groupChannel=live.subscribe();
+    return ()=>{if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
   }
+  async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
+  async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
   async function signOut(){clearTimeout(timer);pending=null;await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize, user:()=>currentSession?.user||null, load,saveNow,schedule,subscribe,signOut};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode};
 })();
