@@ -4,7 +4,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Content-Type": "application/json",
 };
 const json = (body: unknown, status = 200) =>
@@ -71,6 +71,21 @@ async function createProfileAndState(db: any, userId: string, username: string, 
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "GET") {
+    const key = secretKey();
+    const url = Deno.env.get("SUPABASE_URL");
+    if (!url || !key) return json({ ok: false, database: "not_configured" }, 503);
+    try {
+      const db = createClient(url, key, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      });
+      const { error } = await db.from("bandplan_profiles").select("id", { count: "exact", head: true });
+      if (error) return json({ ok: false, database: "unavailable" }, 503);
+      return json({ ok: true, database: "connected" });
+    } catch (_) {
+      return json({ ok: false, database: "unavailable" }, 503);
+    }
+  }
   if (req.method !== "POST") return json({ error: "Метод не поддерживается" }, 405);
 
   try {
