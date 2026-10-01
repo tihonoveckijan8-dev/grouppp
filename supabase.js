@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '';
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null;
   let mode = 'login';
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -127,7 +127,7 @@
     if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
     channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;lastUpdated=row.updated_at||'';load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));}).subscribe();
     let live=client.channel('bp-shared-'+uid);
-    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(timer);timer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
+    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
     groupChannel=live.subscribe();
     return ()=>{if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
   }
