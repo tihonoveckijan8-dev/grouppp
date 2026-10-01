@@ -268,6 +268,8 @@
     rootAuthMode = mode;
     const err = document.getElementById('authError');
     if (err) err.textContent = '';
+    const status = document.getElementById('authUsernameStatus');
+    if (status) { status.textContent = ''; status.className = 'auth-username-status'; }
   }
 
   let rootAuthMode = 'login';
@@ -289,6 +291,45 @@
         try { await signInWithProvider(provider); }
         catch (error) { if (err) err.textContent = authErrorMessage(error); providerButton.disabled = false; }
       }
+    });
+    const usernameInput = document.getElementById('authUsername');
+    const usernameStatus = document.getElementById('authUsernameStatus');
+    let usernameCheckSequence = 0;
+    if (usernameInput && usernameStatus) {
+      usernameInput.addEventListener('input', function () {
+        usernameCheckSequence++;
+        usernameStatus.textContent = '';
+        usernameStatus.className = 'auth-username-status';
+      });
+      usernameInput.addEventListener('blur', async function () {
+        if (rootAuthMode !== 'register') return;
+        const username = String(usernameInput.value || '').trim().toLowerCase();
+        if (!/^[a-zа-яё0-9_.-]{3,24}$/i.test(username)) {
+          usernameStatus.textContent = username ? 'Ник должен содержать 3–24 допустимых символа' : '';
+          usernameStatus.className = 'auth-username-status invalid';
+          return;
+        }
+        const seq = ++usernameCheckSequence;
+        usernameStatus.textContent = 'Проверяем ник…';
+        usernameStatus.className = 'auth-username-status';
+        try {
+          const result = await checkUsername(username);
+          if (seq !== usernameCheckSequence || rootAuthMode !== 'register' || usernameInput.value.trim().toLowerCase() !== username) return;
+          usernameStatus.textContent = result.available ? 'Ник свободен' : 'Этот ник уже занят';
+          usernameStatus.className = 'auth-username-status ' + (result.available ? 'available' : 'taken');
+        } catch (error) {
+          if (seq !== usernameCheckSequence) return;
+          usernameStatus.textContent = authErrorMessage(error);
+          usernameStatus.className = 'auth-username-status invalid';
+        }
+      });
+    }
+    const password2Input = document.getElementById('authPassword2');
+    if (password2Input) password2Input.addEventListener('input', function () {
+      const err = document.getElementById('authError');
+      if (rootAuthMode === 'register' && password2Input.value && password2Input.value !== document.getElementById('authPassword').value) {
+        if (err) err.textContent = 'Пароли не совпадают';
+      } else if (err && err.textContent === 'Пароли не совпадают') err.textContent = '';
     });
     const form = document.getElementById('authForm');
     if (!form) return;
