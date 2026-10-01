@@ -143,11 +143,27 @@
   }
   function subscribe(onState) {
     if(!currentSession?.user)return ()=>{};const uid=currentSession.user.id;
-    channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;lastUpdated=row.updated_at||'';load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));}).subscribe();
+    channel=client.channel('bp-personal-'+uid).on('postgres_changes',{event:'*',schema:'public',table:TABLE,filter:'user_id=eq.'+uid},payload=>{
+      const row=payload?.new;if(!row?.state||(row.updated_at&&row.updated_at===lastUpdated))return;
+      lastUpdated=row.updated_at||'';
+      load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));
+    }).subscribe();
     let live=client.channel('bp-shared-'+uid);
-    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state','bandplan_groups'].forEach(table=>{live=live.on('postgres_changes',{event:'*',schema:'public',table},payload=>{const gid=payload?.new?.group_id||payload?.old?.group_id||payload?.new?.id||payload?.old?.id;if(!activeGroupId||gid!==activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e)),200);});});
+    const refreshShared=()=>{if(!activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{
+      load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e));
+    },200);};
+    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{
+      live=live.on('postgres_changes',{event:'*',schema:'public',table,filter:'group_id=eq.'+activeGroupId},payload=>{
+        const gid=payload?.new?.group_id||payload?.old?.group_id;
+        if(gid===activeGroupId)refreshShared();
+      });
+    });
+    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_groups',filter:'id=eq.'+activeGroupId},refreshShared);
+    // Membership and account changes must refresh the roster on every participant's device.
+    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
+    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
     groupChannel=live.subscribe();
-    return ()=>{if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
+    return ()=>{clearTimeout(refreshTimer);if(channel){client.removeChannel(channel);channel=null;}if(groupChannel){client.removeChannel(groupChannel);groupChannel=null;}};
   }
   async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
   async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
