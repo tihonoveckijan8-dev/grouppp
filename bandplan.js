@@ -1045,7 +1045,7 @@ function vSettings() {
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
     [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
-    '<button class="btn btn-secondary btn-block" type="button" data-act="invite">' + ic('link', 16) + 'Скопировать ссылку-приглашение</button></section>';
+    '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></section>';
 
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '<button class="btn btn-primary btn-sm" type="button" data-act="mem-add">' + ic('plus', 15) + 'Добавить</button></div>';
@@ -1902,10 +1902,23 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'invite': {
-      stop();
-      const txt = 'Присоединяйся к ' + (state.profile.bandName || 'группе') + ' в BandPlan: ' + location.href;
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(() => toast('Ссылка-приглашение скопирована', 'ok')).catch(() => toast('Не удалось скопировать: ' + txt, 'warn', 7000));
-      else toast('Ссылка: ' + txt, 'info', 7000);
+      stop();el.disabled=true;
+      window.BandPlanCloud.getInviteCode().then(code=>{
+        const txt='Код группы '+(state.profile.bandName||'BandPlan')+': '+code;
+        if(navigator.clipboard?.writeText)return navigator.clipboard.writeText(code).then(()=>toast('Код приглашения скопирован: '+code,'ok',6000));
+        toast(txt,'info',8000);
+      }).catch(err=>toast('Не удалось получить код: '+(err.message||'проверьте подключение'),'err')).finally(()=>{el.disabled=false;});
+      break;
+    }
+    case 'group-join': {
+      stop();const code=prompt('Введите код приглашения в группу:');if(!code||!code.trim())break;
+      el.disabled=true;
+      window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles()).then(async result=>{
+        if(!result)throw new Error('Группа не найдена.');
+        const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
+        normalizeCloudState(loaded.state);state.profile.bandName=result.group_name||state.profile.bandName;save();applyTheme();applyAccentVars();render();
+        toast('Вы вступили в группу «'+(result.group_name||'')+'»','ok',4500);
+      }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;});
       break;
     }
     case 'export': stop(); exportData(); break;
