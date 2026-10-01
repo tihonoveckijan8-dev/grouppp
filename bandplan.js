@@ -1615,7 +1615,7 @@ function drawOnb() {
   } else if (onbStep === 1) {
     h += '<div class="onb-hero">' + ic('users', 28) + '</div><h2>Ваш коллектив</h2>' +
       '<p class="lead">Название появится в шапке, на главном экране и в печатных сет-листах.</p>' +
-      '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="err"></span></div>' +
+      '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="hint">Участники, указавшие одинаковое название, попадут в общее пространство с одними песнями и расписанием.</span><span class="err"></span></div>' +
       '<div class="field"><label class="field-label" for="ob_banddesc">О группе</label><textarea class="input" id="ob_banddesc" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(onbData.bandDesc) + '</textarea></div>' +
       '<div class="field"><span class="field-label">Акцентный цвет интерфейса</span><div class="swatches">' +
       ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '"></button>').join('') + '</div></div>';
@@ -1700,7 +1700,7 @@ function collectStep(el) {
   if (onbStep === 1) { const b = $('#ob_band', el); if (b) onbData.bandName = b.value; const d = $('#ob_banddesc', el); if (d) onbData.bandDesc = d.value; }
   if (onbStep === 2) collectMembers(el);
 }
-function finishOnboarding() {
+async function finishOnboarding() {
   state.profile.name = onbData.name.trim() || 'Участник';
   state.profile.roles = (onbData.roles || []).slice(); state.profile.role = state.profile.roles[0] || onbData.role;
   state.profile.bandName = onbData.bandName.trim() || 'Моя группа';
@@ -1712,6 +1712,27 @@ function finishOnboarding() {
   state.onboardingDone = true;
   if (onbData.demo) seedDemo();
   applyTheme(); applyAccentVars(); save();
+
+  // По завершении обычной настройки подключаем участника к общей группе
+  // с таким же названием. В деморежиме общие данные не создаём.
+  if (!onbData.demo && window.BandPlanCloud && window.BandPlanCloud.joinGroup) {
+    try {
+      const ownProfile = Object.assign({}, state.profile);
+      const ownSettings = Object.assign({}, state.settings);
+      const joined = await window.BandPlanCloud.joinGroup(state.profile.bandName, state);
+      if (joined && joined.state) {
+        normalizeCloudState(joined.state);
+        state.profile = Object.assign({}, state.profile, ownProfile);
+        state.settings = Object.assign({}, state.settings, ownSettings);
+        if (joined.group && joined.group.group_name) state.profile.bandName = joined.group.group_name;
+        await window.BandPlanCloud.saveNow(state);
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (_) {}
+      }
+    } catch (error) {
+      console.warn('BandPlan group onboarding:', error);
+      toast('Профиль создан. Общую группу можно подключить в настройках.', 'warn');
+    }
+  }
   $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
   go('#/calendar'); render();
   toast('BandPlan готов · роль: ' + roleLabel(state.profile.role), 'ok');
