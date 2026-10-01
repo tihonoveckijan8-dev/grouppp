@@ -13,7 +13,7 @@
   "theme_color": "#2547D0",
   "categories": ["music", "productivity"],
   "shortcuts": [
-    { "name": "Календарь", "short_name": "Календарь", "url": "./#/calendar", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Календарь", "short_name": "Календарь", "url": "./#/calendar", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
     { "name": "Песни", "short_name": "Песни", "url": "./#/songs", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ],
   "icons": [
