@@ -208,6 +208,7 @@ function load() {
   } catch (e) { return false; }
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } }
+  if (window.BandPlanCloud) window.BandPlanCloud.schedule(state);
 function cloudSave() { if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
 function commit() { save(); cloudSave(); render(); }
 const songById = id => state.songs.find(s => s.id === id);
@@ -2153,7 +2154,7 @@ async function bootCloudSync() {
   if (!window.BandPlanCloud) return;
   try {
     const remote = await window.BandPlanCloud.load();
-    if (remote && remote.state && typeof remote.state === 'object') {
+    if (remote && remote.state && typeof remote.state === 'object' && (Array.isArray(remote.state.songs) && remote.state.songs.length || Array.isArray(remote.state.events) && remote.state.events.length || Array.isArray(remote.state.members) && remote.state.members.length || Array.isArray(remote.state.setlists) && remote.state.setlists.length || (remote.state.profile && (remote.state.profile.name || remote.state.profile.bandName && remote.state.profile.bandName !== 'Моя группа')))) {
       state = Object.assign(defaults(), remote.state);
       state.profile = Object.assign(defaults().profile, remote.state.profile || {});
       state.settings = Object.assign(defaults().settings, remote.state.settings || {});
