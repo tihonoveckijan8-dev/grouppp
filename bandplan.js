@@ -1910,14 +1910,20 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'group-join': {
-      stop();const code=prompt('Введите код приглашения в группу:');if(!code||!code.trim())break;
-      el.disabled=true;
+      stop();
+      openModal({title:'Вступить в группу',sub:'Введите код приглашения, который вам отправил участник группы.',body:'<div class="field"><label class="field-label" for="f_group_code">Код приглашения</label><input class="input" id="f_group_code" maxlength="20" autocomplete="off" placeholder="Например, 7A2F91C0B4"><span class="hint">После вступления песни, события и состав группы загрузятся из общего пространства.</span></div>',footer:'<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="group-join-confirm">Вступить</button>'});
+      break;
+    }
+    case 'group-join-confirm': {
+      stop();const code=fv('f_group_code');if(!code){fieldError('f_group_code','Введите код приглашения');break;}
+      el.disabled=true;el.classList.add('loading');
       window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles()).then(async result=>{
         if(!result)throw new Error('Группа не найдена.');
         const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
-        normalizeCloudState(loaded.state);state.profile.bandName=result.group_name||state.profile.bandName;save();applyTheme();applyAccentVars();render();
+        normalizeCloudState(loaded.state);state.profile.bandName=result.group_name||state.profile.bandName;
+        modalDirty=false;hardClose(modalRoot);save();applyTheme();applyAccentVars();render();
         toast('Вы вступили в группу «'+(result.group_name||'')+'»','ok',4500);
-      }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;});
+      }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
       break;
     }
     case 'export': stop(); exportData(); break;
