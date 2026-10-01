@@ -111,7 +111,7 @@
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();pending=null;
+    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();clearTimeout(timer);pending=null;
     if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
     if(!activeGroupId&&snapshot.onboardingDone){const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});if(made.error)throw made.error;activeGroupId=made.data?.[0]?.group_id||made.data?.group_id||null;}
     if(activeGroupId){
