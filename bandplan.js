@@ -1100,12 +1100,11 @@ function vSettings() {
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div><span class="hint">Сообщения вроде «Сохранено» можно полностью отключить или оставить только ошибки.</span></div></div></div></section>';
 
   h += '<section class="card rise"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
-  h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Всё хранится локально в этом браузере</div></div></div>' +
+  h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Общие песни, события и сет-листы синхронизируются через Supabase; локальный кэш используется для офлайн-работы</div></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
     '<button class="btn btn-secondary btn-sm" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить из файла</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-secondary btn-sm" type="button" data-act="demo">' + ic('bolt', 16) + 'Демо-данные</button>' +
-    '<button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
+    '<div class="row mt-s"><button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
     '<p class="t-xs t-muted mt">Объём данных: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</p></section>';
 
   h += '<section class="card rise" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2><div class="sub">Music Group OS</div></div></div>' +
@@ -1557,9 +1556,7 @@ function drawOnb() {
       '<p class="lead">Оформление, роли и данные можно изменить в любой момент в разделе «Настройки».</p>' +
       '<div class="field"><span class="field-label">Тема</span><div class="seg" id="ob_theme">' +
       [['light', 'Светлая'], ['dark', 'Тёмная'], ['amoled', 'AMOLED']].map(t => '<button type="button" data-v="' + t[0] + '" class="' + (onbData.theme === t[0] ? 'on' : '') + '" data-accent="1">' + t[1] + '</button>').join('') + '</div></div>' +
-      '<div class="field"><span class="field-label">Стартовые данные</span><div class="row" style="gap:6px">' +
-      '<button type="button" class="chip' + (onbData.demo ? ' on' : '') + '" id="ob_demo_yes">' + ic('bolt', 13) + 'Загрузить демо (6 песен с динамикой)</button>' +
-      '<button type="button" class="chip' + (!onbData.demo ? ' on' : '') + '" id="ob_demo_no">' + ic('plus', 13) + 'Начать с чистого листа</button></div></div>';
+
   }
   h += '<div class="onb-foot">' + (onbStep > 0 ? '<button class="btn btn-secondary" type="button" id="ob_back">' + ic('left', 16) + 'Назад</button>' : '<span></span>') +
     (onbStep < 3 ? '<button class="btn btn-primary" type="button" id="ob_next">Продолжить' + ic('right', 16) + '</button>' : '<button class="btn btn-primary" type="button" id="ob_done">' + ic('check', 16) + 'Начать работу</button>') + '</div></div>';
@@ -1587,8 +1584,6 @@ function drawOnb() {
   }
   if (onbStep === 3) {
     $$('#ob_theme button', el).forEach(b => b.addEventListener('click', () => { onbData.theme = b.getAttribute('data-v'); $$('#ob_theme button', el).forEach(x => x.classList.toggle('on', x === b)); }));
-    bind('ob_demo_yes', 'click', () => { onbData.demo = true; $('#ob_demo_yes').classList.add('on'); $('#ob_demo_no').classList.remove('on'); });
-    bind('ob_demo_no', 'click', () => { onbData.demo = false; $('#ob_demo_no').classList.add('on'); $('#ob_demo_yes').classList.remove('on'); });
   }
   bind('ob_back', 'click', () => { collectStep(el); onbStep = Math.max(0, onbStep - 1); drawOnb(); });
   bind('ob_next', 'click', () => {
@@ -1638,7 +1633,6 @@ function finishOnboarding() {
   state.members = onbData.members.filter(m => m.name.trim()).map(function (m, i) { return { id: uid('m'), name: m.name.trim(), role: m.role, color: m.color || PALETTE[i % PALETTE.length], note: '' }; });
   if (!state.members.some(m => m.name === state.profile.name)) state.members.unshift({ id: uid('m'), name: state.profile.name, role: state.profile.role, roles: myRoles(), color: onbData.accent, note: 'это вы' });
   state.onboardingDone = true;
-  if (onbData.demo) seedDemo();
   applyTheme(); applyAccentVars(); save();
   $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
   go('#/calendar'); render();
