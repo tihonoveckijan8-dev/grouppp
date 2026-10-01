@@ -1303,3 +1303,6 @@ h1,h2,h3,h4,p,.sub,.nm,.rl,.ev-title,.ev-meta,.sd-t,.sd-m,.brand-name,.brand-sub
 .auth-error{min-height:20px;margin:4px 0 8px;color:var(--danger,#b83b35);font-size:12px;line-height:1.45}
 .auth-note{margin:16px 0 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.5}
 @media(max-width:520px){.auth-screen{padding:14px}.auth-card{padding:22px;border-radius:20px}.auth-copy h1{font-size:25px}}
+
+.account-line{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg2);margin-bottom:14px}.account-name{font-weight:700}.friend-code{font-family:var(--mono);letter-spacing:.08em}.friend-tools{margin-bottom:14px}.friends-list{border-top:1px solid var(--line);padding-top:12px}.friend-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.friend-row:last-child{border-bottom:0}
+@media(max-width:600px){.account-line{align-items:flex-start;flex-wrap:wrap}.account-line .grow{min-width:160px}.account-line .btn{width:100%}}
