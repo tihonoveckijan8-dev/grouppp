@@ -88,15 +88,25 @@
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
     const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
     if(!activeGroupId)return personal.data?{state:pstate,updatedAt:lastUpdated}:null;
-    const [songs,events,setlists,gs]=await Promise.all([
+    const [songs,events,setlists,gs,memberRows]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_setlists').select('data').eq('group_id',activeGroupId),
-      client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle()
+      client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle(),
+      client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId)
     ]);
-    for(const q of [songs,events,setlists,gs])if(q.error)throw q.error;
-    const shared=gs.data?.state||{};
-    return {state:Object.assign({},pstate,{songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:Array.isArray(shared.members)?shared.members:(pstate.members||[])}),updatedAt:lastUpdated};
+    for(const q of [songs,events,setlists,gs,memberRows])if(q.error)throw q.error;
+    const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
+    let accounts=[];
+    if(ids.length){const a=await client.from('bandplan_accounts').select('user_id,display_name,roles').in('user_id',ids);if(a.error)throw a.error;accounts=a.data||[];}
+    const roster=Array.isArray(shared.members)?shared.members.slice():(pstate.members||[]);
+    accounts.forEach(a=>{
+      if(!a.display_name)return;
+      const existing=roster.find(m=>String(m.name||'').trim().toLowerCase()===a.display_name.trim().toLowerCase());
+      if(existing){existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
+      else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
+    });
+    return {state:Object.assign({},pstate,{songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
