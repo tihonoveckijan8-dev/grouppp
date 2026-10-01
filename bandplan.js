@@ -2279,6 +2279,11 @@ async function bootCloudSync(hadLocal) {
       normalizeCloudState(defaults());
       await window.BandPlanCloud.saveNow(state);
     }
+    /* Если загрузка пришла из старой общей таблицы, закрепляем её
+       в личной таблице текущего аккаунта, не изменяя исходную запись. */
+    if (remote && remote.legacy && hasMeaningfulState(state) && !isKnownDemoState(state)) {
+      await window.BandPlanCloud.saveNow(state);
+    }
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     try { const ap3 = window.BandPlanAuth && window.BandPlanAuth.getProfile ? window.BandPlanAuth.getProfile() : null; if (ap3) localStorage.setItem('bandplan.auth.userId', ap3.id); } catch (e) {}
     applyTheme();
