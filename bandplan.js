@@ -2051,7 +2051,6 @@ document.addEventListener('keydown', function (e) {
   const modalOn = $('#modalOverlay').classList.contains('on');
   const typing = /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '');
   if ((e.ctrlKey || e.metaKey) && ['k', 'K', 'л', 'Л'].indexOf(e.key) >= 0) {
-    if (document.body.getAttribute('data-route') !== 'calendar') return;
     e.preventDefault();
     const inp = $('#globalSearch');
     if ($('#searchDrop').classList.contains('open')) { closeSearch(); inp.blur(); }
@@ -2150,6 +2149,10 @@ function wireStickyHeader() {
   c.addEventListener('scroll', update, { passive: true });
   window.addEventListener('hashchange', () => {
     document.body.classList.remove('hdr-hide');
+    /* Hash navigation is the single source of truth for every section change. */
+    ui.skeleton = false;
+    closeSearch();
+    render();
     update();
   });
   document.body.classList.remove('hdr-hide');
