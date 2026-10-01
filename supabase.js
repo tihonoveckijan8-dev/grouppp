@@ -50,7 +50,7 @@
     const form=event.currentTarget, button=$('#bpAuthSubmit');
     const email=$('#bpAuthEmail').value.trim(), password=$('#bpAuthPassword')?.value || '';
     const name=$('#bpAuthName')?.value.trim() || '';
-    if(!email || (mode!=='reset' && password.length<8)){setMessage('Укажите почту и пароль не короче 8 символов.',true);return;}
+    if(!email || (mode==='signup' && !name) || (mode!=='reset' && password.length<8)){setMessage(mode==='signup'?'Укажите имя, почту и пароль не короче 8 символов.':'Укажите почту и пароль не короче 8 символов.',true);return;}
     button.disabled=true;button.textContent='Подождите…';
     try {
       let result;
