@@ -2337,8 +2337,18 @@ function initApp() {
 async function init() {
   if (window.BandPlanAuth) {
     const ok = await window.BandPlanAuth.ready;
-    if (!ok) { window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_IN') location.reload(); }); return; }
-    window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_OUT') location.reload(); });
+    const hasLocalAccount = !!(localStorage.getItem('bandplan.auth.userId') && localStorage.getItem(KEY));
+    if (!ok && !(navigator.onLine === false && hasLocalAccount)) {
+      window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_IN') location.reload(); });
+      return;
+    }
+    if (!ok && navigator.onLine === false && hasLocalAccount) {
+      const authScreen = document.getElementById('authScreen');
+      if (authScreen) authScreen.hidden = true;
+      window.addEventListener('online', function () { location.reload(); }, { once: true });
+    } else {
+      window.BandPlanAuth.onChange(function (event) { if (event === 'SIGNED_OUT') location.reload(); });
+    }
   }
   initApp();
 }
