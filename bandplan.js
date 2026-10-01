@@ -1661,9 +1661,10 @@ document.addEventListener('click', function (e) {
       e.stopPropagation();
       const target = '#/' + el.getAttribute('data-to');
       ui.skeleton = false;
-      skipNextHashRoute = true;
-      if (location.hash === target) routeTransition();
-      else {
+      if (location.hash === target) {
+        routeTransition();
+      } else {
+        skipNextHashRoute = true;
         location.hash = target;
         routeTransition();
       }
