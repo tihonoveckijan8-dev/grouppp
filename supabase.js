@@ -200,7 +200,10 @@
     }
     const groupName = String(name || '').trim();
     if (groupName.length < 3 || groupName.length > 50) throw new Error('Название группы должно содержать от 3 до 50 символов');
-    const { data, error } = await client.rpc('bandplan_join_group_by_name', { p_name: groupName });
+    const { data, error } = await client.rpc('bandplan_join_group_by_name', {
+      p_name: groupName,
+      p_initial_state: groupPayload(initialState || {})
+    });
     if (error) throw error;
     const group = Array.isArray(data) ? data[0] : data;
     if (!group || !group.group_id) throw new Error('Сервер не вернул группу');
@@ -208,18 +211,6 @@
     if (realtimeStop) { try { realtimeStop(); } catch (_) {} realtimeStop = null; }
     if (realtimeCallback) subscribe(realtimeCallback);
 
-    const { data: row, error: readError } = await client.from(GROUP_STATE_TABLE)
-      .select('state').eq('group_id', group.group_id).maybeSingle();
-    if (readError) throw readError;
-    const existing = row && row.state ? row.state : {};
-    const hasSharedContent = ['songs','events','setlists','members'].some(k => Array.isArray(existing[k]) && existing[k].length);
-    if (!hasSharedContent && initialState && ['songs','events','setlists','members'].some(k => Array.isArray(initialState[k]) && initialState[k].length)) {
-      const payload = groupPayload(initialState);
-      const { error: seedError } = await client.from(GROUP_STATE_TABLE).upsert({
-        group_id: group.group_id, state: payload, updated_at: new Date().toISOString()
-      }, { onConflict: 'group_id' });
-      if (seedError) throw seedError;
-    }
     const loaded = await loadState();
     return { group, ...(loaded || {}) };
   }
