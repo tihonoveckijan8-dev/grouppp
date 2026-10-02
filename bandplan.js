@@ -321,8 +321,6 @@ function memberParticipationSummary(member) {
     const ev = events[0];
     return { status: participantStatusFor(ev, member), event: ev };
   }
-  const me = currentMemberForParticipation();
-  if (me && member && me.id === member.id) return { status: state.profile.defaultParticipation || 'unset', event: null };
   return { status: 'unset', event: null };
 }
 function setPersonalEventStatus(id, value) {
@@ -1367,8 +1365,6 @@ function vSettings() {
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '</div>';
   h += '<div class="group-settings-controls">' +
-    '<div class="profile-part-box"><span class="field-label">Участие по умолчанию</span><div class="seg profile-part-seg">' +
-    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
@@ -1379,7 +1375,9 @@ function vSettings() {
       '<div class="avatar participation-avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (summary.status || 'unset') + '"></span></div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
-      '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="participation-dot status-' + (summary.status || 'unset') + '" aria-hidden="true"></span><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
+      '<div class="member-status-wrap">' +
+        '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="participation-dot status-' + (summary.status || 'unset') + '" aria-hidden="true"></span><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
+        '<span class="member-event-context">' + (summary.event ? esc(summary.event.title || 'Событие') + ' · ' + esc(pdate(summary.event.date)) : 'Нет ближайших событий') + '</span></div>' +
       (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
       '</div>';
   });
