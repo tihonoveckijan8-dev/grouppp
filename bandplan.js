@@ -1310,7 +1310,10 @@ function eventInfoModal(evId, occurrenceDate) {
       '</div>' +
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
-      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div></div>' +
+      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div>' +
+        '<div class="part-switch event-info-part-switch" role="group" aria-label="Ваше участие">' +
+          [['yes','Участвую','check'],['maybe','Под вопросом','info'],['no','Не участвую','x']].map(p => '<button class="part-btn' + (my === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev.id) + '" aria-pressed="' + (my === p[0]) + '">' + ic(p[2],12) + '<span>' + p[1] + '</span></button>').join('') +
+        '</div></div>' +
     '</div>';
   openModal({
     title: 'Событие',
@@ -1987,6 +1990,7 @@ document.addEventListener('click', function (e) {
       const me = currentMemberForParticipation();
       if (me) setEventParticipantStatus(ev, me, next);
       commit();
+      if (modalRoot && modalRoot.querySelector('.event-info-my')) eventInfoModal(ev.id);
       break;
     }
     case 'ev-filter-open': stop(); openEventFilters(); break;
