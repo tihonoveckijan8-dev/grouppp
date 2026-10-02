@@ -2939,10 +2939,22 @@ function init() {
           if (!navigator.onLine) return;
           registration.update().catch(() => {});
         };
+        const activateWaitingWorker = () => {
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+        };
+        registration.addEventListener('updatefound', () => {
+          const installing = registration.installing;
+          if (!installing) return;
+          installing.addEventListener('statechange', () => {
+            if (installing.state === 'installed' && navigator.serviceWorker.controller) activateWaitingWorker();
+          });
+        });
+        activateWaitingWorker();
         checkForAppUpdate();
-        // Check regularly while the installed app is open, and immediately
-        // when the user returns online or brings the app back to foreground.
-        window.setInterval(checkForAppUpdate, 60 * 1000);
+        // Frequent checks keep an already-open installed app current.
+        window.setInterval(checkForAppUpdate, 30 * 1000);
         window.addEventListener('online', checkForAppUpdate);
         window.addEventListener('focus', checkForAppUpdate);
         document.addEventListener('visibilitychange', () => {
