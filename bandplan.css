@@ -1683,3 +1683,34 @@ button,a,input,select,textarea { touch-action: manipulation; }
 }
 .auth-tabs button.on{box-shadow:var(--shadow-accent)}
 /* No hard-coded hue gradients/shadows on buttons. */
+
+
+/* ═══ SELECTED ACCENT — MEMBER AVATARS + SCENE ACTION ═══
+   The selected accent is the single visual color for interactive/member identity
+   surfaces. Choice swatches remain independent because they represent choices. */
+#sceneQuick.btn-primary,
+.btn-primary{
+  background:var(--accent)!important;
+  color:var(--on-accent)!important;
+  border-color:transparent!important;
+  box-shadow:var(--shadow-accent)!important;
+}
+#sceneQuick.btn-primary:hover,
+.btn-primary:hover{
+  background:var(--accent-hover)!important;
+  color:var(--on-accent)!important;
+  box-shadow:var(--shadow-accent-hover,var(--shadow-accent))!important;
+}
+#sceneQuick.btn-primary:active,
+.btn-primary:active{
+  background:var(--accent-press)!important;
+  color:var(--on-accent)!important;
+}
+.memb-row .avatar,
+.ob-member .avatar,
+.avatars i:not(.more){
+  background:var(--accent)!important;
+  color:var(--on-accent)!important;
+  border-color:transparent;
+  box-shadow:var(--shadow-accent);
+}
