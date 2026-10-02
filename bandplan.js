@@ -1170,14 +1170,18 @@ function vSettings() {
   const settingsTab = ui.settingsTab || 'profile';
   let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль','user'],['group','Группа','users'],['interface','Интерфейс','palette'],['data','Данные','database'],['app','Приложение','monitor']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + ic(t[2], 17) + '<span>' + t[1] + '</span></button>').join('') + '</div><div class="settings-tab-content">';
   h += '<section class="card rise settings-card" data-settings-panel="profile"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
-    '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
-    '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
-    '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
-    '<div class="field"><span class="field-label">Ваши роли / инструменты (можно несколько)</span><div class="row" style="gap:6px">' +
+    '<div class="profile-settings-grid">' +
+    '<div class="profile-settings-main">' +
+      '<div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
+      '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Название группы"></div>' +
+      '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
+    '</div>' +
+    '<div class="profile-settings-side">' +
+      '<div class="profile-role-box"><span class="field-label">Роли и инструменты</span><div class="profile-role-list"> +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
-    '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
-    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
-    '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
+      '<div class="profile-part-box"><span class="field-label">Участие по умолчанию</span><div class="seg profile-part-seg">' +
+    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div>' +
+    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
     '</section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
@@ -1223,11 +1227,16 @@ function vSettings() {
 
   h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
   h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
-    '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
-    '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
-    '<button class="btn btn-secondary btn-sm" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить из файла</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
-    '<p class="t-xs t-muted mt">Объём данных: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</p></section>';
+    '<div class="data-stats-grid">' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><strong>' + state.songs.length + '</strong><span>Песен</span></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('calendar', 17) + '</span><strong>' + state.events.length + '</strong><span>Событий</span></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('list', 17) + '</span><strong>' + state.setlists.length + '</strong><span>Сет-листов</span></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('users', 17) + '</span><strong>' + state.members.length + '</strong><span>Участников</span></div>' +
+    '</div>' +
+    '<div class="data-actions">' +
+      '<div class="data-action-group"><div class="data-action-title">Резервная копия</div><div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 16) + 'Скачать JSON</button><button class="btn btn-secondary" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить файл</button></div><div class="data-meta">Объём: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</div></div>' +
+      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Полностью удалить локальные данные BandPlan</span></div><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button></div>' +
+    '</div></section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
     '' +
