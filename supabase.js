@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, activeMemberIds = [], lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
   let authSubscription = null;
   let realtimeGeneration = 0;
   let subscriptionCallback = null;
@@ -217,6 +217,7 @@
     if(!activeGroupId){
       delete profile.groupId;
       sharedBaseline={songs:{},events:{},setlists:{}};
+      activeMemberIds=[];
       if(!(personal.data||accountProfile)) return null;
       return {
         state:Object.assign({},hydratedPersonal,{
@@ -241,7 +242,8 @@
     for(const q of [songs,events,setlists,gs,memberRows,groupInfo,participation])if(q.error)throw q.error;
     const toSharedMap=rows=>Object.fromEntries((rows||[]).map(x=>{const data=x.data||{};const id=String(data.id||'').trim();return id?[id,JSON.stringify(data)]:null;}).filter(Boolean));
     sharedBaseline={songs:toSharedMap(songs.data),events:toSharedMap(events.data),setlists:toSharedMap(setlists.data)};
-    const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
+    const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id).filter(Boolean);
+    activeMemberIds=ids.slice(0,100);
     let accounts=[];
     if(ids.length){const a=await client.from('bandplan_accounts').select('user_id,display_name,roles').in('user_id',ids);if(a.error)throw a.error;accounts=a.data||[];}
     const roster=Array.isArray(shared.members)?shared.members.slice():(pstate.members||[]);
@@ -378,16 +380,26 @@
     const refreshShared=()=>{if(!activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{
       load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e));
     },200);};
-    ['bandplan_songs','bandplan_events','bandplan_setlists','bandplan_group_state'].forEach(table=>{
-      live=live.on('postgres_changes',{event:'*',schema:'public',table,filter:'group_id=eq.'+activeGroupId},payload=>{
+    const sharedSubscriptions=[
+      ['bandplan_songs',['group_id','id','updated_at']],
+      ['bandplan_events',['group_id','id','updated_at']],
+      ['bandplan_setlists',['group_id','id','updated_at']],
+      ['bandplan_group_state',['group_id','updated_at']]
+    ];
+    sharedSubscriptions.forEach(([table,select])=>{
+      live=live.on('postgres_changes',{event:'*',schema:'public',table,filter:'group_id=eq.'+activeGroupId,select},payload=>{
         const gid=payload?.new?.group_id||payload?.old?.group_id;
         if(gid===activeGroupId)refreshShared();
       });
     });
-    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_groups',filter:'id=eq.'+activeGroupId},refreshShared);
-    // Membership and account changes must refresh the roster on every participant's device.
-    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
-    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
+    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_groups',filter:'id=eq.'+activeGroupId,select:['id']},refreshShared);
+    // Only listen for accounts belonging to the current group. The old global
+    // subscription caused every account update in the project to wake every client.
+    if(activeMemberIds.length){
+      const memberFilter='user_id=in.('+activeMemberIds.join(',')+')';
+      live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts',filter:memberFilter,select:['user_id','updated_at']},refreshShared);
+    }
+    live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId,select:['group_id','user_id']},refreshShared);
     const sharedChannel=live.subscribe(status => handleStatus('shared', status));
     participationChannel=client.channel('bp-participation-'+activeGroupId)
       .on('broadcast',{event:'participation'},payload=>{
