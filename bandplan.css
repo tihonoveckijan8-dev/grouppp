@@ -1605,3 +1605,81 @@ button,a,input,select,textarea { touch-action: manipulation; }
   .day-modal-event{gap:8px}
   .day-modal-event>.badge{font-size:10px}
 }
+
+/* ═══ PREMIUM ACCENT CONSISTENCY — one selected color across all controls ═══ */
+.btn-primary,
+.btn-secondary,
+.btn-tertiary,
+.btn-danger,
+.btn-danger-solid{
+  --button-accent:var(--accent);
+  --button-on-accent:var(--on-accent);
+}
+.btn-primary{
+  background:var(--accent);
+  color:var(--on-accent);
+  border-color:transparent;
+  box-shadow:var(--shadow-accent);
+}
+.btn-primary:hover{background:var(--accent-hover);color:var(--on-accent);box-shadow:var(--shadow-accent-hover,var(--shadow-accent))}
+.btn-primary:active{background:var(--accent-press);color:var(--on-accent)}
+.btn-secondary{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:var(--accent-ring);
+  box-shadow:none;
+}
+.btn-secondary:hover{
+  background:var(--accent-soft-2);
+  color:var(--accent);
+  border-color:var(--accent);
+  box-shadow:var(--shadow-accent);
+}
+.btn-secondary:active{background:var(--accent-soft-2);color:var(--accent);box-shadow:var(--shadow-accent)}
+.btn-tertiary{
+  background:transparent;
+  color:var(--accent);
+  border-color:transparent;
+}
+.btn-tertiary:hover{
+  background:var(--accent-soft);
+  color:var(--accent);
+  border-color:var(--accent-ring);
+}
+.btn-danger,
+.btn-danger-solid{
+  background:var(--accent);
+  color:var(--on-accent);
+  border-color:transparent;
+  box-shadow:var(--shadow-accent);
+}
+.btn-danger:hover,
+.btn-danger-solid:hover{
+  background:var(--accent-hover);
+  color:var(--on-accent);
+  border-color:transparent;
+  filter:none;
+}
+.btn-danger:active,
+.btn-danger-solid:active{background:var(--accent-press);color:var(--on-accent)}
+.seg button.on,
+.auth-tabs button.on,
+.btn.on{
+  background:var(--accent);
+  color:var(--on-accent);
+  border-color:transparent;
+}
+.seg button.on[data-accent="1"]{color:var(--on-accent)}
+.icon-btn:hover,
+.icon-btn.on,
+.nav-item.on,
+.chip.on{
+  color:var(--accent);
+}
+.icon-btn.on,
+.chip.on{
+  background:var(--accent-soft);
+  border-color:var(--accent-ring);
+}
+.auth-tabs button.on{box-shadow:var(--shadow-accent)}
+/* No hard-coded hue gradients/shadows on buttons. */
