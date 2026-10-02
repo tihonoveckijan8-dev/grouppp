@@ -401,24 +401,8 @@
     const {data,error}=await client.rpc('bandplan_leave_group');
     if(error)throw error;
 
-    // The RPC removes membership and updates the shared roster atomically.
-    // Clear the account snapshot as well, otherwise a reload could hydrate
-    // the old group's songs/events from bandplan_user_state even without a membership.
-    const personal=await client.from(TABLE).upsert({
-      user_id:uid,
-      state:{
-        profile:{groupDetached:true,eventParticipation:{}},
-        settings:{},
-        songs:[],
-        events:[],
-        setlists:[],
-        members:[],
-        onboardingDone:true
-      },
-      updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-    if(personal.error)throw personal.error;
-
+    // The RPC removes membership, clears group data, preserves personal settings,
+    // and updates the shared roster atomically.
     // Verify the membership is actually gone before reporting success.
     const check=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();
     if(check.error)throw check.error;
