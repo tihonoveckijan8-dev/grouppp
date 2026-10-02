@@ -3407,3 +3407,170 @@ input,textarea,select{max-width:100%;min-width:0}
   .participation-collection .ev-row .ev-title{grid-column:2!important;grid-row:1!important}
   .participation-collection .ev-row .ev-meta{grid-column:2!important;grid-row:2!important}
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BandPlan — Premium Performance & Cross-Platform Polish v7
+   Safe visual/performance layer: no application logic or data contracts changed.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Rendering containment: long collections no longer force the whole page
+   to recalculate when one card changes. */
+.collection-grid,
+.collection-blocks{contain:layout paint;content-visibility:auto}
+.collection-grid>.song-card,
+.collection-grid>.ev-row,
+.collection-blocks>.ev-row{content-visibility:auto;contain-intrinsic-size:150px}
+.participation-collection .ev-row{contain:layout paint}
+
+/* Stable interactive surfaces — less visual noise, better touch feedback. */
+.card,
+.song-card,
+.ev-row,
+.toolbar,
+.tb-search,
+.settings-card{
+  backface-visibility:hidden;
+}
+.btn,
+.icon-btn,
+.avatar-btn,
+.nav-item,
+.bottom-nav a,
+.chip,
+.view-switch-btn{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:active,
+.icon-btn:active,
+.avatar-btn:active,
+.chip:active,
+.view-switch-btn:active{
+  transform:translateY(1px);
+}
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.avatar-btn:focus-visible,
+.nav-item:focus-visible,
+.bottom-nav a:focus-visible,
+.chip:focus-visible,
+.view-switch-btn:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+/* More deliberate premium hierarchy for content surfaces. */
+.card,
+.settings-card{
+  border-color:color-mix(in srgb,var(--border) 92%,transparent);
+}
+.card-interactive:hover,
+.song-card:hover,
+.ev-row:hover{
+  border-color:color-mix(in srgb,var(--accent) 14%,var(--border));
+}
+.song-card,
+.ev-row{
+  min-width:0;
+}
+.song-name,
+.ev-title,
+.ev-name{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.song-meta,
+.ev-meta,
+.song-acts,
+.ev-acts{
+  min-width:0;
+  flex-wrap:wrap;
+}
+
+/* Search/toolbars remain usable on narrow screens without horizontal overflow. */
+.toolbar,
+.collection-toolbar,
+.active-chips{
+  min-width:0;
+  max-width:100%;
+}
+.toolbar>.tb-search{
+  min-width:min(100%,240px);
+}
+.active-chips{overflow-wrap:anywhere}
+
+/* Mobile: use the available viewport rather than fixed desktop assumptions. */
+@media(max-width:900px){
+  html,body{min-height:100%;height:100%}
+  .app,.main{min-height:100dvh}
+  .content{
+    padding-bottom:calc(var(--bn) + var(--s8) + env(safe-area-inset-bottom,0px));
+  }
+  .bottom-nav{
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    min-height:calc(var(--bn) + env(safe-area-inset-bottom,0px));
+  }
+  .bottom-nav a{min-height:50px}
+  .toolbar{
+    gap:var(--s2);
+  }
+  .toolbar>.tb-search{
+    flex:1 1 100%;
+    width:100%;
+    min-width:0;
+  }
+  .toolbar>.btn{flex:0 0 auto}
+  .collection-grid.collection-blocks{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:640px){
+  .content{padding-left:max(var(--s3),env(safe-area-inset-left,0px));padding-right:max(var(--s3),env(safe-area-inset-right,0px))}
+  .topbar{padding-left:max(var(--s3),env(safe-area-inset-left,0px));padding-right:max(var(--s3),env(safe-area-inset-right,0px))}
+  .page-head{padding-left:max(var(--s3),env(safe-area-inset-left,0px));padding-right:max(var(--s3),env(safe-area-inset-right,0px))}
+  .collection-grid.collection-blocks{grid-template-columns:minmax(0,1fr)}
+  .toolbar>.btn{min-height:44px}
+  .toolbar>.btn .btn-lbl{display:inline}
+  .card,.settings-card{border-radius:18px}
+  .song-card{padding:18px}
+  .ev-row{padding:14px}
+}
+@media(max-width:380px){
+  .tb-tools{gap:4px}
+  .tb-tools .icon-btn{width:36px;height:36px}
+  .tb-tools .avatar-btn{width:40px;height:40px}
+  .toolbar>.btn .btn-lbl{display:none}
+  .toolbar>.btn{padding-inline:12px}
+  .page-head h1{font-size:25px}
+}
+@media(min-width:1920px){
+  :root{--maxw:1480px}
+  .content,.topbar,.page-head{padding-left:clamp(32px,3vw,64px);padding-right:clamp(32px,3vw,64px)}
+}
+@media(min-width:2560px){
+  :root{--maxw:1600px;--sb:300px}
+}
+
+/* Liquid-glass surfaces are limited to transient/floating UI so content stays
+   crisp and readable. */
+@supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){
+  .search-drop,
+  .filter-pop,
+  .modal-card,
+  .toast,
+  .scene-top,
+  .scene-ctrl{
+    background:color-mix(in srgb,var(--surf-4) 78%,transparent);
+    -webkit-backdrop-filter:blur(18px) saturate(1.08);
+    backdrop-filter:blur(18px) saturate(1.08);
+    border-color:color-mix(in srgb,var(--border-2) 82%,transparent);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .btn:active,.icon-btn:active,.avatar-btn:active,.chip:active,.view-switch-btn:active{transform:none}
+}
+@media(hover:none){
+  .card-interactive:hover,.song-card:hover,.ev-row:hover{transform:none}
+}
