@@ -785,7 +785,7 @@ function render() {
     acts = '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + esc(r.id) + '">' + ic('print', 17) + 'Печать</button><button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
     actionBarHTML = '<div class="actionbar"><button class="btn btn-secondary btn-icon" type="button" data-act="print-setlist" data-id="' + esc(r.id) + '" aria-label="Печать сет-листа">' + ic('print', 18) + '</button><button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button></div>';
   } else if (r.name === 'settings') acts = '<button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 17) + 'Скачать копию</button>';
-  $('#pageHead').innerHTML = '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
+  $('#pageHead').innerHTML = '<div class="page-head-main" style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
     (acts ? '<div class="ph-acts">' + acts + '</div>' : '');
   document.body.setAttribute('data-actionbar', actionBarHTML ? '1' : '0');
 
@@ -2904,6 +2904,9 @@ async function bootCloudSync(hadLocal, durableInfo) {
   }
 }
 
+
+function heroHTML(){const up=upcoming(),next=up[0];if(!next)return '<section class="calendar-overview card rise"><div><span class="cap">'+ic('calendar',12)+' РАСПИСАНИЕ</span><h2>Календарь группы</h2><p class="t-sm t-muted">Создайте первое событие, чтобы собрать расписание.</p></div><button class="btn btn-primary" type="button" data-act="new-event">'+ic('plus',16)+'Новое событие</button></section>';const my=eventStatusFor(next.ev)||'',status=my?participantStatusLabel(my):'Не отмечено',cls=my?'b-ok':'b-muted',meta=[pdateFull(next.date),next.ev.time?(next.ev.time+(next.ev.end?'–'+next.ev.end:'')):'',next.ev.location||''].filter(Boolean).join(' · ');return '<section class="calendar-overview card rise"><div class="co-main"><span class="cap">'+ic('calendar',12)+' БЛИЖАЙШЕЕ СОБЫТИЕ</span><div class="co-title-row"><h2>'+esc(next.ev.title)+'</h2><span class="badge '+cls+'">'+esc(status)+'</span></div><div class="co-meta">'+esc(meta)+' · '+esc(countdown(next.date))+'</div></div><div class="co-actions"><span class="badge b-muted">'+esc(evType(next.ev.type).label)+'</span><button class="btn btn-secondary btn-sm" type="button" data-act="event-info" data-id="'+esc(next.ev.id)+'" data-date="'+esc(next.date)+'">Открыть</button><button class="btn btn-primary btn-sm" type="button" data-act="scene-quick">Сцена</button></div></section>'}
+.calendar-overview{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 18px!important;margin-bottom:12px}.calendar-overview h2{font-size:16px;margin:5px 0 3px}.co-main{min-width:0}.co-title-row{display:flex;align-items:center;gap:8px;min-width:0}.co-title-row h2{min-width:0;overflow-wrap:anywhere}.co-meta{font-size:11px;color:var(--muted)}.co-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.co-actions .btn{height:34px;min-height:34px}@media(max-width:640px){.calendar-overview{align-items:flex-start;flex-direction:column;gap:12px}.co-actions{width:100%;flex-wrap:wrap}.co-actions .btn{flex:1}.co-title-row{align-items:flex-start;flex-wrap:wrap}}
 function init() {
   window.addEventListener('bandplan:sync-error', e => toast('Не удалось синхронизировать данные: ' + (e.detail || 'проверьте подключение'), 'err', 6500));
   const had = load();
