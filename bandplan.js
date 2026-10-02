@@ -225,12 +225,19 @@ function personalParticipationMap() {
   return map && typeof map === 'object' ? map : {};
 }
 function eventStatusFor(ev) {
+  if (!ev) return '';
+  const id = String(ev.id || '');
   const map = personalParticipationMap();
-  return map[String(ev.id)] || '';
+  if (Object.prototype.hasOwnProperty.call(map, id)) return map[id] || '';
+  const me = currentMemberForParticipation();
+  const shared = ev.participation && typeof ev.participation === 'object' ? ev.participation : {};
+  const key = me && (me.accountId || me.id);
+  return key ? (shared[String(key)] || '') : '';
 }
 function currentMemberForParticipation() {
   const uid = window.BandPlanCloud && window.BandPlanCloud.user ? window.BandPlanCloud.user()?.id : '';
-  return state.members.find(m => uid && (m.accountId === uid || m.id === uid)) || null;
+  if (!uid) return null;
+  return state.members.find(m => String(m.accountId || '') === String(uid) || String(m.id || '') === String(uid)) || null;
 }
 function participantStatusFor(ev, member) {
   const key = member && (member.accountId || member.id);
@@ -2600,7 +2607,24 @@ async function bootCloudSync(hadLocal, durableInfo) {
     if (!state.onboardingDone) openOnboarding();
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
+      const before = JSON.stringify({
+        profile: state.profile,
+        settings: state.settings,
+        members: state.members,
+        events: state.events,
+        songs: state.songs,
+        setlists: state.setlists
+      });
       normalizeCloudState(incoming);
+      const after = JSON.stringify({
+        profile: state.profile,
+        settings: state.settings,
+        members: state.members,
+        events: state.events,
+        songs: state.songs,
+        setlists: state.setlists
+      });
+      if (before === after) return;
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
       applyTheme();
       applyAccentVars();
