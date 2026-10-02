@@ -1203,7 +1203,7 @@ function vSettings() {
       '<div class="avatar participation-avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (summary.status || 'unset') + '"></span></div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
-      '<span class="participation-dot status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"></span>' +
+      '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="participation-dot status-' + (summary.status || 'unset') + '" aria-hidden="true"></span><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
       (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
       '</div>';
   });
