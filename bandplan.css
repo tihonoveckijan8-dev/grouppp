@@ -3416,22 +3416,15 @@ input,textarea,select{max-width:100%;min-width:0}
 
 /* Rendering containment: long collections no longer force the whole page
    to recalculate when one card changes. */
-.collection-grid,
-.collection-blocks{contain:layout paint;content-visibility:auto}
-.collection-grid>.song-card,
+ .collection-grid>.song-card,
 .collection-grid>.ev-row,
 .collection-blocks>.ev-row{content-visibility:auto;contain-intrinsic-size:150px}
+.collection-grid>.song-card,
+.collection-grid>.ev-row,
+.collection-blocks>.ev-row{contain:layout paint}
 .participation-collection .ev-row{contain:layout paint}
 
 /* Stable interactive surfaces — less visual noise, better touch feedback. */
-.card,
-.song-card,
-.ev-row,
-.toolbar,
-.tb-search,
-.settings-card{
-  backface-visibility:hidden;
-}
 .btn,
 .icon-btn,
 .avatar-btn,
