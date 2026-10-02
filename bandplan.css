@@ -2772,3 +2772,27 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 @media (hover:none) and (pointer:coarse) {
   .ev-row:hover, .song-card:hover, .memb-row:hover, .event-participant:hover { transform:none; }
 }
+
+
+/* Collection display mode: compact rows or spacious cards */
+.view-switch { display:inline-flex; align-items:center; gap:3px; padding:3px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); flex-shrink:0; }
+.view-switch-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:34px; padding:6px 9px; border:0; border-radius:8px; color:var(--muted); background:transparent; font:inherit; font-size:12px; cursor:pointer; white-space:nowrap; }
+.view-switch-btn.on { color:var(--text); background:var(--surface); box-shadow:0 1px 4px rgba(0,0,0,.12); }
+.collection-grid.collection-list { display:flex; flex-direction:column; gap:8px; }
+.collection-grid.collection-list > .song-card { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px 14px; padding:12px 14px; min-width:0; }
+.collection-grid.collection-list > .song-card .song-top { grid-column:1; min-width:0; }
+.collection-grid.collection-list > .song-card .song-meta { grid-column:1; margin-top:0; }
+.collection-grid.collection-list > .song-card .song-acts { grid-column:2; grid-row:1 / span 2; align-self:center; margin:0; }
+.collection-grid.collection-list > .song-card .song-name { overflow-wrap:anywhere; }
+.collection-grid.collection-list > .song-card .fav { top:10px; right:10px; }
+.participation-collection.collection-list { display:flex; flex-direction:column; gap:7px; }
+.participation-collection.collection-list > .ev-row { border-radius:12px; padding:10px 12px; box-shadow:none; }
+.participation-collection.collection-list > .ev-row .ev-meta { margin-top:2px; }
+@media (max-width:640px) {
+  .view-switch-btn { min-height:40px; padding:7px 8px; }
+  .view-switch-btn span { display:none; }
+  .collection-grid.collection-list > .song-card { grid-template-columns:minmax(0,1fr); }
+  .collection-grid.collection-list > .song-card .song-acts { grid-column:1; grid-row:auto; justify-content:flex-start; flex-wrap:wrap; }
+  .collection-grid.collection-list > .song-card .song-meta { padding-right:28px; }
+  .participation-collection.collection-list > .ev-row { padding:10px; }
+}
