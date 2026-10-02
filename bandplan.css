@@ -3343,3 +3343,21 @@ input,textarea,select{max-width:100%;min-width:0}
  .member-status-wrap{margin-left:46px}
  .member-event-context{font-size:10px}
 }
+
+
+/* Clear hierarchy in event cards: title and category occupy independent,
+   wrapping areas so long names never collide with the category badge. */
+.ev-title{display:flex;align-items:center;flex-wrap:wrap;gap:7px 10px;min-width:0;line-height:1.35}
+.ev-title .ev-name{display:block;flex:0 1 auto;min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.ev-title .ev-category{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;max-width:100%;white-space:normal;line-height:1.25;overflow-wrap:anywhere}
+@media(max-width:640px){
+ .ev-title{align-items:flex-start;column-gap:8px;row-gap:6px}
+ .ev-title .ev-name{flex:1 1 100%;width:100%}
+ .ev-title .ev-category{flex:0 1 auto}
+}
+@media(max-width:380px){
+ .ev-row{gap:9px;padding:10px}
+ .ev-date{width:44px;min-width:44px;flex:0 0 44px}
+ .ev-title{font-size:14px}
+ .ev-title .ev-category{font-size:10px}
+}
