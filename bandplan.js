@@ -1646,6 +1646,11 @@ function applyAccentVars() {
   r.setProperty('--warn-bg', hex + '14');
   r.setProperty('--plum', hex);
   r.setProperty('--plum-bg', hex + '14');
+  /* Participation keeps the selected hue; state is differentiated by intensity. */
+  r.setProperty('--part-yes', hex);
+  r.setProperty('--part-maybe', shade(hex, .38));
+  r.setProperty('--part-no', shade(hex, -.28));
+  r.setProperty('--part-unset', shade(hex, -.12));
 
   function contrast(a, b) {
     const la = luminance(a), lb = luminance(b);
