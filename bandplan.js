@@ -1597,8 +1597,17 @@ function applyAccentVars() {
   r.setProperty('--accent-ring', hex + '66');
   r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
   r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
+  /* Один выбранный акцентный цвет управляет всей системой UI-акцентов.
+     Семантические переменные сохраняются для совместимости компонентов,
+     но визуально больше не вводят сторонние цвета. */
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
+  r.setProperty('--ok', hex);
+  r.setProperty('--ok-bg', hex + '14');
+  r.setProperty('--warn', hex);
+  r.setProperty('--warn-bg', hex + '14');
+  r.setProperty('--plum', hex);
+  r.setProperty('--plum-bg', hex + '14');
 
   function contrast(a, b) {
     const la = luminance(a), lb = luminance(b);
@@ -2484,7 +2493,28 @@ function init() {
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake(); });
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => { console.warn('BandPlan service worker registration failed:', err); window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'})); }); });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', () => {
+      let updateTimer = null;
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        /* Тихая проверка обновлений: текущая страница не перезагружается
+           и пользователь не видит уведомлений или диалогов. */
+        const check = () => {
+          if (document.hidden) return;
+          reg.update().catch(() => {});
+        };
+        check();
+        updateTimer = window.setInterval(check, 15 * 60 * 1000);
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) check();
+        }, { passive: true });
+        window.addEventListener('focus', check, { passive: true });
+      }).catch(err => {
+        console.warn('BandPlan service worker registration failed:', err);
+        window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'}));
+      });
+    });
+  }
   ui.skeleton = true;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
