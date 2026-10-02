@@ -2739,3 +2739,36 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 @media (min-width:2560px){
   :root{--maxw:1640px}
 }
+
+
+/* ═══ MOBILE PLATFORM POLISH — safe areas, touch targets, layout stability ═══ */
+@media (max-width: 900px) {
+  .bottom-nav { padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+  .content, .page, .page-content { min-width: 0; max-width: 100%; }
+  button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+  .part-btn, .btn, .icon-btn, .nav-item, .bottom-nav a { touch-action: manipulation; }
+  .ev-row, .song-card, .card, .memb-row { min-width: 0; }
+}
+@media (max-width: 640px) {
+  .ev-row { display:grid; grid-template-columns:48px minmax(0,1fr); gap:10px; padding:12px; }
+  .ev-date { width:48px; padding:8px 3px; }
+  .ev-body { min-width:0; }
+  .ev-title { font-size:14px; overflow-wrap:anywhere; }
+  .ev-meta { column-gap:10px; row-gap:5px; }
+  .part-switch { gap:6px; }
+  .part-btn { min-height:42px; padding:8px 10px; justify-content:center; }
+  .ev-acts { grid-column:1/-1; justify-content:flex-start; flex-wrap:wrap; }
+  .event-info-meta-grid { grid-template-columns:minmax(0,1fr); }
+  input, select, textarea { max-width:100%; }
+}
+@media (max-width: 380px) {
+  .content { padding-left:10px; padding-right:10px; }
+  .ev-row { grid-template-columns:42px minmax(0,1fr); gap:8px; padding:10px; }
+  .ev-date { width:42px; }
+  .part-switch { display:grid; grid-template-columns:1fr; }
+  .part-btn { width:100%; }
+  .ev-acts .icon-btn { min-width:40px; min-height:40px; }
+}
+@media (hover:none) and (pointer:coarse) {
+  .ev-row:hover, .song-card:hover, .memb-row:hover, .event-participant:hover { transform:none; }
+}
