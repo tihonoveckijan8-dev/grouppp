@@ -2990,3 +2990,27 @@ svg { flex:0 0 auto; max-width:100%; }
 .ios-install-step { display:flex; align-items:flex-start; gap:12px; min-width:0; }
 .ios-install-step > span { flex:0 0 28px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--brand); color:#fff; font-weight:700; }
 .ios-install-step p { margin:2px 0 0; min-width:0; line-height:1.5; }
+
+
+/* Mobile stability: keep horizontally scrolling subtab rails from snapping
+   or shifting when their selected state changes. */
+@media(max-width:900px) {
+  .settings-tabs {
+    scroll-snap-type:none !important;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-behavior:auto !important;
+    overflow-anchor:none;
+    touch-action:pan-x pan-y;
+  }
+  .settings-tab { scroll-snap-align:none !important; flex-shrink:0; }
+}
+@media(max-width:640px) {
+  html,body,#app,.app,.content { max-width:100%; }
+  .content { overflow-x:hidden; }
+  .card,.card-h,.page-head,.toolbar,.row,.grid > * { min-width:0; }
+  .card-h { gap:10px; }
+  .card-h h1,.card-h h2,.page-head h1 { overflow-wrap:anywhere; }
+  button,.btn,.icon-btn { max-width:100%; }
+  .settings-tabs { -webkit-overflow-scrolling:touch; }
+}
