@@ -3851,36 +3851,150 @@ body{font-synthesis:none}
 }
 
 
-/* BANDPLAN v8.1 — restrained polish over the proven v8 UI */
+/* ═══════════════════════════════════════════════════════════════════════
+   BANDPLAN CLAYMORPHISM RESTORE
+   Возвращаем исходную мягкую clay-систему поверх performance-слоя.
+   Функциональность не затрагивается.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 :root{
-  --bp-ui-gap:12px;
-  --bp-ui-radius:12px;
+  --clay-out:10px 12px 26px rgba(120,104,165,.30),-8px -8px 20px rgba(255,255,255,.95)!important;
+  --clay-in:inset 3px 3px 6px rgba(255,255,255,.95),inset -4px -5px 10px rgba(120,104,165,.16)!important;
+  --clay-sm:5px 6px 14px rgba(120,104,165,.26),-4px -4px 11px rgba(255,255,255,.95)!important;
+  --clay-press:inset 5px 6px 12px rgba(120,104,165,.30),inset -4px -4px 10px rgba(255,255,255,.85)!important;
+  --shadow-xs:var(--clay-in)!important;
+  --shadow-sm:var(--clay-sm),var(--clay-in)!important;
+  --shadow-md:var(--clay-out),var(--clay-in)!important;
+  --shadow-lg:14px 18px 40px rgba(120,104,165,.36),-10px -10px 26px rgba(255,255,255,.95),var(--clay-in)!important;
 }
-/* Keep the original v8 visual language; improve rhythm and interaction precision. */
-.content{scroll-padding-top:76px}
-.page-head{scroll-margin-top:76px}
-.card,.hero,.song-card,.sl-item,.ev-row,.settings-card{backface-visibility:hidden}
-.btn,.icon-btn,.nav-item,.chip,.badge,.seg button{transition:background-color .14s ease,border-color .14s ease,color .14s ease,box-shadow .14s ease,transform .14s ease}
-.btn:active,.icon-btn:active,.nav-item:active{transform:translateY(1px)}
-.btn:focus-visible,.icon-btn:focus-visible,.nav-item:focus-visible,.chip:focus-visible,.seg button:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 72%,transparent);outline-offset:2px}
-/* Event rows: one stable grid, so title/category/meta/actions never fight for space. */
-.ev-row{grid-template-columns:64px minmax(0,1fr) auto!important;align-items:center!important;column-gap:16px!important;min-width:0}
-.ev-main,.ev-title,.ev-meta{min-width:0}
-.ev-title{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap}
-.ev-name{min-width:0;overflow-wrap:anywhere;line-height:1.25}
-.ev-category{flex:0 0 auto;white-space:nowrap}
-.ev-meta{display:flex;align-items:center;flex-wrap:wrap;min-width:0;row-gap:3px}
-.ev-acts{flex:0 0 auto;display:flex;align-items:center;gap:6px}
-/* Collections stay airy without becoming oversized. */
-.collection-grid{align-items:stretch}
-.collection-grid>.song-card,.collection-grid>.ev-row,.collection-blocks>.ev-row{min-width:0}
-.song-card .song-name{overflow-wrap:anywhere}
-/* Calendar remains information-dense and readable. */
-.cal-cell{overflow:hidden}
-.cal-cell .ev-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* Desktop: keep the workspace centered; ultrawide screens should not stretch text to the edges. */
-@media(min-width:1440px){.content,.page-head{padding-left:clamp(28px,3vw,52px);padding-right:clamp(28px,3vw,52px)}}
-/* Tablet/mobile: preserve v8 structure but give controls more breathing room. */
-@media(max-width:720px){.ev-row{grid-template-columns:52px minmax(0,1fr)!important;column-gap:11px!important}.ev-acts{grid-column:2;justify-content:flex-start;margin-top:5px}.ev-meta{font-size:11px}.toolbar{gap:7px}.toolbar .btn,.toolbar .icon-btn{min-height:42px}.collection-grid{gap:10px}}
-@media(max-width:430px){.ev-row{grid-template-columns:46px minmax(0,1fr)!important;padding:11px!important}.ev-acts{gap:5px}.ev-acts .btn{min-height:38px}.card,.song-card{border-radius:13px!important}.page-head h1{line-height:1.15}}
-@media(prefers-reduced-motion:reduce){.btn,.icon-btn,.nav-item,.chip,.badge,.seg button{transition:none}.btn:active,.icon-btn:active,.nav-item:active{transform:none}}
+[data-theme="dark"]{
+  --clay-out:10px 12px 26px rgba(0,0,0,.55),-7px -7px 18px rgba(255,255,255,.045)!important;
+  --clay-in:inset 2px 2px 5px rgba(255,255,255,.08),inset -4px -5px 10px rgba(0,0,0,.38)!important;
+  --clay-sm:5px 6px 14px rgba(0,0,0,.5),-4px -4px 10px rgba(255,255,255,.04)!important;
+  --clay-press:inset 5px 6px 12px rgba(0,0,0,.6),inset -4px -4px 10px rgba(255,255,255,.05)!important;
+  --shadow-xs:var(--clay-in)!important;
+  --shadow-sm:var(--clay-sm),var(--clay-in)!important;
+  --shadow-md:var(--clay-out),var(--clay-in)!important;
+  --shadow-lg:14px 18px 40px rgba(0,0,0,.65),-8px -8px 22px rgba(255,255,255,.05),var(--clay-in)!important;
+}
+[data-theme="amoled"]{
+  --clay-out:10px 12px 26px rgba(0,0,0,.9),-6px -6px 16px rgba(255,255,255,.05)!important;
+  --clay-in:inset 2px 2px 5px rgba(255,255,255,.07),inset -4px -5px 10px rgba(0,0,0,.6)!important;
+  --clay-sm:5px 6px 14px rgba(0,0,0,.85),-3px -3px 9px rgba(255,255,255,.045)!important;
+  --clay-press:inset 5px 6px 12px rgba(0,0,0,.9),inset -3px -3px 9px rgba(255,255,255,.05)!important;
+  --shadow-xs:var(--clay-in)!important;
+  --shadow-sm:var(--clay-sm),var(--clay-in)!important;
+  --shadow-md:var(--clay-out),var(--clay-in)!important;
+  --shadow-lg:var(--clay-out),var(--clay-in)!important;
+}
+
+/* Light / dark / AMOLED clay surfaces. Glass stays an explicit separate theme. */
+:not([data-theme="glass"]) .card,
+:not([data-theme="glass"]) .hero,
+:not([data-theme="glass"]) .song-card,
+:not([data-theme="glass"]) .sl-item,
+:not([data-theme="glass"]) .stat-mini,
+:not([data-theme="glass"]) .cal-cell,
+:not([data-theme="glass"]) .toast,
+:not([data-theme="glass"]) .modal-card,
+:not([data-theme="glass"]) .search-drop,
+:not([data-theme="glass"]) .filter-pop,
+:not([data-theme="glass"]) .onb-card,
+:not([data-theme="glass"]) .hv-card{
+  border:1px solid var(--border)!important;
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .hero{
+  background:linear-gradient(145deg,var(--surf-2),var(--surf-3))!important;
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .card-interactive:hover,
+:not([data-theme="glass"]) .song-card:hover{
+  transform:translateY(-1px)!important;
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .sidebar{
+  border-radius:0 var(--r-32) var(--r-32) 0!important;
+  box-shadow:12px 0 30px rgba(120,104,165,.18),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .nav-item.active{
+  background:var(--surf-2)!important;
+  box-shadow:var(--clay-press)!important;
+}
+:not([data-theme="glass"]) .brand-mark{
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .btn,
+:not([data-theme="glass"]) .icon-btn,
+:not([data-theme="glass"]) .avatar-btn,
+:not([data-theme="glass"]) .sbtn,
+:not([data-theme="glass"]) .sctl button,
+:not([data-theme="glass"]) .mini-stepper button,
+:not([data-theme="glass"]) .part-btn,
+:not([data-theme="glass"]) .chip{
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .btn-secondary,
+:not([data-theme="glass"]) .btn-tertiary,
+:not([data-theme="glass"]) .icon-btn,
+:not([data-theme="glass"]) .avatar-btn,
+:not([data-theme="glass"]) .sbtn,
+:not([data-theme="glass"]) .sctl button,
+:not([data-theme="glass"]) .mini-stepper button,
+:not([data-theme="glass"]) .part-btn,
+:not([data-theme="glass"]) .chip{
+  background:var(--surf-2)!important;
+  border:1px solid var(--border)!important;
+}
+:not([data-theme="glass"]) .btn-primary{
+  background:linear-gradient(145deg,#4A6BE8,var(--accent) 60%,#1B38A8)!important;
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .btn-primary:active,
+:not([data-theme="glass"]) .btn:active,
+:not([data-theme="glass"]) .icon-btn:active,
+:not([data-theme="glass"]) .part-btn:active,
+:not([data-theme="glass"]) .chip:active{
+  box-shadow:var(--clay-press)!important;
+  transform:translateY(1px)!important;
+}
+:not([data-theme="glass"]) .tb-search,
+:not([data-theme="glass"]) .input,
+:not([data-theme="glass"]) .select,
+:not([data-theme="glass"]) .textarea{
+  background:var(--surf-3)!important;
+  border:1px solid var(--border)!important;
+  box-shadow:var(--clay-press)!important;
+}
+:not([data-theme="glass"]) .input:focus,
+:not([data-theme="glass"]) .select:focus,
+:not([data-theme="glass"]) .textarea:focus,
+:not([data-theme="glass"]) .tb-search:focus-within{
+  background:var(--surf-2)!important;
+  box-shadow:var(--clay-press),0 0 0 3px var(--accent-soft-2)!important;
+}
+:not([data-theme="glass"]) .cal-cell,
+:not([data-theme="glass"]) .ev-row,
+:not([data-theme="glass"]) .lib-item{
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .cal-cell.out{
+  box-shadow:var(--clay-press)!important;
+}
+:not([data-theme="glass"]) .badge,
+:not([data-theme="glass"]) .pill,
+:not([data-theme="glass"]) .chip{
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+:not([data-theme="glass"]) .topbar.stuck{
+  background:color-mix(in srgb,var(--surf-2) 92%,transparent)!important;
+  box-shadow:0 8px 22px rgba(120,104,165,.12),var(--clay-in)!important;
+}
+@media(hover:hover){
+  :not([data-theme="glass"]) .btn:hover,
+  :not([data-theme="glass"]) .icon-btn:hover,
+  :not([data-theme="glass"]) .chip:hover,
+  :not([data-theme="glass"]) .nav-item:hover{
+    box-shadow:var(--clay-out),var(--clay-in)!important;
+  }
+}
