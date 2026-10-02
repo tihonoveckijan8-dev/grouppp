@@ -9,7 +9,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(r.url);
   if (url.origin !== self.location.origin) return;
 
-  const appShell = /(?:^|\\/)(?:index\\.html|bandplan\\.js|supabase\\.js|bandplan\\.css|manifest\\.webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const appShell = /(?:^|\/)(?:index\.html|bandplan\.js|supabase\.js|bandplan\.css|manifest\.webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
 
   e.respondWith((async () => {
     const cached = await caches.match(r, { ignoreSearch: true });
