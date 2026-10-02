@@ -325,8 +325,10 @@
   }
   async function joinGroup(code,name,roles){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const normalizedCode=String(code||'').toUpperCase().replace(/[^0-9A-F]/g,'');
+    if(!normalizedCode)throw new Error('Введите код приглашения.');
     const {data,error}=await client.rpc('bandplan_join_group',{
-      p_code:String(code||'').trim(),
+      p_code:normalizedCode,
       p_display_name:String(name||'').trim(),
       p_roles:Array.isArray(roles)?roles:[]
     });
@@ -337,10 +339,14 @@
   async function getInviteCode(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const {data,error}=await client.rpc('bandplan_get_invite_code');
-    if(error)throw error;
+    if(error){
+      const msg=String(error.message||'');
+      if(msg.includes('GROUP_REQUIRED'))throw new Error('Не удалось создать группу для приглашения.');
+      throw error;
+    }
     const code=Array.isArray(data)?data[0]?.bandplan_get_invite_code:data;
     if(!code)throw new Error('Не удалось создать код приглашения.');
-    return String(code);
+    return String(code).trim().toUpperCase();
   }
   window.addEventListener('online',async()=>{
     if(!currentSession?.user)return;
