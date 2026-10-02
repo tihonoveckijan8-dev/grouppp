@@ -1986,11 +1986,29 @@ document.addEventListener('click', function (e) {
       const ev = evById(id); if (!ev) break;
       const v = el.getAttribute('data-v');
       const next = eventStatusFor(ev) === v ? '' : v;
-      setPersonalEventStatus(ev.id, next);
       const me = currentMemberForParticipation();
+      setPersonalEventStatus(ev.id, next);
       if (me) setEventParticipantStatus(ev, me, next);
       commit();
       if (modalRoot && modalRoot.querySelector('.event-info-my')) eventInfoModal(ev.id);
+      if (window.BandPlanCloud?.setEventParticipation) {
+        window.BandPlanCloud.setEventParticipation(ev.id, next).then(async remoteEvent => {
+          if (remoteEvent && typeof remoteEvent === 'object') {
+            const fresh = evById(ev.id);
+            if (fresh) {
+              fresh.participation = remoteEvent.participation || {};
+              if (me) {
+                const key = String(me.accountId || me.id || '');
+                if (next) fresh.participation[key] = next; else delete fresh.participation[key];
+              }
+            }
+            try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+            render();
+          }
+        }).catch(err => {
+          toast('Не удалось синхронизировать участие: ' + (err.message || 'Ошибка сети'), 'err', 6000);
+        });
+      }
       break;
     }
     case 'ev-filter-open': stop(); openEventFilters(); break;
