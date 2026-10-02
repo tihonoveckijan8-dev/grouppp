@@ -1587,14 +1587,31 @@ function applyAccent(hex) { if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; state.se
 function applyAccentVars() {
   const hex = state.settings.accent || '#2547D0', r = document.documentElement.style;
   const dark = shade(hex, -.16), press = shade(hex, -.3);
+  const onAccent = contrast(hex, '#FFFFFF') >= contrast(hex, '#111827') ? '#FFFFFF' : '#111827';
   r.setProperty('--accent', hex);
   r.setProperty('--accent-hover', dark);
   r.setProperty('--accent-press', press);
+  r.setProperty('--on-accent', onAccent);
   r.setProperty('--accent-soft', hex + '14');
   r.setProperty('--accent-soft-2', hex + '24');
-  r.setProperty('--accent-ring', hex + '5c');
+  r.setProperty('--accent-ring', hex + '66');
   r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
-  r.setProperty('--info', hex); r.setProperty('--info-bg', hex + '14');
+  r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
+  r.setProperty('--info', hex);
+  r.setProperty('--info-bg', hex + '14');
+
+  function contrast(a, b) {
+    const la = luminance(a), lb = luminance(b);
+    return (Math.max(la, lb) + .05) / (Math.min(la, lb) + .05);
+  }
+  function luminance(h) {
+    const n = parseInt(h.slice(1), 16);
+    const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
+      v /= 255;
+      return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+    });
+    return .2126 * rgb[0] + .7152 * rgb[1] + .7152 * rgb[1] + .0722 * rgb[2];
+  }
   function shade(h, amt) {
     const n = parseInt(h.slice(1), 16);
     const f = v => clamp(Math.round(amt < 0 ? v * (1 + amt) : v + (255 - v) * amt), 0, 255);
