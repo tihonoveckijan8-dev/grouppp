@@ -1508,3 +1508,100 @@ button,a,input,select,textarea { touch-action: manipulation; }
   .settings-card .seg button{min-width:0;flex:1}
 }
 @media(prefers-reduced-motion:reduce){.settings-card,.settings-card .sw{transition:none}}
+
+
+/* ══ PREMIUM POLISH / SAFE RESPONSIVE OVERRIDES ══ */
+.settings-shell,
+.settings-shell *{min-width:0;box-sizing:border-box}
+.settings-shell{width:100%;max-width:1180px;overflow:visible}
+.settings-shell>.split2{align-items:start}
+.settings-card{overflow:hidden}
+.settings-card .card-h,
+.settings-card .field,
+.settings-card .row,
+.settings-card .f2,
+.settings-card .split2{max-width:100%}
+.settings-card .row{flex-wrap:wrap}
+.settings-card .seg{display:flex;flex-wrap:wrap;max-width:100%;overflow:hidden}
+.settings-card .seg button{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.settings-card .chip{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.settings-card .input,
+.settings-card .select,
+.settings-card textarea{width:100%;max-width:100%}
+.settings-card .swatches{max-width:100%}
+.settings-card .field-label{color:var(--text)}
+.settings-card .sub,
+.settings-card .hint{color:var(--muted)}
+.settings-card .settings-leave{max-width:100%}
+
+.day-modal-list{display:flex;flex-direction:column;gap:8px}
+.day-modal-event{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid var(--border);border-radius:14px;background:var(--surf-2);color:var(--text);text-align:left;cursor:pointer;transition:border-color .16s ease,background .16s ease,transform .16s ease}
+.day-modal-event:hover{border-color:var(--border-2);background:var(--surf-3);transform:translateY(-1px)}
+.day-modal-event-main{min-width:0;display:flex;flex-direction:column;gap:4px}
+.day-modal-event-main strong{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-modal-event-main>span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day-modal-event>.badge{flex:none}
+.day-modal-empty{padding:28px 16px;text-align:center;border:1px dashed var(--border-2);border-radius:14px;color:var(--muted)}
+
+[data-theme="dark"]{
+  --text:#F2F4F8;
+  --text-2:#D5D9E2;
+  --muted:#A8AFBC;
+  --border:rgba(255,255,255,.12);
+  --border-2:rgba(255,255,255,.19);
+}
+[data-theme="amoled"]{
+  --text:#F7F8FB;
+  --text-2:#D8DCE6;
+  --muted:#A4AAB7;
+  --border:rgba(255,255,255,.13);
+  --border-2:rgba(255,255,255,.21);
+}
+[data-theme="dark"] .settings-card .field-label,
+[data-theme="amoled"] .settings-card .field-label,
+[data-theme="dark"] .settings-card h2,
+[data-theme="amoled"] .settings-card h2{color:var(--text)}
+[data-theme="dark"] .settings-card .sub,
+[data-theme="amoled"] .settings-card .sub,
+[data-theme="dark"] .settings-card .hint,
+[data-theme="amoled"] .settings-card .hint{color:var(--muted)}
+
+.scene,
+[data-theme="light"] .scene,
+[data-theme="dark"] .scene,
+[data-theme="amoled"] .scene{background:#080A0F;color:#F7F8FB}
+.scene-title h2{color:#F7F8FB}
+.scene-title p{color:rgba(247,248,251,.66)}
+.scene-dyn .dc{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.09)}
+.scene-dyn .dc em{color:rgba(247,248,251,.5)}
+.scene-body{color:#F7F8FB}
+.scene-body .sec{color:rgba(247,248,251,.58)}
+.scene-body b.ch{color:#B8C8FF}
+.scene-body b.ch.inl{background:rgba(184,200,255,.16)}
+.scene-ctrl{background:rgba(8,10,15,.96);border-top-color:rgba(255,255,255,.1)}
+
+@media(max-width:760px){
+  .settings-shell{width:100%}
+  .settings-shell>.split2{grid-template-columns:minmax(0,1fr);gap:12px}
+  .settings-card{width:100%;padding:16px;border-radius:18px}
+  .settings-card .card-h{margin-bottom:15px}
+  .settings-card .f2,
+  .settings-card .split2{grid-template-columns:minmax(0,1fr);gap:12px}
+  .settings-card .seg{width:100%}
+  .settings-card .seg button{flex:1 1 0}
+  .settings-card .row{gap:7px}
+  .settings-card .row>.btn{flex:1 1 150px;min-width:0}
+  .settings-card .settings-member-footer{justify-content:stretch}
+  .settings-card .settings-leave{width:100%}
+  .day-modal-event{align-items:flex-start;padding:12px}
+  .day-modal-event>.badge{margin-top:1px}
+}
+@media(max-width:430px){
+  .settings-card{padding:14px;border-radius:16px}
+  .settings-card .seg{padding:3px}
+  .settings-card .seg button{padding:8px 7px;font-size:12px}
+  .settings-card .chip{padding:7px 9px;font-size:12px}
+  .settings-card .row>.btn{flex-basis:100%}
+  .day-modal-event{gap:8px}
+  .day-modal-event>.badge{font-size:10px}
+}
