@@ -184,7 +184,9 @@ let deferredInstall = null;
 const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
 function installButtonVisible() {
-  return !isStandalone() && (!!deferredInstall || isIOSDevice());
+  // Show a clear install entry on every supported platform; where the browser
+  // has no install prompt, the action opens platform-specific instructions.
+  return !isStandalone();
 }
 function syncInstallButton() {
   const b = $('#pwaBtn');
@@ -210,7 +212,22 @@ function doInstall() {
   if (isIOSDevice()) {
     openModal({title:'Установка на iPhone и iPad',sub:'Добавьте BandPlan на экран «Домой»',guard:false,body:'<div class="ios-install-steps"><div class="ios-install-step"><span>1</span><p>Откройте сайт именно в <strong>Safari</strong>.</p></div><div class="ios-install-step"><span>2</span><p>Нажмите кнопку <strong>Поделиться</strong> внизу экрана (квадрат со стрелкой вверх).</p></div><div class="ios-install-step"><span>3</span><p>Прокрутите меню и выберите <strong>На экран «Домой»</strong>.</p></div><div class="ios-install-step"><span>4</span><p>Подтвердите добавление кнопкой <strong>Добавить</strong>.</p></div></div><p class="sub mt-s">После этого запускайте BandPlan с нового значка. Для первого запуска и загрузки данных потребуется интернет.</p>'});
   } else {
-    toast('Установка недоступна в этом браузере. Откройте меню браузера и выберите добавление на главный экран.', 'info', 7000);
+    const ua = navigator.userAgent || '';
+    const isAndroid = /Android/i.test(ua);
+    const isEdge = /Edg\//i.test(ua);
+    const isChrome = /Chrome\//i.test(ua) && !isEdge;
+    const isFirefox = /Firefox\//i.test(ua);
+    let steps;
+    if (isAndroid) {
+      steps = '<p>Откройте меню браузера (⋮) и выберите <strong>Установить приложение</strong> или <strong>Добавить на главный экран</strong>. Название пункта зависит от браузера.</p>';
+    } else if (isChrome || isEdge) {
+      steps = '<p>Откройте меню браузера и выберите <strong>Установить BandPlan</strong> или <strong>Приложения → Установить этот сайт как приложение</strong>. Также рядом с адресной строкой может быть значок установки.</p>';
+    } else if (isFirefox) {
+      steps = '<p>В этом браузере установка PWA может быть недоступна. На Android попробуйте меню браузера и пункт добавления на главный экран; на компьютере откройте BandPlan в Chrome или Edge.</p>';
+    } else {
+      steps = '<p>Откройте меню браузера и найдите пункт <strong>Установить приложение</strong> или <strong>Добавить на главный экран</strong>. Если такого пункта нет, откройте сайт в Chrome, Edge или Safari (на iPhone/iPad).</p>';
+    }
+    openModal({title:'Установка BandPlan',sub:'Установите приложение на это устройство',guard:false,body:steps + '<p class="sub mt-s">Если пункт установки не отображается, проверьте, что сайт открыт по HTTPS и манифест приложения загружен.</p>'});
   }
 }
 window.addEventListener('beforeinstallprompt', e => {
@@ -1403,7 +1420,7 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
-  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (installButtonVisible() ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
+  if (!isStandalone()) h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на устройство</h2></div></div><button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install">' + ic('dl', 16) + 'Установить приложение</button></section>';
   h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
     '<div class="data-stats-grid">' +
       '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><strong>' + state.songs.length + '</strong><span>Песен</span></div>' +
