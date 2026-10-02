@@ -220,6 +220,25 @@ const ui = {
   songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false
 };
+function personalParticipationMap() {
+  const map = state.profile && state.profile.eventParticipation;
+  return map && typeof map === 'object' ? map : {};
+}
+function eventStatusFor(ev) {
+  const map = personalParticipationMap();
+  return map[String(ev.id)] || '';
+}
+function setPersonalEventStatus(id, value) {
+  state.profile.eventParticipation = Object.assign({}, personalParticipationMap(), { [String(id)]: value || '' });
+  if (!value) delete state.profile.eventParticipation[String(id)];
+}
+function stripSharedEventPersonalFields(events) {
+  return (events || []).map(ev => {
+    const copy = Object.assign({}, ev);
+    delete copy.myStatus;
+    return copy;
+  });
+}
 function load() {
   try {
     const raw = localStorage.getItem(KEY) || localStorage.getItem('bandplan.premium.v5') || localStorage.getItem('bandplan.premium.v4');
@@ -285,11 +304,11 @@ function seedDemo() {
   ];
   const a = off(2, 19, 0), b = off(6, 20, 0), c = off(11, 14, 0), e = off(19, 18, 30), f = off(4, 12, 0), g = off(-5, 19, 0);
   state.events = [
-    { id: uid('e'), type: 'rehearsal', title: 'Репетиция основного сета', date: a.date, time: a.time, end: '21:30', location: 'База на Лиговском', notes: 'Прогоняем финал и переходы.', status: 'upcoming', repeat: 'weekly', setlistId: state.setlists[0].id, myStatus: 'yes', except: [] },
+    { id: uid('e'), type: 'rehearsal', title: 'Репетиция основного сета', date: a.date, time: a.time, end: '21:30', location: 'База на Лиговском', notes: 'Прогоняем финал и переходы.', status: 'upcoming', repeat: 'weekly', setlistId: state.setlists[0].id, except: [] },
     { id: uid('e'), type: 'gig', title: 'Концерт в «Портах»', date: b.date, time: b.time, end: '22:00', location: 'Клуб «Порты»', notes: 'Саундчек в 17:00.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, myStatus: 'yes', except: [] },
-    { id: uid('e'), type: 'recording', title: 'Запись сингла «Эхо»', date: c.date, time: c.time, end: '19:00', location: 'Студия K-Rec', notes: 'Живьём, 3 дубля.', status: 'upcoming', repeat: 'none', setlistId: '', myStatus: 'maybe', except: [] },
+    { id: uid('e'), type: 'recording', title: 'Запись сингла «Эхо»', date: c.date, time: c.time, end: '19:00', location: 'Студия K-Rec', notes: 'Живьём, 3 дубля.', status: 'upcoming', repeat: 'none', setlistId: '', except: [] },
     { id: uid('e'), type: 'gig', title: 'Фестиваль «Северный звук»', date: e.date, time: e.time, end: '19:15', location: 'Парк 300-летия', notes: 'Слот 45 минут, сцена B.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, myStatus: 'yes', except: [] },
-    { id: uid('e'), type: 'meeting', title: 'Созвон по мерчу', date: f.date, time: f.time, end: '13:00', location: 'Онлайн', notes: '', status: 'upcoming', repeat: 'none', setlistId: '', myStatus: '', except: [] },
+    { id: uid('e'), type: 'meeting', title: 'Созвон по мерчу', date: f.date, time: f.time, end: '13:00', location: 'Онлайн', notes: '', status: 'upcoming', repeat: 'none', setlistId: '', except: [] },
     { id: uid('e'), type: 'gig', title: 'Квартирник у друзей', date: g.date, time: g.time, end: '21:00', location: 'Лофт «Тихий»', notes: '', status: 'done', repeat: 'none', setlistId: state.setlists[1].id, myStatus: 'yes', except: [] }
   ];
   save();
@@ -780,7 +799,7 @@ function evRow(o, withPart) {
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
     (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => '<i style="background:' + esc(m.color || 'var(--accent)') + '" title="' + esc(m.name) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>').join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
-      '<button class="part-btn' + (e.myStatus === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (e.myStatus === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
+      '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
     '<div class="ev-acts">' +
     (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
@@ -1095,20 +1114,19 @@ function moveItem(slId, itemId, at) {
 /* ═══ 14. SETTINGS ═══ */
 function vSettings() {
   const s = state.settings, p = state.profile;
-  let h = '<div class="split2">';
-  h += '<section class="card rise"><div class="card-h"><div><h2>Профиль и роль</h2><div class="sub">Роль определяет, какая динамика песни подсвечивается</div></div></div>' +
+  let h = '<div class="settings-shell"><div class="split2">';
+  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Профиль и роль</h2><div class="sub">Роль определяет, какая динамика песни подсвечивается</div></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
     '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
     '<div class="field"><span class="field-label">Ваши роли / инструменты (можно несколько)</span><div class="row" style="gap:6px">' +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
-    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
-    (window.BandPlanCloud?.user?.() && state.members.some(m => m.accountId === window.BandPlanCloud.user().id) ? '<button class="btn btn-danger btn-block mt-s" type="button" data-act="group-leave">' + ic('x', 16) + 'Выйти из группы</button>' : '') +
     '</section>';
 
-  h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
+  h += '<section class="card rise settings-card" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '<span class="t-xs t-muted">Участники подключаются по коду</span></div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
@@ -1117,9 +1135,12 @@ function vSettings() {
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       (m.accountId ? '<span class="t-xs t-muted" title="Профиль участника управляется его аккаунтом">Аккаунт</span>' : '<button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button>') + '</div>';
   });
+  if (window.BandPlanCloud?.user?.() && state.members.some(m => m.accountId === window.BandPlanCloud.user().id)) {
+    h += '<div class="settings-member-footer"><button class="btn btn-danger settings-leave" type="button" data-act="group-leave">' + ic('x', 16) + '<span>Выйти из группы</span></button></div>';
+  }
   h += '</section>';
 
-  h += '<section class="card rise" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2><div class="sub">Изменения применяются сразу и сохраняются на устройстве</div></div></div>' +
+  h += '<section class="card rise settings-card" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2><div class="sub">Изменения применяются сразу и сохраняются на устройстве</div></div></div>' +
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
     [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
@@ -1141,15 +1162,15 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div><span class="hint">Сообщения вроде «Сохранено» можно полностью отключить или оставить только ошибки.</span></div></div></div></section>';
 
-  h += '<section class="card rise"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
-  h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Общие песни, события и сет-листы синхронизируются через Supabase; локальный кэш используется для офлайн-работы</div></div></div>' +
+  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
+  h += '<section class="card rise settings-card" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Общие песни, события и сет-листы синхронизируются через Supabase; локальный кэш используется для офлайн-работы</div></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
     '<button class="btn btn-secondary btn-sm" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить из файла</button></div>' +
     '<div class="row mt-s"><button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
     '<p class="t-xs t-muted mt">Объём данных: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</p></section>';
 
-  h += '<section class="card rise" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2><div class="sub">Music Group OS</div></div></div>' +
+  h += '<section class="card rise settings-card" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2><div class="sub">Music Group OS</div></div></div>' +
     '<p class="t-sm t-2" style="line-height:var(--lh-loose)">Расписание (месяц / неделя / день), репертуар с аккордами и динамикой партий по инструментам, конструктор сет-листов с перетаскиванием, сценический режим с автопрокруткой, онбординг группы и роли, глобальный поиск на главной, оформление и печать в PDF.</p>' +
     '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span><span class="badge b-muted">свайп-навигация</span></div>' +
     '<hr class="divider"><span class="field-label">Горячие клавиши</span>' +
@@ -1158,7 +1179,7 @@ function vSettings() {
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">← →</kbd><span class="t-sm t-muted">сцена: песни · календарь: навигация</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Space</kbd><span class="t-sm t-muted">автопрокрутка на сцене</span></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Esc</kbd><span class="t-sm t-muted">закрыть окно или выйти со сцены</span></div></section>';
-  return h + '</div>';
+  return h + '</div></div>';
 }
 function mini(v, l) { return '<div class="stat-mini"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function kb() { try { return (new Blob([JSON.stringify(state)]).size / 1024).toFixed(1); } catch (e) { return '0'; } }
@@ -1178,7 +1199,7 @@ function bindSettings() {
 /* ═══ 15. FORM MODALS ═══ */
 function eventModal(evId, date) {
   const ev = evId ? evById(evId) : null;
-  const d = ev || { type: 'gig', title: '', date: date || ui.selDate || today(), time: '19:00', end: '', location: '', notes: '', status: 'upcoming', repeat: 'none', repeatUntil: '', setlistId: '', myStatus: state.profile.defaultParticipation || 'yes', memberIds: state.members.map(m => m.id), except: [] };
+  const d = ev || { type: 'gig', title: '', date: date || ui.selDate || today(), time: '19:00', end: '', location: '', notes: '', status: 'upcoming', repeat: 'none', repeatUntil: '', setlistId: '', memberIds: state.members.map(m => m.id), except: [] };
   const body =
     '<div class="field"><span class="field-label">Тип события</span><div class="seg" id="evTypeSeg" style="flex-wrap:wrap">' +
     Object.keys(EV_TYPES).map(k => '<button type="button" data-t="' + k + '" class="' + (d.type === k ? 'on' : '') + '" data-accent="1">' + ic(EV_TYPES[k].ic, 14) + esc(EV_TYPES[k].label) + '</button>').join('') + '</div></div>' +
@@ -1195,7 +1216,7 @@ function eventModal(evId, date) {
     Object.keys(REPEATS).map(k => '<option value="' + k + '"' + (d.repeat === k ? ' selected' : '') + '>' + REPEATS[k] + '</option>').join('') + '</select></div>' +
     '<div class="field"><label class="field-label" for="f_until">Повторять до</label><input class="input" id="f_until" type="date" value="' + esc(d.repeatUntil || '') + '"><span class="err"></span></div></div>' +
     '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
-    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (d.myStatus === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (d.myStatus === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Состав</span><div class="row" id="f_members" style="gap:6px">' +
     (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены — сделайте это в настройках.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
@@ -1580,7 +1601,7 @@ function drawOnb() {
       '<div class="field"><span class="field-label">Ваши роли в группе * (можно несколько)</span><div class="row" style="gap:6px" id="ob_roles">' +
       ROLES.map(r => '<button type="button" class="chip' + ((onbData.roles || []).indexOf(r.k) >= 0 ? ' on' : '') + '" data-r="' + r.k + '" aria-pressed="' + ((onbData.roles || []).indexOf(r.k) >= 0) + '">' + ic(r.icon, 13) + esc(r.label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><span class="field-label">Участие в событиях по умолчанию</span><div class="seg" id="ob_part">' +
-      [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (onbData.participation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>';
+      [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (onbData.participation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>';
   } else if (onbStep === 1) {
     h += '<div class="onb-hero">' + ic('users', 28) + '</div><h2>Ваш коллектив</h2>' +
       '<p class="lead">Название появится в шапке, на главном экране и в печатных сет-листах.</p>' +
@@ -1782,9 +1803,10 @@ document.addEventListener('click', function (e) {
       stop();
       const ev = evById(id); if (!ev) break;
       const v = el.getAttribute('data-v');
-      ev.myStatus = ev.myStatus === v ? '' : v;
+      const next = eventStatusFor(ev) === v ? '' : v;
+      setPersonalEventStatus(ev.id, next);
       commit();
-      if (ev.myStatus) toast('Ваше участие: ' + ({ yes: 'участвую', maybe: 'под вопросом', no: 'не участвую' }[ev.myStatus]), 'ok', 2400);
+      if (next) toast('Ваше участие: ' + ({ yes: 'участвую', maybe: 'неизвестно', no: 'не участвую' }[next]), 'ok', 2400);
       break;
     }
     case 'ev-filter-open': stop(); openEventFilters(); break;
