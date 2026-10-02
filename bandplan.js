@@ -1032,7 +1032,7 @@ function vSong(id) {
   h += '<section class="card rise" style="animation-delay:.16s"><div class="card-h"><div><h2>Входит в сет-листы</h2><div class="sub">' + used.length + '</div></div></div>' +
     (used.length ? used.map(sl => '<a class="ev-row" href="#/setlist/' + sl.id + '"><div class="ev-date" style="width:48px"><div class="d" style="font-size:var(--fs-body)">' + (sl.items || []).length + '</div></div><div class="ev-body"><h3 class="ev-title">' + esc(sl.name) + '</h3><div class="ev-meta"><span>' + ic('clock', 12) + fmtDur(setlistDur(sl)) + '</span></div></div></a>').join('')
       : '<p class="t-sm t-muted">Песня пока не добавлена ни в один сет-лист.</p>') + '</section>';
-  return h + '</div></div>';
+  return h + '</div></div></div>';
 }
 const infoRow = (l, v) => '<div class="info-row"><span class="l">' + esc(l) + '</span><span class="v">' + (v || '—') + '</span></div>';
 
@@ -1167,8 +1167,9 @@ function moveItem(slId, itemId, at) {
 /* ═══ 14. SETTINGS ═══ */
 function vSettings() {
   const s = state.settings, p = state.profile;
-  let h = '<div class="settings-shell"><div class="split2">';
-  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
+  const settingsTab = ui.settingsTab || 'profile';
+  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль','user'],['group','Группа','users'],['interface','Интерфейс','palette'],['data','Данные','database'],['app','Приложение','monitor']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + ic(t[2], 17) + '<span>' + t[1] + '</span></button>').join('') + '</div><div class="settings-tab-content">';
+  h += '<section class="card rise settings-card" data-settings-panel="profile"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
     '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
@@ -1179,7 +1180,7 @@ function vSettings() {
     '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
     '</section>';
 
-  h += '<section class="card rise settings-card" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
+  h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
@@ -1198,7 +1199,7 @@ function vSettings() {
   }
   h += '</section>';
 
-  h += '<section class="card rise settings-card" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2></div></div>' +
+  h += '<section class="card rise settings-card" data-settings-panel="interface" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2></div></div>' +
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
     [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
@@ -1220,15 +1221,15 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
-  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
-  h += '<section class="card rise settings-card" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
+  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
+  h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
     '<button class="btn btn-secondary btn-sm" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить из файла</button></div>' +
     '<div class="row mt-s"><button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
     '<p class="t-xs t-muted mt">Объём данных: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</p></section>';
 
-  h += '<section class="card rise settings-card" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
+  h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
     '' +
     '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span><span class="badge b-muted">свайп-навигация</span></div>' +
     '<hr class="divider"><span class="field-label">Горячие клавиши</span>' +
@@ -1898,6 +1899,7 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
+    case 'settings-tab': stop(); ui.settingsTab = el.getAttribute('data-v') || 'profile'; render(); break;
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
     case 'notation-set': stop(); state.settings.notation = el.getAttribute('data-v'); commit(); break;
