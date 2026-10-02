@@ -813,14 +813,14 @@ function vCalendar() {
     '<button class="btn btn-tertiary btn-sm" type="button" data-act="ev-reset">Сбросить</button></div>';
 
   h += '<section class="card rise" style="animation-delay:.07s" aria-labelledby="upH"><div class="card-h"><div><h2 id="upH">Ближайшие участия</h2>' +
-    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div></div>' +
+    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div>' + collectionViewControl('events') + '</div>' +
     '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div>';
   if (!list.length) h += stateHTML(ui.evQuery || ac ? 'search' : 'empty',
     ui.evQuery || ac ? 'Ничего не найдено' : 'Событий пока нет',
     ui.evQuery || ac ? 'Попробуйте изменить запрос или сбросить фильтры — возможно, события запланированы на другие даты.' : 'Создайте первую репетицию или выступление: укажите дату, время, место и состав.',
     (ui.evQuery || ac ? '<button class="btn btn-secondary" type="button" data-act="ev-reset">Сбросить фильтры</button>' : '') +
     '<button class="btn btn-primary" type="button" data-act="new-event">Создать событие</button>');
-  else list.slice(0, 12).forEach(o => { h += evRow(o, true); });
+  else { h += '<div class="participation-collection collection-' + collectionView('events') + '">'; list.slice(0, 12).forEach(o => { h += evRow(o, true); }); h += '</div>'; }
   return h + '</section>';
 }
 function calTitle() {
@@ -1002,13 +1002,23 @@ function filteredSongs() {
   return l.sort(cmp);
 }
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
+function collectionView(section) {
+  const views = state.settings.collectionViews || {};
+  return views[section] === 'list' ? 'list' : 'blocks';
+}
+function collectionViewControl(section) {
+  const current = collectionView(section);
+  return '<div class="view-switch" role="group" aria-label="Режим отображения">' +
+    [['blocks','Блоки','grid'],['list','Список','rows']].map(v => '<button type="button" class="view-switch-btn' + (current === v[0] ? ' on' : '') + '" data-act="collection-view" data-section="' + section + '" data-v="' + v[0] + '" aria-pressed="' + (current === v[0]) + '" aria-label="' + v[1] + '">' + ic(v[2],15) + '<span>' + v[1] + '</span></button>').join('') + '</div>';
+}
+
 function vSongs() {
   const list = filteredSongs(), tags = allTags();
   let h = '<div class="toolbar">' +
     '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '" style="border:none;background:none;outline:none;font-size:var(--fs-body-s);flex:1;min-width:0;box-shadow:none">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
-    '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
+    collectionViewControl('songs') + '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
       (ui.songQuery ? '<button class="chip" type="button" data-act="song-clear">' + ic('search', 13) + '«' + esc(ui.songQuery) + '»<span class="rm">×</span></button>' : '') +
@@ -1026,7 +1036,7 @@ function vSongs() {
       state.songs.length ? '<button class="btn btn-secondary" type="button" data-act="song-reset">Сбросить фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">Добавить песню</button>'
         : '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить первую песню</button>') + '</div>';
   }
-  h += '<div class="grid g3">';
+  h += '<div class="grid g3 collection-grid collection-' + collectionView('songs') + '">';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     const dyn = (s.dynamics && s.dynamics.instruments || []).length;
@@ -1161,7 +1171,7 @@ function vSetlists() {
   if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
     'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
     '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
-  let h = '<div class="grid g2">';
+  let h = '<div class="grid g2 collection-grid collection-' + collectionView('setlists') + '">';
   state.setlists.slice().sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))).forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
@@ -2033,6 +2043,16 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
+    case 'collection-view': {
+      stop();
+      const section = el.getAttribute('data-section');
+      const value = el.getAttribute('data-v') === 'list' ? 'list' : 'blocks';
+      if (['songs','events','setlists'].includes(section)) {
+        state.settings.collectionViews = Object.assign({}, state.settings.collectionViews || {}, {[section]:value});
+        save(); render();
+      }
+      break;
+    }
     case 'settings-tab': stop(); ui.settingsTab = el.getAttribute('data-v') || 'profile'; render(); break;
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
