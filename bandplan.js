@@ -301,6 +301,32 @@ function persistParticipationLocal() {
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
 }
 
+function refreshMemberParticipationUI() {
+  document.querySelectorAll('.memb-row[data-member-key]').forEach(row => {
+    const member = memById(row.getAttribute('data-member-key'));
+    if (!member) return;
+    const summary = memberParticipationSummary(member);
+    const status = summary.status || 'unset';
+    const label = participantStatusLabel(summary.status);
+    const title = summary.event ? label + ' · ' + summary.event.title : label;
+    row.querySelectorAll('.participation-dot').forEach(dot => {
+      dot.className = 'participation-dot participation-dot-avatar status-' + status;
+      if (dot.classList.contains('participation-dot-avatar')) {
+        dot.title = title;
+        dot.setAttribute('aria-label', title);
+      }
+    });
+    const badge = row.querySelector('.member-participation');
+    if (badge) {
+      badge.className = 'member-participation status-' + status;
+      badge.title = title;
+      badge.setAttribute('aria-label', title);
+      const text = badge.querySelector('.member-participation-text');
+      if (text) text.textContent = label;
+    }
+  });
+}
+
 function refreshParticipationUI(evId) {
   const ev = evById(evId);
   if (!ev) return;
@@ -1243,7 +1269,7 @@ function vSettings() {
   state.members.forEach(function (m) {
     const summary = memberParticipationSummary(m);
     const statusTitle = summary.event ? participantStatusLabel(summary.status) + ' · ' + summary.event.title : participantStatusLabel(summary.status);
-    h += '<div class="memb-row">' +
+    h += '<div class="memb-row" data-member-key="' + esc(String(m.accountId || m.id || '')) + '">' +
       '<div class="avatar participation-avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (summary.status || 'unset') + '"></span></div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
@@ -2705,24 +2731,48 @@ async function bootCloudSync(hadLocal, durableInfo) {
     if (!state.onboardingDone) openOnboarding();
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
+
+      const beforeEvents = JSON.parse(JSON.stringify(state.events || []));
       const before = JSON.stringify({
         profile: state.profile,
         settings: state.settings,
         members: state.members,
-        events: state.events,
         songs: state.songs,
-        setlists: state.setlists
+        setlists: state.setlists,
+        events: beforeEvents.map(ev => {
+          const copy = Object.assign({}, ev);
+          delete copy.participation;
+          return copy;
+        })
       });
+
       normalizeCloudState(incoming);
+
       const after = JSON.stringify({
         profile: state.profile,
         settings: state.settings,
         members: state.members,
-        events: state.events,
         songs: state.songs,
-        setlists: state.setlists
+        setlists: state.setlists,
+        events: (state.events || []).map(ev => {
+          const copy = Object.assign({}, ev);
+          delete copy.participation;
+          return copy;
+        })
       });
-      if (before === after) return;
+
+      if (before === after) {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        (state.events || []).forEach(ev => {
+          const oldEv = beforeEvents.find(x => String(x.id) === String(ev.id));
+          if (oldEv && JSON.stringify(oldEv.participation || {}) !== JSON.stringify(ev.participation || {})) {
+            refreshParticipationUI(ev.id);
+          }
+        });
+        refreshMemberParticipationUI();
+        return;
+      }
+
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
       applyTheme();
       applyAccentVars();
