@@ -1968,6 +1968,7 @@ document.addEventListener('click', function (e) {
     case 'invite': {
       stop();el.disabled=true;
       window.BandPlanCloud.getInviteCode().then(async code=>{
+        try{ await window.BandPlanCloud.saveNow(state); }catch(syncError){ console.warn('BandPlan invite state sync deferred:',syncError); }
         const copied=await copyTextReliable(code);
         openModal({
           title:'Код приглашения',
