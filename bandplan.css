@@ -3849,3 +3849,38 @@ body{font-synthesis:none}
 @media(prefers-reduced-motion:reduce){
   [data-theme="glass"] body{background:var(--bg)!important}
 }
+
+
+/* BANDPLAN v8.1 — restrained polish over the proven v8 UI */
+:root{
+  --bp-ui-gap:12px;
+  --bp-ui-radius:12px;
+}
+/* Keep the original v8 visual language; improve rhythm and interaction precision. */
+.content{scroll-padding-top:76px}
+.page-head{scroll-margin-top:76px}
+.card,.hero,.song-card,.sl-item,.ev-row,.settings-card{backface-visibility:hidden}
+.btn,.icon-btn,.nav-item,.chip,.badge,.seg button{transition:background-color .14s ease,border-color .14s ease,color .14s ease,box-shadow .14s ease,transform .14s ease}
+.btn:active,.icon-btn:active,.nav-item:active{transform:translateY(1px)}
+.btn:focus-visible,.icon-btn:focus-visible,.nav-item:focus-visible,.chip:focus-visible,.seg button:focus-visible{outline:2px solid color-mix(in srgb,var(--accent) 72%,transparent);outline-offset:2px}
+/* Event rows: one stable grid, so title/category/meta/actions never fight for space. */
+.ev-row{grid-template-columns:64px minmax(0,1fr) auto!important;align-items:center!important;column-gap:16px!important;min-width:0}
+.ev-main,.ev-title,.ev-meta{min-width:0}
+.ev-title{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap}
+.ev-name{min-width:0;overflow-wrap:anywhere;line-height:1.25}
+.ev-category{flex:0 0 auto;white-space:nowrap}
+.ev-meta{display:flex;align-items:center;flex-wrap:wrap;min-width:0;row-gap:3px}
+.ev-acts{flex:0 0 auto;display:flex;align-items:center;gap:6px}
+/* Collections stay airy without becoming oversized. */
+.collection-grid{align-items:stretch}
+.collection-grid>.song-card,.collection-grid>.ev-row,.collection-blocks>.ev-row{min-width:0}
+.song-card .song-name{overflow-wrap:anywhere}
+/* Calendar remains information-dense and readable. */
+.cal-cell{overflow:hidden}
+.cal-cell .ev-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Desktop: keep the workspace centered; ultrawide screens should not stretch text to the edges. */
+@media(min-width:1440px){.content,.page-head{padding-left:clamp(28px,3vw,52px);padding-right:clamp(28px,3vw,52px)}}
+/* Tablet/mobile: preserve v8 structure but give controls more breathing room. */
+@media(max-width:720px){.ev-row{grid-template-columns:52px minmax(0,1fr)!important;column-gap:11px!important}.ev-acts{grid-column:2;justify-content:flex-start;margin-top:5px}.ev-meta{font-size:11px}.toolbar{gap:7px}.toolbar .btn,.toolbar .icon-btn{min-height:42px}.collection-grid{gap:10px}}
+@media(max-width:430px){.ev-row{grid-template-columns:46px minmax(0,1fr)!important;padding:11px!important}.ev-acts{gap:5px}.ev-acts .btn{min-height:38px}.card,.song-card{border-radius:13px!important}.page-head h1{line-height:1.15}}
+@media(prefers-reduced-motion:reduce){.btn,.icon-btn,.nav-item,.chip,.badge,.seg button{transition:none}.btn:active,.icon-btn:active,.nav-item:active{transform:none}}
