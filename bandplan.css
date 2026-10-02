@@ -2954,3 +2954,39 @@ svg { flex:0 0 auto; max-width:100%; }
   .ph-acts { min-width:0; }
   .ph-acts .btn { min-width:0; }
 }
+
+/* Square song tiles when the user chooses the block view */
+.collection-grid.collection-blocks {
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));
+  align-items:stretch;
+}
+.collection-grid.collection-blocks > .song-card {
+  aspect-ratio:1 / 1;
+  min-height:0;
+  overflow:hidden;
+  padding:clamp(12px,2vw,18px);
+  gap:clamp(8px,1.5vw,12px);
+}
+.collection-grid.collection-blocks > .song-card .song-meta { align-content:flex-start; overflow:hidden; }
+.collection-grid.collection-blocks > .song-card .song-acts { flex-wrap:wrap; }
+@media(max-width:640px) {
+  .collection-grid.collection-blocks { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .collection-grid.collection-blocks > .song-card { aspect-ratio:1 / 1; padding:10px; gap:7px; border-radius:16px; }
+  .collection-grid.collection-blocks > .song-card .song-top { gap:7px; }
+  .collection-grid.collection-blocks > .song-card .key-badge { width:34px; min-width:34px; height:34px; font-size:12px; }
+  .collection-grid.collection-blocks > .song-card .song-name { font-size:13px; line-height:1.25; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+  .collection-grid.collection-blocks > .song-card .song-artist { font-size:11px; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:1; overflow:hidden; }
+  .collection-grid.collection-blocks > .song-card .song-meta { gap:4px; }
+  .collection-grid.collection-blocks > .song-card .song-meta .badge { font-size:9px; padding:3px 5px; }
+  .collection-grid.collection-blocks > .song-card .song-acts { gap:4px; padding-top:5px; }
+  .collection-grid.collection-blocks > .song-card .song-acts .btn { min-height:30px; min-width:30px; padding:4px 6px; }
+  .collection-grid.collection-blocks > .song-card .song-acts .song-open { flex:1 1 100%; }
+}
+@media(max-width:350px) {
+  .collection-grid.collection-blocks { grid-template-columns:minmax(0,1fr); }
+  .collection-grid.collection-blocks > .song-card { aspect-ratio:auto; min-height:180px; }
+}
+.ios-install-steps { display:grid; gap:12px; }
+.ios-install-step { display:flex; align-items:flex-start; gap:12px; min-width:0; }
+.ios-install-step > span { flex:0 0 28px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--brand); color:#fff; font-weight:700; }
+.ios-install-step p { margin:2px 0 0; min-width:0; line-height:1.5; }
