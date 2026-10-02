@@ -3172,3 +3172,41 @@ input,textarea,select{max-width:100%;min-width:0}
 @media(max-width:360px){
   .participation-collection .ev-date{width:50px;min-width:50px;flex-basis:50px}
 }
+
+
+/* Keep the date label fully inside its decorative tile */
+.participation-collection .ev-row .ev-date{
+  box-sizing:border-box;
+  width:56px;
+  min-width:0;
+  max-width:100%;
+  flex:0 1 56px;
+  overflow:hidden;
+  padding:7px 2px;
+  border-radius:var(--r-14);
+}
+.participation-collection .ev-row .ev-date .d,
+.participation-collection .ev-row .ev-date .m{
+  box-sizing:border-box;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:clip;
+  white-space:nowrap;
+  text-align:center;
+}
+.participation-collection .ev-row .ev-date .d{
+  font-size:clamp(17px,5vw,22px);
+  letter-spacing:-.02em;
+}
+.participation-collection .ev-row .ev-date .m{
+  font-size:10px;
+  letter-spacing:0;
+}
+@media(max-width:640px){
+  .participation-collection .ev-row .ev-date{width:48px;flex-basis:48px;padding:7px 1px}
+  .participation-collection .ev-row .ev-date .d{font-size:18px}
+}
+@media(max-width:360px){
+  .participation-collection .ev-row .ev-date{width:44px;flex-basis:44px}
+  .participation-collection .ev-row .ev-date .d{font-size:17px}
+}
