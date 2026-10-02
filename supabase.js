@@ -367,6 +367,13 @@
       subscribe(subscriptionCallback);
     }
   });
+  async function clearLocalCache(){
+    const uid=currentSession?.user?.id;
+    if(!uid)return;
+    pending=null;
+    await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(uid));
+    await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.delete(uid));
+  }
   async function leaveGroup(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     clearTimeout(timer);
@@ -377,8 +384,9 @@
     activeGroupId=null;
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
+    await clearLocalCache();
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,joinGroup,getInviteCode,hydrateLocalCache};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,hydrateLocalCache};
 })();
