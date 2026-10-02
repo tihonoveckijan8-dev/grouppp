@@ -305,11 +305,11 @@ function seedDemo() {
   const a = off(2, 19, 0), b = off(6, 20, 0), c = off(11, 14, 0), e = off(19, 18, 30), f = off(4, 12, 0), g = off(-5, 19, 0);
   state.events = [
     { id: uid('e'), type: 'rehearsal', title: 'Репетиция основного сета', date: a.date, time: a.time, end: '21:30', location: 'База на Лиговском', notes: 'Прогоняем финал и переходы.', status: 'upcoming', repeat: 'weekly', setlistId: state.setlists[0].id, except: [] },
-    { id: uid('e'), type: 'gig', title: 'Концерт в «Портах»', date: b.date, time: b.time, end: '22:00', location: 'Клуб «Порты»', notes: 'Саундчек в 17:00.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, myStatus: 'yes', except: [] },
+    { id: uid('e'), type: 'gig', title: 'Концерт в «Портах»', date: b.date, time: b.time, end: '22:00', location: 'Клуб «Порты»', notes: 'Саундчек в 17:00.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, except: [] },
     { id: uid('e'), type: 'recording', title: 'Запись сингла «Эхо»', date: c.date, time: c.time, end: '19:00', location: 'Студия K-Rec', notes: 'Живьём, 3 дубля.', status: 'upcoming', repeat: 'none', setlistId: '', except: [] },
-    { id: uid('e'), type: 'gig', title: 'Фестиваль «Северный звук»', date: e.date, time: e.time, end: '19:15', location: 'Парк 300-летия', notes: 'Слот 45 минут, сцена B.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, myStatus: 'yes', except: [] },
+    { id: uid('e'), type: 'gig', title: 'Фестиваль «Северный звук»', date: e.date, time: e.time, end: '19:15', location: 'Парк 300-летия', notes: 'Слот 45 минут, сцена B.', status: 'upcoming', repeat: 'none', setlistId: state.setlists[0].id, except: [] },
     { id: uid('e'), type: 'meeting', title: 'Созвон по мерчу', date: f.date, time: f.time, end: '13:00', location: 'Онлайн', notes: '', status: 'upcoming', repeat: 'none', setlistId: '', except: [] },
-    { id: uid('e'), type: 'gig', title: 'Квартирник у друзей', date: g.date, time: g.time, end: '21:00', location: 'Лофт «Тихий»', notes: '', status: 'done', repeat: 'none', setlistId: state.setlists[1].id, myStatus: 'yes', except: [] }
+    { id: uid('e'), type: 'gig', title: 'Квартирник у друзей', date: g.date, time: g.time, end: '21:00', location: 'Лофт «Тихий»', notes: '', status: 'done', repeat: 'none', setlistId: state.setlists[1].id, except: [] }
   ];
   save();
 }
@@ -683,7 +683,7 @@ function filteredUpcoming() {
   return upcoming().filter(function (o) {
     const e = o.ev;
     if (ui.evTypes.length && ui.evTypes.indexOf(e.type) < 0) return false;
-    if (ui.evMine && e.myStatus !== 'yes') return false;
+    if (ui.evMine && eventStatusFor(e) !== 'yes') return false;
     if (ui.evRepeat && (!e.repeat || e.repeat === 'none')) return false;
     if (q && ((e.title || '') + ' ' + (e.location || '') + ' ' + (e.notes || '')).toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1216,7 +1216,7 @@ function eventModal(evId, date) {
     Object.keys(REPEATS).map(k => '<option value="' + k + '"' + (d.repeat === k ? ' selected' : '') + '>' + REPEATS[k] + '</option>').join('') + '</select></div>' +
     '<div class="field"><label class="field-label" for="f_until">Повторять до</label><input class="input" id="f_until" type="date" value="' + esc(d.repeatUntil || '') + '"><span class="err"></span></div></div>' +
     '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
-    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (d.myStatus === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Состав</span><div class="row" id="f_members" style="gap:6px">' +
     (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены — сделайте это в настройках.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
@@ -1243,7 +1243,7 @@ function readEventForm(id) {
   return {
     id: id || uid('e'), type: t ? t.getAttribute('data-t') : 'gig', title: title, date: date, time: time, end: end,
     location: fv('f_loc'), notes: fv('f_notes'), status: $('#f_status', w).value, repeat: $('#f_repeat', w).value, repeatUntil: until,
-    setlistId: $('#f_sl', w).value, myStatus: my ? my.getAttribute('data-v') : '',
+    setlistId: $('#f_sl', w).value, personalStatus: my ? my.getAttribute('data-v') : '',
     memberIds: $$('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []
   };
 }
@@ -1776,7 +1776,10 @@ document.addEventListener('click', function (e) {
     case 'event-save': {
       stop(); btnLoading(el);
       const data = readEventForm(id); if (!data) break;
+      const personalStatus = data.personalStatus || '';
+      delete data.personalStatus;
       if (id) { const i = state.events.findIndex(x => x.id === id); if (i >= 0) state.events[i] = data; } else state.events.push(data);
+      setPersonalEventStatus(data.id, personalStatus);
       ui.selDate = data.date; ui.month = new Date(data.date + 'T00:00:00');
       modalDirty = false; hardClose(modalRoot); commit();
       toast(id ? 'Изменения события сохранены' : 'Событие добавлено в расписание', 'ok');
