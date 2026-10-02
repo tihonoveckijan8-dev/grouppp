@@ -2723,3 +2723,19 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
+
+@supports (height:100svh){
+  .app,.main,.sidebar{min-height:100svh}
+}
+@supports (height:100dvh){
+  .app,.main,.sidebar{height:100dvh}
+}
+@media (max-width:900px){
+  .content{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+}
+@media (min-width:1920px){
+  :root{--maxw:1480px}
+}
+@media (min-width:2560px){
+  :root{--maxw:1640px}
+}
