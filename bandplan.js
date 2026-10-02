@@ -1346,7 +1346,7 @@ function setlistModal(id) {
 }
 function memberModal(id) {
   const m = id ? memById(id) : null;
-  const d = m || { name: '', role: '', color: PALETTE[state.members.length % PALETTE.length], note: '' };
+  const d = m || { name: '', role: '', note: '' };
   openModal({
     title: m ? 'Участник' : 'Новый участник',
     body: '<div class="field"><label class="field-label" for="f_mname">Имя *</label><input class="input" id="f_mname" maxlength="50" value="' + esc(d.name) + '" placeholder="Имя и фамилия"><span class="err"></span></div>' +
