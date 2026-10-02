@@ -3231,3 +3231,19 @@ input,textarea,select{max-width:100%;min-width:0}
     max-width:44px;
   }
 }
+
+
+/* Center collection layout selector on mobile for both library sections. */
+@media(max-width:640px){
+  .songs-view-toolbar,.collection-toolbar{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:100%;
+  }
+  .songs-view-toolbar .view-switch,.collection-toolbar .view-switch{
+    margin-inline:auto;
+    justify-content:center;
+    max-width:100%;
+  }
+}
