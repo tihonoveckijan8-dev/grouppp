@@ -2541,41 +2541,8 @@ function wireSearch() {
   document.addEventListener('click', function (e) { if (!e.target.closest('#searchWrap')) closeSearch(); });
 }
 
-/* ═══ 23. SWIPE ═══ */
-function wireSwipe() {
-  const el = $('#view');
-  let sx = 0, sy = 0, st = 0, tracking = false;
-  const ok = () => !$('#scene').classList.contains('on') && !$('#modalOverlay').classList.contains('on') && !$('#onb').classList.contains('on') && window.innerWidth <= 900;
-  el.addEventListener('touchstart', function (e) {
-    if (!ok()) return;
-    if (e.target.closest('input,textarea,select,.lib-list,.dropzone,.tg-scroll,.dyn-strip,.dyn-scroll,.lyrics,.search-drop,.actionbar')) return;
-    const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); tracking = true;
-  }, { passive: true });
-  el.addEventListener('touchmove', function (e) {
-    if (!tracking) return;
-    const t = e.touches[0], dx = t.clientX - sx, dy = t.clientY - sy;
-    if (Math.abs(dx) > 22 && Math.abs(dx) > Math.abs(dy) * 1.6) el.style.opacity = String(clamp(1 - Math.abs(dx) / 900, .65, 1));
-  }, { passive: true });
-  el.addEventListener('touchend', function (e) {
-    if (!tracking) return;
-    tracking = false; el.style.opacity = '';
-    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy, dt = Date.now() - st;
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.6 || dt > 900) return;
-    const order = TABS.map(x => x.k), cur = navKey(parseHash().name);
-    let i = order.indexOf(cur); if (i < 0) i = 0;
-    const next = dx < 0 ? order[(i + 1) % order.length] : order[(i - 1 + order.length) % order.length];
-    if (next !== cur) { ui.skeleton = true; go('#/' + next); }
-  }, { passive: true });
-}
-let hintT = null;
-function swipeHint(dir) {
-  let h = $('.swipe-hint');
-  if (!h) { h = document.createElement('div'); h.className = 'swipe-hint'; h.setAttribute('aria-hidden', 'true'); document.body.appendChild(h); }
-  const t = TABS.find(x => x.k === navKey(parseHash().name));
-  h.innerHTML = ic(dir === '→' ? 'right' : 'left', 15) + '<span>' + esc(t ? t.t : '') + '</span>';
-  h.classList.add('on'); clearTimeout(hintT);
-  hintT = setTimeout(() => h.classList.remove('on'), 1000);
-}
+/* Навигация между вкладками выполняется только через меню.
+   Горизонтальный свайп отключён намеренно. */
 
 /* ═══ 24. KEYBOARD ═══ */
 document.addEventListener('keydown', function (e) {
@@ -2848,7 +2815,7 @@ function init() {
     ui.skeleton = false;
     routeTransition();
   });
-  wireSearch(); wireSwipe(); wireImport(); wireNet(); wireStickyHeader();
+  wireSearch(); wireImport(); wireNet(); wireStickyHeader();
   $('#scBody').addEventListener('scroll', updateBar, { passive: true });
   $('#scBody').addEventListener('wheel', () => { if (scene.auto) setAuto(false); }, { passive: true });
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
