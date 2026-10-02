@@ -1473,3 +1473,38 @@ button,a,input,select,textarea { touch-action: manipulation; }
   box-shadow:0 0 0 1px rgba(37,71,208,.12);
   font-weight:var(--fw-semi);
 }
+
+/* ══ PREMIUM SETTINGS ══ */
+.settings-shell{max-width:1180px;margin:0 auto}
+.settings-shell>.split2{gap:18px}
+.settings-card{border-radius:24px;padding:24px;background:var(--surf-2);border:1px solid color-mix(in srgb,var(--border) 88%,transparent);box-shadow:0 10px 30px rgba(15,23,42,.055);transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
+.settings-card:hover{border-color:color-mix(in srgb,var(--accent) 16%,var(--border));box-shadow:0 14px 36px rgba(15,23,42,.075)}
+.settings-card .card-h{margin-bottom:20px}
+.settings-card .card-h h2{font-size:16px;letter-spacing:-.02em}
+.settings-card .card-h .sub{max-width:560px}
+.settings-card .field{margin-bottom:18px}
+.settings-card .field:last-child{margin-bottom:0}
+.settings-card .field-label{font-size:12px;font-weight:700;letter-spacing:.01em}
+.settings-card .input,.settings-card .select{min-height:46px;border-radius:13px}
+.settings-card textarea.input{padding-top:12px}
+.settings-card .seg{padding:4px;border-radius:14px;background:var(--surf-3);border:1px solid var(--border);gap:3px}
+.settings-card .seg button{min-height:38px;border-radius:10px;padding:8px 12px;font-weight:650}
+.settings-card .seg button.on{box-shadow:0 3px 10px rgba(15,23,42,.08)}
+.settings-card .chip{min-height:38px;border-radius:12px;padding:7px 11px}
+.settings-card .swatches{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.settings-card .sw{width:30px;height:30px;border-radius:50%;border:2px solid var(--surf-2);box-shadow:0 0 0 1px var(--border),0 2px 6px rgba(15,23,42,.1);transition:transform .16s ease,box-shadow .16s ease}
+.settings-card .sw:hover{transform:scale(1.08)}
+.settings-card .sw.on{box-shadow:0 0 0 2px var(--surf-2),0 0 0 4px var(--accent)}
+.settings-member-footer{margin-top:18px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+.settings-leave{min-height:42px;padding:9px 14px;border-radius:12px}
+.settings-card .stat-mini{border-radius:16px;padding:15px 14px;background:var(--surf-1);border:1px solid var(--border);box-shadow:none}
+.settings-card .stat-mini .v{font-size:22px}
+@media(max-width:760px){
+  .settings-shell>.split2{grid-template-columns:1fr}
+  .settings-card{padding:18px;border-radius:20px}
+  .settings-member-footer{justify-content:stretch}
+  .settings-leave{width:100%;justify-content:center}
+  .settings-card .seg{width:100%}
+  .settings-card .seg button{min-width:0;flex:1}
+}
+@media(prefers-reduced-motion:reduce){.settings-card,.settings-card .sw{transition:none}}
