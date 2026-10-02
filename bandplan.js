@@ -1628,7 +1628,7 @@ function applyAccentVars() {
 let onbStep = 0, onbData = null;
 function openOnboarding() {
   onbStep = 0;
-  onbData = { name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes', members: [{ name: '', role: 'vocal', color: PALETTE[0] }], theme: 'light', accent: '#2547D0', demo: false };
+  onbData = { name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes', members: [{ name: '', role: 'vocal' }], theme: 'light', accent: '#2547D0', demo: false };
   drawOnb(); $('#onb').classList.add('on');
 }
 function drawOnb() {
@@ -1725,7 +1725,7 @@ function finishOnboarding() {
   state.profile.bandDesc = onbData.bandDesc;
   state.profile.defaultParticipation = onbData.participation;
   state.settings.theme = onbData.theme; state.settings.accent = onbData.accent;
-  state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), color: onbData.accent, note: 'это вы' }];
+  state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), note: 'это вы' }];
   state.onboardingDone = true;
   applyTheme(); applyAccentVars(); save();
   $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
