@@ -1089,7 +1089,7 @@ function vSongs() {
       state.songs.length ? '<button class="btn btn-secondary" type="button" data-act="song-reset">Сбросить фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">Добавить песню</button>'
         : '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить первую песню</button>') + '</div>';
   }
-  h += '<div class="grid g3 collection-grid>';
+  h += '<div class="grid g3 collection-grid">';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     const dyn = (s.dynamics && s.dynamics.instruments || []).length;
