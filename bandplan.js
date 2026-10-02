@@ -228,9 +228,31 @@ function eventStatusFor(ev) {
   const map = personalParticipationMap();
   return map[String(ev.id)] || '';
 }
+function currentMemberForParticipation() {
+  const uid = window.BandPlanCloud && window.BandPlanCloud.user ? window.BandPlanCloud.user()?.id : '';
+  return state.members.find(m => uid && (m.accountId === uid || m.id === uid)) || null;
+}
+function participantStatusFor(ev, member) {
+  const key = member && (member.accountId || member.id);
+  const map = ev && ev.participation && typeof ev.participation === 'object' ? ev.participation : {};
+  const shared = key ? map[String(key)] || '' : '';
+  const me = currentMemberForParticipation();
+  return !shared && me && member && me.id === member.id ? eventStatusFor(ev) : shared;
+}
+function participantStatusLabel(v) {
+  return ({yes:'Участвует', maybe:'Под вопросом', no:'Не участвует'}[v] || 'Не отмечено');
+}
 function setPersonalEventStatus(id, value) {
   state.profile.eventParticipation = Object.assign({}, personalParticipationMap(), { [String(id)]: value || '' });
   if (!value) delete state.profile.eventParticipation[String(id)];
+}
+function setEventParticipantStatus(ev, member, value) {
+  if (!ev || !member) return;
+  const key = String(member.accountId || member.id || '');
+  if (!key) return;
+  ev.participation = Object.assign({}, ev.participation || {});
+  if (value) ev.participation[key] = value;
+  else delete ev.participation[key];
 }
 function stripSharedEventPersonalFields(events) {
   return (events || []).map(ev => {
@@ -816,7 +838,7 @@ function evRow(o, withPart) {
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
-    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => '<i style="background:var(--accent)" title="' + esc(m.name) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>').join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
+    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
       '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
@@ -1234,17 +1256,32 @@ function eventModal(evId, date) {
     '<div class="f2"><div class="field"><label class="field-label" for="f_repeat">Повторение</label><select class="select" id="f_repeat">' +
     Object.keys(REPEATS).map(k => '<option value="' + k + '"' + (d.repeat === k ? ' selected' : '') + '>' + REPEATS[k] + '</option>').join('') + '</select></div>' +
     '<div class="field"><label class="field-label" for="f_until">Повторять до</label><input class="input" id="f_until" type="date" value="' + esc(d.repeatUntil || '') + '"><span class="err"></span></div></div>' +
+    '<div class="field"><span class="field-label">Участники события</span><div class="event-participants" id="f_participants">' +
+    (state.members.length ? state.members.map(m => {
+      const included = (d.memberIds || []).indexOf(m.id) >= 0, ps = participantStatusFor(d, m);
+      return '<div class="event-participant' + (included ? ' is-in' : '') + '" data-member="' + esc(m.id) + '">' +
+        '<div class="event-part-main"><span class="event-part-avatar part-' + (ps || 'unset') + '">' + esc(m.name.charAt(0).toUpperCase()) + '</span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div>' +
+        '<span class="event-part-status part-status-' + (ps || 'unset') + '">' + esc(participantStatusLabel(ps)) + '</span></div>';
+    }).join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
-    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
-    '<div class="field"><span class="field-label">Состав</span><div class="row" id="f_members" style="gap:6px">' +
-    (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены — сделайте это в настройках.</span>') + '</div></div>' +
+    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    '<div class="field"><span class="field-label">Состав события</span><div class="row" id="f_members" style="gap:6px">' +
+    (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
   openModal({
     title: ev ? 'Изменить событие' : 'Новое событие', sub: ev ? pdateFull(ev.date) : 'Заполните название, дату и время', size: 'lg', body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="evSaveBtn" data-act="event-save" data-id="' + (ev ? ev.id : '') + '">' + ic('check', 16) + (ev ? 'Сохранить изменения' : 'Создать событие') + '</button>',
     onMount: function (w) {
       $$('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $$('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
-      $$('#f_my button', w).forEach(b => b.addEventListener('click', () => $$('#f_my button', w).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); })));
+      $$('#f_my button', w).forEach(b => b.addEventListener('click', () => {
+        $$('#f_my button', w).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
+        const me = currentMemberForParticipation(), box = me ? $('#f_participants [data-member="' + me.id + '"]', w) : null;
+        if (box) {
+          const v = b.getAttribute('data-v'), status = $('.event-part-status', box), av = $('.event-part-avatar', box);
+          if (status) { status.className = 'event-part-status part-status-' + v; status.textContent = participantStatusLabel(v); }
+          if (av) av.className = 'event-part-avatar part-' + v;
+        }
+      }));
       $$('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
     }
   });
@@ -1263,8 +1300,13 @@ function readEventForm(id) {
     id: id || uid('e'), type: t ? t.getAttribute('data-t') : 'gig', title: title, date: date, time: time, end: end,
     location: fv('f_loc'), notes: fv('f_notes'), status: $('#f_status', w).value, repeat: $('#f_repeat', w).value, repeatUntil: until,
     setlistId: $('#f_sl', w).value, personalStatus: my ? my.getAttribute('data-v') : '',
-    memberIds: $$('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []
-  };
+    participation: Object.assign({}, old && old.participation || {}, (function () {
+      const me = currentMemberForParticipation(), v = my ? my.getAttribute('data-v') : '';
+      if (!me || !v) return {};
+      const key = String(me.accountId || me.id || ''); if (!key) return {};
+      const map = {}; map[key] = v; return map;
+    })()),
+    memberIds: $$('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []  };
 }
 let dynDraft = null;
 function songModal(id) {
@@ -1851,8 +1893,9 @@ document.addEventListener('click', function (e) {
       const v = el.getAttribute('data-v');
       const next = eventStatusFor(ev) === v ? '' : v;
       setPersonalEventStatus(ev.id, next);
+      const me = currentMemberForParticipation();
+      if (me) setEventParticipantStatus(ev, me, next);
       commit();
-      if (next) toast('Ваше участие: ' + ({ yes: 'участвую', maybe: 'неизвестно', no: 'не участвую' }[next]), 'ok', 2400);
       break;
     }
     case 'ev-filter-open': stop(); openEventFilters(); break;
