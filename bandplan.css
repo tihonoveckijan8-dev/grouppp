@@ -2490,3 +2490,139 @@ button,a,input,select,textarea { touch-action: manipulation; }
   .data-action-danger{align-items:stretch;flex-direction:column}
   .data-action-danger .btn{width:100%}
 }
+
+/* ═══ SETTINGS BUTTON ALIGNMENT — PROFILE + DATA ═══ */
+.profile-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  width:100%;
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.profile-actions .btn{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  height:44px;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  border-radius:14px;
+  padding:0 14px;
+  white-space:nowrap;
+}
+.profile-actions .btn svg{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+}
+.profile-role-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.profile-role-list .chip{
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  height:38px;
+  justify-content:center;
+  padding:0 9px;
+  border-radius:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.profile-part-seg{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:5px;
+  padding:5px!important;
+  width:100%;
+}
+.profile-part-seg button{
+  width:100%;
+  min-width:0;
+  min-height:38px;
+  height:38px;
+  padding:0 7px;
+  border-radius:11px;
+  font-size:11px;
+  white-space:nowrap;
+}
+.data-action-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  width:100%;
+}
+.data-action-buttons .btn{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  height:44px;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  border-radius:14px;
+  padding:0 13px;
+  white-space:nowrap;
+}
+.data-action-buttons .btn svg{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+}
+.data-action-danger{
+  min-height:68px;
+}
+.data-action-danger .btn{
+  flex:0 0 auto;
+  min-width:154px;
+  min-height:42px;
+  height:42px;
+  justify-content:center;
+  border-radius:13px;
+  white-space:nowrap;
+}
+@media(max-width:600px){
+  .profile-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .profile-actions .btn{
+    height:44px;
+  }
+  .profile-role-list{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .profile-part-seg{
+    grid-template-columns:1fr!important;
+    gap:5px;
+  }
+  .profile-part-seg button{
+    height:40px;
+  }
+  .data-action-buttons{
+    grid-template-columns:1fr;
+  }
+  .data-action-buttons .btn{
+    height:44px;
+  }
+  .data-action-danger{
+    gap:12px;
+  }
+  .data-action-danger .btn{
+    width:100%;
+    min-width:0;
+  }
+}
+@media(max-width:380px){
+  .profile-role-list{grid-template-columns:1fr}
+  .profile-actions .btn,
+  .data-action-buttons .btn{font-size:11.5px}
+}
