@@ -227,13 +227,13 @@ function personalParticipationMap() {
 }
 function eventStatusFor(ev) {
   if (!ev) return '';
-  const id = String(ev.id || '');
-  const map = personalParticipationMap();
-  if (Object.prototype.hasOwnProperty.call(map, id)) return map[id] || '';
-  const me = currentMemberForParticipation();
-  const shared = ev.participation && typeof ev.participation === 'object' ? ev.participation : {};
-  const key = me && (me.accountId || me.id);
-  return key ? (shared[String(key)] || '') : '';
+  const id=String(ev.id||'');
+  const me=currentMemberForParticipation();
+  const shared=ev.participation && typeof ev.participation==='object' ? ev.participation : {};
+  const key=me && (me.accountId||me.id);
+  if(key && Object.prototype.hasOwnProperty.call(shared,String(key))) return shared[String(key)]||'';
+  const map=personalParticipationMap();
+  return Object.prototype.hasOwnProperty.call(map,id) ? (map[id]||'') : '';
 }
 function currentMemberForParticipation() {
   const uid = window.BandPlanCloud && window.BandPlanCloud.user ? window.BandPlanCloud.user()?.id : '';
