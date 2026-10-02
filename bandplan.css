@@ -183,7 +183,7 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .side-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.5;padding-top:var(--s2)}
 
 /* ─── 6. TOPBAR + SEARCH (L1/L3) ─────────────────────────────────────── */
-.topbar{flex:none;padding:var(--s5) var(--s8) var(--s3);z-index:60;position:relative;
+.topbar{flex:none;padding:var(--s5) var(--s8) var(--s3);z-index:500;position:relative;
   border-bottom:1px solid transparent;transition:border-color var(--t-card),box-shadow var(--t-card),background var(--t-card)}
 .topbar.stuck{border-bottom-color:var(--border);background:var(--bg);box-shadow:var(--shadow-xs)}
 .tb-inner{display:flex;align-items:center;gap:var(--s3);min-width:0;max-width:var(--maxw);margin:0 auto}
@@ -211,7 +211,7 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
   border-radius:var(--r-14);background:var(--warn-bg);color:var(--warn);font-size:13.5px;font-weight:var(--fw-semi);
   border:1px solid transparent}
 
-.search-drop{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:200;background:var(--surf-4);
+.search-drop{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:1000;background:var(--surf-4);
   border:1px solid var(--border);border-radius:var(--r-24);box-shadow:var(--shadow-lg);padding:var(--s2);
   max-height:min(62vh,520px);overflow-y:auto;display:none}
 .search-drop.open{display:block;animation:dropIn var(--t-pop) both}
