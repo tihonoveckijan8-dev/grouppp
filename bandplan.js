@@ -1353,12 +1353,9 @@ function memberModal(id) {
       '<div class="field"><span class="field-label">Роль / инструмент</span><div class="row" style="gap:6px" id="f_mrole">' +
       ROLES.map(r => '<button type="button" class="chip' + (rolesOf(d).indexOf(r.k) >= 0 ? ' on' : '') + '" data-r="' + r.k + '" aria-pressed="' + (rolesOf(d).indexOf(r.k) >= 0) + '">' + ic(r.icon, 13) + esc(r.label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><label class="field-label" for="f_mnote">Заметка</label><input class="input" id="f_mnote" maxlength="80" value="' + esc(d.note || '') + '" placeholder="Свой инструмент, бэк-вокал"></div>' +
-      '<div class="field"><span class="field-label">Цвет аватара</span><div class="row" id="f_mcol" style="gap:var(--s2)">' +
-      PALETTE.map(c => '<button type="button" data-c="' + c + '" style="width:36px;height:36px;border-radius:var(--r-10);border:2px solid ' + (d.color === c ? 'var(--text)' : 'transparent') + ';background:' + c + '" aria-label="Цвет ' + c + '" aria-pressed="' + (d.color === c) + '"></button>').join('') + '</div></div>',
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="mem-save" data-id="' + (m ? m.id : '') + '">' + ic('check', 16) + (m ? 'Сохранить изменения' : 'Добавить участника') + '</button>',
     onMount: function (w) {
       $$('#f_mrole .chip', w).forEach(b => b.addEventListener('click', () => { const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }));
-      $$('#f_mcol button', w).forEach(b => b.addEventListener('click', () => { $$('#f_mcol button', w).forEach(x => { x.style.borderColor = 'transparent'; x.setAttribute('aria-pressed', 'false'); }); b.style.borderColor = 'var(--text)'; b.setAttribute('aria-pressed', 'true'); }));
     }
   });
 }
@@ -2045,10 +2042,8 @@ document.addEventListener('click', function (e) {
       stop(); btnLoading(el);
       const name = fv('f_mname'); if (!name) { fieldError('f_mname', 'Введите имя участника'); break; }
       const roleEls = $$('#f_mrole .chip.on', modalRoot);
-      let col = null;
-      $$('#f_mcol button', modalRoot).forEach(b => { if (b.getAttribute('aria-pressed') === 'true' || (b.style.borderColor && b.style.borderColor.indexOf('transparent') < 0)) col = b; });
-      const data = { id: id || uid('m'), name: name, roles: roleEls.length ? roleEls.map(x => x.getAttribute('data-r')) : ['other'], role: roleEls.length ? roleEls[0].getAttribute('data-r') : 'other', note: fv('f_mnote'), color: col ? col.getAttribute('data-c') : PALETTE[0] };
-      if (id) { const i = state.members.findIndex(x => x.id === id); if (i >= 0) { data.color = state.members[i].color || data.color; state.members[i] = data; } }
+      const data = { id: id || uid('m'), name: name, roles: roleEls.length ? roleEls.map(x => x.getAttribute('data-r')) : ['other'], role: roleEls.length ? roleEls[0].getAttribute('data-r') : 'other', note: fv('f_mnote') };
+      if (id) { const i = state.members.findIndex(x => x.id === id); if (i >= 0) { data.accountId = state.members[i].accountId || ''; state.members[i] = data; } }
       else state.members.push(data);
       modalDirty = false; hardClose(modalRoot); commit(); toast(id ? 'Данные участника обновлены' : 'Участник добавлен в состав', 'ok');
       break;
