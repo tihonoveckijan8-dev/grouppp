@@ -2245,11 +2245,22 @@ button,a,input,select,textarea { touch-action: manipulation; }
   transition:color var(--t-fast),background var(--t-fast),border-color var(--t-fast),box-shadow var(--t-fast),transform var(--t-fast);
 }
 .settings-tab svg{
+  position:absolute;
+  left:12px;
+  top:50%;
   width:16px;
   height:16px;
   flex:0 0 16px;
+  transform:translateY(-50%);
   opacity:.68;
   stroke-width:1.9;
+}
+.settings-tab span{
+  display:block;
+  width:100%;
+  min-width:0;
+  text-align:center;
+  line-height:1;
 }
 .settings-tab:hover{
   color:var(--text);
@@ -2324,7 +2335,7 @@ button,a,input,select,textarea { touch-action: manipulation; }
 @media(max-width:380px){
   .settings-tabs{grid-template-columns:repeat(5,101px)}
   .settings-tab{padding:0 7px;font-size:10.5px;gap:5px}
-  .settings-tab svg{width:15px;height:15px;flex-basis:15px}
+  .settings-tab svg{left:10px;width:15px;height:15px;flex-basis:15px}
 }
 @media(prefers-reduced-motion:reduce){
   .settings-tab,.settings-tab::after,.settings-tab-content{transition:none;animation:none}
