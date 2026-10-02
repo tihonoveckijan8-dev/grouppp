@@ -3117,3 +3117,35 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 @media(min-width:901px){
   .content{scrollbar-gutter:stable}
 }
+
+
+/* UI fit pass: keep card content and controls inside their surfaces */
+.card,.song-card,.sl-item,.memb-row,.profile-settings-grid,.settings-tab-content{min-width:0;max-width:100%}
+.card{overflow-wrap:anywhere}
+.card-h>*,.row>*{min-width:0}
+.song-card{overflow:hidden}
+.song-top{min-width:0;align-items:flex-start}
+.song-top>div:last-child{flex:1;min-width:0}
+.song-meta{min-width:0;max-width:100%;flex-wrap:wrap;overflow:hidden}
+.song-meta .badge{max-width:100%;min-width:0;overflow-wrap:anywhere}
+.song-acts{display:flex;flex-wrap:wrap;align-items:center;min-width:0}
+.song-acts .btn{flex:0 0 auto}
+.sl-item{grid-template-columns:auto auto minmax(0,1fr) auto auto auto auto auto;}
+.sl-info,.sl-sub{min-width:0;max-width:100%}
+.sl-sub{display:flex;flex-wrap:wrap;overflow-wrap:anywhere}
+.memb-row{display:flex;flex-wrap:wrap;align-items:center}
+.memb-row>.grow{flex:1 1 120px;min-width:0}
+.member-participation{max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.profile-settings-grid,.group-settings-controls{min-width:0}
+.profile-role-list{display:flex;flex-wrap:wrap;min-width:0}
+.settings-tabs{max-width:100%;overscroll-behavior-x:contain}
+input,textarea,select{max-width:100%;min-width:0}
+@media(max-width:640px){
+ .sl-item{grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px}
+ .sl-item .mini-stepper{grid-column:3;justify-self:start}
+ .sl-item .icon-btn{min-width:36px;min-height:36px}
+ .memb-row .member-participation{flex:1 1 100%;margin-left:52px}
+ .profile-actions{display:flex;flex-wrap:wrap}
+ .profile-actions .btn{flex:1 1 140px;min-width:0}
+ .active-chips{max-width:100%;overflow-x:auto;flex-wrap:nowrap;overscroll-behavior-x:contain}
+}
