@@ -1966,19 +1966,46 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'invite': {
-      stop();el.disabled=true;
-      window.BandPlanCloud.getInviteCode().then(async code=>{
-        try{ await window.BandPlanCloud.saveNow(state); }catch(syncError){ console.warn('BandPlan invite state sync deferred:',syncError); }
+      stop();
+      const btn=el;
+      btn.disabled=true;
+      const cloud=window.BandPlanCloud;
+      if(!cloud || typeof cloud.getInviteCode!=='function'){
+        btn.disabled=false;
+        openModal({
+          title:'Облачное подключение недоступно',
+          sub:'Невозможно создать группу без соединения с Supabase.',
+          body:'<div class="state-box"><strong>BandPlan работает в локальном режиме.</strong><br><span class="t-muted">Обновите страницу и убедитесь, что вы вошли в аккаунт. После подключения Supabase кнопка создаст группу и код автоматически.</span></div>',
+          footer:'<button class="btn btn-primary" type="button" data-act="modal-close">Понятно</button>'
+        });
+        break;
+      }
+      Promise.resolve().then(async()=>{
+        const result=await cloud.getInviteCode(state.profile?.bandName||'Моя группа',myRoles());
+        const code=typeof result==='string'?result:result?.code;
+        if(!code)throw new Error('Сервер не вернул код приглашения.');
+        if(result?.groupName)state.profile.bandName=result.groupName;
+        state.onboardingDone=true;
+        try{await cloud.saveNow(state);}catch(syncError){console.warn('BandPlan invite state sync deferred:',syncError);}
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
         const copied=await copyTextReliable(code);
         openModal({
           title:'Код приглашения',
-          sub:'Отправьте этот код участнику. Код можно скопировать повторно в любой момент.',
-          body:'<div class="field"><label class="field-label" for="f_invite_code">Код группы</label><div class="row" style="gap:8px"><input class="input" id="f_invite_code" value="'+esc(code)+'" readonly spellcheck="false" style="font-weight:700;letter-spacing:.14em;text-transform:uppercase"><button class="btn btn-secondary" type="button" data-act="invite-copy">'+ic('copy',16)+'Скопировать</button></div><span class="hint">Код создаётся и хранится в Supabase, поэтому он одинаковый на всех устройствах участников.</span></div>',
+          sub:'Отправьте этот код ребятам — они смогут вступить в вашу группу со своих аккаунтов.',
+          body:'<div class="field"><label class="field-label" for="f_invite_code">Код группы</label><div class="row" style="gap:8px"><input class="input" id="f_invite_code" value="'+esc(code)+'" readonly spellcheck="false" style="font-weight:700;letter-spacing:.14em;text-transform:uppercase"><button class="btn btn-secondary" type="button" data-act="invite-copy">'+ic('copy',16)+'Скопировать</button></div><span class="hint">Код хранится в Supabase и действителен для вступления до 500 участников.</span></div>',
           footer:'<button class="btn btn-primary" type="button" data-act="modal-close">Готово</button>'
         });
         if(copied) toast('Код приглашения скопирован: '+code,'ok',5000);
         else toast('Код создан. Нажмите «Скопировать» рядом с кодом.','warn',6500);
-      }).catch(err=>toast('Не удалось получить код: '+(err.message||'проверьте подключение'),'err',7000)).finally(()=>{el.disabled=false;});
+      }).catch(err=>{
+        console.error('BandPlan invite creation failed:',err);
+        openModal({
+          title:'Не удалось создать группу',
+          sub:'Сервер вернул ошибку при создании группы или приглашения.',
+          body:'<div class="state-box"><strong>'+esc(err?.message||'Неизвестная ошибка')+'</strong><br><span class="t-muted">Группа не была создана частично: операция выполняется одной транзакцией. Нажмите «Закрыть» и повторите попытку.</span></div>',
+          footer:'<button class="btn btn-primary" type="button" data-act="modal-close">Закрыть</button>'
+        });
+      }).finally(()=>{btn.disabled=false;});
       break;
     }
     case 'invite-copy': {
