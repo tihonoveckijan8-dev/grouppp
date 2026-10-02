@@ -2066,7 +2066,20 @@ document.addEventListener('click', function (e) {
       }
       break;
     }
-    case 'settings-tab': stop(); ui.settingsTab = el.getAttribute('data-v') || 'profile'; render(); break;
+    case 'settings-tab': {
+      stop();
+      const tabs = el.closest('.settings-tabs');
+      const scrollLeft = tabs ? tabs.scrollLeft : 0;
+      ui.settingsTab = el.getAttribute('data-v') || 'profile';
+      render();
+      // Rendering replaces the settings markup. Restore the horizontal
+      // position so selecting a tab never jumps the tab strip forward.
+      requestAnimationFrame(() => {
+        const nextTabs = $('.settings-tabs');
+        if (nextTabs) nextTabs.scrollLeft = scrollLeft;
+      });
+      break;
+    }
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
     case 'notation-set': stop(); state.settings.notation = el.getAttribute('data-v'); commit(); break;
