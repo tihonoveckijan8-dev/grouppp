@@ -1089,7 +1089,7 @@ function vSongs() {
       state.songs.length ? '<button class="btn btn-secondary" type="button" data-act="song-reset">Сбросить фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">Добавить песню</button>'
         : '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить первую песню</button>') + '</div>';
   }
-  h += '<div class="grid g3 collection-grid collection-' + collectionView('songs') + '">';
+  h += '<div class="grid g3 collection-grid>';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     const dyn = (s.dynamics && s.dynamics.instruments || []).length;
@@ -2735,11 +2735,9 @@ function normalizeCloudState(d) {
   const base = defaults(), x = d && typeof d === 'object' ? d : {};
   // Display mode is a local UI preference. Preserve it when shared cloud
   // state refreshes, while still accepting it from cloud if no local choice exists.
-  const localViews = state.settings && state.settings.collectionViews || {};
   state = Object.assign(base, x);
   state.profile = Object.assign(base.profile, x.profile || {});
   state.settings = Object.assign(base.settings, x.settings || {});
-  state.settings.collectionViews = Object.assign({}, base.settings.collectionViews, x.settings && x.settings.collectionViews || {}, localViews);
   state.members = Array.isArray(x.members) ? x.members : [];
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
