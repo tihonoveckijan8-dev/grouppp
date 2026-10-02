@@ -2221,6 +2221,25 @@ function wireSearch() {
     const i = +it.getAttribute('data-sr');
     if (i !== ui.searchIdx) { ui.searchIdx = i; $$('#searchDrop .sd-item').forEach(x => { x.classList.remove('sel'); x.setAttribute('aria-selected', 'false'); }); it.classList.add('sel'); it.setAttribute('aria-selected', 'true'); }
   });
+  /* Mobile search sheet can be dismissed with a vertical swipe. */
+  let sx = 0, sy = 0, tracking = false;
+  dd.addEventListener('touchstart', function (e) {
+    if (window.innerWidth > 640 || !e.touches[0]) return;
+    const t = e.touches[0]; sx = t.clientX; sy = t.clientY; tracking = true;
+    dd.classList.remove('search-swipe-out');
+  }, { passive: true });
+  dd.addEventListener('touchend', function (e) {
+    if (!tracking || window.innerWidth > 640 || !e.changedTouches[0]) return;
+    tracking = false;
+    const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dy) > 70 && Math.abs(dy) > Math.abs(dx) * 1.25) {
+      closeSearch();
+      dd.classList.remove('search-swipe-out');
+      const inp = $('#globalSearch');
+      if (inp) inp.blur();
+    }
+  }, { passive: true });
+
   document.addEventListener('click', function (e) { if (!e.target.closest('#searchWrap')) closeSearch(); });
 }
 
