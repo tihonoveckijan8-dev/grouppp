@@ -338,15 +338,18 @@
   }
   async function getInviteCode(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    const {data,error}=await client.rpc('bandplan_get_invite_code');
-    if(error){
-      const msg=String(error.message||'');
-      if(msg.includes('GROUP_REQUIRED'))throw new Error('Не удалось создать группу для приглашения.');
-      throw error;
-    }
-    const code=Array.isArray(data)?data[0]?.bandplan_get_invite_code:data;
-    if(!code)throw new Error('Не удалось создать код приглашения.');
-    return String(code).trim().toUpperCase();
+    const profileName=String(arguments[0]||'').trim();
+    const roles=Array.isArray(arguments[1])?arguments[1]:[];
+    const {data,error}=await client.rpc('bandplan_create_group_and_invite',{
+      p_name:profileName||'Моя группа',
+      p_display_name:profileName,
+      p_roles:roles
+    });
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row?.invite_code)throw new Error('Supabase не вернул код приглашения.');
+    activeGroupId=row.group_id||activeGroupId||null;
+    return {code:String(row.invite_code).trim().toUpperCase(),groupId:activeGroupId,groupName:row.group_name||''};
   }
   window.addEventListener('online',async()=>{
     if(!currentSession?.user)return;
