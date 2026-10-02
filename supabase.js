@@ -208,7 +208,20 @@
     const hasAccountIdentity=!!String(accountProfile?.display_name||'').trim() && Array.isArray(accountProfile?.roles) && accountProfile.roles.length>0;
     const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
     const personalEvents=hydratePersonalEventParticipation(pstate.events||[],profile);
-    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data||accountProfile?{state:Object.assign({},hydratedPersonal,{profile:personalEvents.profile}),updatedAt:lastUpdated}:null;}
+    if(!activeGroupId){
+      sharedBaseline={songs:{},events:{},setlists:{}};
+      if(!(personal.data||accountProfile)) return null;
+      return {
+        state:Object.assign({},hydratedPersonal,{
+          profile:personalEvents.profile,
+          songs:[],
+          events:[],
+          setlists:[],
+          members:[]
+        }),
+        updatedAt:lastUpdated
+      };
+    }
     const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
