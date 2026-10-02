@@ -1168,7 +1168,7 @@ const infoRow = (l, v) => '<div class="info-row"><span class="l">' + esc(l) + '<
 
 /* ═══ 13. SETLISTS ═══ */
 function vSetlists() {
-  if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
+  if (!state.setlists.length) return '<div class="collection-toolbar">' + collectionViewControl('setlists') + '</div><div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
     'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
     '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
   let h = '<div class="collection-toolbar">' + collectionViewControl('setlists') + '</div><div class="grid g2 collection-grid collection-' + collectionView('setlists') + '">';
