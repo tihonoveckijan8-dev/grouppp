@@ -12,6 +12,7 @@
   let realtimeGeneration = 0;
   let subscriptionCallback = null;
   let participationCallback = null;
+  let participationChannel = null;
 
   /* Durable offline cache: per-account snapshot + latest pending sync. */
   const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=1, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue';
@@ -70,6 +71,7 @@
     if (channel) { client.removeChannel(channel); channel = null; }
     if (Array.isArray(groupChannel)) { groupChannel.forEach(ch => client.removeChannel(ch)); groupChannel = null; }
     else if (groupChannel) { client.removeChannel(groupChannel); groupChannel = null; }
+    participationChannel = null;
   }
   function bindAuthLifecycle() {
     if (authSubscription) return;
@@ -387,7 +389,11 @@
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
     const sharedChannel=live.subscribe(status => handleStatus('shared', status));
-    const participationChannel=client.channel('bp-participation-'+uid)
+    participationChannel=client.channel('bp-participation-'+activeGroupId)
+      .on('broadcast',{event:'participation'},payload=>{
+        const data=payload?.payload;
+        if(data?.event_id&&data?.user_id&&typeof participationCallback==='function') participationCallback(data);
+      })
       .on('postgres_changes',{event:'*',schema:'public',table:'bandplan_event_participation',filter:'group_id=eq.'+activeGroupId},payload=>{
         if(generation !== realtimeGeneration) return;
         const row=payload?.new||payload?.old;
@@ -423,12 +429,21 @@
   }
   async function setEventParticipation(eventId,status){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const uid=String(currentSession.user.id);
+    const cleanStatus=String(status||'');
     const {data,error}=await client.rpc('bandplan_set_event_participation',{
       p_event_id:String(eventId||''),
       p_status:String(status||'')
     });
     if(error)throw error;
-    return data||null;
+    const result=data||{group_id:activeGroupId,event_id:String(eventId||''),user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()};
+    if(participationChannel && result.event_id){
+      await participationChannel.send({type:'broadcast',event:'participation',payload:{
+        group_id:result.group_id||activeGroupId,event_id:String(result.event_id),user_id:String(result.user_id||uid),
+        status:String(result.status||''),updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
+      }});
+    }
+    return result;
   }
   async function deleteAccount(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
