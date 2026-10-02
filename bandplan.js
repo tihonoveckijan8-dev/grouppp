@@ -1298,7 +1298,7 @@ function moveItem(slId, itemId, at) {
 function vSettings() {
   const s = state.settings, p = state.profile;
   const settingsTab = ui.settingsTab || 'profile';
-  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль','user'],['group','Группа','users'],['interface','Интерфейс','palette'],['data','Данные','database'],['app','Приложение','monitor']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + ic(t[2], 17) + '<span>' + t[1] + '</span></button>').join('') + '</div><div class="settings-tab-content">';
+  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль'],['group','Группа'],['interface','Интерфейс'],['data','Данные'],['app','Приложение']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div><div class="settings-tab-content">';
   h += '<section class="card rise settings-card" data-settings-panel="profile"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
     '<div class="profile-settings-grid">' +
     '<div class="profile-settings-main">' +
