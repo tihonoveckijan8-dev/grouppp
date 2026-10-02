@@ -2923,11 +2923,26 @@ function init() {
   document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake(); });
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(err => {
+    // When a new app version takes control, reload once so installed clients
+    // load the updated HTML, CSS and JavaScript instead of keeping old code.
+    let reloadingForWorker = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloadingForWorker) return;
+      reloadingForWorker = true;
+      location.reload();
+    });
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+        // Check immediately on launch; browsers otherwise throttle update checks.
+        registration.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) registration.update().catch(() => {});
+        });
+      } catch (err) {
         console.warn('BandPlan service worker registration failed:', err);
         window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'}));
-      });
+      }
     });
   }
   ui.skeleton = true;
