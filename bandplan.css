@@ -1714,3 +1714,55 @@ button,a,input,select,textarea { touch-action: manipulation; }
   border-color:transparent;
   box-shadow:var(--shadow-accent);
 }
+
+
+/* ═══ ACCENT + CLAYMORPHISM — profile surfaces and selected controls ═══ */
+.side-profile .av,
+.avatar-btn,
+.memb-row .avatar,
+.ob-member .avatar,
+.avatars i:not(.more){
+  background:var(--accent)!important;
+  color:var(--on-accent)!important;
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+.avatar-btn:hover{
+  background:var(--accent-hover)!important;
+  color:var(--on-accent)!important;
+  border-color:rgba(255,255,255,.24);
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+#sceneQuick.btn-primary,
+.btn-primary,
+.btn.on,
+.seg button.on,
+.auth-tabs button.on{
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+#sceneQuick.btn-primary:hover,
+.btn-primary:hover{
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+#sceneQuick.btn-primary:active,
+.btn-primary:active,
+.btn.on:active{
+  box-shadow:var(--clay-press)!important;
+}
+
+/* Search result sheet: on touch devices it stays anchored at the top. */
+@media(max-width:640px){
+  .search-drop{
+    top:calc(var(--s2) + env(safe-area-inset-top,0px));
+    bottom:auto;
+    max-height:min(72dvh,680px);
+    touch-action:pan-y;
+    transform:translateY(0);
+    transition:transform 180ms var(--ease),opacity 180ms var(--ease);
+  }
+  .search-drop.search-swipe-out{
+    transform:translateY(-18px);
+    opacity:0;
+    pointer-events:none;
+  }
+}
