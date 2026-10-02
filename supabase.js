@@ -436,7 +436,10 @@
     });
     if(error)throw error;
     activeGroupId=data?.[0]?.group_id||null;
-    if(activeGroupId && subscriptionCallback) subscribe(subscriptionCallback,participationCallback);
+    if(activeGroupId && subscriptionCallback){
+      try { await load(); } catch(e) { console.warn('BandPlan group hydration after join deferred:',e); }
+      subscribe(subscriptionCallback,participationCallback);
+    }
     return data?.[0]||null;
   }
   async function setEventParticipation(eventId,status){
@@ -491,7 +494,12 @@
     if(error)throw error;
     const row=Array.isArray(data)?data[0]:data;
     if(!row?.invite_code)throw new Error('Supabase не вернул код приглашения.');
+    const previousGroupId=activeGroupId;
     activeGroupId=row.group_id||activeGroupId||null;
+    if(activeGroupId && activeGroupId!==previousGroupId && subscriptionCallback){
+      try { await load(); } catch(e) { console.warn('BandPlan group hydration after creation deferred:',e); }
+      subscribe(subscriptionCallback,participationCallback);
+    }
     return {code:String(row.invite_code).trim().toUpperCase(),groupId:activeGroupId,groupName:row.group_name||''};
   }
   window.addEventListener('online',async()=>{
