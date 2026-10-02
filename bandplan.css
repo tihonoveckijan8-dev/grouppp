@@ -3324,3 +3324,22 @@ input,textarea,select{max-width:100%;min-width:0}
   .ev-row>.ev-date{width:42px;padding:7px 2px;}
   .ev-row .ev-title{column-gap:7px;}
 }
+
+
+/* Group settings: make each member's event participation clear and readable. */
+.group-settings-controls{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 14px;min-width:0}
+.group-settings-controls .profile-actions{margin-left:auto}
+.member-status-wrap{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;min-width:0;max-width:220px;flex:0 1 auto}
+.member-event-context{display:block;max-width:100%;color:var(--muted);font-size:10.5px;line-height:1.35;text-align:right;overflow-wrap:anywhere}
+.memb-row>.grow{flex:1 1 150px;min-width:0}
+@media(max-width:640px){
+ .group-settings-controls{justify-content:flex-start}
+ .group-settings-controls .profile-actions{width:100%;margin:0}
+ .member-status-wrap{flex:1 1 100%;max-width:none;align-items:flex-start;margin-left:52px}
+ .member-event-context{text-align:left}
+ .memb-row .member-participation{flex:0 0 auto;margin:0}
+}
+@media(max-width:380px){
+ .member-status-wrap{margin-left:46px}
+ .member-event-context{font-size:10px}
+}
