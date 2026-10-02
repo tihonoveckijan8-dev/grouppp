@@ -3265,3 +3265,30 @@ input,textarea,select{max-width:100%;min-width:0}
   .participation-collection .ev-row .part-switch{display:flex;flex-wrap:wrap;max-width:100%;}
   .participation-collection .ev-row .part-btn{min-width:0;white-space:normal;}
 }
+
+
+/* Upcoming event cards: stable non-overlapping mobile layout. */
+@media(max-width:640px){
+  .participation-collection.collection-blocks>.ev-row,
+  .participation-collection.collection-list>.ev-row{
+    display:grid!important;
+    grid-template-columns:48px minmax(0,1fr)!important;
+    grid-auto-rows:auto;
+    align-items:start;
+    column-gap:10px!important;
+    row-gap:0!important;
+    min-width:0;
+  }
+  .participation-collection .ev-row>.ev-date{grid-column:1!important;grid-row:1 / span 5!important;align-self:start;}
+  .participation-collection .ev-row>.ev-body{display:contents!important;}
+  .participation-collection .ev-row .ev-title{grid-column:2!important;grid-row:1!important;display:block!important;min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;line-height:1.4;margin:0;}
+  .participation-collection .ev-row .ev-title .badge{display:inline-flex;max-width:100%;white-space:normal;vertical-align:middle;margin:4px 5px 0 0;}
+  .participation-collection .ev-row .ev-meta{grid-column:2!important;grid-row:2!important;display:flex!important;flex-direction:column;align-items:flex-start;gap:6px;margin-top:9px;min-width:0;max-width:100%;line-height:1.4;}
+  .participation-collection .ev-row .ev-meta>span{display:flex;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+  .participation-collection .ev-row .avatars{grid-column:2!important;grid-row:3!important;margin-top:10px;}
+  .participation-collection .ev-row .part-switch{grid-column:1 / -1!important;grid-row:4!important;width:100%;min-width:0;margin-top:12px;}
+  .participation-collection .ev-row .ev-acts{grid-column:1 / -1!important;grid-row:5!important;width:100%;min-width:0;margin-top:10px;}
+}
+@media(max-width:380px){
+ .participation-collection.collection-blocks>.ev-row,.participation-collection.collection-list>.ev-row{grid-template-columns:42px minmax(0,1fr)!important;column-gap:8px!important;padding:12px!important;}
+}
