@@ -241,7 +241,7 @@
       if(!a.display_name)return;
       const existing=roster.find(m=>m.accountId===a.user_id||m.id===a.user_id||String(m.name||'').trim().toLowerCase()===a.display_name.trim().toLowerCase());
       if(existing){existing.name=a.display_name;existing.roles=a.roles||existing.roles;existing.role=(a.roles||[])[0]||existing.role;existing.accountId=a.user_id;}
-      else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
+      else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',note:''});
     });
     const groupProfile=Object.assign({},profile);if(groupInfo.data?.name)groupProfile.bandName=groupInfo.data.name;
     const hydratedEvents=hydratePersonalEventParticipation((events.data||[]).map(x=>x.data),groupProfile);
