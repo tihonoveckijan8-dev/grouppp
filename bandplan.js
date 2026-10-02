@@ -747,7 +747,7 @@ function dayCellModal(date) {
   const title = pdateFull(date);
   const items = occ.map(function(o) {
     const e = o.ev, t = evType(e.type);
-    return '<button class="day-modal-event" type="button" data-act="event-edit" data-id="' + esc(e.id) + '">' +
+    return '<button class="day-modal-event" type="button" data-act="event-info" data-id="' + esc(e.id) + '" data-date="' + esc(date) + '">' +
       '<span class="day-modal-event-main"><strong>' + esc(e.title) + '</strong>' +
       '<span>' + esc(e.time || 'Без времени') + (e.end ? '–' + esc(e.end) : '') + (e.location ? ' · ' + esc(e.location) : '') + '</span></span>' +
       '<span class="badge ' + t.cls + '">' + ic(t.ic, 12) + esc(t.label) + '</span></button>';
@@ -779,7 +779,7 @@ function monthHTML(y, mo) {
     if (k === ui.selDate) cls.push('sel');
     h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') + '</div>';
-    list.slice(0, 3).forEach(o => { h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-edit" data-id="' + o.ev.id + '" role="button" tabindex="-1">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>'; });
+    list.slice(0, 3).forEach(o => { h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + o.ev.id + '" data-date="' + o.date + '" role="button" tabindex="0">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>'; });
     if (list.length > 3) h += '<div class="cal-more">ещё ' + (list.length - 3) + '</div>';
     h += '</div>';
   }
@@ -810,7 +810,7 @@ function timeGrid(days) {
       const e = o.ev, t = evType(e.type);
       const sm = clamp(mins(e.time), H0 * 60, H1 * 60), em = clamp(mins(e.end) || sm + 90, sm + 30, H1 * 60);
       const top = (sm - H0 * 60) / 60 * HPH, hh = Math.max(24, (em - sm) / 60 * HPH - 3);
-      h += '<div class="tg-ev" style="top:' + top + 'px;height:' + hh + 'px;border-left-color:' + t.color + '" data-act="event-edit" data-id="' + e.id + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
+      h += '<div class="tg-ev" style="top:' + top + 'px;height:' + hh + 'px;border-left-color:' + t.color + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
         '<b>' + esc(e.title) + '</b><span>' + esc(e.time || '') + (e.end ? '–' + esc(e.end) : '') + '</span></div>';
     });
     if (k === todayK) {
@@ -839,7 +839,7 @@ function evRow(o, withPart) {
   const e = o.ev, t = evType(e.type), d = new Date(o.date + 'T00:00:00');
   const done = e.status === 'done', sl = e.setlistId ? slById(e.setlistId) : null;
   const mems = (e.memberIds || []).map(memById).filter(Boolean);
-  return '<article class="ev-row' + (done ? ' ev-done' : '') + '" style="--ev-c:' + esc(t.color || 'var(--accent)') + '">' +
+  return '<article class="ev-row' + (done ? ' ev-done' : '') + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" style="--ev-c:' + esc(t.color || 'var(--accent)') + '">' +
     '<div class="ev-date" aria-hidden="true"><div class="d">' + d.getDate() + '</div><div class="m">' + MON[d.getMonth()] + '</div></div>' +
     '<div class="ev-body">' +
     '<h3 class="ev-title">' + esc(e.title) + '<span class="badge ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
@@ -850,7 +850,7 @@ function evRow(o, withPart) {
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
-    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
+    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" aria-hidden="true"></span></i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
       '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
@@ -1186,7 +1186,7 @@ function vSettings() {
     const summary = memberParticipationSummary(m);
     const statusTitle = summary.event ? participantStatusLabel(summary.status) + ' · ' + summary.event.title : participantStatusLabel(summary.status);
     h += '<div class="memb-row">' +
-      '<div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+      '<div class="avatar participation-avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (summary.status || 'unset') + '"></span></div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       '<span class="participation-dot status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"></span>' +
@@ -1255,6 +1255,56 @@ function bindSettings() {
 }
 
 /* ═══ 15. FORM MODALS ═══ */
+function eventInfoModal(evId, occurrenceDate) {
+  const ev = evId ? evById(evId) : null;
+  if (!ev) return;
+  const t = evType(ev.type), date = occurrenceDate || ev.date;
+  const sl = ev.setlistId ? slById(ev.setlistId) : null;
+  const members = (ev.memberIds || []).map(memById).filter(Boolean);
+  const my = eventStatusFor(ev) || state.profile.defaultParticipation || '';
+  const myLabel = participantStatusLabel(my);
+  const participants = members.length ? members.map(m => {
+    const ps = participantStatusFor(ev, m);
+    return '<div class="event-info-person">' +
+      '<div class="event-info-person-main">' +
+        '<span class="event-info-avatar">' + esc(m.name.charAt(0).toUpperCase()) +
+          '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span>' +
+        '</span>' +
+        '<div class="event-info-person-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div>' +
+      '</div>' +
+      '<span class="participation-label status-' + (ps || 'unset') + '">' + esc(participantStatusLabel(ps)) + '</span>' +
+    '</div>';
+  }).join('') : '<div class="day-modal-empty">Участники не добавлены</div>';
+  const body =
+    '<div class="event-info-card">' +
+      '<div class="event-info-top">' +
+        '<span class="badge ' + t.cls + '">' + ic(t.ic, 12) + esc(t.label) + '</span>' +
+        (ev.status === 'done' ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') +
+        (ev.repeat && ev.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[ev.repeat]) + '</span>' : '') +
+      '</div>' +
+      '<h4 class="event-info-title">' + esc(ev.title) + '</h4>' +
+      '<div class="event-info-meta-grid">' +
+        '<div><span class="event-info-label">Дата</span><strong>' + esc(pdateFull(date)) + '</strong></div>' +
+        (ev.time ? '<div><span class="event-info-label">Время</span><strong>' + esc(ev.time) + (ev.end ? '–' + esc(ev.end) : '') + '</strong></div>' : '') +
+        (ev.location ? '<div><span class="event-info-label">Место</span><strong>' + esc(ev.location) + '</strong></div>' : '') +
+        (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong></div>' : '') +
+      '</div>' +
+      (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
+      '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
+      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div></div>' +
+    '</div>';
+  openModal({
+    title: 'Событие',
+    sub: '',
+    size: 'lg',
+    guard: false,
+    body: body,
+    footer:
+      (sl ? '<button class="btn btn-secondary" type="button" data-act="scene-setlist" data-id="' + esc(sl.id) + '">' + ic('monitor', 16) + 'Сцена</button>' : '') +
+      '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button>' +
+      '<button class="btn btn-primary" type="button" data-act="event-edit" data-id="' + esc(ev.id) + '">' + ic('edit', 16) + 'Изменить</button>'
+  });
+}
 function eventModal(evId, date) {
   const ev = evId ? evById(evId) : null;
   const d = ev || { type: 'gig', title: '', date: date || ui.selDate || today(), time: '19:00', end: '', location: '', notes: '', status: 'upcoming', repeat: 'none', repeatUntil: '', setlistId: '', memberIds: state.members.map(m => m.id), except: [] };
@@ -1277,8 +1327,7 @@ function eventModal(evId, date) {
     (state.members.length ? state.members.map(m => {
       const included = (d.memberIds || []).indexOf(m.id) >= 0, ps = participantStatusFor(d, m);
       return '<div class="event-participant' + (included ? ' is-in' : '') + '" data-member="' + esc(m.id) + '">' +
-        '<div class="event-part-main"><span class="event-part-avatar">' + esc(m.name.charAt(0).toUpperCase()) + '</span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div>' +
-        '<span class="participation-dot status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span></div>';
+        '<div class="event-part-main"><span class="event-part-avatar">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span></span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div></div>';
     }).join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
     [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -1878,6 +1927,7 @@ document.addEventListener('click', function (e) {
     case 'tg-day': stop(); ui.selDate = el.getAttribute('data-date'); ui.calView = 'day'; render(); break;
     case 'tg-col': stop(); if (e.target.closest('.tg-ev')) break; ui.selDate = el.getAttribute('data-date'); eventModal(null, el.getAttribute('data-date')); break;
     case 'new-event': stop(); eventModal(null, el.getAttribute('data-date') || ui.selDate); break;
+    case 'event-info': stop(); eventInfoModal(id, el.getAttribute('data-date') || ''); break;
     case 'event-edit': stop(); eventModal(id); break;
     case 'event-save': {
       stop(); btnLoading(el);
