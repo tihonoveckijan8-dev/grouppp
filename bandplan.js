@@ -1244,7 +1244,7 @@ function vSettings() {
     '</div>' +
     '<div class="data-actions">' +
       '<div class="data-action-group"><div class="data-action-title">Резервная копия</div><div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 16) + 'Скачать JSON</button><button class="btn btn-secondary" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить файл</button></div><div class="data-meta">Объём: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</div></div>' +
-      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Полностью удалить локальные данные BandPlan</span></div><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button></div>' +
+      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX', 16) + 'Удалить аккаунт</button></div></div>' +
     '</div></section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
@@ -2286,6 +2286,29 @@ document.addEventListener('click', function (e) {
         applyTheme();applyAccentVars();render();
         toast('Вы вступили в группу «'+(result.group_name||'')+'». Данные группы загружены.','ok',4500);
       }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
+      break;
+    }
+    case 'account-delete': {
+      stop();
+      confirmBox('Удалить аккаунт?', 'Аккаунт, профиль, настройки, участие в группах и локальные данные будут удалены без возможности восстановления.', async function () {
+        const button = el;
+        try {
+          if (button) { button.disabled = true; button.classList.add('loading'); }
+          if (!window.BandPlanCloud?.deleteAccount) throw new Error('Сервис удаления аккаунта недоступен.');
+          await window.BandPlanCloud.deleteAccount();
+          state = defaults();
+          try { localStorage.clear(); } catch (e) {}
+          hardClose(modalRoot);
+          if (window.BandPlanCloud?.signOut) {
+            try { await window.BandPlanCloud.signOut(); } catch (e) {}
+          }
+          renderGate();
+          toast('Аккаунт и связанные данные удалены', 'ok', 5000);
+        } catch (err) {
+          if (button) { button.disabled = false; button.classList.remove('loading'); }
+          toast('Не удалось удалить аккаунт: ' + (err.message || 'Ошибка'), 'err', 7000);
+        }
+      }, 'Удалить аккаунт', true);
       break;
     }
     case 'export': stop(); exportData(); break;
