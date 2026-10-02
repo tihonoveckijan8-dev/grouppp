@@ -183,10 +183,28 @@ const rolesLabel = list => { const a = (list || []).map(k => roleLabel(k)); retu
 let deferredInstall = null;
 const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function installButtonVisible() {
+  return !isStandalone() && (!!deferredInstall || isIOSDevice());
+}
+function syncInstallButton() {
+  const b = $('#pwaBtn');
+  if (b) b.hidden = !installButtonVisible();
+}
 function doInstall() {
+  if (isStandalone()) { syncInstallButton(); return; }
   if (deferredInstall) {
-    deferredInstall.prompt();
-    deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => {});
+    const promptEvent = deferredInstall;
+    promptEvent.prompt();
+    promptEvent.userChoice.then(choice => {
+      if (choice && choice.outcome === 'accepted') {
+        deferredInstall = null;
+        syncInstallButton();
+      } else {
+        // Пользователь закрыл системный диалог: установку можно предложить снова.
+        deferredInstall = null;
+        syncInstallButton();
+      }
+    }).catch(() => syncInstallButton());
     return;
   }
   if (isIOSDevice()) {
@@ -195,8 +213,24 @@ function doInstall() {
     toast('Установка недоступна в этом браузере. Откройте меню браузера и выберите добавление на главный экран.', 'info', 7000);
   }
 }
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#pwaBtn'); if (b) b.hidden = false; });
-window.addEventListener('appinstalled', () => { deferredInstall = null; });
+window.addEventListener('beforeinstallprompt', e => {
+  if (isStandalone()) return;
+  e.preventDefault();
+  deferredInstall = e;
+  syncInstallButton();
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstall = null;
+  syncInstallButton();
+});
+// Состояние может измениться, пока вкладка открыта или после возврата из установки.
+window.addEventListener('pageshow', syncInstallButton);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncInstallButton(); });
+if (window.matchMedia) {
+  const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+  if (standaloneQuery.addEventListener) standaloneQuery.addEventListener('change', syncInstallButton);
+  else if (standaloneQuery.addListener) standaloneQuery.addListener(syncInstallButton);
+}
 function syncSceneChords() { const b = $('#scChords'); if (b) { const on = state.settings.showChords !== false; b.setAttribute('aria-pressed', on); b.classList.toggle('off', !on); } }
 const roleLabel = k => (ROLES.find(r => r.k === k) || { label: k || '—' }).label;
 const DYN_LEVELS = ['', 'pp', 'p', 'mp', 'mf', 'f', 'ff'];
@@ -1369,7 +1403,7 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
-  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall || isIOSDevice() ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
+  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (installButtonVisible() ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
   h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
     '<div class="data-stats-grid">' +
       '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><strong>' + state.songs.length + '</strong><span>Песен</span></div>' +
