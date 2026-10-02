@@ -1610,7 +1610,7 @@ function applyAccentVars() {
       v /= 255;
       return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
     });
-    return .2126 * rgb[0] + .7152 * rgb[1] + .7152 * rgb[1] + .0722 * rgb[2];
+    return .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
   }
   function shade(h, amt) {
     const n = parseInt(h.slice(1), 16);
