@@ -290,7 +290,14 @@
         p_songs:songDelta.rows,
         p_events:eventDelta.rows,
         p_setlists:setlistDelta.rows,
-        p_roster:snapshot.members||[],
+        p_roster:(snapshot.members||[]).map(m=>({
+          id:m?.id||m?.accountId||'',
+          accountId:m?.accountId||m?.id||'',
+          name:m?.name||'',
+          roles:Array.isArray(m?.roles)?m.roles.slice():(m?.role?[m.role]:[]),
+          role:m?.role||'',
+          note:m?.note||''
+        })).filter(m=>m.name),
         p_display_name:snapshot.profile?.name||'',
         p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[]),
         p_personal_settings:snapshot.settings||{},
