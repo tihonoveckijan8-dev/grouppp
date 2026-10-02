@@ -296,6 +296,50 @@ function load() {
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
 function commit() { save(); render(); }
+
+function persistParticipationLocal() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function refreshParticipationUI(evId) {
+  const ev = evById(evId);
+  if (!ev) return;
+  const my = eventStatusFor(ev) || '';
+  const overlay = document.querySelector('#modalOverlay');
+  if (overlay) {
+    overlay.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
+      const v = btn.getAttribute('data-v');
+      const on = !!my && v === my;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    const myLabel = overlay.querySelector('.event-info-my .event-info-section-head .participation-label');
+    if (myLabel) {
+      myLabel.className = 'participation-label status-' + (my || 'unset');
+      myLabel.textContent = participantStatusLabel(my);
+    }
+    const me = currentMemberForParticipation();
+    if (me) {
+      const key = String(me.accountId || me.id || '');
+      const ps = participantStatusFor(ev, me);
+      const person = overlay.querySelector('[data-participant-key="' + CSS.escape(key) + '"]');
+      if (person) {
+        const dot = person.querySelector('.participation-dot');
+        const label = person.querySelector('.participation-label');
+        if (dot) {
+          dot.className = 'participation-dot participation-dot-avatar status-' + (ps || 'unset');
+          dot.title = participantStatusLabel(ps);
+          dot.setAttribute('aria-label', participantStatusLabel(ps));
+        }
+        if (label) {
+          label.className = 'participation-label status-' + (ps || 'unset');
+          label.textContent = participantStatusLabel(ps);
+        }
+      }
+    }
+  }
+}
+
 const songById = id => state.songs.find(s => s.id === id);
 const evById = id => state.events.find(e => e.id === id);
 const slById = id => state.setlists.find(s => s.id === id);
@@ -1284,7 +1328,7 @@ function eventInfoModal(evId, occurrenceDate) {
   const myLabel = participantStatusLabel(my);
   const participants = members.length ? members.map(m => {
     const ps = participantStatusFor(ev, m);
-    return '<div class="event-info-person">' +
+    return '<div class="event-info-person" data-participant-key="' + esc(String(m.accountId || m.id || '')) + '">' +
       '<div class="event-info-person-main">' +
         '<span class="event-info-avatar">' + esc(m.name.charAt(0).toUpperCase()) +
           '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span>' +
@@ -1989,24 +2033,34 @@ document.addEventListener('click', function (e) {
       const me = currentMemberForParticipation();
       setPersonalEventStatus(ev.id, next);
       if (me) setEventParticipantStatus(ev, me, next);
-      commit();
-      if (modalRoot && modalRoot.querySelector('.event-info-my')) eventInfoModal(ev.id);
+      persistParticipationLocal();
+      refreshParticipationUI(ev.id);
+
       if (window.BandPlanCloud?.setEventParticipation) {
-        window.BandPlanCloud.setEventParticipation(ev.id, next).then(async remoteEvent => {
-          if (remoteEvent && typeof remoteEvent === 'object') {
-            const fresh = evById(ev.id);
-            if (fresh) {
-              fresh.participation = remoteEvent.participation || {};
-              if (me) {
-                const key = String(me.accountId || me.id || '');
-                if (next) fresh.participation[key] = next; else delete fresh.participation[key];
-              }
+        el.disabled = true;
+        el.setAttribute('aria-busy', 'true');
+        window.BandPlanCloud.setEventParticipation(ev.id, next).then(remoteEvent => {
+          const fresh = evById(ev.id);
+          if (fresh && remoteEvent && typeof remoteEvent === 'object') {
+            fresh.participation = remoteEvent.participation || {};
+            if (me) {
+              const key = String(me.accountId || me.id || '');
+              if (next) fresh.participation[key] = next; else delete fresh.participation[key];
             }
-            try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-            render();
+            persistParticipationLocal();
           }
+          refreshParticipationUI(ev.id);
         }).catch(err => {
+          setPersonalEventStatus(ev.id, '');
+          if (me) setEventParticipantStatus(ev, me, '');
+          persistParticipationLocal();
+          refreshParticipationUI(ev.id);
           toast('Не удалось синхронизировать участие: ' + (err.message || 'Ошибка сети'), 'err', 6000);
+        }).finally(() => {
+          document.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+          });
         });
       }
       break;
