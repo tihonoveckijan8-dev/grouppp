@@ -2263,7 +2263,6 @@ document.addEventListener('click', function (e) {
         try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
         applyTheme();applyAccentVars();render();
         toast('Вы вступили в группу «'+(result.group_name||'')+'». Данные группы загружены.','ok',4500);
-        setTimeout(()=>location.reload(),350);
       }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
       break;
     }
