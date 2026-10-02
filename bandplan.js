@@ -816,7 +816,7 @@ function evRow(o, withPart) {
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
-    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => '<i style="background:' + esc(m.color || 'var(--accent)') + '" title="' + esc(m.name) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>').join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
+    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => '<i style="background:var(--accent)" title="' + esc(m.name) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>').join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
       '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
@@ -1149,7 +1149,7 @@ function vSettings() {
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
-    h += '<div class="memb-row"><div class="avatar" style="background:' + esc(m.color || 'var(--accent)') + '" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+    h += '<div class="memb-row"><div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       (m.accountId ? '<span class="t-xs t-muted" title="Профиль участника управляется его аккаунтом">Аккаунт</span>' : '<button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button>') + '</div>';
@@ -1700,7 +1700,7 @@ function onbErr(el, id, msg) {
 }
 function memberRowHTML(m, i) {
   return '<div class="ob-member" data-ob-row="' + i + '">' +
-    '<div class="avatar" style="background:' + esc(m.color || 'var(--accent)') + '" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+    '<div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
     '<div class="grow"><label class="sr-only" for="ob_mn_' + i + '">Имя участника</label><input class="input mb-s" id="ob_mn_' + i + '" data-ob-name="' + i + '" maxlength="50" value="' + esc(m.name) + '" placeholder="Имя участника">' +
     '<div class="row" style="gap:6px" data-ob-role="' + i + '">' +
     ROLES.map(r => '<button type="button" class="chip' + (m.role === r.k ? ' on' : '') + '" data-r="' + r.k + '" style="padding:7px 11px;font-size:11.5px;min-height:34px" aria-pressed="' + (m.role === r.k) + '">' + esc(r.label) + '</button>').join('') + '</div></div>' +
