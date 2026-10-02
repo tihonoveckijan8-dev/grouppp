@@ -1177,11 +1177,11 @@ function vSettings() {
       '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
     '</div>' +
     '<div class="profile-settings-side">' +
-      '<div class="profile-role-box"><span class="field-label">Роли и инструменты</span><div class="profile-role-list"> +
+      '<div class="profile-role-box"><span class="field-label">Роли и инструменты</span><div class="profile-role-list">' +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
       '<div class="profile-part-box"><span class="field-label">Участие по умолчанию</span><div class="seg profile-part-seg">' +
     [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div>' +
-    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
+    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
     '</section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
