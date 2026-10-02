@@ -242,6 +242,18 @@ function participantStatusFor(ev, member) {
 function participantStatusLabel(v) {
   return ({yes:'Участвует', maybe:'Под вопросом', no:'Не участвует'}[v] || 'Не отмечено');
 }
+function memberParticipationSummary(member) {
+  const events = state.events
+    .filter(e => e && (e.status || 'upcoming') === 'upcoming' && (e.memberIds || []).indexOf(member.id) >= 0)
+    .sort((a,b) => String(a.date || '').localeCompare(String(b.date || '')) || String(a.time || '').localeCompare(String(b.time || '')));
+  if (events.length) {
+    const ev = events[0];
+    return { status: participantStatusFor(ev, member), event: ev };
+  }
+  const me = currentMemberForParticipation();
+  if (me && member && me.id === member.id) return { status: state.profile.defaultParticipation || 'unset', event: null };
+  return { status: 'unset', event: null };
+}
 function setPersonalEventStatus(id, value) {
   state.profile.eventParticipation = Object.assign({}, personalParticipationMap(), { [String(id)]: value || '' });
   if (!value) delete state.profile.eventParticipation[String(id)];
@@ -1171,10 +1183,15 @@ function vSettings() {
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
-    h += '<div class="memb-row"><div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+    const summary = memberParticipationSummary(m);
+    const statusTitle = summary.event ? participantStatusLabel(summary.status) + ' · ' + summary.event.title : participantStatusLabel(summary.status);
+    h += '<div class="memb-row">' +
+      '<div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
-      (m.accountId ? '<span class="t-xs t-muted" title="Профиль участника управляется его аккаунтом">Аккаунт</span>' : '<button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button>') + '</div>';
+      '<span class="participation-dot status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"></span>' +
+      (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
+      '</div>';
   });
   if (window.BandPlanCloud?.user?.() && state.members.some(m => m.accountId === window.BandPlanCloud.user().id)) {
     h += '<div class="settings-member-footer"><button class="btn btn-danger settings-leave" type="button" data-act="group-leave">' + ic('x', 16) + '<span>Выйти из группы</span></button></div>';
@@ -1260,8 +1277,8 @@ function eventModal(evId, date) {
     (state.members.length ? state.members.map(m => {
       const included = (d.memberIds || []).indexOf(m.id) >= 0, ps = participantStatusFor(d, m);
       return '<div class="event-participant' + (included ? ' is-in' : '') + '" data-member="' + esc(m.id) + '">' +
-        '<div class="event-part-main"><span class="event-part-avatar part-' + (ps || 'unset') + '">' + esc(m.name.charAt(0).toUpperCase()) + '</span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div>' +
-        '<span class="event-part-status part-status-' + (ps || 'unset') + '">' + esc(participantStatusLabel(ps)) + '</span></div>';
+        '<div class="event-part-main"><span class="event-part-avatar">' + esc(m.name.charAt(0).toUpperCase()) + '</span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div>' +
+        '<span class="participation-dot status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span></div>';
     }).join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
     [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -1277,9 +1294,8 @@ function eventModal(evId, date) {
         $$('#f_my button', w).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
         const me = currentMemberForParticipation(), box = me ? $('#f_participants [data-member="' + me.id + '"]', w) : null;
         if (box) {
-          const v = b.getAttribute('data-v'), status = $('.event-part-status', box), av = $('.event-part-avatar', box);
-          if (status) { status.className = 'event-part-status part-status-' + v; status.textContent = participantStatusLabel(v); }
-          if (av) av.className = 'event-part-avatar part-' + v;
+          const v = b.getAttribute('data-v'), dot = $('.participation-dot', box);
+          if (dot) { dot.className = 'participation-dot status-' + v; dot.title = participantStatusLabel(v); dot.setAttribute('aria-label', participantStatusLabel(v)); }
         }
       }));
       $$('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
@@ -2556,29 +2572,7 @@ function init() {
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', () => {
-      let updateTimer = null;
-      navigator.serviceWorker.register('sw.js').then(reg => {
-        /* Тихая проверка обновлений: текущая страница не перезагружается
-           и пользователь не видит уведомлений или диалогов. */
-        const check = () => {
-          if (document.hidden) return;
-          reg.update().catch(() => {});
-          /* Тихо прогреваем свежую оболочку в Service Worker.
-             Текущая вкладка не перезагружается и не прерывает работу. */
-          const stamp = Date.now();
-          ['./', './index.html', './bandplan.css', './bandplan.js', './supabase.js', './manifest.webmanifest']
-            .forEach(path => fetch(path + (path.indexOf('?') >= 0 ? '&' : '?') + 'bp-preload=' + stamp, {
-              cache: 'no-store',
-              credentials: 'same-origin'
-            }).catch(() => {}));
-        };
-        check();
-        updateTimer = window.setInterval(check, 15 * 60 * 1000);
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) check();
-        }, { passive: true });
-        window.addEventListener('focus', check, { passive: true });
-      }).catch(err => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
         console.warn('BandPlan service worker registration failed:', err);
         window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'}));
       });
