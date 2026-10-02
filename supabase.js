@@ -7,7 +7,7 @@
   const client = window.supabase.createClient(URL, KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
+  let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
   let authSubscription = null;
   let realtimeGeneration = 0;
   let subscriptionCallback = null;
@@ -343,7 +343,7 @@
     const generation = realtimeGeneration;
     const handleStatus = (label, status, error) => {
       if (generation !== realtimeGeneration) return;
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      if (label === 'shared' && status === 'SUBSCRIBED') realtimeSharedReady = true;\n      if (label === 'shared' && (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED')) realtimeSharedReady = false;\n      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         console.warn('BandPlan realtime '+label+' '+status, error || '');
         window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:'Realtime-синхронизация временно недоступна'}));
       }
@@ -368,6 +368,12 @@
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
     groupChannel=live.subscribe(status => handleStatus('shared', status));
+    /* Realtime/WebSocket is primary. Poll only while the shared channel is degraded. */
+    realtimePollTimer=setInterval(()=>{
+      if(!currentSession?.user||!activeGroupId||navigator.onLine===false||realtimeSharedReady||document.hidden)return;
+      load().then(x=>{if(x?.state&&subscriptionCallback)subscriptionCallback(x.state,x.updatedAt||'');})
+        .catch(e=>console.warn('BandPlan fallback refresh failed',e));
+    },30000);
     return ()=>disposeRealtime();
   }
   async function joinGroup(code,name,roles){
