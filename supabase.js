@@ -180,7 +180,7 @@
     */
     let accountProfile=null;
     try{
-      const account=await client.from('bandplan_accounts').select('display_name,roles').eq('user_id',uid).maybeSingle();
+      const account=await client.from('bandplan_accounts').select('display_name,roles,personal_settings').eq('user_id',uid).maybeSingle();
       if(!account.error) accountProfile=account.data||null;
     }catch(e){ console.warn('BandPlan account profile hydration skipped:',e); }
     const profile=Object.assign({},pstate.profile||{});
@@ -189,7 +189,10 @@
       profile.roles=accountProfile.roles.slice();
       profile.role=profile.roles[0]||'';
     }
-    const hydratedPersonal=Object.assign({},pstate,{profile});
+    const accountSettings=accountProfile?.personal_settings&&typeof accountProfile.personal_settings==='object' ? accountProfile.personal_settings : {};
+    const settings=Object.assign({},accountSettings,pstate.settings||{});
+    const hasAccountIdentity=!!String(accountProfile?.display_name||'').trim() && Array.isArray(accountProfile?.roles) && accountProfile.roles.length>0;
+    const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
     if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data||accountProfile?{state:hydratedPersonal,updatedAt:lastUpdated}:null;}
     const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
@@ -320,8 +323,25 @@
     groupChannel=live.subscribe(status => handleStatus('shared', status));
     return ()=>disposeRealtime();
   }
-  async function joinGroup(code,name,roles){const {data,error}=await client.rpc('bandplan_join_group',{p_code:String(code||'').trim(),p_display_name:name||'',p_roles:roles||[]});if(error)throw error;activeGroupId=data?.[0]?.group_id||null;return data?.[0]||null;}
-  async function getInviteCode(){if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}if(!activeGroupId)throw new Error('Сначала завершите настройку группы.');const q=await client.from('bandplan_group_invites').select('invite_code').eq('group_id',activeGroupId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(q.error)throw q.error;if(q.data?.invite_code)return q.data.invite_code;throw new Error('Код приглашения не найден.');}
+  async function joinGroup(code,name,roles){
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const {data,error}=await client.rpc('bandplan_join_group',{
+      p_code:String(code||'').trim(),
+      p_display_name:String(name||'').trim(),
+      p_roles:Array.isArray(roles)?roles:[]
+    });
+    if(error)throw error;
+    activeGroupId=data?.[0]?.group_id||null;
+    return data?.[0]||null;
+  }
+  async function getInviteCode(){
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const {data,error}=await client.rpc('bandplan_get_invite_code');
+    if(error)throw error;
+    const code=Array.isArray(data)?data[0]?.bandplan_get_invite_code:data;
+    if(!code)throw new Error('Не удалось создать код приглашения.');
+    return String(code);
+  }
   window.addEventListener('online',async()=>{
     if(!currentSession?.user)return;
     try{await hydrateLocalCache();}catch(e){console.warn('BandPlan durable queue restore failed:',e);}
