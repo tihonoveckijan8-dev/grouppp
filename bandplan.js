@@ -1098,7 +1098,7 @@ function vSongs() {
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
       '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + esc(s.key || '—') + '</div>' +
-      '<div style="min-width:0"><h3 class="song-name">' + esc(s.title) + '</h3><div class="song-artist">' + esc(s.artist || 'Исполнитель не указан') + '</div></div></div>' +
+      '<div style="min-width:0"><h3 class="song-name">' + esc(s.title) + '</h3></div></div>' +
       '<div class="song-meta">' +
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
       (s.duration ? '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(s.duration) + '</span>' : '') +
@@ -1231,9 +1231,7 @@ function vSetlists() {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
-      '<div style="min-width:0"><h3 class="song-name">' + esc(sl.name) + '</h3><div class="song-artist num">' + fmtDur(setlistDur(sl)) + ' · ' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + '</div></div></div>' +
-      (sl.note ? '<p class="t-sm t-muted" style="line-height:1.55">' + esc(sl.note) + '</p>' : '') +
-      '<div class="song-meta">' + (ev ? '<span class="badge b-info">' + ic('calendar', 11) + esc(pdate(ev.date)) + ' · ' + esc(ev.title) + '</span>' : '<span class="badge b-muted">Не привязан к событию</span>') + '</div>' +
+      '<div style="min-width:0"><h3 class="song-name">' + esc(sl.name) + '</h3></div></div>' +
       '<div class="song-acts">' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа">' + ic('print', 15) + '</button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Создать копию">' + ic('copy', 15) + '</button>' +
