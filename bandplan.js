@@ -356,7 +356,7 @@ function load() {
     return true;
   } catch (e) { return false; }
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
+function save() { expandCache.clear(); searchCorpus = null; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
 function commit() { save(); render(); }
 
 function persistParticipationLocal() {
@@ -530,8 +530,12 @@ function seedDemo() {
 }
 
 /* ═══ 7. EVENTS ENGINE ═══ */
+const expandCache = new Map();
 function expand(from, to) {
   const out = [], f = typeof from === 'string' ? from : iso(from), t = typeof to === 'string' ? to : iso(to);
+  const cacheKey = f + '|' + t;
+  const cached = expandCache.get(cacheKey);
+  if (cached) return cached.map(x => ({ ev:x.ev, date:x.date }));
   state.events.forEach(function (ev) {
     if (ev.status === 'cancelled') return;
     const ex = ev.except || [];
@@ -550,6 +554,8 @@ function expand(from, to) {
     }
   });
   out.sort((a, b) => (a.date + (a.ev.time || '')).localeCompare(b.date + (b.ev.time || '')));
+  expandCache.set(cacheKey, out.map(x => ({ ev:x.ev, date:x.date })));
+  if (expandCache.size > 24) expandCache.delete(expandCache.keys().next().value);
   return out;
 }
 const upcoming = n => expand(today(), iso(new Date(Date.now() + 86400000 * 400))).filter(o => o.date >= today()).slice(0, n || 999);
@@ -756,6 +762,7 @@ let actionBarHTML = '';
    rendering the same route twice. */
 let skipNextHashRoute = false;
 function render() {
+  expandCache.clear(); searchCorpus = null;
   const r = parseHash(), hd = HEADERS[r.name] || HEADERS.calendar;
   document.body.setAttribute('data-route', r.name);
   buildChrome(); updateNav(navKey(r.name));
@@ -785,7 +792,7 @@ function render() {
   const v = $('#view');
   if (ui.skeleton) {
     v.innerHTML = skeletonHTML(r.name === 'songs' ? 6 : 3);
-    setTimeout(function () { ui.skeleton = false; render(); }, 170);
+    requestAnimationFrame(() => setTimeout(function () { ui.skeleton = false; render(); }, 80));
     return;
   }
   try {
@@ -812,16 +819,22 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
-  const up = upcoming(), next = up[0], p = state.profile;
+  const up = upcoming(), next = up[0], p = state.profile, song = state.songs[0];
+  const my = next ? (eventStatusFor(next.ev) || '') : '';
+  const status = my ? participantStatusLabel(my) : 'Не отмечено';
+  const statusCls = my ? 'b-ok' : 'b-muted';
+  const nextMeta = next ? [
+    pdateFull(next.date),
+    next.ev.time ? next.ev.time + (next.ev.end ? '–' + next.ev.end : '') : '',
+    next.ev.location || ''
+  ].filter(Boolean).join(' · ') : 'Добавьте первое событие в календарь';
   return '<section class="hero rise" aria-labelledby="heroH"><div class="hero-in"><div>' +
-    '<span class="hero-eyebrow">' + ic('bolt', 12) + esc(p.bandName || 'Моя группа') + (p.role ? ' · ' + esc(rolesLabel(myRoles())) : '') + '</span>' +
+    '<span class="hero-eyebrow">' + ic('bolt', 12) + esc(p.bandName || 'Моя группа') + (myRoles().length ? ' · ' + esc(rolesLabel(myRoles())) : '') + '</span>' +
     '<h1 id="heroH">' + esc(next ? 'Ближайшее: ' + next.ev.title : 'Расписание группы под контролем') + '</h1>' +
-    '<p class="hero-sub">' + esc(next
-      ? pdateFull(next.date) + (next.ev.time ? ', начало в ' + next.ev.time : '') + ' · ' + countdown(next.date) + (next.ev.location ? ' · ' + next.ev.location : '')
-      : 'Соберите репертуар, запланируйте репетиции и выступления, отметьте участие и выходите на сцену с готовой программой.') + '</p>' +
+    '<p class="hero-sub">' + esc(next ? nextMeta + ' · ' + countdown(next.date) : 'Календарь, репертуар, сет-листы и сценический режим в одном рабочем пространстве.') + '</p>' +
     '<div class="hero-cta">' +
-    (next ? '<button class="btn btn-primary btn-lg" type="button" data-act="event-edit" data-id="' + esc(next.ev.id) + '">' + ic('calendar', 18) + 'Открыть событие</button>'
-      : '<button class="btn btn-primary btn-lg" type="button" data-act="new-event">' + ic('plus', 18) + 'Создать событие</button>') +
+    (next ? '<button class="btn btn-primary btn-lg" type="button" data-act="event-info" data-id="' + esc(next.ev.id) + '" data-date="' + esc(next.date) + '">' + ic('calendar', 18) + 'Открыть событие</button>' :
+      '<button class="btn btn-primary btn-lg" type="button" data-act="new-event">' + ic('plus', 18) + 'Создать событие</button>') +
     '<button class="btn btn-tertiary btn-lg" type="button" data-act="scene-quick">' + ic('monitor', 18) + 'Сценический режим</button></div>' +
     '<div class="hero-metrics">' +
     heroMetric(up.length, 'предстоящих ' + plural(up.length, 'событие', 'события', 'событий')) +
@@ -829,15 +842,10 @@ function heroHTML() {
     heroMetric(state.setlists.length, plural(state.setlists.length, 'сет-лист', 'сет-листа', 'сет-листов')) +
     heroMetric(state.members.length, 'участников в составе') +
     '</div></div>' +
-    '<div class="hero-visual" aria-hidden="true">' +
-    '<div class="hv-card"><div class="hv-row"><span class="hv-dot" style="background:var(--ok)"></span>' +
-    '<div class="grow"><div style="font-weight:600;font-size:13.5px">Репетиция · 19:00</div><div class="t-xs t-muted">База на Лиговском</div></div>' +
-    '<span class="badge b-ok">' + ic('check', 11) + 'Участвую</span></div></div>' +
-    '<div class="hv-card"><div class="cap" style="margin-bottom:8px">Динамика партии · вокал</div>' +
-    '<div class="hv-row" style="margin-bottom:8px"><span class="t-xs t-muted" style="width:64px">Куплет</span><span class="hv-bar"><i style="width:42%"></i></span><b class="num t-sm">mp</b></div>' +
-    '<div class="hv-row" style="margin-bottom:8px"><span class="t-xs t-muted" style="width:64px">Припев</span><span class="hv-bar"><i style="width:78%"></i></span><b class="num t-sm">f</b></div>' +
-    '<div class="hv-row"><span class="t-xs t-muted" style="width:64px">Финал</span><span class="hv-bar"><i style="width:100%"></i></span><b class="num t-sm">ff</b></div></div>' +
-    '<div class="hv-card"><div class="hv-row"><span class="badge b-muted num">Em</span><span class="t-sm t-2 grow nowrap">Город не спит</span><span class="badge b-muted num">104 BPM</span></div></div>' +
+    '<div class="hero-visual" aria-label="Актуальное состояние группы">' +
+    (next ? '<div class="hv-card"><div class="hv-row"><span class="hv-dot" style="background:' + esc(next.ev.type === 'gig' ? 'var(--accent)' : 'var(--ok)') + '"></span><div class="grow"><div style="font-weight:600;font-size:13.5px">' + esc(next.ev.title) + '</div><div class="t-xs t-muted">' + esc(nextMeta) + '</div></div><span class="badge ' + statusCls + '">' + esc(status) + '</span></div></div>' : '') +
+    (song ? '<div class="hv-card"><div class="cap" style="margin-bottom:8px">Репертуар</div><div class="hv-row"><span class="badge b-muted num">' + esc(song.key || '—') + '</span><span class="t-sm t-2 grow nowrap">' + esc(song.title) + '</span>' + (song.bpm ? '<span class="badge b-muted num">' + esc(song.bpm) + ' BPM</span>' : '') + '</div></div>' : '') +
+    '<div class="hv-card"><div class="hv-row"><span class="badge b-muted">' + (next ? esc(evType(next.ev.type).label) : 'Календарь') + '</span><span class="t-sm t-2 grow">' + esc(next ? (next.ev.setlistId ? ((slById(next.ev.setlistId) || {}).name || 'Сет-лист') : 'Без сет-листа') : 'Готов к планированию') + '</span></div></div>' +
     '</div></div></section>';
 }
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
@@ -1780,6 +1788,17 @@ function printSetlist(id) {
 }
 
 /* ═══ 18. GLOBAL SEARCH (только главная) ═══ */
+let searchCorpus = null;
+function getSearchCorpus() {
+  if (searchCorpus) return searchCorpus;
+  searchCorpus = {
+    songs: state.songs.map(s => ({s, hay: ((s.title || '') + ' ' + (s.artist || '') + ' ' + (s.tags || []).join(' ') + ' ' + (s.lyrics || '')).toLowerCase()})),
+    setlists: state.setlists.map(sl => ({sl, hay:(sl.name + ' ' + (sl.note || '')).toLowerCase()})),
+    members: state.members.map(m => ({m, hay:(m.name + ' ' + rolesLabel(rolesOf(m)) + ' ' + (m.note || '')).toLowerCase()})),
+    events: expand(iso(new Date(Date.now() - 86400000 * 365)), iso(new Date(Date.now() + 86400000 * 400))).map(o => ({o, hay:((o.ev.title || '') + ' ' + (o.ev.location || '') + ' ' + (o.ev.notes || '')).toLowerCase()}))
+  };
+  return searchCorpus;
+}
 function searchAll(q) {
   q = String(q || '').toLowerCase().trim();
   const out = [];
@@ -1794,21 +1813,18 @@ function searchAll(q) {
     upcoming(4).forEach(o => add('Ближайшие события', 'calendar', o.ev.title, pdateShort(o.date) + ' · ' + (o.ev.time || '') + ' · ' + evType(o.ev.type).label, '', () => eventModal(o.ev.id)));
     return out;
   }
-  state.songs.forEach(function (s) {
-    if (((s.title || '') + ' ' + (s.artist || '') + ' ' + (s.tags || []).join(' ') + ' ' + (s.lyrics || '')).toLowerCase().indexOf(q) >= 0)
-      add('Песни', 'music', s.title, [s.key, s.bpm ? s.bpm + ' BPM' : '', s.artist].filter(Boolean).join(' · ') || '—', s.key || '', () => go('#/song/' + s.id));
+  const corpus = getSearchCorpus();
+  corpus.songs.forEach(({s,hay}) => {
+    if (hay.indexOf(q) >= 0) add('Песни', 'music', s.title, [s.key, s.bpm ? s.bpm + ' BPM' : '', s.artist].filter(Boolean).join(' · ') || '—', s.key || '', () => go('#/song/' + s.id));
   });
-  expand(iso(new Date(Date.now() - 86400000 * 365)), iso(new Date(Date.now() + 86400000 * 400))).forEach(function (o) {
-    if (((o.ev.title || '') + ' ' + (o.ev.location || '') + ' ' + (o.ev.notes || '')).toLowerCase().indexOf(q) >= 0)
-      add('События', 'calendar', o.ev.title, pdateShort(o.date) + ' · ' + (o.ev.time || '') + ' · ' + evType(o.ev.type).label, '', () => eventModal(o.ev.id));
+  corpus.events.forEach(({o,hay}) => {
+    if (hay.indexOf(q) >= 0) add('События', 'calendar', o.ev.title, pdateShort(o.date) + ' · ' + (o.ev.time || '') + ' · ' + evType(o.ev.type).label, '', () => eventModal(o.ev.id));
   });
-  state.setlists.forEach(function (sl) {
-    if ((sl.name + ' ' + (sl.note || '')).toLowerCase().indexOf(q) >= 0)
-      add('Сет-листы', 'list', sl.name, (sl.items || []).length + ' ' + plural((sl.items || []).length, 'песня', 'песни', 'песен') + ' · ' + fmtDur(setlistDur(sl)), '', () => go('#/setlist/' + sl.id));
+  corpus.setlists.forEach(({sl,hay}) => {
+    if (hay.indexOf(q) >= 0) add('Сет-листы', 'list', sl.name, (sl.items || []).length + ' ' + plural((sl.items || []).length, 'песня', 'песни', 'песен') + ' · ' + fmtDur(setlistDur(sl)), '', () => go('#/setlist/' + sl.id));
   });
-  state.members.forEach(function (m) {
-    if ((m.name + ' ' + rolesLabel(rolesOf(m)) + ' ' + (m.note || '')).toLowerCase().indexOf(q) >= 0)
-      add('Участники', 'users', m.name, rolesLabel(rolesOf(m)), '', () => memberModal(m.id));
+  corpus.members.forEach(({m,hay}) => {
+    if (hay.indexOf(q) >= 0) add('Участники', 'users', m.name, rolesLabel(rolesOf(m)), '', () => memberModal(m.id));
   });
   [['Календарь', 'calendar', '#/calendar'], ['Репертуар', 'music', '#/songs'], ['Сет-листы', 'list', '#/setlists'], ['Настройки', 'gear', '#/settings']].forEach(function (t) {
     if (t[0].toLowerCase().indexOf(q) >= 0) add('Разделы', t[1], 'Перейти: ' + t[0], 'Навигация', '', () => go(t[2]));
