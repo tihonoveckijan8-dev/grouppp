@@ -3789,3 +3789,63 @@ body{font-synthesis:none}
 @media(prefers-reduced-motion:reduce){
   .route-enter,.route-enter-active{will-change:auto!important}
 }
+
+/* ─── Liquid Glass theme: restrained, readable, optional ─────────────── */
+[data-theme="glass"]{
+  --bg:#EEF2F8;--bg-deep:#E5EAF2;--surf-1:rgba(255,255,255,.66);--surf-2:rgba(255,255,255,.82);--surf-3:rgba(255,255,255,.52);--surf-4:rgba(255,255,255,.90);
+  --border:rgba(61,77,105,.14);--border-2:rgba(61,77,105,.20);--border-3:rgba(61,77,105,.28);
+  --text:#182131;--text-2:#4B5668;--muted:#737F91;
+  --shadow-xs:0 1px 2px rgba(30,43,63,.04);--shadow-sm:0 8px 24px rgba(30,43,63,.08);--shadow-md:0 14px 34px rgba(30,43,63,.10);--shadow-lg:0 24px 60px rgba(30,43,63,.14);
+}
+[data-theme="glass"] body{
+  background:
+    radial-gradient(700px 500px at 0% 0%,rgba(255,255,255,.82),transparent 68%),
+    radial-gradient(800px 520px at 100% 100%,rgba(160,181,225,.28),transparent 70%),
+    var(--bg)!important;
+}
+[data-theme="glass"] .sidebar,
+[data-theme="glass"] .topbar.stuck,
+[data-theme="glass"] .card,
+[data-theme="glass"] .hero,
+[data-theme="glass"] .song-card,
+[data-theme="glass"] .sl-item,
+[data-theme="glass"] .cal-cell,
+[data-theme="glass"] .toolbar .tb-search{
+  background:var(--surf-2)!important;
+  border-color:var(--border)!important;
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  [data-theme="glass"] .sidebar,
+  [data-theme="glass"] .topbar.stuck,
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .hero,
+  [data-theme="glass"] .song-card,
+  [data-theme="glass"] .sl-item,
+  [data-theme="glass"] .cal-cell,
+  [data-theme="glass"] .toolbar .tb-search{
+    -webkit-backdrop-filter:blur(14px) saturate(1.08);
+    backdrop-filter:blur(14px) saturate(1.08);
+  }
+}
+[data-theme="glass"] .card,
+[data-theme="glass"] .hero,
+[data-theme="glass"] .song-card,
+[data-theme="glass"] .sl-item{box-shadow:var(--shadow-xs)!important}
+[data-theme="glass"] .btn-secondary,
+[data-theme="glass"] .btn-tertiary,
+[data-theme="glass"] .icon-btn,
+[data-theme="glass"] .avatar-btn,
+[data-theme="glass"] .chip{
+  background:rgba(255,255,255,.60)!important;
+  border-color:rgba(61,77,105,.13)!important;
+}
+[data-theme="glass"] .nav-item.active{background:rgba(255,255,255,.72)!important}
+@media(max-width:640px){
+  [data-theme="glass"] .bottom-nav{
+    background:rgba(255,255,255,.78)!important;
+    border-top:1px solid rgba(61,77,105,.13)!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  [data-theme="glass"] body{background:var(--bg)!important}
+}
