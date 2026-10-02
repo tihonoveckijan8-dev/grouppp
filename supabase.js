@@ -184,7 +184,11 @@
       client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle()
     ]);
     if(personal.error) throw personal.error;if(membership.error) throw membership.error;
-    const pstate=personal.data?.state||{};activeGroupId=membership.data?.group_id||null;lastUpdated=personal.data?.updated_at||'';
+    const pstate=personal.data?.state||{};lastUpdated=personal.data?.updated_at||'';
+    const groupLookup=await client.rpc('bandplan_get_my_group');
+    if(groupLookup.error)throw groupLookup.error;
+    const groupRow=Array.isArray(groupLookup.data)?groupLookup.data[0]:groupLookup.data;
+    activeGroupId=groupRow?.group_id||membership.data?.group_id||null;
 
     /*
       The account row is the durable identity source for the member's name and
@@ -198,6 +202,7 @@
       if(!account.error) accountProfile=account.data||null;
     }catch(e){ console.warn('BandPlan account profile hydration skipped:',e); }
     const profile=Object.assign({},pstate.profile||{});
+    if(activeGroupId) profile.groupId=activeGroupId;
     if(accountProfile?.display_name) profile.name=accountProfile.display_name;
     if(Array.isArray(accountProfile?.roles)&&accountProfile.roles.length){
       profile.roles=accountProfile.roles.slice();
@@ -209,6 +214,7 @@
     const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
     const personalEvents=hydratePersonalEventParticipation(pstate.events||[],profile);
     if(!activeGroupId){
+      delete profile.groupId;
       sharedBaseline={songs:{},events:{},setlists:{}};
       if(!(personal.data||accountProfile)) return null;
       return {
@@ -253,7 +259,13 @@
     snapshot.events=(snapshot.events||[]).map(ev=>{const copy=Object.assign({},ev);delete copy.myStatus;return copy;});
     clearTimeout(timer);pending=snapshot;
     await writeDurableState(uid,snapshot,updatedAt,true);
-    if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
+    if(!activeGroupId){
+      const membership=await client.rpc('bandplan_get_my_group');
+      if(membership.error)throw membership.error;
+      const row=Array.isArray(membership.data)?membership.data[0]:membership.data;
+      activeGroupId=row?.group_id||null;
+    }
+    if(activeGroupId) snapshot.profile=Object.assign({},snapshot.profile||{}, {groupId:activeGroupId, groupDetached:false});
     if(!activeGroupId&&snapshot.onboardingDone&&!snapshot.profile?.groupDetached){
       if(!groupSetupPromise)groupSetupPromise=(async()=>{
         const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});
