@@ -361,25 +361,23 @@ function refreshParticipationUI(evId) {
       myLabel.className = 'participation-label status-' + (my || 'unset');
       myLabel.textContent = participantStatusLabel(my);
     }
-    const me = currentMemberForParticipation();
-    if (me) {
-      const key = String(me.accountId || me.id || '');
-      const ps = participantStatusFor(ev, me);
-      const person = overlay.querySelector('[data-participant-key="' + CSS.escape(key) + '"]');
-      if (person) {
-        const dot = person.querySelector('.participation-dot');
-        const label = person.querySelector('.participation-label');
-        if (dot) {
-          dot.className = 'participation-dot participation-dot-avatar status-' + (ps || 'unset');
-          dot.title = participantStatusLabel(ps);
-          dot.setAttribute('aria-label', participantStatusLabel(ps));
-        }
-        if (label) {
-          label.className = 'participation-label status-' + (ps || 'unset');
-          label.textContent = participantStatusLabel(ps);
-        }
+    overlay.querySelectorAll('[data-participant-key]').forEach(person => {
+      const key=String(person.getAttribute('data-participant-key')||'');
+      if(!key)return;
+      const member=memById(key);
+      const ps=member ? participantStatusFor(ev,member) : String((ev.participation||{})[key]||'');
+      const dot=person.querySelector('.participation-dot');
+      const label=person.querySelector('.participation-label');
+      if(dot){
+        dot.className='participation-dot participation-dot-avatar status-'+(ps||'unset');
+        dot.title=participantStatusLabel(ps);
+        dot.setAttribute('aria-label',participantStatusLabel(ps));
       }
-    }
+      if(label){
+        label.className='participation-label status-'+(ps||'unset');
+        label.textContent=participantStatusLabel(ps);
+      }
+    })
   }
 }
 
