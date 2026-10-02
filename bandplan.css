@@ -3849,3 +3849,5 @@ body{font-synthesis:none}
 @media(prefers-reduced-motion:reduce){
   [data-theme="glass"] body{background:var(--bg)!important}
 }
+
+/* v9 UI refinement marker */
