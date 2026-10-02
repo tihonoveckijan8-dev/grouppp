@@ -2935,9 +2935,18 @@ function init() {
       try {
         const registration = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
         // Check immediately on launch; browsers otherwise throttle update checks.
-        registration.update().catch(() => {});
+        const checkForAppUpdate = () => {
+          if (!navigator.onLine) return;
+          registration.update().catch(() => {});
+        };
+        checkForAppUpdate();
+        // Check regularly while the installed app is open, and immediately
+        // when the user returns online or brings the app back to foreground.
+        window.setInterval(checkForAppUpdate, 60 * 1000);
+        window.addEventListener('online', checkForAppUpdate);
+        window.addEventListener('focus', checkForAppUpdate);
         document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) registration.update().catch(() => {});
+          if (!document.hidden) checkForAppUpdate();
         });
       } catch (err) {
         console.warn('BandPlan service worker registration failed:', err);
