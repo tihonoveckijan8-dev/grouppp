@@ -728,8 +728,8 @@ function buildChrome() {
   $('#tbAvatar').textContent = ((p.name || 'B').charAt(0)).toUpperCase();
 
   const th = state.settings.theme;
-  const thIco = ic(th === 'light' ? 'moon' : 'sun', 18);
-  const thLbl = th === 'light' ? 'Тёмная тема' : th === 'dark' ? 'AMOLED-тема' : 'Светлая тема';
+  const thIco = ic(th === 'light' ? 'moon' : th === 'dark' ? 'bolt' : th === 'amoled' ? 'sun' : 'sun', 18);
+  const thLbl = th === 'light' ? 'Тёмная тема' : th === 'dark' ? 'AMOLED-тема' : th === 'amoled' ? 'Liquid Glass' : 'Светлая тема';
   $('#themeQuick').innerHTML = thIco + '<span>' + thLbl + '</span>';
   $('#tbTheme').innerHTML = thIco; $('#tbTheme').setAttribute('aria-label', thLbl);
   $('#sceneQuick').innerHTML = ic('monitor', 18) + '<span>Сценический режим</span>';
