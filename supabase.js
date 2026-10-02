@@ -227,15 +227,16 @@
         updatedAt:lastUpdated
       };
     }
-    const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
+    const [songs,events,setlists,gs,memberRows,groupInfo,participation]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_setlists').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_group_state').select('state').eq('group_id',activeGroupId).maybeSingle(),
       client.from('bandplan_group_members').select('user_id').eq('group_id',activeGroupId),
-      client.from('bandplan_groups').select('name').eq('id',activeGroupId).maybeSingle()
+      client.from('bandplan_groups').select('name').eq('id',activeGroupId).maybeSingle(),
+      client.from('bandplan_event_participation').select('event_id,user_id,status,updated_at').eq('group_id',activeGroupId)
     ]);
-    for(const q of [songs,events,setlists,gs,memberRows,groupInfo])if(q.error)throw q.error;
+    for(const q of [songs,events,setlists,gs,memberRows,groupInfo,participation])if(q.error)throw q.error;
     const toSharedMap=rows=>Object.fromEntries((rows||[]).map(x=>{const data=x.data||{};const id=String(data.id||'').trim();return id?[id,JSON.stringify(data)]:null;}).filter(Boolean));
     sharedBaseline={songs:toSharedMap(songs.data),events:toSharedMap(events.data),setlists:toSharedMap(setlists.data)};
     const shared=gs.data?.state||{}, ids=(memberRows.data||[]).map(x=>x.user_id);
@@ -249,7 +250,20 @@
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',note:''});
     });
     const groupProfile=Object.assign({},profile);if(groupInfo.data?.name)groupProfile.bandName=groupInfo.data.name;
-    const hydratedEvents=hydratePersonalEventParticipation((events.data||[]).map(x=>x.data),groupProfile);
+    const participationByEvent={};
+    (participation.data||[]).forEach(row=>{
+      const eventId=String(row.event_id||'').trim(),userId=String(row.user_id||'').trim();
+      if(!eventId||!userId)return;
+      if(!participationByEvent[eventId])participationByEvent[eventId]={};
+      if(row.status)participationByEvent[eventId][userId]=String(row.status);
+    });
+    const baseEvents=(events.data||[]).map(x=>x.data).map(ev=>{
+      const copy=Object.assign({},ev);
+      const sharedParticipation=participationByEvent[String(ev?.id||'').trim()];
+      if(sharedParticipation)copy.participation=sharedParticipation;
+      return copy;
+    });
+    const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
     return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
