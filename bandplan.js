@@ -1031,7 +1031,7 @@ function evRow(o, withPart) {
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
-    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" aria-hidden="true"></span></i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
+    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
       '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
@@ -1376,7 +1376,7 @@ function vSettings() {
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       '<div class="member-status-wrap">' +
-        '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="participation-dot status-' + (summary.status || 'unset') + '" aria-hidden="true"></span><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
+        '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
         '<span class="member-event-context">' + (summary.event ? esc(summary.event.title || 'Событие') + ' · ' + esc(pdate(summary.event.date)) : 'Нет ближайших событий') + '</span></div>' +
       (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
       '</div>';
