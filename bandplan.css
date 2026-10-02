@@ -250,7 +250,7 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
   transition:transform var(--t-btn),box-shadow var(--t-btn),background var(--t-btn),color var(--t-btn),border-color var(--t-btn)}
 .btn:active{transform:scale(.985)}
 .btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow-accent)}
-.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 10px 22px rgba(37,71,208,.26),0 2px 6px rgba(37,71,208,.16)}
+.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:var(--shadow-accent-hover,var(--shadow-accent))}
 .btn-primary:active{background:var(--accent-press);transform:translateY(0);box-shadow:var(--shadow-xs)}
 .btn-secondary{background:var(--surf-2);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-xs)}
 .btn-secondary:hover{border-color:var(--border-2);background:var(--surf-2);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
@@ -1441,7 +1441,7 @@ button,a,input,select,textarea { touch-action: manipulation; }
   border-color:var(--border-2);
 }
 :root[data-theme="light"] .nav-item{color:var(--text-2)}
-:root[data-theme="light"] .nav-item.active{background:rgba(37,71,208,.10);color:var(--accent);border-color:rgba(37,71,208,.16)}
+:root[data-theme="light"] .nav-item.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-ring)}
 :root[data-theme="light"] .sd-item:hover,
 :root[data-theme="light"] .sd-item.sel{background:#E9EEF9}
 :root[data-theme="light"] .sd-t{color:var(--text)}
@@ -1470,7 +1470,7 @@ button,a,input,select,textarea { touch-action: manipulation; }
   background:var(--accent-soft);
   color:var(--accent);
   border-color:var(--accent);
-  box-shadow:0 0 0 1px rgba(37,71,208,.12);
+  box-shadow:0 0 0 1px var(--accent-ring);
   font-weight:var(--fw-semi);
 }
 
