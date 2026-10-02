@@ -179,16 +179,13 @@
   async function load() {
     if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
     const uid=currentSession.user.id;
-    const [personal,membership]=await Promise.all([
-      client.from(TABLE).select('state,updated_at').eq('user_id',uid).maybeSingle(),
-      client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle()
-    ]);
-    if(personal.error) throw personal.error;if(membership.error) throw membership.error;
+    const personal=await client.from(TABLE).select('state,updated_at').eq('user_id',uid).maybeSingle();
+    if(personal.error) throw personal.error;
     const pstate=personal.data?.state||{};lastUpdated=personal.data?.updated_at||'';
     const groupLookup=await client.rpc('bandplan_get_my_group');
     if(groupLookup.error)throw groupLookup.error;
     const groupRow=Array.isArray(groupLookup.data)?groupLookup.data[0]:groupLookup.data;
-    activeGroupId=groupRow?.group_id||membership.data?.group_id||null;
+    activeGroupId=groupRow?.group_id||null;
 
     /*
       The account row is the durable identity source for the member's name and
