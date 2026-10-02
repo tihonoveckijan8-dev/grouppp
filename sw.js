@@ -1,45 +1,57 @@
-/* BandPlan service worker: оболочка в кэше, работает офлайн */
-const V = 'bandplan-v27';
+/* BandPlan offline app shell — resilient cache install and safe updates */
+const V = 'bandplan-v28';
 const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'supabase.js'];
-self.addEventListener('install', e => { e.waitUntil(caches.open(V).then(c => c.addAll(SHELL))); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== V).map(x => caches.delete(x))))); });
-self.addEventListener('fetch', e => {
-  const r = e.request;
-  if (r.method !== 'GET') return;
-  const url = new URL(r.url);
-  if (url.origin !== self.location.origin) return;
-
-  const appShell = /(?:^|\/)(?:index\.html|bandplan\.js|supabase\.js|bandplan\.css|manifest\.webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
-
-  e.respondWith((async () => {
-    const cached = await caches.match(r, { ignoreSearch: true });
-
-    /* Network-first for the app shell: new deployments are picked up on the
-       next navigation/reload, without forcing a reload or interrupting a
-       session. Offline falls back to the last known shell. */
-    if (appShell) {
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(V);
+    // A single unavailable optional icon must not prevent the whole app from
+    // installing its offline shell.
+    await Promise.allSettled(SHELL.map(async path => {
       try {
-        const fresh = await fetch(r, { cache: 'no-cache' });
-        if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-          const copy = fresh.clone();
-          caches.open(V).then(cache => cache.put(r, copy)).catch(() => {});
+        const response = await fetch(path, {cache:'reload'});
+        if (response && response.ok) await cache.put(path, response);
+      } catch (_) {}
+    }));
+    await self.skipWaiting();
+  })());
+});
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key.startsWith('bandplan-') && key !== V).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|supabase\.js|bandplan\.css|manifest\.webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
+  event.respondWith((async () => {
+    const cached = await caches.match(request, {ignoreSearch:true});
+    if (shell) {
+      try {
+        const response = await fetch(request, {cache:'no-cache'});
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(V).then(cache => cache.put(request, copy)).catch(() => {});
         }
-        return fresh;
-      } catch (err) {
-        return cached || caches.match('index.html');
+        return response;
+      } catch (_) {
+        return cached || await caches.match('index.html') || Response.error();
       }
     }
-
     if (cached) return cached;
     try {
-      const fresh = await fetch(r);
-      if (fresh && (fresh.ok || fresh.type === 'opaque')) {
-        const copy = fresh.clone();
-        caches.open(V).then(cache => cache.put(r, copy)).catch(() => {});
+      const response = await fetch(request);
+      if (response && response.ok) {
+        const copy = response.clone();
+        caches.open(V).then(cache => cache.put(request, copy)).catch(() => {});
       }
-      return fresh;
-    } catch (err) {
-      return caches.match('index.html');
+      return response;
+    } catch (_) {
+      return await caches.match('index.html') || Response.error();
     }
   })());
 });
