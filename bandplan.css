@@ -2926,3 +2926,31 @@ svg { flex:0 0 auto; max-width:100%; }
   .page-head h1 { overflow-wrap:anywhere; }
   .tb-tools { gap:5px; }
 }
+
+
+/* Final mobile safeguards for header, text wrapping and controls */
+@media (max-width:640px) {
+  .tb-inner { width:100%; gap:7px; }
+  .tb-search { flex:1 1 0; min-width:0; padding:0 10px; gap:7px; }
+  #globalSearch { width:100%; min-width:0; font-size:14px; }
+  #globalSearch::placeholder { text-overflow:ellipsis; }
+  .tb-tools { flex:0 0 auto; gap:5px; }
+  .tb-tools .icon-btn, .tb-tools .avatar-btn { width:40px; height:40px; min-width:40px; }
+  .tb-tools .icon-btn:last-child { width:36px; min-width:36px; }
+  .page-head h1, .card h2, .song-name, .ev-title { overflow-wrap:anywhere; }
+  .badge, .chip { max-width:100%; min-width:0; white-space:normal; overflow-wrap:anywhere; }
+  .row { min-width:0; flex-wrap:wrap; }
+  .row-ns { min-width:0; }
+  .icon-btn svg, .btn svg, .view-switch svg { width:16px; height:16px; }
+  .bottom-nav a { min-width:0; overflow:hidden; }
+}
+@media (max-width:380px) {
+  .tb-tools { gap:3px; }
+  .tb-tools .icon-btn, .tb-tools .avatar-btn { width:36px; height:36px; min-width:36px; }
+  .tb-tools .icon-btn:last-child { width:34px; min-width:34px; }
+  .tb-search { padding:0 8px; }
+  .tb-search-ic svg { width:17px; height:17px; }
+  .page-head { gap:8px; }
+  .ph-acts { min-width:0; }
+  .ph-acts .btn { min-width:0; }
+}
