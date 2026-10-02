@@ -208,7 +208,7 @@ function defaults() {
     members: [], events: [], songs: [], setlists: [],
     settings: {
       theme: 'light', accent: '#2547D0', notation: 'auto', weekStart: 1,
-      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true
+      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true, collectionViews: { songs: 'blocks', events: 'blocks', setlists: 'blocks' }
     },
     onboardingDone: false
   };
@@ -2678,9 +2678,13 @@ function wireStickyHeader() {
 /* ═══ 26. INIT ═══ */
 function normalizeCloudState(d) {
   const base = defaults(), x = d && typeof d === 'object' ? d : {};
+  // Display mode is a local UI preference. Preserve it when shared cloud
+  // state refreshes, while still accepting it from cloud if no local choice exists.
+  const localViews = state.settings && state.settings.collectionViews || {};
   state = Object.assign(base, x);
   state.profile = Object.assign(base.profile, x.profile || {});
   state.settings = Object.assign(base.settings, x.settings || {});
+  state.settings.collectionViews = Object.assign({}, base.settings.collectionViews, x.settings && x.settings.collectionViews || {}, localViews);
   state.members = Array.isArray(x.members) ? x.members : [];
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
