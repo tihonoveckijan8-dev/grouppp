@@ -3080,3 +3080,40 @@ svg { flex:0 0 auto; max-width:100%; }
     grid-template-columns:42px minmax(0,1fr);
   }
 }
+
+
+/* V9 — viewport containment and overflow-safe layouts */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+.app,.main,.content,#app{min-width:0;max-width:100%}
+.content{overscroll-behavior-x:none;overflow-x:hidden}
+.content>*{min-width:0}
+.grid,.collection-grid,.split,.split2,.toolbar,.page-head,.card-h,.ev-row,.song-card,.sl-item{min-width:0}
+.grid,.collection-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.grid>* , .collection-grid>*{min-width:0;max-width:100%}
+.ev-title,.song-name,.song-artist,.ev-meta,.field-label,.hint,.info-row,.info-row>*{min-width:0;overflow-wrap:anywhere}
+.ev-meta span,.ev-acts,.song-acts,.ph-acts{min-width:0;max-width:100%}
+.dyn-table,.table-wrap,.table-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dyn-table{width:100%;table-layout:auto}
+.modal-card{width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.overlay,.filter-pop,.search-drop{max-width:calc(100vw - 20px)}
+.actionbar{max-width:100%;min-width:0;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+@media(max-width:640px){
+  .grid,.collection-grid{grid-template-columns:minmax(0,1fr)}
+  .ph-acts{width:100%}
+  .ph-acts>.btn{min-width:0}
+  .card-h{flex-wrap:wrap}
+  .ev-acts{grid-template-columns:repeat(auto-fit,minmax(58px,1fr))}
+  .part-switch{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .part-btn{min-width:0;overflow-wrap:anywhere}
+  .modal-card{width:100%;max-height:calc(100dvh - env(safe-area-inset-top,0px));}
+  .overlay{align-items:flex-end;padding:0;}
+}
+@media(max-width:360px){
+  .page-head h1{font-size:22px}
+  .topbar,.page-head,.content{padding-left:12px;padding-right:12px}
+  .song-acts .btn-primary{min-width:0;white-space:normal}
+  .part-btn{font-size:10.5px;padding-left:2px;padding-right:2px}
+}
+@media(min-width:901px){
+  .content{scrollbar-gutter:stable}
+}
