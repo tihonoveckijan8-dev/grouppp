@@ -182,7 +182,19 @@ const rolesOf = m => Array.isArray(m.roles) && m.roles.length ? m.roles : (m.rol
 const rolesLabel = list => { const a = (list || []).map(k => roleLabel(k)); return a.length ? a.join(', ') : '—'; };
 let deferredInstall = null;
 const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-function doInstall() { if (!deferredInstall) return; deferredInstall.prompt(); deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => { }); }
+function isIOSDevice() { return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function doInstall() {
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(() => { deferredInstall = null; const b = $('#pwaBtn'); if (b) b.hidden = true; }, () => {});
+    return;
+  }
+  if (isIOSDevice()) {
+    openModal({title:'Установка на iPhone и iPad',sub:'Добавьте BandPlan на экран «Домой»',guard:false,body:'<div class="ios-install-steps"><div class="ios-install-step"><span>1</span><p>Откройте сайт именно в <strong>Safari</strong>.</p></div><div class="ios-install-step"><span>2</span><p>Нажмите кнопку <strong>Поделиться</strong> внизу экрана (квадрат со стрелкой вверх).</p></div><div class="ios-install-step"><span>3</span><p>Прокрутите меню и выберите <strong>На экран «Домой»</strong>.</p></div><div class="ios-install-step"><span>4</span><p>Подтвердите добавление кнопкой <strong>Добавить</strong>.</p></div></div><p class="sub mt-s">После этого запускайте BandPlan с нового значка. Для первого запуска и загрузки данных потребуется интернет.</p>'});
+  } else {
+    toast('Установка недоступна в этом браузере. Откройте меню браузера и выберите добавление на главный экран.', 'info', 7000);
+  }
+}
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = $('#pwaBtn'); if (b) b.hidden = false; });
 window.addEventListener('appinstalled', () => { deferredInstall = null; });
 function syncSceneChords() { const b = $('#scChords'); if (b) { const on = state.settings.showChords !== false; b.setAttribute('aria-pressed', on); b.classList.toggle('off', !on); } }
