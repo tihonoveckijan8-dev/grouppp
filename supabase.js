@@ -438,10 +438,16 @@
     if(error)throw error;
     const result=data||{group_id:activeGroupId,event_id:String(eventId||''),user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()};
     if(participationChannel && result.event_id){
-      await participationChannel.send({type:'broadcast',event:'participation',payload:{
-        group_id:result.group_id||activeGroupId,event_id:String(result.event_id),user_id:String(result.user_id||uid),
-        status:String(result.status||''),updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
-      }});
+      try{
+        await participationChannel.send({type:'broadcast',event:'participation',payload:{
+          group_id:result.group_id||activeGroupId,event_id:String(result.event_id),user_id:String(result.user_id||uid),
+          status:String(result.status||''),updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
+        }});
+      }catch(broadcastError){
+        // Запись уже подтверждена Supabase. Ошибка Broadcast не должна
+        // откатывать успешное изменение участия на клиенте.
+        console.warn('BandPlan participation broadcast failed:',broadcastError);
+      }
     }
     return result;
   }
