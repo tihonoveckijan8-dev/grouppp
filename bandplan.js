@@ -1352,8 +1352,7 @@ function memberModal(id) {
     body: '<div class="field"><label class="field-label" for="f_mname">Имя *</label><input class="input" id="f_mname" maxlength="50" value="' + esc(d.name) + '" placeholder="Имя и фамилия"><span class="err"></span></div>' +
       '<div class="field"><span class="field-label">Роль / инструмент</span><div class="row" style="gap:6px" id="f_mrole">' +
       ROLES.map(r => '<button type="button" class="chip' + (rolesOf(d).indexOf(r.k) >= 0 ? ' on' : '') + '" data-r="' + r.k + '" aria-pressed="' + (rolesOf(d).indexOf(r.k) >= 0) + '">' + ic(r.icon, 13) + esc(r.label) + '</button>').join('') + '</div></div>' +
-      '<div class="field"><label class="field-label" for="f_mnote">Заметка</label><input class="input" id="f_mnote" maxlength="80" value="' + esc(d.note || '') + '" placeholder="Свой инструмент, бэк-вокал"></div>' +
-    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="mem-save" data-id="' + (m ? m.id : '') + '">' + ic('check', 16) + (m ? 'Сохранить изменения' : 'Добавить участника') + '</button>',
+      '<div class="field"><label class="field-label" for="f_mnote">Заметка</label><input class="input" id="f_mnote" maxlength="80" value="' + esc(d.note || '') + '" placeholder="Свой инструмент, бэк-вокал"></div>',    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="mem-save" data-id="' + (m ? m.id : '') + '">' + ic('check', 16) + (m ? 'Сохранить изменения' : 'Добавить участника') + '</button>',
     onMount: function (w) {
       $$('#f_mrole .chip', w).forEach(b => b.addEventListener('click', () => { const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }));
     }
