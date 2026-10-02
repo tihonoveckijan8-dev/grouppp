@@ -701,7 +701,7 @@ function routeTransition() {
     setTimeout(() => {
       view.classList.remove('route-enter', 'route-enter-active');
       delete view.dataset.transitioning;
-    }, 260);
+    }, 170);
   });
 }
 const navKey = n => n === 'song' ? 'songs' : n === 'setlist' ? 'setlists' : n;
