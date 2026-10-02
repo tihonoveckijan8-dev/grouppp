@@ -6,11 +6,11 @@ self.addEventListener('install', event => {
     const cache = await caches.open(V);
     // A single unavailable optional icon must not prevent the whole app from
     // installing its offline shell.
-    await Promise.allSettled(SHELL.map(async path => {
+    await Promise.all(SHELL.map(async path => {
       try {
         const response = await fetch(path, {cache:'reload'});
         if (response && response.ok) await cache.put(path, response);
-      } catch (_) {}
+      } catch (_) { return null; }
     }));
     await self.skipWaiting();
   })());
