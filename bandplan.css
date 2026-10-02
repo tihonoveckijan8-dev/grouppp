@@ -1766,3 +1766,116 @@ button,a,input,select,textarea { touch-action: manipulation; }
     pointer-events:none;
   }
 }
+
+
+/* ═══ FINAL PREMIUM CLAY SYSTEM ═══ */
+.side-profile .av,
+#tbAvatar,
+.memb-row .avatar,
+.ob-member .avatar,
+.avatars i:not(.more),
+.brand-mark,
+.avatar-btn{
+  background:var(--accent)!important;
+  background-image:none!important;
+  color:var(--on-accent)!important;
+  border-color:rgba(255,255,255,.18)!important;
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+.memb-row,
+.settings-card,
+.card,
+.hero,
+.song-card,
+.sl-item,
+.stat-mini,
+.cal-cell,
+.ev-row,
+.lib-item,
+.modal-card,
+.search-drop,
+.filter-pop,
+.toast,
+.hv-card,
+.onb-card,
+.dropzone{
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+.memb-row:hover,
+.settings-card:hover,
+.card-interactive:hover,
+.song-card:hover,
+.ev-row:hover,
+.lib-item:hover{
+  box-shadow:var(--clay-out),var(--clay-in)!important;
+}
+.input,
+.select,
+.textarea,
+.tb-search,
+#globalSearch{
+  box-shadow:var(--clay-press)!important;
+}
+.btn,
+.chip,
+.icon-btn,
+.nav-item,
+.seg,
+.seg button,
+.part-btn,
+.sbtn,
+.sctl button,
+.mini-stepper button{
+  box-shadow:var(--clay-sm),var(--clay-in)!important;
+}
+.btn:active,
+.chip:active,
+.icon-btn:active,
+.nav-item:active,
+.seg button:active,
+.part-btn:active,
+.sbtn:active,
+.sctl button:active,
+.mini-stepper button:active{
+  box-shadow:var(--clay-press)!important;
+}
+.btn-primary,
+.btn-secondary,
+.btn-tertiary,
+.btn-danger,
+.btn-danger-solid,
+.btn.on,
+.seg button.on,
+.auth-tabs button.on{
+  background:var(--accent)!important;
+  color:var(--on-accent)!important;
+  border-color:transparent!important;
+  background-image:none!important;
+}
+.btn-secondary,
+.btn-tertiary{
+  background:var(--accent-soft)!important;
+  color:var(--accent)!important;
+  border-color:var(--accent-ring)!important;
+}
+.btn-secondary:hover,
+.btn-tertiary:hover{
+  background:var(--accent-soft-2)!important;
+  color:var(--accent)!important;
+}
+.chip.on,
+.chip.active,
+.part-btn.on{
+  background:var(--accent)!important;
+  color:var(--on-accent)!important;
+  border-color:transparent!important;
+}
+.nav-item.active,
+.bottom-nav a.active{
+  background:var(--accent-soft)!important;
+  color:var(--accent)!important;
+}
+.scene-bar,
+.range{
+  box-shadow:var(--clay-press)!important;
+}
