@@ -162,6 +162,20 @@
     if(currentSession){gate().hidden=true;return currentSession.user;}
     mode='login';renderGate();return null;
   }
+  function hydratePersonalEventParticipation(events, profile) {
+    const nextProfile = Object.assign({}, profile || {});
+    const map = nextProfile.eventParticipation && typeof nextProfile.eventParticipation === 'object'
+      ? Object.assign({}, nextProfile.eventParticipation) : {};
+    const cleanEvents = (events || []).map(raw => {
+      const ev = Object.assign({}, raw || {});
+      const id = String(ev.id || '').trim();
+      if (id && !map[id] && ev.myStatus) map[id] = ev.myStatus;
+      delete ev.myStatus;
+      return ev;
+    });
+    nextProfile.eventParticipation = map;
+    return { events: cleanEvents, profile: nextProfile };
+  }
   async function load() {
     if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
     const uid=currentSession.user.id;
@@ -193,7 +207,8 @@
     const settings=Object.assign({},accountSettings,pstate.settings||{});
     const hasAccountIdentity=!!String(accountProfile?.display_name||'').trim() && Array.isArray(accountProfile?.roles) && accountProfile.roles.length>0;
     const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
-    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data||accountProfile?{state:hydratedPersonal,updatedAt:lastUpdated}:null;}
+    const personalEvents=hydratePersonalEventParticipation(pstate.events||[],profile);
+    if(!activeGroupId){sharedBaseline={songs:{},events:{},setlists:{}};return personal.data||accountProfile?{state:Object.assign({},hydratedPersonal,{profile:personalEvents.profile}),updatedAt:lastUpdated}:null;}
     const [songs,events,setlists,gs,memberRows,groupInfo]=await Promise.all([
       client.from('bandplan_songs').select('data').eq('group_id',activeGroupId),
       client.from('bandplan_events').select('data').eq('group_id',activeGroupId),
@@ -216,11 +231,14 @@
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',color:'#2547D0',note:''});
     });
     const groupProfile=Object.assign({},profile);if(groupInfo.data?.name)groupProfile.bandName=groupInfo.data.name;
-    return {state:Object.assign({},pstate,{profile:groupProfile,songs:(songs.data||[]).map(x=>x.data),events:(events.data||[]).map(x=>x.data),setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
+    const hydratedEvents=hydratePersonalEventParticipation((events.data||[]).map(x=>x.data),groupProfile);
+    return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();clearTimeout(timer);pending=snapshot;
+    const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();
+    snapshot.events=(snapshot.events||[]).map(ev=>{const copy=Object.assign({},ev);delete copy.myStatus;return copy;});
+    clearTimeout(timer);pending=snapshot;
     await writeDurableState(uid,snapshot,updatedAt,true);
     if(!activeGroupId){const m=await client.from('bandplan_group_members').select('group_id').eq('user_id',uid).limit(1).maybeSingle();if(m.error)throw m.error;activeGroupId=m.data?.group_id||null;}
     if(!activeGroupId&&snapshot.onboardingDone){
