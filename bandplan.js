@@ -708,6 +708,25 @@ function openEventFilters() {
     }
   });
 }
+function dayCellModal(date) {
+  const occ = expand(date, date);
+  const title = pdateFull(date);
+  const items = occ.map(function(o) {
+    const e = o.ev, t = evType(e.type);
+    return '<button class="day-modal-event" type="button" data-act="event-edit" data-id="' + esc(e.id) + '">' +
+      '<span class="day-modal-event-main"><strong>' + esc(e.title) + '</strong>' +
+      '<span>' + esc(e.time || 'Без времени') + (e.end ? '–' + esc(e.end) : '') + (e.location ? ' · ' + esc(e.location) : '') + '</span></span>' +
+      '<span class="badge ' + t.cls + '">' + ic(t.ic, 12) + esc(t.label) + '</span></button>';
+  }).join('');
+  openModal({
+    title: title,
+    sub: '',
+    guard: false,
+    body: '<div class="day-modal-list">' + (items || '<div class="day-modal-empty">Событий нет</div>') + '</div>',
+    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button>' +
+      '<button class="btn btn-primary" type="button" data-act="new-event" data-date="' + esc(date) + '">' + ic('plus', 16) + 'Добавить событие</button>'
+  });
+}
 function monthHTML(y, mo) {
   const occ = expand(iso(new Date(y, mo, 1)), iso(new Date(y, mo + 1, 0)));
   const byDay = {}; occ.forEach(o => { (byDay[o.date] = byDay[o.date] || []).push(o); });
@@ -1115,7 +1134,7 @@ function moveItem(slId, itemId, at) {
 function vSettings() {
   const s = state.settings, p = state.profile;
   let h = '<div class="settings-shell"><div class="split2">';
-  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Профиль и роль</h2><div class="sub">Роль определяет, какая динамика песни подсвечивается</div></div></div>' +
+  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setName">Ваше имя</label><input class="input" id="setName" maxlength="50" value="' + esc(p.name) + '" placeholder="Имя и фамилия"></div>' +
     '<div class="field"><label class="field-label" for="setBand">Название группы</label><input class="input" id="setBand" maxlength="50" value="' + esc(p.bandName || '') + '" placeholder="Neon Coast"></div></div>' +
     '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:68px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
@@ -1127,7 +1146,7 @@ function vSettings() {
     '</section>';
 
   h += '<section class="card rise settings-card" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
-    '<span class="t-xs t-muted">Участники подключаются по коду</span></div>';
+    '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
     h += '<div class="memb-row"><div class="avatar" style="background:' + esc(m.color || 'var(--accent)') + '" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
@@ -1140,14 +1159,14 @@ function vSettings() {
   }
   h += '</section>';
 
-  h += '<section class="card rise settings-card" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2><div class="sub">Изменения применяются сразу и сохраняются на устройстве</div></div></div>' +
+  h += '<section class="card rise settings-card" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2></div></div>' +
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
     [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
     ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"></button>').join('') +
     '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:30px;height:26px;border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
-    '<span class="hint">Акцент применяется только к главным действиям, активным состояниям и прогрессу.</span></div>' +
+    '</div>' +
     '<div class="field"><span class="field-label">Запись аккордов</span><div class="seg">' +
     [['auto', 'Как в оригинале'], ['sharp', 'Диезы (C#)'], ['flat', 'Бемоли (Db)']].map(o => '<button type="button" data-act="notation-set" data-v="' + o[0] + '" class="' + (s.notation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="setWeekStart">Первый день недели</label><select class="select" id="setWeekStart"><option value="1"' + (s.weekStart !== 0 ? ' selected' : '') + '>Понедельник</option><option value="0"' + (s.weekStart === 0 ? ' selected' : '') + '>Воскресенье</option></select></div>' +
@@ -1160,9 +1179,9 @@ function vSettings() {
     '<button class="chip' + (s.autoscroll ? ' on' : '') + '" type="button" data-act="toggle-auto" aria-pressed="' + !!s.autoscroll + '">' + ic('bolt', 14) + 'Автопрокрутка на сцене</button>' +
     '<button class="chip' + (s.reduced ? ' on' : '') + '" type="button" data-act="toggle-reduced" aria-pressed="' + !!s.reduced + '">' + ic('wave', 14) + 'Меньше анимации</button>' +
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
-    '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div><span class="hint">Сообщения вроде «Сохранено» можно полностью отключить или оставить только ошибки.</span></div></div></div></section>';
+    '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
-  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button><p class="t-sm t-muted mt-s">Если кнопки нет: на iPhone — Safari → «Поделиться» → «На экран Домой»; на Android — меню браузера ⋮ → «Установить приложение». Нужен адрес https:// (GitHub Pages, Netlify) или localhost.</p>') + '</section>';
+  h += '<section class="card rise settings-card"><div class="card-h"><div><h2>Установка на телефон</h2><div class="sub">' + (isStandalone() ? 'Приложение уже запущено отдельно от браузера' : 'Откроется на весь экран, без браузера, и будет работать офлайн') + '</div></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
   h += '<section class="card rise settings-card" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2><div class="sub">Общие песни, события и сет-листы синхронизируются через Supabase; локальный кэш используется для офлайн-работы</div></div></div>' +
     '<div class="grid g4 mb" style="gap:var(--s3)">' + mini(state.songs.length, 'Песен') + mini(state.events.length, 'Событий') + mini(state.setlists.length, 'Сет-листов') + mini(state.members.length, 'Участников') + '</div>' +
     '<div class="row"><button class="btn btn-secondary btn-sm" type="button" data-act="export">' + ic('dl', 16) + 'Скачать копию (JSON)</button>' +
@@ -1170,15 +1189,15 @@ function vSettings() {
     '<div class="row mt-s"><button class="btn btn-danger btn-sm" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить все данные</button></div>' +
     '<p class="t-xs t-muted mt">Объём данных: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</p></section>';
 
-  h += '<section class="card rise settings-card" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2><div class="sub">Music Group OS</div></div></div>' +
-    '<p class="t-sm t-2" style="line-height:var(--lh-loose)">Расписание (месяц / неделя / день), репертуар с аккордами и динамикой партий по инструментам, конструктор сет-листов с перетаскиванием, сценический режим с автопрокруткой, онбординг группы и роли, глобальный поиск на главной, оформление и печать в PDF.</p>' +
+  h += '<section class="card rise settings-card" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
+    '' +
     '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span><span class="badge b-muted">свайп-навигация</span></div>' +
     '<hr class="divider"><span class="field-label">Горячие клавиши</span>' +
-    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Ctrl K</kbd><span class="t-sm t-muted">поиск на главной</span></div>' +
-    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">N</kbd><kbd class="badge b-muted mono">E</kbd><kbd class="badge b-muted mono">S</kbd><span class="t-sm t-muted">песня / событие / сет-лист</span></div>' +
-    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">← →</kbd><span class="t-sm t-muted">сцена: песни · календарь: навигация</span></div>' +
-    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Space</kbd><span class="t-sm t-muted">автопрокрутка на сцене</span></div>' +
-    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Esc</kbd><span class="t-sm t-muted">закрыть окно или выйти со сцены</span></div></section>';
+    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Ctrl K</kbd></div>' +
+    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">N</kbd><kbd class="badge b-muted mono">E</kbd><kbd class="badge b-muted mono">S</kbd></div>' +
+    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">← →</kbd></div>' +
+    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Space</kbd></div>' +
+    '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Esc</kbd></div></section>';
   return h + '</div></div>';
 }
 function mini(v, l) { return '<div class="stat-mini"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
@@ -1713,6 +1732,8 @@ document.addEventListener('click', function (e) {
           state.members = [];
           state.profile.bandName = 'Моя группа';
           state.profile.bandDesc = '';
+          state.profile.eventParticipation = {};
+          state.profile.groupDetached = true;
           state.onboardingDone = true;
           try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
           hardClose(modalRoot);
@@ -1768,7 +1789,7 @@ document.addEventListener('click', function (e) {
     }
     case 'cal-today': stop(); ui.month = new Date(); ui.selDate = today(); if (parseHash().name !== 'calendar') go('#/calendar'); else render(); break;
     case 'cal-view': stop(); ui.calView = el.getAttribute('data-v'); state.settings.calView = ui.calView; save(); render(); break;
-    case 'cal-day': { stop(); ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); eventModal(null, ui.selDate); break; }
+    case 'cal-day': { stop(); ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); dayCellModal(ui.selDate); break; }
     case 'tg-day': stop(); ui.selDate = el.getAttribute('data-date'); ui.calView = 'day'; render(); break;
     case 'tg-col': stop(); if (e.target.closest('.tg-ev')) break; ui.selDate = el.getAttribute('data-date'); eventModal(null, el.getAttribute('data-date')); break;
     case 'new-event': stop(); eventModal(null, el.getAttribute('data-date') || ui.selDate); break;
@@ -2034,6 +2055,7 @@ document.addEventListener('click', function (e) {
         const code=typeof result==='string'?result:result?.code;
         if(!code)throw new Error('Сервер не вернул код приглашения.');
         if(result?.groupName)state.profile.bandName=result.groupName;
+        state.profile.groupDetached=false;
         state.onboardingDone=true;
         try{await cloud.saveNow(state);}catch(syncError){console.warn('BandPlan invite state sync deferred:',syncError);}
         try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
@@ -2081,6 +2103,7 @@ document.addEventListener('click', function (e) {
         const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
         normalizeCloudState(loaded.state);
         state.profile.bandName=result.group_name||state.profile.bandName;
+        state.profile.groupDetached=false;
         state.onboardingDone=true;
         modalDirty=false;hardClose(modalRoot);
         try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
