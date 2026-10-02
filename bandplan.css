@@ -3014,3 +3014,69 @@ svg { flex:0 0 auto; max-width:100%; }
   button,.btn,.icon-btn { max-width:100%; }
   .settings-tabs { -webkit-overflow-scrolling:touch; }
 }
+
+
+/* Calendar participation cards: distinct block and compact list layouts */
+.participation-collection.collection-blocks {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));
+  align-items:stretch;
+  gap:12px;
+}
+.participation-collection.collection-blocks > .ev-row {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:12px;
+  min-width:0;
+  min-height:100%;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:var(--r-card,18px);
+  background:var(--surface);
+  box-shadow:var(--shadow-xs,none);
+}
+.participation-collection.collection-blocks > .ev-row .ev-date {
+  width:auto !important;
+  display:flex;
+  align-items:baseline;
+  gap:6px;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.participation-collection.collection-blocks > .ev-row .ev-date .d { font-size:22px; font-weight:700; }
+.participation-collection.collection-blocks > .ev-row .ev-date .m { font-size:12px; color:var(--muted); }
+.participation-collection.collection-blocks > .ev-row .ev-body {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-width:0;
+}
+.participation-collection.collection-blocks > .ev-row .ev-title { min-width:0; flex-wrap:wrap; overflow-wrap:anywhere; }
+.participation-collection.collection-blocks > .ev-row .ev-meta { display:flex; flex-wrap:wrap; gap:8px 12px; }
+.participation-collection.collection-blocks > .ev-row .part-switch { margin-top:2px; }
+.participation-collection.collection-blocks > .ev-row .ev-acts {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:6px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+}
+.participation-collection.collection-list { display:flex; flex-direction:column; gap:8px; }
+.participation-collection.collection-list > .ev-row {
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px 14px;
+  padding:12px 14px;
+}
+@media(max-width:640px) {
+  .participation-collection.collection-blocks { grid-template-columns:minmax(0,1fr); }
+  .participation-collection.collection-blocks > .ev-row { padding:14px; }
+  .participation-collection.collection-list > .ev-row {
+    display:grid !important;
+    grid-template-columns:42px minmax(0,1fr);
+  }
+}
