@@ -877,13 +877,13 @@ function vCalendar() {
 
   h += '<section class="card rise" style="animation-delay:.07s" aria-labelledby="upH"><div class="card-h"><div><h2 id="upH">Ближайшие участия</h2>' +
     '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div></div>' +
-    '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div><div class="collection-toolbar events-view-toolbar">' + collectionViewControl('events') + '</div>';
+    '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div>';
   if (!list.length) h += stateHTML(ui.evQuery || ac ? 'search' : 'empty',
     ui.evQuery || ac ? 'Ничего не найдено' : 'Событий пока нет',
     ui.evQuery || ac ? 'Попробуйте изменить запрос или сбросить фильтры — возможно, события запланированы на другие даты.' : 'Создайте первую репетицию или выступление: укажите дату, время, место и состав.',
     (ui.evQuery || ac ? '<button class="btn btn-secondary" type="button" data-act="ev-reset">Сбросить фильтры</button>' : '') +
     '<button class="btn btn-primary" type="button" data-act="new-event">Создать событие</button>');
-  else { h += '<div class="participation-collection collection-' + collectionView('events') + '">'; list.slice(0, 12).forEach(o => { h += evRow(o, true); }); h += '</div>'; }
+  else { h += '<div class="participation-collection collection-blocks">'; list.slice(0, 12).forEach(o => { h += evRow(o, true); }); h += '</div>'; }
   return h + '</section>';
 }
 function calTitle() {
@@ -2110,7 +2110,7 @@ document.addEventListener('click', function (e) {
       stop();
       const section = el.getAttribute('data-section');
       const value = el.getAttribute('data-v') === 'list' ? 'list' : 'blocks';
-      if (['songs','events','setlists'].includes(section)) {
+      if (['songs','setlists'].includes(section)) {
         state.settings.collectionViews = Object.assign({}, state.settings.collectionViews || {}, {[section]:value});
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить вид отображения', 'err'); }
         render();
