@@ -2502,6 +2502,14 @@ function init() {
         const check = () => {
           if (document.hidden) return;
           reg.update().catch(() => {});
+          /* Тихо прогреваем свежую оболочку в Service Worker.
+             Текущая вкладка не перезагружается и не прерывает работу. */
+          const stamp = Date.now();
+          ['./', './index.html', './bandplan.css', './bandplan.js', './supabase.js', './manifest.webmanifest']
+            .forEach(path => fetch(path + (path.indexOf('?') >= 0 ? '&' : '?') + 'bp-preload=' + stamp, {
+              cache: 'no-store',
+              credentials: 'same-origin'
+            }).catch(() => {}));
         };
         check();
         updateTimer = window.setInterval(check, 15 * 60 * 1000);
