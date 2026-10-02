@@ -399,6 +399,12 @@
     disposeRealtime();
     const {data,error}=await client.rpc('bandplan_leave_group');
     if(error)throw error;
+
+    // Verify the membership is actually gone before reporting success.
+    const check=await client.from('bandplan_group_members').select('group_id').eq('user_id',currentSession.user.id).limit(1).maybeSingle();
+    if(check.error)throw check.error;
+    if(check.data?.group_id)throw new Error('Не удалось удалить членство в группе.');
+
     activeGroupId=null;
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
