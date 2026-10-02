@@ -1104,7 +1104,9 @@ function vSettings() {
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
     [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
-    '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></section>';
+    '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
+    (window.BandPlanCloud?.user?.() && state.members.some(m => m.accountId === window.BandPlanCloud.user().id) ? '<button class="btn btn-danger btn-block mt-s" type="button" data-act="group-leave">' + ic('x', 16) + 'Выйти из группы</button>' : '') +
+    '</section>';
 
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '<span class="t-xs t-muted">Участники подключаются по коду</span></div>';
@@ -1679,6 +1681,28 @@ document.addEventListener('click', function (e) {
   switch (a) {
     case 'modal-close': stop(); closeModal(); break;
     case 'account-logout': { stop(); const b=el; b.disabled=true; window.BandPlanCloud.signOut().then(()=>location.reload()).catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');}); break; }
+    case 'group-leave': {
+      stop();
+      confirmBox('Выйти из группы?', 'Вы потеряете доступ к её песням, событиям и сет-листам.', async function () {
+        try {
+          await window.BandPlanCloud.leaveGroup();
+          state.songs = [];
+          state.events = [];
+          state.setlists = [];
+          state.members = [];
+          state.profile.bandName = 'Моя группа';
+          state.profile.bandDesc = '';
+          state.onboardingDone = true;
+          try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+          hardClose(modalRoot);
+          render();
+          toast('Вы вышли из группы', 'ok');
+        } catch (err) {
+          toast('Не удалось выйти из группы: ' + (err.message || 'Ошибка'), 'err');
+        }
+      }, 'Выйти', true);
+      break;
+    }
     case 'confirm-yes': { stop(); const cb = confirmCb; hardClose(modalRoot); if (cb) cb(); break; }
     case 'reload-view': stop(); ui.skeleton = true; render(); break;
     case 'nav': {
