@@ -1369,7 +1369,7 @@ function vSettings() {
     '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
     '<div class="field"><span class="field-label">Уведомления о действиях</span><div class="seg">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
-  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
+  h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на телефон</h2></div></div>' + (isStandalone() ? '' : '<button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install"' + (deferredInstall || isIOSDevice() ? '' : ' hidden') + '>' + ic('dl', 16) + 'Установить приложение</button>') + '</section>';
   h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
     '<div class="data-stats-grid">' +
       '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><strong>' + state.songs.length + '</strong><span>Песен</span></div>' +
@@ -2887,7 +2887,18 @@ async function startBandPlan() {
     toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
     return;
   }
-  const user = await window.BandPlanCloud.initialize();
+  let user = null;
+  try {
+    user = await window.BandPlanCloud.initialize();
+  } catch (error) {
+    console.warn('BandPlan cloud initialization failed; opening local app:', error);
+    KEY = 'bandplan.premium.v6';
+    const hadLocal = load();
+    init();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
+    return;
+  }
   if (!user) return;
 
   /*
