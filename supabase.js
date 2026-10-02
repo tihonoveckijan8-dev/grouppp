@@ -11,6 +11,7 @@
   let authSubscription = null;
   let realtimeGeneration = 0;
   let subscriptionCallback = null;
+  let participationCallback = null;
 
   /* Durable offline cache: per-account snapshot + latest pending sync. */
   const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=1, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue';
@@ -67,7 +68,8 @@
     clearTimeout(refreshTimer);
     refreshTimer = null;
     if (channel) { client.removeChannel(channel); channel = null; }
-    if (groupChannel) { client.removeChannel(groupChannel); groupChannel = null; }
+    if (Array.isArray(groupChannel)) { groupChannel.forEach(ch => client.removeChannel(ch)); groupChannel = null; }
+    else if (groupChannel) { client.removeChannel(groupChannel); groupChannel = null; }
   }
   function bindAuthLifecycle() {
     if (authSubscription) return;
@@ -335,9 +337,10 @@
     pending=JSON.parse(JSON.stringify(state||{}));clearTimeout(timer);
     timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
   }
-  function subscribe(onState) {
+  function subscribe(onState,onParticipation) {
     if(!currentSession?.user)return ()=>{};
     subscriptionCallback=onState;
+    participationCallback=typeof onParticipation === 'function' ? onParticipation : null;
     const uid=currentSession.user.id;
     disposeRealtime();
     const generation = realtimeGeneration;
@@ -369,7 +372,19 @@
     // Membership and account changes must refresh the roster on every participant's device.
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_group_members',filter:'group_id=eq.'+activeGroupId},refreshShared);
     live=live.on('postgres_changes',{event:'*',schema:'public',table:'bandplan_accounts'},refreshShared);
-    groupChannel=live.subscribe(status => handleStatus('shared', status));
+    const sharedChannel=live.subscribe(status => handleStatus('shared', status));
+    const participationChannel=client.channel('bp-participation-'+uid)
+      .on('postgres_changes',{event:'*',schema:'public',table:'bandplan_event_participation',filter:'group_id=eq.'+activeGroupId},payload=>{
+        if(generation !== realtimeGeneration) return;
+        const row=payload?.new||payload?.old;
+        if(!row?.event_id||!row?.user_id) return;
+        if(typeof participationCallback==='function') participationCallback({
+          group_id:row.group_id,event_id:String(row.event_id),user_id:String(row.user_id),
+          status:payload?.event==='DELETE'?'':String(row.status||''),
+          updated_at:row.updated_at||new Date().toISOString(),deleted:payload?.event==='DELETE'
+        });
+      }).subscribe(status=>handleStatus('participation',status));
+    groupChannel=[sharedChannel,participationChannel];
     /* Realtime/WebSocket is primary. Poll only while the shared channel is degraded. */
     realtimePollTimer=setInterval(()=>{
       if(!currentSession?.user||!activeGroupId||navigator.onLine===false||realtimeSharedReady||document.hidden)return;
@@ -389,7 +404,7 @@
     });
     if(error)throw error;
     activeGroupId=data?.[0]?.group_id||null;
-    if(activeGroupId && subscriptionCallback) subscribe(subscriptionCallback);
+    if(activeGroupId && subscriptionCallback) subscribe(subscriptionCallback,participationCallback);
     return data?.[0]||null;
   }
   async function setEventParticipation(eventId,status){
@@ -439,13 +454,13 @@
       const snap=JSON.parse(JSON.stringify(pending));
       try{
         await saveNow(snap);
-        if(subscriptionCallback)subscribe(subscriptionCallback);
+        if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
       }catch(e){
         console.warn('BandPlan reconnect sync failed:',e);
         window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));
       }
     } else if(subscriptionCallback && activeGroupId && !groupChannel){
-      subscribe(subscriptionCallback);
+      subscribe(subscriptionCallback,participationCallback);
     }
   });
   async function clearLocalCache(){
