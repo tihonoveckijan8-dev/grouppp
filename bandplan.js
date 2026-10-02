@@ -348,6 +348,34 @@ function refreshParticipationUI(evId) {
   const ev = evById(evId);
   if (!ev) return;
   const my = eventStatusFor(ev) || '';
+
+  // Обновляем только связанные с событием элементы. Полный render() здесь
+  // намеренно не вызывается: это убирает визуальный лаг при переключении участия.
+  document.querySelectorAll('[data-act="event-info"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(row => {
+    row.querySelectorAll('.part-avatar[data-member-key]').forEach(avatar => {
+      const member = memById(avatar.getAttribute('data-member-key'));
+      if (!member) return;
+      const ps = participantStatusFor(ev, member) || 'unset';
+      const title = member.name + ' — ' + participantStatusLabel(ps);
+      avatar.className = 'part-avatar part-' + ps;
+      avatar.title = title;
+      avatar.setAttribute('aria-label', title);
+      const dot = avatar.querySelector('.participation-dot');
+      if (dot) {
+        dot.className = 'participation-dot participation-dot-avatar status-' + ps;
+        dot.title = participantStatusLabel(ps);
+        dot.setAttribute('aria-label', participantStatusLabel(ps));
+      }
+    });
+
+    row.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
+      const v = btn.getAttribute('data-v');
+      const on = !!my && v === my;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  });
+
   const overlay = document.querySelector('#modalOverlay');
   if (overlay) {
     overlay.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
@@ -362,22 +390,22 @@ function refreshParticipationUI(evId) {
       myLabel.textContent = participantStatusLabel(my);
     }
     overlay.querySelectorAll('[data-participant-key]').forEach(person => {
-      const key=String(person.getAttribute('data-participant-key')||'');
-      if(!key)return;
-      const member=memById(key);
-      const ps=member ? participantStatusFor(ev,member) : String((ev.participation||{})[key]||'');
-      const dot=person.querySelector('.participation-dot');
-      const label=person.querySelector('.participation-label');
-      if(dot){
-        dot.className='participation-dot participation-dot-avatar status-'+(ps||'unset');
-        dot.title=participantStatusLabel(ps);
-        dot.setAttribute('aria-label',participantStatusLabel(ps));
+      const key = String(person.getAttribute('data-participant-key') || '');
+      if (!key) return;
+      const member = memById(key);
+      const ps = member ? participantStatusFor(ev, member) : String((ev.participation || {})[key] || '');
+      const dot = person.querySelector('.participation-dot');
+      const label = person.querySelector('.participation-label');
+      if (dot) {
+        dot.className = 'participation-dot participation-dot-avatar status-' + (ps || 'unset');
+        dot.title = participantStatusLabel(ps);
+        dot.setAttribute('aria-label', participantStatusLabel(ps));
       }
-      if(label){
-        label.className='participation-label status-'+(ps||'unset');
-        label.textContent=participantStatusLabel(ps);
+      if (label) {
+        label.className = 'participation-label status-' + (ps || 'unset');
+        label.textContent = participantStatusLabel(ps);
       }
-    })
+    });
   }
 }
 
@@ -942,7 +970,7 @@ function evRow(o, withPart) {
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
-    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" aria-hidden="true"></span></i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
+    (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" aria-hidden="true"></span></i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
       '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
