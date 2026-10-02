@@ -813,8 +813,8 @@ function vCalendar() {
     '<button class="btn btn-tertiary btn-sm" type="button" data-act="ev-reset">Сбросить</button></div>';
 
   h += '<section class="card rise" style="animation-delay:.07s" aria-labelledby="upH"><div class="card-h"><div><h2 id="upH">Ближайшие участия</h2>' +
-    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div></div>' + collectionViewControl('events') +
-    '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div>';
+    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div></div>' +
+    '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div><div class="collection-toolbar events-view-toolbar">' + collectionViewControl('events') + '</div>';
   if (!list.length) h += stateHTML(ui.evQuery || ac ? 'search' : 'empty',
     ui.evQuery || ac ? 'Ничего не найдено' : 'Событий пока нет',
     ui.evQuery || ac ? 'Попробуйте изменить запрос или сбросить фильтры — возможно, события запланированы на другие даты.' : 'Создайте первую репетицию или выступление: укажите дату, время, место и состав.',
@@ -1018,7 +1018,7 @@ function vSongs() {
     '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '" style="border:none;background:none;outline:none;font-size:var(--fs-body-s);flex:1;min-width:0;box-shadow:none">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
-    collectionViewControl('songs') + '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
+    '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div><div class="collection-toolbar songs-view-toolbar">' + collectionViewControl('songs') + '</div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
       (ui.songQuery ? '<button class="chip" type="button" data-act="song-clear">' + ic('search', 13) + '«' + esc(ui.songQuery) + '»<span class="rm">×</span></button>' : '') +
@@ -2049,7 +2049,8 @@ document.addEventListener('click', function (e) {
       const value = el.getAttribute('data-v') === 'list' ? 'list' : 'blocks';
       if (['songs','events','setlists'].includes(section)) {
         state.settings.collectionViews = Object.assign({}, state.settings.collectionViews || {}, {[section]:value});
-        save(); render();
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить вид отображения', 'err'); }
+        render();
       }
       break;
     }
