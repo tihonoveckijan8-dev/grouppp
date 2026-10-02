@@ -31,6 +31,33 @@ function fmtDur(sec) { sec = Math.round(sec || 0); return Math.floor(sec / 60) +
 function durParse(v) { const m = /^(\d+):(\d{1,2})$/.exec(String(v || '').trim()); if (m) return (+m[1]) * 60 + (+m[2]); const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
 function mins(t) { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || '').trim()); return m ? (+m[1]) * 60 + (+m[2]) : 0; }
 function debounce(fn, ms) { let t; return function () { const a = arguments, c = this; clearTimeout(t); t = setTimeout(() => fn.apply(c, a), ms || 250); }; }
+async function copyTextReliable(value) {
+  const text = String(value == null ? '' : value);
+  if (!text) return false;
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function' && window.isSecureContext !== false) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) {}
+  try {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.left = '-9999px';
+    area.style.top = '0';
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    area.setSelectionRange(0, area.value.length);
+    const ok = document.execCommand('copy');
+    area.remove();
+    return !!ok;
+  } catch (e) {
+    return false;
+  }
+}
 
 /* ═══ 2. ICONS (единая толщина линии 1.7) ═══ */
 const ICONS = {
@@ -1940,11 +1967,26 @@ document.addEventListener('click', function (e) {
     }
     case 'invite': {
       stop();el.disabled=true;
-      window.BandPlanCloud.saveNow(state).then(()=>window.BandPlanCloud.getInviteCode()).then(code=>{
-        const txt='Код группы '+(state.profile.bandName||'BandPlan')+': '+code;
-        if(navigator.clipboard?.writeText)return navigator.clipboard.writeText(code).then(()=>toast('Код приглашения скопирован: '+code,'ok',6000));
-        toast(txt,'info',8000);
-      }).catch(err=>toast('Не удалось получить код: '+(err.message||'проверьте подключение'),'err')).finally(()=>{el.disabled=false;});
+      window.BandPlanCloud.getInviteCode().then(async code=>{
+        const copied=await copyTextReliable(code);
+        openModal({
+          title:'Код приглашения',
+          sub:'Отправьте этот код участнику. Код можно скопировать повторно в любой момент.',
+          body:'<div class="field"><label class="field-label" for="f_invite_code">Код группы</label><div class="row" style="gap:8px"><input class="input" id="f_invite_code" value="'+esc(code)+'" readonly spellcheck="false" style="font-weight:700;letter-spacing:.14em;text-transform:uppercase"><button class="btn btn-secondary" type="button" data-act="invite-copy">'+ic('copy',16)+'Скопировать</button></div><span class="hint">Код создаётся и хранится в Supabase, поэтому он одинаковый на всех устройствах участников.</span></div>',
+          footer:'<button class="btn btn-primary" type="button" data-act="modal-close">Готово</button>'
+        });
+        if(copied) toast('Код приглашения скопирован: '+code,'ok',5000);
+        else toast('Код создан. Нажмите «Скопировать» рядом с кодом.','warn',6500);
+      }).catch(err=>toast('Не удалось получить код: '+(err.message||'проверьте подключение'),'err',7000)).finally(()=>{el.disabled=false;});
+      break;
+    }
+    case 'invite-copy': {
+      stop();
+      const code=fv('f_invite_code');
+      copyTextReliable(code).then(ok=>{
+        if(ok) toast('Код приглашения скопирован: '+code,'ok',5000);
+        else toast('Браузер не разрешил автоматическое копирование. Выделите код и скопируйте его вручную.','warn',6500);
+      });
       break;
     }
     case 'group-join': {
@@ -1953,14 +1995,21 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'group-join-confirm': {
-      stop();const code=fv('f_group_code');if(!code){fieldError('f_group_code','Введите код приглашения');break;}
+      stop();
+      const code=String(fv('f_group_code')||'').toUpperCase().replace(/[^0-9A-F]/g,'');
+      if(!code){fieldError('f_group_code','Введите код приглашения');break;}
       el.disabled=true;el.classList.add('loading');
       window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles()).then(async result=>{
         if(!result)throw new Error('Группа не найдена.');
         const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
-        normalizeCloudState(loaded.state);state.profile.bandName=result.group_name||state.profile.bandName;
-        modalDirty=false;hardClose(modalRoot);save();applyTheme();applyAccentVars();render();
-        toast('Вы вступили в группу «'+(result.group_name||'')+'»','ok',4500);
+        normalizeCloudState(loaded.state);
+        state.profile.bandName=result.group_name||state.profile.bandName;
+        state.onboardingDone=true;
+        modalDirty=false;hardClose(modalRoot);
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+        applyTheme();applyAccentVars();render();
+        toast('Вы вступили в группу «'+(result.group_name||'')+'». Данные группы загружены.','ok',4500);
+        setTimeout(()=>location.reload(),350);
       }).catch(err=>toast('Не удалось вступить: '+(err.message||'проверьте код'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
       break;
     }
