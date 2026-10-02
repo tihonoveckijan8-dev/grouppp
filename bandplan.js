@@ -813,7 +813,7 @@ function vCalendar() {
     '<button class="btn btn-tertiary btn-sm" type="button" data-act="ev-reset">Сбросить</button></div>';
 
   h += '<section class="card rise" style="animation-delay:.07s" aria-labelledby="upH"><div class="card-h"><div><h2 id="upH">Ближайшие участия</h2>' +
-    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div>' + collectionViewControl('events') + '</div>' +
+    '<div class="sub">' + list.length + ' ' + plural(list.length, 'событие', 'события', 'событий') + ' · отметьте ваше участие</div></div>' + collectionViewControl('events') +
     '<button class="btn btn-secondary btn-sm" type="button" data-act="new-event" aria-label="Добавить событие">' + ic('plus', 15) + '<span class="btn-lbl">Добавить событие</span></button></div>';
   if (!list.length) h += stateHTML(ui.evQuery || ac ? 'search' : 'empty',
     ui.evQuery || ac ? 'Ничего не найдено' : 'Событий пока нет',
