@@ -1023,7 +1023,7 @@ function evRow(o, withPart) {
   return '<article class="ev-row' + (done ? ' ev-done' : '') + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" style="--ev-c:' + esc(t.color || 'var(--accent)') + '">' +
     '<div class="ev-date" aria-hidden="true"><div class="d">' + d.getDate() + '</div><div class="m">' + MON[d.getMonth()] + '</div></div>' +
     '<div class="ev-body">' +
-    '<h3 class="ev-title">' + esc(e.title) + '<span class="badge ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
+    '<h3 class="ev-title"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
     (e.repeat && e.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[e.repeat]) + '</span>' : '') +
     (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') + '</h3>' +
     '<div class="ev-meta">' +
@@ -1372,7 +1372,7 @@ function vSettings() {
     const summary = memberParticipationSummary(m);
     const statusTitle = summary.event ? participantStatusLabel(summary.status) + ' · ' + summary.event.title : participantStatusLabel(summary.status);
     h += '<div class="memb-row" data-member-key="' + esc(String(m.accountId || m.id || '')) + '">' +
-      '<div class="avatar participation-avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (summary.status || 'unset') + '"></span></div>' +
+      '<div class="avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       '<div class="member-status-wrap">' +
