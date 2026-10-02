@@ -1163,7 +1163,7 @@ function vSettings() {
     '<div class="field"><span class="field-label">Ваши роли / инструменты (можно несколько)</span><div class="row" style="gap:6px">' +
     ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Участие по умолчанию</span><div class="seg">' +
-    [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-act="part-def" data-v="' + o[0] + '" class="' + (p.defaultParticipation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
     '<div class="row mt-s" style="gap:8px"><button class="btn btn-secondary" style="flex:1" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" style="flex:1" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
     '</section>';
 
@@ -1689,7 +1689,7 @@ function drawOnb() {
       '<div class="field"><span class="field-label">Ваши роли в группе * (можно несколько)</span><div class="row" style="gap:6px" id="ob_roles">' +
       ROLES.map(r => '<button type="button" class="chip' + ((onbData.roles || []).indexOf(r.k) >= 0 ? ' on' : '') + '" data-r="' + r.k + '" aria-pressed="' + ((onbData.roles || []).indexOf(r.k) >= 0) + '">' + ic(r.icon, 13) + esc(r.label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><span class="field-label">Участие в событиях по умолчанию</span><div class="seg" id="ob_part">' +
-      [['yes', 'Участвую'], ['maybe', 'Неизвестно'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (onbData.participation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>';
+      [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (onbData.participation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>';
   } else if (onbStep === 1) {
     h += '<div class="onb-hero">' + ic('users', 28) + '</div><h2>Ваш коллектив</h2>' +
       '<p class="lead">Название появится в шапке, на главном экране и в печатных сет-листах.</p>' +
