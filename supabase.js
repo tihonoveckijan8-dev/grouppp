@@ -392,6 +392,31 @@
     if(activeGroupId && subscriptionCallback) subscribe(subscriptionCallback);
     return data?.[0]||null;
   }
+  async function setEventParticipation(eventId,status){
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    const {data,error}=await client.rpc('bandplan_set_event_participation',{
+      p_event_id:String(eventId||''),
+      p_status:String(status||'')
+    });
+    if(error)throw error;
+    return data||null;
+  }
+  async function deleteAccount(){
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    clearTimeout(timer);
+    pending=null;
+    disposeRealtime();
+    const uid=currentSession.user.id;
+    const {error}=await client.rpc('bandplan_delete_my_account');
+    if(error)throw error;
+    try{await clearLocalCache();}catch(e){}
+    try{localStorage.clear();}catch(e){}
+    activeGroupId=null;
+    lastUpdated='';
+    sharedBaseline={songs:{},events:{},setlists:{}};
+    currentSession=null;
+    return uid;
+  }
   async function getInviteCode(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const profileName=String(arguments[0]||'').trim();
@@ -453,5 +478,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,hydrateLocalCache};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache};
 })();
