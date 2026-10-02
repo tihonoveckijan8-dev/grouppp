@@ -220,6 +220,7 @@ const ui = {
   songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false
 };
+const participationPending = new Set();
 function personalParticipationMap() {
   const map = state.profile && state.profile.eventParticipation;
   return map && typeof map === 'object' ? map : {};
@@ -325,6 +326,22 @@ function refreshMemberParticipationUI() {
       if (text) text.textContent = label;
     }
   });
+}
+
+function applyRealtimeParticipation(change) {
+  const eventId=String(change?.event_id||'').trim();
+  const userId=String(change?.user_id||'').trim();
+  if(!eventId||!userId)return;
+  const ev=evById(eventId);
+  if(!ev)return;
+  ev.participation=Object.assign({},ev.participation||{});
+  if(change.deleted||!change.status) delete ev.participation[userId];
+  else ev.participation[userId]=String(change.status);
+  const me=window.BandPlanCloud?.user ? window.BandPlanCloud.user() : null;
+  if(me?.id && String(me.id)===userId) setPersonalEventStatus(eventId,change.deleted?'':String(change.status));
+  persistParticipationLocal();
+  refreshParticipationUI(eventId);
+  refreshMemberParticipationUI();
 }
 
 function refreshParticipationUI(evId) {
@@ -2053,42 +2070,45 @@ document.addEventListener('click', function (e) {
     case 'event-undone': { stop(); const ev = evById(id); if (ev) { ev.status = 'upcoming'; commit(); toast('Событие возвращено в план', 'info'); } break; }
     case 'my-status': {
       stop();
-      const ev = evById(id); if (!ev) break;
-      const v = el.getAttribute('data-v');
-      const next = eventStatusFor(ev) === v ? '' : v;
-      const me = currentMemberForParticipation();
-      setPersonalEventStatus(ev.id, next);
-      if (me) setEventParticipantStatus(ev, me, next);
+      const ev=evById(id); if(!ev)break;
+      const eventId=String(ev.id);
+      if(participationPending.has(eventId))break;
+      const v=el.getAttribute('data-v');
+      const previous=eventStatusFor(ev)||'';
+      const next=previous===v?'':v;
+      const me=currentMemberForParticipation();
+      participationPending.add(eventId);
+      setPersonalEventStatus(eventId,next);
+      if(me)setEventParticipantStatus(ev,me,next);
       persistParticipationLocal();
-      refreshParticipationUI(ev.id);
-
-      if (window.BandPlanCloud?.setEventParticipation) {
-        el.disabled = true;
-        el.setAttribute('aria-busy', 'true');
-        window.BandPlanCloud.setEventParticipation(ev.id, next).then(remoteEvent => {
-          const fresh = evById(ev.id);
-          if (fresh && remoteEvent && typeof remoteEvent === 'object') {
-            fresh.participation = remoteEvent.participation || {};
-            if (me) {
-              const key = String(me.accountId || me.id || '');
-              if (next) fresh.participation[key] = next; else delete fresh.participation[key];
-            }
-            persistParticipationLocal();
-          }
-          refreshParticipationUI(ev.id);
-        }).catch(err => {
-          setPersonalEventStatus(ev.id, '');
-          if (me) setEventParticipantStatus(ev, me, '');
-          persistParticipationLocal();
-          refreshParticipationUI(ev.id);
-          toast('Не удалось синхронизировать участие: ' + (err.message || 'Ошибка сети'), 'err', 6000);
-        }).finally(() => {
-          document.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
-            btn.disabled = false;
-            btn.removeAttribute('aria-busy');
-          });
-        });
+      refreshParticipationUI(eventId);
+      const buttons=document.querySelectorAll('[data-act="my-status"][data-id="'+CSS.escape(eventId)+'"]');
+      buttons.forEach(btn=>{btn.disabled=true;btn.setAttribute('aria-busy','true');});
+      if(!window.BandPlanCloud?.setEventParticipation){
+        participationPending.delete(eventId);
+        buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');});
+        break;
       }
+      window.BandPlanCloud.setEventParticipation(eventId,next).then(remote=>{
+        const remoteStatus=remote&&typeof remote==='object' ? String(remote.status||'') : next;
+        if(remoteStatus!==next){
+          setPersonalEventStatus(eventId,remoteStatus);
+          if(me)setEventParticipantStatus(ev,me,remoteStatus);
+        }
+        persistParticipationLocal();
+        refreshParticipationUI(eventId);
+      }).catch(err=>{
+        setPersonalEventStatus(eventId,previous);
+        if(me)setEventParticipantStatus(ev,me,previous);
+        persistParticipationLocal();
+        refreshParticipationUI(eventId);
+        toast('Не удалось синхронизировать участие: '+(err.message||'Ошибка сети'),'err',6000);
+      }).finally(()=>{
+        participationPending.delete(eventId);
+        document.querySelectorAll('[data-act="my-status"][data-id="'+CSS.escape(eventId)+'"]').forEach(btn=>{
+          btn.disabled=false;btn.removeAttribute('aria-busy');
+        });
+      });
       break;
     }
     case 'ev-filter-open': stop(); openEventFilters(); break;
@@ -2778,6 +2798,9 @@ async function bootCloudSync(hadLocal, durableInfo) {
       applyAccentVars();
       ui.calView = state.settings.calView || 'month';
       render();
+    }, function (change) {
+      if (!change || typeof change !== 'object') return;
+      applyRealtimeParticipation(change);
     });
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
