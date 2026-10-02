@@ -343,7 +343,9 @@
     const generation = realtimeGeneration;
     const handleStatus = (label, status, error) => {
       if (generation !== realtimeGeneration) return;
-      if (label === 'shared' && status === 'SUBSCRIBED') realtimeSharedReady = true;\n      if (label === 'shared' && (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED')) realtimeSharedReady = false;\n      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      if (label === 'shared' && status === 'SUBSCRIBED') realtimeSharedReady = true;
+      if (label === 'shared' && (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED')) realtimeSharedReady = false;
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         console.warn('BandPlan realtime '+label+' '+status, error || '');
         window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:'Realtime-синхронизация временно недоступна'}));
       }
