@@ -389,6 +389,7 @@
     });
     if(error)throw error;
     activeGroupId=data?.[0]?.group_id||null;
+    if(activeGroupId && subscriptionCallback) subscribe(subscriptionCallback);
     return data?.[0]||null;
   }
   async function getInviteCode(){
