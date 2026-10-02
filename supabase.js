@@ -367,6 +367,18 @@
       subscribe(subscriptionCallback);
     }
   });
+  async function leaveGroup(){
+    if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
+    clearTimeout(timer);
+    pending=null;
+    disposeRealtime();
+    const {data,error}=await client.rpc('bandplan_leave_group');
+    if(error)throw error;
+    activeGroupId=null;
+    lastUpdated='';
+    sharedBaseline={songs:{},events:{},setlists:{}};
+    return Array.isArray(data)?(data[0]||null):(data||null);
+  }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,joinGroup,getInviteCode,hydrateLocalCache};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,joinGroup,getInviteCode,hydrateLocalCache};
 })();
