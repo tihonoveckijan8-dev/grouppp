@@ -1884,7 +1884,7 @@ function quickScene() {
 /* ═══ 19. THEME / ACCENT ═══ */
 function applyTheme() {
   const s = state.settings;
-  if (s.theme === 'glass') s.theme = 'light';
+  if (!['light','dark','amoled'].includes(s.theme)) s.theme = 'light';
   document.documentElement.setAttribute('data-theme', s.theme || 'light');
   document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
   document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
