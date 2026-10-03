@@ -183,7 +183,7 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .side-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.5;padding-top:var(--s2)}
 
 /* ─── 6. TOPBAR + SEARCH (L1/L3) ─────────────────────────────────────── */
-.topbar{flex:none;padding:var(--s5) var(--s8) var(--s3);z-index:500;position:relative;
+.topbar{flex:none;padding:var(--s5) var(--s8) var(--s3);z-index:20;position:relative;
   border-bottom:1px solid transparent;transition:border-color var(--t-card),box-shadow var(--t-card),background var(--t-card)}
 .topbar.stuck{border-bottom-color:var(--border);background:var(--bg);box-shadow:var(--shadow-xs)}
 .tb-inner{display:flex;align-items:center;gap:var(--s3);min-width:0;max-width:var(--maxw);margin:0 auto}
