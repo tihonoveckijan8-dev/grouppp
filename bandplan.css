@@ -4327,3 +4327,79 @@ input:focus,select:focus,textarea:focus{
   .overlay.is-fullscreen .modal-foot{gap:8px}
   .overlay.is-fullscreen .modal-foot .btn{font-size:12px;padding-inline:10px}
 }
+
+
+/* Full-viewport creation dialogs: isolate the workspace from app chrome and search */
+#modalOverlay.is-fullscreen,
+#modalOverlay.fullscreen{
+  position:fixed!important;
+  inset:0!important;
+  z-index:10000!important;
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  width:100vw!important;
+  max-width:none!important;
+  height:100vh!important;
+  height:100dvh!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  background:var(--bg)!important;
+}
+#modalOverlay.is-fullscreen .modal-card,
+#modalOverlay.is-fullscreen .modal-card.lg,
+#modalOverlay.fullscreen .modal-card.modal-fullscreen{
+  box-sizing:border-box!important;
+  position:relative!important;
+  flex:1 1 100%!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:calc(18px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  transform:none!important;
+}
+#modalOverlay.is-fullscreen .modal-body,
+#modalOverlay.fullscreen .modal-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+#modalOverlay.is-fullscreen .modal-head,
+#modalOverlay.is-fullscreen .modal-foot{
+  flex:0 0 auto!important;
+}
+#modalOverlay.is-fullscreen .modal-head{
+  padding:0 0 14px!important;
+  margin:0 0 14px!important;
+  border-bottom:1px solid var(--border);
+}
+#modalOverlay.is-fullscreen .modal-foot{
+  margin:12px 0 0!important;
+  padding:14px 0 0!important;
+  background:var(--bg)!important;
+}
+#modalOverlay.is-fullscreen ~ .toast-stack{display:none!important}
+@media(max-width:640px){
+  #modalOverlay.is-fullscreen .modal-card,
+  #modalOverlay.is-fullscreen .modal-card.lg{
+    padding:calc(12px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))!important;
+  }
+  #modalOverlay.is-fullscreen .modal-foot{flex-direction:column-reverse!important}
+  #modalOverlay.is-fullscreen .modal-foot .btn{width:100%!important}
+}
