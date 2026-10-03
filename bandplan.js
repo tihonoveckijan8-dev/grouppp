@@ -729,7 +729,7 @@ function buildChrome() {
 
   const th = state.settings.theme;
   const thIco = ic(th === 'light' ? 'moon' : th === 'dark' ? 'bolt' : th === 'amoled' ? 'sun' : 'sun', 18);
-  const thLbl = th === 'light' ? 'Тёмная тема' : th === 'dark' ? 'AMOLED-тема' : th === 'amoled' ? 'Liquid Glass' : 'Светлая тема';
+  const thLbl = th === 'light' ? 'Тёмная тема' : th === 'dark' ? 'AMOLED-тема' : th === 'amoled' ? 'Светлая тема' : 'Светлая тема';
   $('#themeQuick').innerHTML = thIco + '<span>' + thLbl + '</span>';
   $('#tbTheme').innerHTML = thIco; $('#tbTheme').setAttribute('aria-label', thLbl);
   $('#sceneQuick').innerHTML = ic('monitor', 18) + '<span>Сценический режим</span>';
@@ -1397,7 +1397,7 @@ function vSettings() {
   h += '<section class="card rise settings-card" data-settings-panel="interface" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2></div></div>' +
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
-    [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt'], ['glass', 'Liquid Glass', 'palette']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
+    [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
     ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"></button>').join('') +
     '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:30px;height:26px;border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
@@ -1884,19 +1884,20 @@ function quickScene() {
 /* ═══ 19. THEME / ACCENT ═══ */
 function applyTheme() {
   const s = state.settings;
+  if (s.theme === 'glass') s.theme = 'light';
   document.documentElement.setAttribute('data-theme', s.theme || 'light');
   document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
   document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
   const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute('content', s.theme === 'light' ? '#F7F7F5' : s.theme === 'dark' ? '#111318' : s.theme === 'glass' ? '#EEF2F8' : '#000000');
+  if (m) m.setAttribute('content', s.theme === 'light' ? '#F7F7F5' : s.theme === 'dark' ? '#111318' : '#000000');
 }
 function cycleTheme() {
-  const o = ['light', 'dark', 'amoled', 'glass'];
+  const o = ['light', 'dark', 'amoled'];
   setTheme(o[(o.indexOf(state.settings.theme) + 1) % o.length]);
 }
 function setTheme(t) {
   state.settings.theme = t; applyTheme(); save(); render();
-  toast('Тема: ' + ({ light: 'светлая', dark: 'тёмная', amoled: 'AMOLED', glass: 'Liquid Glass' }[t] || 'системная'), 'info', 2000);
+  toast('Тема: ' + ({ light: 'светлая', dark: 'тёмная', amoled: 'AMOLED' }[t] || 'светлая'), 'info', 2000);
 }
 function applyAccent(hex) { if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; state.settings.accent = hex; applyAccentVars(); save(); render(); }
 function applyAccentVars() {
@@ -1982,7 +1983,7 @@ function drawOnb() {
     h += '<div class="onb-hero">' + ic('check', 28) + '</div><h2>Всё готово</h2>' +
       '<p class="lead">Оформление, роли и данные можно изменить в любой момент в разделе «Настройки».</p>' +
       '<div class="field"><span class="field-label">Тема</span><div class="seg" id="ob_theme">' +
-      [['light', 'Светлая'], ['dark', 'Тёмная'], ['amoled', 'AMOLED'], ['glass', 'Liquid Glass']].map(t => '<button type="button" data-v="' + t[0] + '" class="' + (onbData.theme === t[0] ? 'on' : '') + '" data-accent="1">' + t[1] + '</button>').join('') + '</div></div>';
+      [['light', 'Светлая'], ['dark', 'Тёмная'], ['amoled', 'AMOLED']].map(t => '<button type="button" data-v="' + t[0] + '" class="' + (onbData.theme === t[0] ? 'on' : '') + '" data-accent="1">' + t[1] + '</button>').join('') + '</div></div>';
   }
   h += '<div class="onb-foot">' + (onbStep > 0 ? '<button class="btn btn-secondary" type="button" id="ob_back">' + ic('left', 16) + 'Назад</button>' : '<span></span>') +
     (onbStep < 3 ? '<button class="btn btn-primary" type="button" id="ob_next">Продолжить' + ic('right', 16) + '</button>' : '<button class="btn btn-primary" type="button" id="ob_done">' + ic('check', 16) + 'Начать работу</button>') + '</div></div>';
