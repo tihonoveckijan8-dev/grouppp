@@ -4041,3 +4041,50 @@ input:focus,select:focus,textarea:focus{
 .part-switch{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
 .part-switch .part-btn{flex:1 1 110px;min-height:40px}
 @media(max-width:480px){.part-switch{gap:6px}.part-switch .part-btn{flex:1 1 100px;padding:9px 7px;font-size:12px}}
+
+/* Participation UI polish: distinct semantic states, readable on every surface */
+.part-avatar.part-yes,.event-part-avatar.part-yes{
+  background:#197A50!important;color:#fff!important;border-color:rgba(25,122,80,.42)!important;opacity:1!important;
+}
+.part-avatar.part-maybe,.event-part-avatar.part-maybe{
+  background:#A66A08!important;color:#fff!important;border-color:rgba(166,106,8,.42)!important;opacity:1!important;
+}
+.part-avatar.part-no,.event-part-avatar.part-no{
+  background:#C43D4B!important;color:#fff!important;border-color:rgba(196,61,75,.42)!important;opacity:1!important;
+}
+.part-avatar.part-unset,.event-part-avatar.part-unset{
+  background:var(--surf-3)!important;color:var(--text-2)!important;border-color:var(--border)!important;opacity:.8!important;
+}
+.part-switch,.event-info-part-switch{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px!important;width:100%;min-width:0;
+}
+.part-switch .part-btn,.event-info-part-switch .part-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  min-width:0;min-height:42px;padding:9px 8px;border-radius:12px;
+  white-space:normal;text-align:center;overflow-wrap:anywhere;
+}
+.part-switch .part-btn span,.event-info-part-switch .part-btn span{min-width:0}
+.part-btn:not(.on){background:var(--surf-2);color:var(--text-2);border-color:var(--border)}
+.part-btn:not(.on):hover{border-color:var(--border-2);background:var(--surf-3)}
+.part-btn.on.status-yes,.part-btn.on[data-v="yes"]{background:#197A50!important;color:#fff!important;border-color:#197A50!important}
+.part-btn.on.status-maybe,.part-btn.on[data-v="maybe"]{background:#A66A08!important;color:#fff!important;border-color:#A66A08!important}
+.part-btn.on.status-no,.part-btn.on[data-v="no"]{background:#C43D4B!important;color:#fff!important;border-color:#C43D4B!important}
+.participant-label.status-yes,.participation-label.status-yes,.member-participation.status-yes{color:#197A50}
+.participant-label.status-maybe,.participation-label.status-maybe,.member-participation.status-maybe{color:#94600C}
+.participant-label.status-no,.participation-label.status-no,.member-participation.status-no{color:#C43D4B}
+.event-info-person,.event-participant{min-width:0;gap:10px}
+.event-info-person-copy,.event-participant .event-info-person-copy{flex:1 1 auto;min-width:0}
+.event-info-person-copy strong,.event-info-person-copy span{overflow-wrap:anywhere}
+.participation-label{max-width:100%;white-space:normal;text-align:center}
+@media(max-width:520px){
+  .part-switch,.event-info-part-switch{gap:5px!important}
+  .part-switch .part-btn,.event-info-part-switch .part-btn{font-size:11px;padding:8px 5px;gap:4px;min-height:42px}
+  .part-switch .part-btn svg,.event-info-part-switch .part-btn svg{width:12px;height:12px;flex:none}
+}
+@media(max-width:360px){
+  .part-switch,.event-info-part-switch{grid-template-columns:1fr;gap:6px!important}
+  .part-switch .part-btn,.event-info-part-switch .part-btn{justify-content:flex-start;padding:9px 12px}
+}
+[data-theme="dark"] .part-btn:not(.on),[data-theme="amoled"] .part-btn:not(.on){background:var(--surf-2);color:var(--text-2);border-color:var(--border)}
+[data-theme="dark"] .part-btn:not(.on):hover,[data-theme="amoled"] .part-btn:not(.on):hover{background:var(--surf-3);color:var(--text)}
+
