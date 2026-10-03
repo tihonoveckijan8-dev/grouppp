@@ -604,7 +604,7 @@ function closeModal(force) {
 function hardClose(node) {
   const ov = $('#modalOverlay');
   if (node && node.parentNode === ov) node.remove();
-  if (!ov.children.length) { ov.classList.remove('on'); ov.innerHTML = ''; }
+  if (!ov.children.length) { ov.classList.remove('on', 'is-fullscreen'); ov.innerHTML = ''; }
   modalRoot = ov.querySelector('.modal-card') || null;
   confirmCb = null; modalDirty = false;
   if (trapHandler) { document.removeEventListener('keydown', trapHandler); trapHandler = null; }
@@ -624,6 +624,7 @@ function openModal(o) {
     '<div class="modal-body">' + (o.body || '') + '</div>' +
     (o.footer ? '<div class="modal-foot">' + (o.guard === false ? '' : '<span class="dirty-note">' + ic('info', 14) + 'Есть несохранённые изменения</span>') + o.footer + '</div>' : '') + '</div>';
   ov.classList.toggle('fullscreen', !!o.fullscreen);
+  ov.classList.toggle('is-fullscreen', !!o.fullscreen);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
   document.body.style.overflow = 'hidden';
@@ -845,11 +846,7 @@ function heroHTML() {
     heroMetric(state.setlists.length, plural(state.setlists.length, 'сет-лист', 'сет-листа', 'сет-листов')) +
     heroMetric(state.members.length, 'участников в составе') +
     '</div></div>' +
-    '<div class="hero-visual" aria-label="Актуальное состояние группы">' +
-    (next ? '<div class="hv-card"><div class="hv-row"><span class="hv-dot" style="background:' + esc(next.ev.type === 'gig' ? 'var(--accent)' : 'var(--ok)') + '"></span><div class="grow"><div style="font-weight:600;font-size:13.5px">' + esc(next.ev.title) + '</div><div class="t-xs t-muted">' + esc(nextMeta) + '</div></div><span class="badge ' + statusCls + '">' + esc(status) + '</span></div></div>' : '') +
-    (song ? '<div class="hv-card"><div class="cap" style="margin-bottom:8px">Репертуар</div><div class="hv-row"><span class="badge b-muted num">' + esc(song.key || '—') + '</span><span class="t-sm t-2 grow nowrap">' + esc(song.title) + '</span>' + (song.bpm ? '<span class="badge b-muted num">' + esc(song.bpm) + ' BPM</span>' : '') + '</div></div>' : '') +
-    '<div class="hv-card"><div class="hv-row"><span class="badge b-muted">' + (next ? esc(evType(next.ev.type).label) : 'Календарь') + '</span><span class="t-sm t-2 grow">' + esc(next ? (next.ev.setlistId ? ((slById(next.ev.setlistId) || {}).name || 'Сет-лист') : 'Без сет-листа') : 'Готов к планированию') + '</span></div></div>' +
-    '</div></div></section>';
+    '</div></section>';
 }
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
