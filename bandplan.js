@@ -617,12 +617,13 @@ function openModal(o) {
   if (modalRoot) hardClose(modalRoot);
   lastFocus = document.activeElement; modalDirty = false;
   const ov = $('#modalOverlay');
-  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
+  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (o.fullscreen ? ' modal-fullscreen' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
     '<div class="modal-head"><div style="min-width:0"><h3 id="mTitle">' + esc(o.title || '') + '</h3>' +
     (o.sub ? '<div class="sub">' + esc(o.sub) + '</div>' : '') + '</div>' +
     '<button class="icon-btn" type="button" data-act="modal-close" aria-label="Закрыть окно">' + ic('x', 18) + '</button></div>' +
     '<div class="modal-body">' + (o.body || '') + '</div>' +
     (o.footer ? '<div class="modal-foot">' + (o.guard === false ? '' : '<span class="dirty-note">' + ic('info', 14) + 'Есть несохранённые изменения</span>') + o.footer + '</div>' : '') + '</div>';
+  ov.classList.toggle('fullscreen', !!o.fullscreen);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
   document.body.style.overflow = 'hidden';
@@ -1539,7 +1540,7 @@ function eventModal(evId, date) {
     (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
   openModal({
-    title: ev ? 'Изменить событие' : 'Новое событие', sub: ev ? pdateFull(ev.date) : 'Заполните название, дату и время', size: 'lg', body: body,
+    title: ev ? 'Изменить событие' : 'Новое событие', sub: ev ? pdateFull(ev.date) : 'Заполните название, дату и время', size: 'lg', fullscreen: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="evSaveBtn" data-act="event-save" data-id="' + (ev ? ev.id : '') + '">' + ic('check', 16) + (ev ? 'Сохранить изменения' : 'Создать событие') + '</button>',
     onMount: function (w) {
       $$('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $$('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
@@ -1597,7 +1598,7 @@ function songModal(id) {
     '<span class="hint" style="margin-bottom:var(--s2)">Уровни pp–ff для каждой партии по секциям. Участник видит только свою партию — согласно роли из профиля.</span>' +
     '<div id="dynBlock"></div></div>';
   openModal({
-    title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', body: body,
+    title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', fullscreen: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="song-save" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : 'Добавить песню') + '</button>',
     onMount: function () { renderDynBlock(); }
   });
@@ -1651,7 +1652,7 @@ function setlistModal(id) {
       state.songs.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru')).map(s => '<label class="check" style="padding:10px var(--s3);border:1px solid var(--border);border-radius:var(--r-10);background:var(--surf-1)"><input type="checkbox" class="f_slsong" value="' + s.id + '"><span class="grow nowrap">' + esc(s.title) + '</span><span class="badge b-muted mono">' + esc(s.key || '') + '</span></label>').join('') + '</div></div>'
       : (!state.songs.length ? '<p class="t-sm t-muted">В репертуаре пока нет песен — их можно добавить позже.</p>' : ''));
   openModal({
-    title: sl ? 'Название и заметки' : 'Новый сет-лист', body: body,
+    title: sl ? 'Название и заметки' : 'Новый сет-лист', fullscreen: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="sl-save" data-id="' + (sl ? sl.id : '') + '">' + ic('check', 16) + (sl ? 'Сохранить изменения' : 'Создать сет-лист') + '</button>'
   });
 }
