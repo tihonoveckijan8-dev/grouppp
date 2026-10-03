@@ -3802,116 +3802,7 @@ body{font-synthesis:none}
   --shadow-md:var(--clay-out),var(--clay-in)!important;
   --shadow-lg:var(--clay-out),var(--clay-in)!important;
 }
-
-/* Light / dark / AMOLED clay surfaces. Glass stays an explicit separate theme. */
-:not([data-theme="glass"]) .card,
-:not([data-theme="glass"]) .hero,
-:not([data-theme="glass"]) .song-card,
-:not([data-theme="glass"]) .sl-item,
-:not([data-theme="glass"]) .stat-mini,
-:not([data-theme="glass"]) .cal-cell,
-:not([data-theme="glass"]) .toast,
-:not([data-theme="glass"]) .modal-card,
-:not([data-theme="glass"]) .search-drop,
-:not([data-theme="glass"]) .filter-pop,
-:not([data-theme="glass"]) .onb-card,
-:not([data-theme="glass"]) .hv-card{
-  border:1px solid var(--border)!important;
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .hero{
-  background:linear-gradient(145deg,var(--surf-2),var(--surf-3))!important;
-  box-shadow:var(--clay-out),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .card-interactive:hover,
-:not([data-theme="glass"]) .song-card:hover{
-  transform:translateY(-1px)!important;
-  box-shadow:var(--clay-out),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .sidebar{
-  border-radius:0 var(--r-32) var(--r-32) 0!important;
-  box-shadow:12px 0 30px rgba(120,104,165,.18),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .nav-item.active{
-  background:var(--surf-2)!important;
-  box-shadow:var(--clay-press)!important;
-}
-:not([data-theme="glass"]) .brand-mark{
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .btn,
-:not([data-theme="glass"]) .icon-btn,
-:not([data-theme="glass"]) .avatar-btn,
-:not([data-theme="glass"]) .sbtn,
-:not([data-theme="glass"]) .sctl button,
-:not([data-theme="glass"]) .mini-stepper button,
-:not([data-theme="glass"]) .part-btn,
-:not([data-theme="glass"]) .chip{
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .btn-secondary,
-:not([data-theme="glass"]) .btn-tertiary,
-:not([data-theme="glass"]) .icon-btn,
-:not([data-theme="glass"]) .avatar-btn,
-:not([data-theme="glass"]) .sbtn,
-:not([data-theme="glass"]) .sctl button,
-:not([data-theme="glass"]) .mini-stepper button,
-:not([data-theme="glass"]) .part-btn,
-:not([data-theme="glass"]) .chip{
-  background:var(--surf-2)!important;
-  border:1px solid var(--border)!important;
-}
-:not([data-theme="glass"]) .btn-primary{
-  background:linear-gradient(145deg,#4A6BE8,var(--accent) 60%,#1B38A8)!important;
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .btn-primary:active,
-:not([data-theme="glass"]) .btn:active,
-:not([data-theme="glass"]) .icon-btn:active,
-:not([data-theme="glass"]) .part-btn:active,
-:not([data-theme="glass"]) .chip:active{
-  box-shadow:var(--clay-press)!important;
-  transform:translateY(1px)!important;
-}
-:not([data-theme="glass"]) .tb-search,
-:not([data-theme="glass"]) .input,
-:not([data-theme="glass"]) .select,
-:not([data-theme="glass"]) .textarea{
-  background:var(--surf-3)!important;
-  border:1px solid var(--border)!important;
-  box-shadow:var(--clay-press)!important;
-}
-:not([data-theme="glass"]) .input:focus,
-:not([data-theme="glass"]) .select:focus,
-:not([data-theme="glass"]) .textarea:focus,
-:not([data-theme="glass"]) .tb-search:focus-within{
-  background:var(--surf-2)!important;
-  box-shadow:var(--clay-press),0 0 0 3px var(--accent-soft-2)!important;
-}
-:not([data-theme="glass"]) .cal-cell,
-:not([data-theme="glass"]) .ev-row,
-:not([data-theme="glass"]) .lib-item{
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .cal-cell.out{
-  box-shadow:var(--clay-press)!important;
-}
-:not([data-theme="glass"]) .badge,
-:not([data-theme="glass"]) .pill,
-:not([data-theme="glass"]) .chip{
-  box-shadow:var(--clay-sm),var(--clay-in)!important;
-}
-:not([data-theme="glass"]) .topbar.stuck{
-  background:color-mix(in srgb,var(--surf-2) 92%,transparent)!important;
-  box-shadow:0 8px 22px rgba(120,104,165,.12),var(--clay-in)!important;
-}
 @media(hover:hover){
-  :not([data-theme="glass"]) .btn:hover,
-  :not([data-theme="glass"]) .icon-btn:hover,
-  :not([data-theme="glass"]) .chip:hover,
-  :not([data-theme="glass"]) .nav-item:hover{
-    box-shadow:var(--clay-out),var(--clay-in)!important;
-  }
 }
 
 
@@ -4015,3 +3906,48 @@ input:focus,select:focus,textarea:focus{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* Keep dark themes distinct while sharing the same flat component language. */
+[data-theme="dark"]{
+ --bg:#14171D!important;--bg-deep:#101217!important;
+ --surf-1:#1B1F27!important;--surf-2:#222731!important;--surf-3:#171B22!important;--surf-4:#1B1F27!important;
+ --border:#2D333E!important;--border-2:#3A424F!important;--border-3:#4B5564!important;
+ --text:#F1F3F7!important;--text-2:#C2C8D2!important;--muted:#929BAA!important;
+ --shadow-xs:0 1px 2px rgba(0,0,0,.12)!important;--shadow-sm:0 2px 8px rgba(0,0,0,.16)!important;
+ --shadow-md:0 8px 24px rgba(0,0,0,.22)!important;--shadow-lg:0 16px 42px rgba(0,0,0,.32)!important;
+}
+[data-theme="amoled"]{
+ --bg:#000!important;--bg-deep:#000!important;
+ --surf-1:#0B0C0F!important;--surf-2:#14161B!important;--surf-3:#07080A!important;--surf-4:#0B0C0F!important;
+ --border:#24262C!important;--border-2:#343740!important;--border-3:#494D58!important;
+ --text:#F5F6F8!important;--text-2:#C9CDD6!important;--muted:#9298A5!important;
+ --shadow-xs:0 1px 2px rgba(0,0,0,.24)!important;--shadow-sm:0 2px 8px rgba(0,0,0,.3)!important;
+ --shadow-md:0 8px 24px rgba(0,0,0,.4)!important;--shadow-lg:0 16px 42px rgba(0,0,0,.55)!important;
+}
+[data-theme="dark"] .sidebar,[data-theme="amoled"] .sidebar,
+[data-theme="dark"] .card,[data-theme="amoled"] .card,
+[data-theme="dark"] .hero,[data-theme="amoled"] .hero,
+[data-theme="dark"] .song-card,[data-theme="amoled"] .song-card,
+[data-theme="dark"] .sl-item,[data-theme="amoled"] .sl-item,
+[data-theme="dark"] .ev-row,[data-theme="amoled"] .ev-row,
+[data-theme="dark"] .modal-card,[data-theme="amoled"] .modal-card,
+[data-theme="dark"] .search-drop,[data-theme="amoled"] .search-drop,
+[data-theme="dark"] .filter-pop,[data-theme="amoled"] .filter-pop,
+[data-theme="dark"] .bottom-nav,[data-theme="amoled"] .bottom-nav{
+ background:var(--surf-1)!important;border-color:var(--border)!important;color:var(--text)!important;
+}
+[data-theme="dark"] .topbar,[data-theme="amoled"] .topbar,
+[data-theme="dark"] .topbar.stuck,[data-theme="amoled"] .topbar.stuck{
+ background:var(--bg)!important;border-color:var(--border)!important;
+}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea,
+[data-theme="amoled"] input,[data-theme="amoled"] select,[data-theme="amoled"] textarea{
+ background:var(--surf-2)!important;border-color:var(--border-2)!important;color:var(--text)!important;
+}
+[data-theme="dark"] .btn-secondary,[data-theme="dark"] .btn-tertiary,[data-theme="dark"] .icon-btn,
+[data-theme="amoled"] .btn-secondary,[data-theme="amoled"] .btn-tertiary,[data-theme="amoled"] .icon-btn,
+[data-theme="dark"] .chip,[data-theme="amoled"] .chip{
+ background:var(--surf-2)!important;border-color:var(--border-2)!important;color:var(--text-2)!important;
+}
+/* No translucent blur surfaces remain in the interface. */
+*,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
