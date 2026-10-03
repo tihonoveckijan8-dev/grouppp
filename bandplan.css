@@ -3806,7 +3806,7 @@ body{font-synthesis:none}
 }
 
 
-/* BANDPLAN — clean premium interface system (flat surfaces, no glass/clay effects) */
+/* BANDPLAN — clean premium interface system */
 :root{
   --bg:#F4F6F8!important;--bg-deep:#EEF1F5!important;
   --surf-1:#FFFFFF!important;--surf-2:#F8F9FB!important;--surf-3:#F1F3F6!important;--surf-4:#FFFFFF!important;
