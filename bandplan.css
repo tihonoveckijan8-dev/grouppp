@@ -4022,3 +4022,22 @@ input:focus,select:focus,textarea:focus{
   color:var(--text)!important;
   color-scheme:dark;
 }
+
+
+/* Participation controls: semantic state colors, consistent in cards and dialogs */
+.part-btn{min-width:0;white-space:normal;line-height:1.25;transition:background-color .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease}
+.part-btn.on,.part-btn.on.status-yes{background:#197A50!important;color:#fff!important;border-color:#197A50!important;box-shadow:0 2px 8px rgba(25,122,80,.18)!important}
+.part-btn.on.status-maybe{background:#A66A08!important;color:#fff!important;border-color:#A66A08!important;box-shadow:0 2px 8px rgba(166,106,8,.18)!important}
+.part-btn.on.status-no{background:#C43D4B!important;color:#fff!important;border-color:#C43D4B!important;box-shadow:0 2px 8px rgba(196,61,75,.18)!important}
+[data-theme="dark"] .part-btn.on.status-yes,[data-theme="amoled"] .part-btn.on.status-yes{background:#247F5C!important;border-color:#247F5C!important}
+[data-theme="dark"] .part-btn.on.status-maybe,[data-theme="amoled"] .part-btn.on.status-maybe{background:#94600C!important;border-color:#94600C!important}
+[data-theme="dark"] .part-btn.on.status-no,[data-theme="amoled"] .part-btn.on.status-no{background:#B83B49!important;border-color:#B83B49!important}
+.participation-label.status-yes{color:#197A50!important;background:rgba(25,122,80,.10)!important;border-color:rgba(25,122,80,.22)!important}
+.participation-label.status-maybe{color:#94600C!important;background:rgba(166,106,8,.12)!important;border-color:rgba(166,106,8,.24)!important}
+.participation-label.status-no{color:#C43D4B!important;background:rgba(196,61,75,.10)!important;border-color:rgba(196,61,75,.22)!important}
+.participation-dot.status-yes{--status-color:#35B879}
+.participation-dot.status-maybe{--status-color:#E6AD35}
+.participation-dot.status-no{--status-color:#E34E5D}
+.part-switch{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+.part-switch .part-btn{flex:1 1 110px;min-height:40px}
+@media(max-width:480px){.part-switch{gap:6px}.part-switch .part-btn{flex:1 1 100px;padding:9px 7px;font-size:12px}}
