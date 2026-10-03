@@ -263,8 +263,9 @@
     });
     const baseEvents=(events.data||[]).map(x=>x.data).map(ev=>{
       const copy=Object.assign({},ev);
-      const sharedParticipation=participationByEvent[String(ev?.id||'').trim()];
-      if(sharedParticipation)copy.participation=sharedParticipation;
+      // The participation table is the source of truth. Always replace the
+      // embedded map, including with an empty map after a user clears a status.
+      copy.participation=Object.assign({},participationByEvent[String(ev?.id||'').trim()]||{});
       return copy;
     });
     const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
@@ -445,22 +446,32 @@
   async function setEventParticipation(eventId,status){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const uid=String(currentSession.user.id);
+    const id=String(eventId||'').trim();
     const cleanStatus=String(status||'');
+    if(!id)throw new Error('Не удалось определить событие.');
+    if(cleanStatus&&!['yes','maybe','no'].includes(cleanStatus))throw new Error('Некорректный статус участия.');
     const {data,error}=await client.rpc('bandplan_set_event_participation',{
-      p_event_id:String(eventId||''),
-      p_status:String(status||'')
+      p_event_id:id,
+      p_status:cleanStatus
     });
     if(error)throw error;
-    const result=data||{group_id:activeGroupId,event_id:String(eventId||''),user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()};
-    if(participationChannel && result.event_id){
+    // Postgres functions returning TABLE produce an array, while scalar/json
+    // functions may return an object. Normalize both before broadcasting.
+    const row=Array.isArray(data)?data[0]:data;
+    const result=Object.assign({
+      group_id:activeGroupId,event_id:id,user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()
+    },row&&typeof row==='object'?row:{});
+    result.event_id=String(result.event_id||id);
+    result.user_id=String(result.user_id||uid);
+    result.status=String(result.status||'');
+    if(participationChannel){
       try{
         await participationChannel.send({type:'broadcast',event:'participation',payload:{
-          group_id:result.group_id||activeGroupId,event_id:String(result.event_id),user_id:String(result.user_id||uid),
-          status:String(result.status||''),updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
+          group_id:result.group_id||activeGroupId,event_id:result.event_id,user_id:result.user_id,
+          status:result.status,updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
         }});
       }catch(broadcastError){
-        // Запись уже подтверждена Supabase. Ошибка Broadcast не должна
-        // откатывать успешное изменение участия на клиенте.
+        // The database write has already succeeded; realtime delivery may retry via DB changes.
         console.warn('BandPlan participation broadcast failed:',broadcastError);
       }
     }
