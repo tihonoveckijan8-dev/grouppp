@@ -3951,3 +3951,74 @@ input:focus,select:focus,textarea:focus{
 }
 /* No translucent blur surfaces remain in the interface. */
 *,*::before,*::after{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+
+
+/* Dark/AMOLED: eliminate remaining light-only surfaces and hover fills. */
+[data-theme="dark"] .sidebar,
+[data-theme="amoled"] .sidebar,
+[data-theme="dark"] .side-profile,
+[data-theme="amoled"] .side-profile,
+[data-theme="dark"] .tb-search,
+[data-theme="amoled"] .tb-search,
+[data-theme="dark"] .settings-tabs,
+[data-theme="amoled"] .settings-tabs,
+[data-theme="dark"] .settings-tab,
+[data-theme="amoled"] .settings-tab,
+[data-theme="dark"] .btn-secondary,
+[data-theme="amoled"] .btn-secondary,
+[data-theme="dark"] .btn-tertiary,
+[data-theme="amoled"] .btn-tertiary,
+[data-theme="dark"] .icon-btn,
+[data-theme="amoled"] .icon-btn,
+[data-theme="dark"] .avatar-btn,
+[data-theme="amoled"] .avatar-btn,
+[data-theme="dark"] .view-switch-btn,
+[data-theme="amoled"] .view-switch-btn,
+[data-theme="dark"] .ev-row,
+[data-theme="amoled"] .ev-row,
+[data-theme="dark"] .song-row,
+[data-theme="amoled"] .song-row,
+[data-theme="dark"] .friend-row,
+[data-theme="amoled"] .friend-row {
+  background:var(--surf-2)!important;
+  border-color:var(--border)!important;
+  color:var(--text-2)!important;
+}
+[data-theme="dark"] .nav-item:hover,
+[data-theme="amoled"] .nav-item:hover,
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="amoled"] .btn-secondary:hover,
+[data-theme="dark"] .btn-tertiary:hover,
+[data-theme="amoled"] .btn-tertiary:hover,
+[data-theme="dark"] .icon-btn:hover,
+[data-theme="amoled"] .icon-btn:hover,
+[data-theme="dark"] .chip:hover,
+[data-theme="amoled"] .chip:hover,
+[data-theme="dark"] .view-switch-btn:hover,
+[data-theme="amoled"] .view-switch-btn:hover {
+  background:var(--surf-3)!important;
+  border-color:var(--border-2)!important;
+  color:var(--text)!important;
+}
+[data-theme="dark"] .settings-tab.active,
+[data-theme="amoled"] .settings-tab.active,
+[data-theme="dark"] .settings-tab.on,
+[data-theme="amoled"] .settings-tab.on {
+  background:var(--accent-soft)!important;
+  color:var(--accent)!important;
+}
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .input,
+[data-theme="dark"] .select,
+[data-theme="dark"] .textarea,
+[data-theme="amoled"] input,
+[data-theme="amoled"] select,
+[data-theme="amoled"] textarea,
+[data-theme="amoled"] .input,
+[data-theme="amoled"] .select,
+[data-theme="amoled"] .textarea {
+  color:var(--text)!important;
+  color-scheme:dark;
+}
