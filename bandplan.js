@@ -308,7 +308,7 @@ function participantStatusFor(ev, member) {
   const map = ev && ev.participation && typeof ev.participation === 'object' ? ev.participation : {};
   const shared = key ? map[String(key)] || '' : '';
   const me = currentMemberForParticipation();
-  return !shared && me && member && me.id === member.id ? eventStatusFor(ev) : shared;
+  return !shared && me && member && String(me.accountId||me.id) === String(member.accountId||member.id) ? eventStatusFor(ev) : shared;
 }
 function participantStatusLabel(v) {
   return ({yes:'Участвует', maybe:'Под вопросом', no:'Не участвует'}[v] || 'Не отмечено');
@@ -433,6 +433,7 @@ function refreshParticipationUI(evId) {
       const v = btn.getAttribute('data-v');
       const on = !!my && v === my;
       btn.classList.toggle('on', on);
+      ['yes','maybe','no'].forEach(status => btn.classList.toggle('status-' + status, on && v === status));
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
   });
@@ -443,6 +444,7 @@ function refreshParticipationUI(evId) {
       const v = btn.getAttribute('data-v');
       const on = !!my && v === my;
       btn.classList.toggle('on', on);
+      ['yes','maybe','no'].forEach(status => btn.classList.toggle('status-' + status, on && v === status));
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     const myLabel = overlay.querySelector('.event-info-my .event-info-section-head .participation-label');
@@ -1041,7 +1043,7 @@ function evRow(o, withPart) {
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
     (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
     (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
-      '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
+      '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
     '</div>' +
     '<div class="ev-acts">' +
     (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
@@ -1494,7 +1496,7 @@ function eventInfoModal(evId, occurrenceDate) {
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
       '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div>' +
         '<div class="part-switch event-info-part-switch" role="group" aria-label="Ваше участие">' +
-          [['yes','Участвую','check'],['maybe','Под вопросом','info'],['no','Не участвую','x']].map(p => '<button class="part-btn' + (my === p[0] ? ' on' : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev.id) + '" aria-pressed="' + (my === p[0]) + '">' + ic(p[2],12) + '<span>' + p[1] + '</span></button>').join('') +
+          [['yes','Участвую','check'],['maybe','Под вопросом','info'],['no','Не участвую','x']].map(p => '<button class="part-btn' + (my === p[0] ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev.id) + '" aria-pressed="' + (my === p[0]) + '">' + ic(p[2],12) + '<span>' + p[1] + '</span></button>').join('') +
         '</div></div>' +
     '</div>';
   openModal({
