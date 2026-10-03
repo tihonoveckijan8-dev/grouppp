@@ -271,7 +271,7 @@ function defaults() {
     members: [], events: [], songs: [], setlists: [],
     settings: {
       theme: 'light', accent: '#2547D0', notation: 'auto', weekStart: 1,
-      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true, collectionViews: { songs: 'blocks', setlists: 'blocks' }
+      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true
     },
     onboardingDone: false
   };
@@ -1073,15 +1073,13 @@ function filteredSongs() {
   return l.sort(cmp);
 }
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
-function collectionView(section) { const views = state.settings.collectionViews || {}; return views[section] === 'list' ? 'list' : 'blocks'; }
-function collectionViewControl(section) { const current = collectionView(section); return '<div class="view-switch" role="group" aria-label="Режим отображения">' + [['blocks','Блоки','grid'],['list','Список','rows']].map(v => '<button type="button" class="view-switch-btn' + (current === v[0] ? ' on' : '') + '" data-act="collection-view" data-section="' + section + '" data-v="' + v[0] + '" aria-pressed="' + (current === v[0]) + '" aria-label="' + v[1] + '">' + ic(v[2],15) + '<span>' + v[1] + '</span></button>').join('') + '</div>'; }
 function vSongs() {
   const list = filteredSongs(), tags = allTags();
   let h = '<div class="toolbar">' +
     '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '" style="border:none;background:none;outline:none;font-size:var(--fs-body-s);flex:1;min-width:0;box-shadow:none">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
-    '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div><div class="collection-toolbar songs-view-toolbar">' + collectionViewControl('songs') + '</div>';
+    '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
       (ui.songQuery ? '<button class="chip" type="button" data-act="song-clear">' + ic('search', 13) + '«' + esc(ui.songQuery) + '»<span class="rm">×</span></button>' : '') +
@@ -1099,7 +1097,7 @@ function vSongs() {
       state.songs.length ? '<button class="btn btn-secondary" type="button" data-act="song-reset">Сбросить фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">Добавить песню</button>'
         : '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить первую песню</button>') + '</div>';
   }
-  h += '<div class="grid g3 collection-grid collection-' + collectionView('songs') + '">';
+  h += '<div class="collection-grid collection-list songs-list">';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     const dyn = (s.dynamics && s.dynamics.instruments || []).length;
@@ -1231,10 +1229,10 @@ const infoRow = (l, v) => '<div class="info-row"><span class="l">' + esc(l) + '<
 
 /* ═══ 13. SETLISTS ═══ */
 function vSetlists() {
-  if (!state.setlists.length) return '<div class="collection-toolbar">' + collectionViewControl('setlists') + '</div><div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
+  if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
     'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
     '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
-  let h = '<div class="collection-toolbar">' + collectionViewControl('setlists') + '</div><div class="grid g2 collection-grid collection-' + collectionView('setlists') + '">';
+  let h = '<div class="collection-grid collection-list setlists-list">';
   state.setlists.slice().sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))).forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
@@ -2113,17 +2111,6 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
-    case 'collection-view': {
-      stop();
-      const section = el.getAttribute('data-section');
-      const value = el.getAttribute('data-v') === 'list' ? 'list' : 'blocks';
-      if (['songs','setlists'].includes(section)) {
-        state.settings.collectionViews = Object.assign({}, state.settings.collectionViews || {}, {[section]:value});
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить вид отображения', 'err'); }
-        render();
-      }
-      break;
-    }
     case 'settings-tab': {
       stop();
       const tabs = el.closest('.settings-tabs');
