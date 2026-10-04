@@ -1311,15 +1311,13 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
 
 /* ===== AUTH GATE — Supabase account access ===== */
 .bp-auth-gate{
-  position:fixed; inset:0; z-index:2100;
+  position:fixed; inset:0; z-index:var(--z-onb,1500);
   display:grid; place-items:center;
   padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
   overflow:auto; background:var(--bg);
   color:var(--text);
 }
 .bp-auth-gate[hidden]{display:none}
-/* Auth is a first-class entry screen: it must never sit behind boot/update layers. */
-.bp-auth-gate:not([hidden]){visibility:visible;opacity:1}
 .bp-auth-card{
   width:min(440px,100%); max-height:calc(100dvh - 40px); overflow:auto;
   padding:28px; border:1px solid var(--border); border-radius:var(--r-24,24px);
