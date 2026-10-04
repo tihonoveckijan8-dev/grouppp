@@ -192,6 +192,22 @@
     nextProfile.eventParticipation = map;
     return { events: cleanEvents, profile: nextProfile };
   }
+  async function hasAccountIdentity() {
+    if (!currentSession?.user) return false;
+    try {
+      const { data, error } = await client.from('bandplan_accounts')
+        .select('display_name,roles')
+        .eq('user_id', currentSession.user.id)
+        .maybeSingle();
+      if (error) throw error;
+      return !!(String(data?.display_name || '').trim() &&
+        Array.isArray(data?.roles) && data.roles.length > 0);
+    } catch (error) {
+      console.warn('BandPlan account identity check failed:', error);
+      return false;
+    }
+  }
+
   async function load() {
     if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
     const uid=currentSession.user.id;
@@ -571,5 +587,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity};
 })();
