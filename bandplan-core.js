@@ -578,7 +578,7 @@ function renderParticipationSwitch(ev, options) {
     ['maybe','Под вопросом','info','secondary'],
     ['no','Не участвую','x','main']
   ];
-  let html = '<div class="part-switch part-switch-' + esc(size) + ' part-switch-' + esc(variant) + '" role="group" aria-label="Ваше участие"' + (disabled ? ' aria-disabled="true"' : '') + '>';
+  let html = '<div class="part-switch part-switch-' + esc(size) + ' part-switch-' + esc(variant) + '" data-event-switch="' + esc(String(ev?.id || '')) + '" role="group" aria-label="Ваше участие"' + (disabled ? ' aria-disabled="true"' : '') + '>';
   states.forEach(p => {
     const active = status === p[0];
     html += '<button class="part-btn part-btn-' + p[3] + (p[1] === 'Под вопросом' ? ' part-btn-secondary' : '') + (active ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
@@ -761,6 +761,8 @@ function refreshParticipationUI(evId) {
       btn.classList.toggle('on', on);
       ['yes','maybe','no'].forEach(status => btn.classList.toggle('status-' + status, on && v === status));
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const labels = {yes:'Участвую', maybe:'Под вопросом', no:'Не участвую'};
+      if (v && labels[v]) btn.setAttribute('aria-label', labels[v] + (on ? ' — выбрано' : ''));
     });
   });
 
@@ -775,6 +777,22 @@ function refreshParticipationUI(evId) {
   const sum = participationSummary(ev);
   document.querySelectorAll('[data-event-participation-summary="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
     node.innerHTML = '<span class="status-yes">' + sum.yes + ' · Участвуют</span><span class="status-maybe">' + sum.maybe + ' · Под вопросом</span><span class="status-no">' + sum.no + ' · Не участвуют</span><span class="status-unset">' + sum.unset + ' · Не ответили</span>';
+  });
+  document.querySelectorAll('.part-switch[data-event-switch="' + CSS.escape(String(ev.id)) + '"]').forEach(sw => {
+    let reset = sw.querySelector('.part-reset');
+    if (my && !reset) {
+      reset = document.createElement('button');
+      reset.className = 'part-reset';
+      reset.type = 'button';
+      reset.setAttribute('data-v','');
+      reset.setAttribute('data-act','my-status');
+      reset.setAttribute('data-id',String(ev.id));
+      reset.setAttribute('aria-label','Сбросить отметку участия');
+      reset.innerHTML = ic('x',13) + '<span>Сбросить</span>';
+      sw.appendChild(reset);
+    } else if (!my && reset) {
+      reset.remove();
+    }
   });
   const pendingNode = document.querySelectorAll('[data-participation-pending="' + CSS.escape(String(ev.id)) + '"]');
   pendingNode.forEach(node => node.remove());
