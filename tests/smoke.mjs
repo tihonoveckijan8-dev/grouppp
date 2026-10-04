@@ -47,12 +47,20 @@ try {
   await page.goto('http://127.0.0.1:4173/', {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
+  const lazyCore = await page.evaluate(() => ({
+    ensureCore: typeof window.__bandplanEnsureCore === 'function',
+    coreNotLoadedInitially: !window.__bandplanCorePromise
+  }));
+  assert.equal(lazyCore.ensureCore, true, 'Lazy core loader missing');
+  assert.equal(lazyCore.coreNotLoadedInitially, true, 'Application core should stay deferred on the login gate');
+  await page.evaluate(() => window.__bandplanEnsureCore());
+  await page.waitForFunction(() => typeof window.BandPlanCloud?.queueEventParticipation === 'function', null, {timeout: 15000});
   const cloudApi = await page.evaluate(() => ({
     queueParticipation: typeof window.BandPlanCloud?.queueEventParticipation === 'function',
     flushParticipation: typeof window.BandPlanCloud?.flushEventParticipationQueue === 'function'
   }));
-  assert.equal(cloudApi.queueParticipation, true, 'Participation offline queue API missing');
-  assert.equal(cloudApi.flushParticipation, true, 'Participation queue flush API missing');
+  assert.equal(cloudApi.queueParticipation, true, 'Participation offline queue API missing after core load');
+  assert.equal(cloudApi.flushParticipation, true, 'Participation queue flush API missing after core load');
   const offlineStore = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
       const req = indexedDB.open('bandplan-cloud-v1');
