@@ -7,6 +7,81 @@
 (function () {
 'use strict';
 
+const Boot = (() => {
+  const el = document.getElementById('boot');
+  const app = document.getElementById('app');
+  const stageEl = () => document.getElementById('bootStage');
+  const barEl = () => document.getElementById('bootBar');
+  const slowEl = () => document.getElementById('bootSlow');
+  const t0 = performance.now();
+  const nav = performance.getEntriesByType('navigation')[0] || {};
+  const warm = nav.type === 'reload' || nav.type === 'back_forward';
+  const MIN = warm ? 0 : 350;
+  let lastAnnounce = 0, slowT = 0, finished = false, slowShown = false;
+
+  function stage(text, pct) {
+    if (!el || finished) return;
+    const now = performance.now(), next = Math.max(0, Math.min(100, Number(pct) || 0));
+    const label = stageEl();
+    if (label) {
+      label.style.opacity = '0';
+      setTimeout(() => { if (!finished && label) { label.textContent = text; label.style.opacity = '1'; } }, 80);
+    }
+    if (barEl()) barEl().style.transform = 'scaleX(' + Math.max(.08, next / 100) + ')';
+    if (now - lastAnnounce >= 800 || next >= 100) { if (el) el.setAttribute('aria-label', text); lastAnnounce = now; }
+    clearTimeout(slowT);
+    slowT = setTimeout(slow, 8000);
+  }
+  function slow() {
+    if (!el || finished || slowShown) return;
+    slowShown = true;
+    const x = slowEl(); if (x) x.hidden = false;
+  }
+  function fail(opts) {
+    if (!el || finished) return;
+    clearTimeout(slowT);
+    finished = false;
+    el.classList.add('is-error');
+    const core = el.querySelector('.boot-core');
+    const title = opts && opts.title || 'Не удалось запустить BandPlan';
+    const body = opts && opts.text || 'Попробуйте ещё раз. Ваши локальные данные не удалены.';
+    const actions = opts && opts.actions || '<button type="button" id="bootRetry">Повторить</button>';
+    if (core) core.innerHTML = '<div class="boot-error-ic" aria-hidden="true">' + ic('alert', 24) + '</div><div class="boot-error-title">' + esc(title) + '</div><div class="boot-error-text">' + esc(body) + '</div><div class="boot-acts">' + actions + '</div>';
+    el.setAttribute('aria-label', title + '. ' + body);
+  }
+  function done() {
+    if (!el || finished) return;
+    finished = true;
+    clearTimeout(slowT);
+    const label = stageEl();
+    if (label) { label.style.opacity = '0'; setTimeout(() => { if (label) { label.textContent = 'Всё готово'; label.style.opacity = '1'; } }, 60); }
+    if (barEl()) barEl().style.transform = 'scaleX(1)';
+    const wait = Math.max(0, MIN - (performance.now() - t0));
+    setTimeout(() => {
+      if (!el || !el.isConnected) return;
+      el.classList.add('is-leaving');
+      const rm = () => { if (el.isConnected) el.remove(); };
+      el.addEventListener('transitionend', rm, {once:true});
+      setTimeout(rm, 600);
+      if (app) { app.removeAttribute('inert'); app.setAttribute('aria-busy', 'false'); }
+      const main = document.querySelector('main') || document.getElementById('view');
+      if (main) { main.setAttribute('tabindex', '-1'); try { main.focus({preventScroll:true}); } catch(e) { try { main.focus(); } catch(_) {} } }
+    }, wait + 120);
+  }
+  if (el) {
+    const offline = document.getElementById('bootOffline');
+    const retry = document.getElementById('bootRetry');
+    if (offline) offline.addEventListener('click', () => {
+      window.__bandplanOfflineRequested = true;
+      window.__bandplanBootAttempt = (window.__bandplanBootAttempt || 0) + 1;
+      startBandPlan(true);
+    });
+    if (retry) retry.addEventListener('click', () => location.reload());
+    if (navigator.onLine === false) stage('Нет сети — открываем локальные данные', 60);
+  }
+  return {stage, slow, fail, done};
+})();
+
 /* ═══ 1. HELPERS ═══ */
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
@@ -281,7 +356,7 @@ const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evRepeat: false,
   songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
-  libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false
+  libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
 function personalParticipationMap() {
@@ -692,6 +767,14 @@ function go(h) {
   if (location.hash === h) { routeTransition(); return; }
   location.hash = h;
 }
+function renderWithTransition(fn) {
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (document.startViewTransition && !reduced) {
+    try { document.startViewTransition(fn); return; } catch (e) {}
+  }
+  fn();
+}
+
 function routeTransition() {
   const view = $('#view');
   if (!view) { render(); return; }
@@ -710,7 +793,7 @@ function routeTransition() {
   view.classList.remove('route-enter');
   void view.offsetWidth;
   view.classList.add('route-enter');
-  render();
+  renderWithTransition(render);
   requestAnimationFrame(() => {
     view.classList.add('route-enter-active');
     setTimeout(() => {
@@ -761,12 +844,31 @@ function stateHTML(kind, title, text, actions) {
     '<h4>' + esc(title) + '</h4>' + (text ? '<p>' + esc(text) + '</p>' : '') +
     (actions ? '<div class="acts">' + actions + '</div>' : '') + '</div>';
 }
-function skeletonHTML(n) {
-  let h = '<div class="grid g3">';
-  for (let i = 0; i < (n || 6); i++) h += '<div class="skel-card"><div class="skel skel-title"></div><div class="skel skel-line" style="width:82%"></div><div class="row"><div class="skel skel-badge"></div><div class="skel skel-badge"></div></div></div>';
-  return h + '</div>';
-}
-let actionBarHTML = '';
+function skeletonFor(routeName) {
+  const line = (w) => '<div class="skel skel-line" style="width:' + w + '%"></div>';
+  const card = (extra) => '<div class="skel-card"><div class="skel skel-title"></div>' + line(76) + (extra || '') + '</div>';
+  if (routeName === 'calendar') {
+    return '<div class="skel-calendar"><div class="skel-hero">' + line(34) + '<div class="skel skel-heading"></div>' + line(62) + '<div class="skel-actions"><div class="skel skel-btn"></div><div class="skel skel-btn"></div></div><div class="skel-metrics">' +
+      [1,2,3,4].map(() => '<div class="skel-metric">' + line(42) + '<div class="skel skel-num"></div></div>').join('') +
+      '</div></div><div class="skel skel-heading"></div><div class="skel-month-grid">' + Array.from({length:35},(_,i)=>'<div class="skel skel-cell">' + (i%3===0?'<i></i>':'') + '</div>').join('') + '</div></div>';
+  }
+  if (routeName === 'songs') {
+    return '<div class="skel-stack"><div class="skel skel-search"></div>' + [1,2,3,4,5,6].map(() => '<div class="skel-song-row"><div class="skel skel-badge"></div><div class="skel-copy">' + line(58) + line(32) + '</div><div class="skel skel-btn"></div></div>').join('') + '</div>';
+  }
+  if (routeName === 'song') {
+    return '<div class="skel-detail"><div class="skel skel-crumb"></div><div class="skel skel-heading"></div><div class="skel-detail-grid"><div class="skel-card skel-lyrics">' + Array.from({length:9},(_,i)=>line(55+(i%4)*9)).join('') + '</div><div class="skel-card">' + line(62) + line(48) + line(72) + '</div></div></div>';
+  }
+  if (routeName === 'setlists') {
+    return '<div class="skel-stack">' + [1,2,3].map((_,i) => '<div class="skel-list-row"><span class="skel skel-num"></span><div class="skel-copy">' + line(54) + line(30) + '</div><div class="skel skel-btn"></div><div class="skel skel-icon"></div></div>').join('') + '</div>';
+  }
+  if (routeName === 'setlist') {
+    return '<div class="skel-detail-grid"><div class="skel-card">' + [1,2,3,4,5].map(() => line(70)).join('') + '</div><div class="skel-card"><div class="skel skel-heading"></div>' + line(80) + line(55) + '</div></div>';
+  }
+  if (routeName === 'settings') {
+    return '<div class="skel-settings"><div class="skel skel-tabs"></div><div class="skel-detail-grid"><div class="skel-card">' + line(68) + line(84) + line(58) + '</div><div class="skel-card">' + line(64) + line(76) + '</div></div></div>';
+  }
+  return card();
+}let actionBarHTML = '';
 /* Prevent the delegated nav click and the following native hashchange from
    rendering the same route twice. */
 let skipNextHashRoute = false;
@@ -800,8 +902,19 @@ function render() {
 
   const v = $('#view');
   if (ui.skeleton) {
-    v.innerHTML = skeletonHTML(r.name === 'songs' ? 6 : 3);
-    requestAnimationFrame(() => setTimeout(function () { ui.skeleton = false; render(); }, 80));
+    const token = ++ui.skeletonToken;
+    clearTimeout(ui.skeletonTimer);
+    ui.skeletonTimer = setTimeout(function () {
+      if (token !== ui.skeletonToken) return;
+      v.setAttribute('aria-busy', 'true');
+      v.innerHTML = skeletonFor(r.name);
+      ui.skeletonShownAt = performance.now();
+      setTimeout(function () {
+        if (token !== ui.skeletonToken) return;
+        ui.skeleton = false;
+        render();
+      }, Math.max(250, 250 - (performance.now() - ui.skeletonShownAt)));
+    }, 120);
     return;
   }
   try {
@@ -814,7 +927,9 @@ function render() {
     else if (r.name === 'settings') html = vSettings();
     else html = '<div class="card">' + stateHTML('err', 'Раздел не найден', 'Проверьте адрес или вернитесь в расписание.', '<a class="btn btn-primary" href="#/calendar">Открыть расписание</a>') + '</div>';
     v.innerHTML = html + (actionBarHTML || '');
+    v.setAttribute('aria-busy', 'false');
   } catch (err) {
+    v.setAttribute('aria-busy', 'false');
     v.innerHTML = '<div class="card">' + stateHTML('err', 'Не удалось отобразить раздел', 'Данные сохранены локально. Повторите попытку или вернитесь в расписание.', '<button class="btn btn-primary" type="button" data-act="reload-view">Повторить</button>') + '</div>';
   }
   afterRender(r);
@@ -1900,24 +2015,34 @@ function quickScene() {
 }
 
 /* ═══ 19. THEME / ACCENT ═══ */
+function persistBootPrefs() {
+  try {
+    const st = state.settings || {};
+    const theme = ['light','dark','amoled'].includes(st.theme) ? st.theme : 'light';
+    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent : '#2547D0';
+    const onAccent = document.documentElement.style.getPropertyValue('--on-accent') || '#fff';
+    localStorage.setItem('bandplan.boot', JSON.stringify({theme, accent, onAccent: onAccent.trim(), density: st.density || 'comfortable'}));
+  } catch (e) {}
+}
 function applyTheme() {
   const s = state.settings;
   if (!['light','dark','amoled'].includes(s.theme)) s.theme = 'light';
   document.documentElement.setAttribute('data-theme', s.theme || 'light');
   document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
   document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
-  const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute('content', s.theme === 'light' ? '#F4F6F8' : s.theme === 'dark' ? '#14161C' : '#000000');
+  const c = s.theme === 'light' ? '#F4F6F8' : s.theme === 'dark' ? '#14161C' : '#000000';
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', c));
+  persistBootPrefs();
 }
 function cycleTheme() {
   const o = ['light', 'dark', 'amoled'];
   setTheme(o[(o.indexOf(state.settings.theme) + 1) % o.length]);
 }
 function setTheme(t) {
-  state.settings.theme = t; applyTheme(); save(); render();
+  state.settings.theme = t; applyTheme(); save(); renderWithTransition(render);
   toast('Тема: ' + ({ light: 'светлая', dark: 'тёмная', amoled: 'AMOLED' }[t] || 'светлая'), 'info', 2000);
 }
-function applyAccent(hex) { if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; state.settings.accent = hex; applyAccentVars(); save(); render(); }
+function applyAccent(hex) { if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; state.settings.accent = hex; applyAccentVars(); save(); renderWithTransition(render); }
 function applyAccentVars() {
   const hex = state.settings.accent || '#2547D0', r = document.documentElement.style;
   const dark = shade(hex, -.16), press = shade(hex, -.3);
@@ -1931,6 +2056,7 @@ function applyAccentVars() {
   r.setProperty('--accent-ring', hex + '66');
   r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
   r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
+  persistBootPrefs();
   /* Один выбранный акцентный цвет управляет всей системой UI-акцентов.
      Семантические переменные сохраняются для совместимости компонентов,
      но визуально больше не вводят сторонние цвета. */
@@ -2753,7 +2879,9 @@ function wireNet() {
     else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; }
   };
   bar.addEventListener('click', e => { if (e.target.closest('.netbar-close')) bar.hidden = true; });
-  window.addEventListener('online', upd); window.addEventListener('offline', upd); upd();
+  window.addEventListener('online', upd); window.addEventListener('offline', upd);
+  window.addEventListener('bandplan:sync-error', e => { if (bar && navigator.onLine) { bar.hidden = false; bar.innerHTML = ic('alert', 16) + '<span>Ошибка синхронизации. Данные сохранены локально.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.add('sync-error'); } });
+  upd();
 }
 function wireStickyHeader() {
   const c = $('#view'), tb = $('#topbar');
@@ -2981,30 +3109,38 @@ function init() {
       }
     });
   }
-  ui.skeleton = true;
+  ui.skeleton = false;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
   else if (!had || !state.onboardingDone) openOnboarding();
 }
-async function startBandPlan() {
+async function startBandPlan(forceOffline) {
+  const attempt = (window.__bandplanBootAttempt || 0) + 1;
+  window.__bandplanBootAttempt = attempt;
   window.__bandplanStarted = true;
+  Boot.stage(forceOffline || navigator.onLine === false ? 'Нет сети — открываем локальные данные' : 'Запускаем BandPlan', forceOffline || navigator.onLine === false ? 60 : 8);
   /*
     The UI must never remain a blank shell when the optional cloud SDK fails
     to load. Start the local application first; cloud sync is attached when
     the Supabase client is available.
   */
   if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
+    if (attempt !== window.__bandplanBootAttempt) return;
+    Boot.stage('Готовим локальные данные', 70);
     console.error('BandPlan: Supabase client is unavailable; starting in local/offline mode.');
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
     init();
     if (!hadLocal || !state.onboardingDone) openOnboarding();
     toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
+    Boot.done();
     return;
   }
   let user = null;
   try {
+    Boot.stage('Проверяем сессию', 25);
     user = await window.BandPlanCloud.initialize();
+    if (attempt !== window.__bandplanBootAttempt) return;
   } catch (error) {
     console.warn('BandPlan cloud initialization failed; opening local app:', error);
     KEY = 'bandplan.premium.v6';
@@ -3012,9 +3148,10 @@ async function startBandPlan() {
     init();
     if (!hadLocal || !state.onboardingDone) openOnboarding();
     toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
+    Boot.done();
     return;
   }
-  if (!user) return;
+  if (!user) { Boot.done(); return; }
 
   /*
     One-time migration for installations that stored the user's real work in
@@ -3037,7 +3174,9 @@ async function startBandPlan() {
 
   KEY = 'bandplan.premium.v6:' + user.id;
   try {
+    Boot.stage('Загружаем ваши данные', 60);
     window.__bandplanDurable = await window.BandPlanCloud.hydrateLocalCache();
+    if (attempt !== window.__bandplanBootAttempt) return;
     if (window.__bandplanDurable?.state) {
       try { localStorage.setItem(KEY, JSON.stringify(window.__bandplanDurable.state)); } catch (e) {}
     } else if (legacyState) {
@@ -3050,7 +3189,9 @@ async function startBandPlan() {
     }
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
+  Boot.stage('Готовим интерфейс', 85);
   init();
+  Boot.done();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
 })();
