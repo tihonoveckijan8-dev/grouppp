@@ -2092,22 +2092,8 @@ function applyAccentVars() {
 /* ═══ 20. ONBOARDING ═══ */
 let onbStep = 0, onbData = null;
 function openOnboarding() {
-  const existing = state.profile || {};
-  const existingRoles = Array.isArray(existing.roles) ? existing.roles.slice() : (existing.role ? [existing.role] : []);
-  const hasIdentity = !!String(existing.name || '').trim() && existingRoles.length > 0;
-  onbStep = hasIdentity ? 1 : 0;
-  onbData = {
-    name: String(existing.name || ''),
-    role: existingRoles[0] || '',
-    roles: existingRoles,
-    bandName: String(existing.bandName || ''),
-    bandDesc: String(existing.bandDesc || ''),
-    participation: existing.defaultParticipation || 'yes',
-    members: [{ name: String(existing.name || ''), role: existingRoles[0] || 'vocal' }],
-    theme: state.settings?.theme || 'light',
-    accent: state.settings?.accent || '#2547D0',
-    demo: false
-  };
+  onbStep = 0;
+  onbData = { name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes', members: [{ name: '', role: 'vocal' }], theme: 'light', accent: '#2547D0', demo: false };
   drawOnb(); $('#onb').classList.add('on');
 }
 function drawOnb() {
@@ -3072,27 +3058,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
     setSyncStatus(navigator.onLine === false ? 'offline' : 'err', navigator.onLine === false ? 'Офлайн' : 'Ошибка синхронизации', 0);
-    /*
-      A cloud/group read failure must not reset an existing account's identity.
-      If the durable account row is present, preserve name/roles and continue
-      without reopening the first-time profile form.
-    */
-    let accountIdentity = false;
-    try {
-      const account = await window.BandPlanCloud.getAccountProfile?.();
-      const roles = Array.isArray(account?.roles) ? account.roles : [];
-      const name = String(account?.display_name || '').trim();
-      if (name && roles.length) {
-        state.profile = Object.assign({}, state.profile || {}, {name, roles:roles.slice(), role:roles[0] || ''});
-        state.onboardingDone = true;
-        accountIdentity = true;
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (storageError) {}
-        render();
-      }
-    } catch (identityError) {
-      console.warn('BandPlan account identity recovery skipped:', identityError);
-    }
-    if (!accountIdentity && !hadLocal && !state.onboardingDone) openOnboarding();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
     if (!window.__bandplanSyncRetryBound) {
       window.__bandplanSyncRetryBound = true;
       window.addEventListener('online', () => { window.__bandplanSyncRetryBound = false; bootCloudSync(true, window.__bandplanDurable || null); }, {once:true});
