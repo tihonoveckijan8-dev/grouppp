@@ -17,8 +17,10 @@
       const legacy = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
       if (legacy) localStorage.setItem(standardKey, legacy);
     }
-    localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
   } catch (_) {}
+  function cleanupLegacyAuthStorage() {
+    try { localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY); } catch (_) {}
+  }
   const client = window.supabase.createClient(URL, KEY, {
     auth: {
       persistSession: true,
@@ -272,6 +274,7 @@
 
     currentSession=data?.session||null;
     authState='ready';
+    cleanupLegacyAuthStorage();
     if(currentSession?.user) {
       gate().hidden=true;
       return currentSession.user;
