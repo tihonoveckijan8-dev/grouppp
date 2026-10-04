@@ -2959,8 +2959,20 @@ function isKnownDemoState(s) {
     mems.some(x => members.indexOf(String(x && x.name || '')) >= 0);
 }
 async function shouldOpenAccountOnboarding() {
+  // Never show the profile wizard to an account that has already been
+  // configured. The decision must not depend on a stale local cache.
   if (state.onboardingDone) return false;
+
   try {
+    const user = window.BandPlanCloud?.user?.();
+    const meta = user?.user_metadata || {};
+
+    if (meta.bandplan_onboarding_done === true) {
+      state.onboardingDone = true;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      return false;
+    }
+
     if (window.BandPlanCloud?.hasAccountIdentity) {
       const hasIdentity = await window.BandPlanCloud.hasAccountIdentity();
       if (hasIdentity) {
@@ -2969,9 +2981,27 @@ async function shouldOpenAccountOnboarding() {
         return false;
       }
     }
+
+    /*
+      Existing Supabase accounts must never be treated as a brand-new
+      registration just because the profile snapshot is temporarily
+      unavailable. A real first registration is the only case where the
+      onboarding wizard is allowed to appear automatically.
+    */
+    if (user?.created_at && user?.last_sign_in_at) {
+      const created = Date.parse(user.created_at);
+      const signedIn = Date.parse(user.last_sign_in_at);
+      if (Number.isFinite(created) && Number.isFinite(signedIn) &&
+          signedIn - created > 120000) {
+        state.onboardingDone = true;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        return false;
+      }
+    }
   } catch (e) {
     console.warn('BandPlan onboarding identity check failed:', e);
   }
+
   return true;
 }
 
