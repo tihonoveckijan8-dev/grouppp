@@ -357,7 +357,8 @@ function defaults() {
     members: [], events: [], songs: [], setlists: [],
     settings: {
       theme: bootTheme, accent: bootAccent, notation: 'auto', weekStart: 1,
-      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true
+      lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
+      offlineSongsAutoSave: true, offlineSongsDays: 30, offlineSongsNearestCount: 3, offlineSongsSaveMaybe: false
     },
     onboardingDone: false
   };
@@ -371,6 +372,113 @@ const ui = {
 };
 const participationPending = new Set();
 const participationPrevious = new Map();
+let offlineSongSyncTimer = 0;
+let offlineSongSyncBusy = false;
+let offlineSongStorageWarned = false;
+function offlineSongSettings() {
+  const s=state.settings||{};
+  return {
+    auto:s.offlineSongsAutoSave !== false,
+    days:clamp(Number(s.offlineSongsDays||30),1,90),
+    count:clamp(Number(s.offlineSongsNearestCount||3),1,10),
+    maybe:s.offlineSongsSaveMaybe === true
+  };
+}
+function eventStartMs(ev) {
+  if (!ev?.date) return NaN;
+  const time=ev.time || '00:00';
+  const ms=Date.parse(String(ev.date)+'T'+String(time));
+  return Number.isFinite(ms) ? ms : NaN;
+}
+function eventEndMs(ev) {
+  const start=eventStartMs(ev);
+  if(!Number.isFinite(start))return NaN;
+  if(ev.end) {
+    const ms=Date.parse(String(ev.date)+'T'+String(ev.end));
+    if(Number.isFinite(ms) && ms>=start)return ms;
+  }
+  return start+3*60*60*1000;
+}
+function eligibleOfflineEvents() {
+  const cfg=offlineSongSettings(), now=Date.now(), limit=now+cfg.days*86400000;
+  return state.events
+    .filter(ev => ev && (ev.status||'upcoming')==='upcoming' && eventStartMs(ev)>=now && eventStartMs(ev)<=limit && ev.setlistId)
+    .filter(ev => ['yes'].includes(eventStatusFor(ev)) || (cfg.maybe && eventStatusFor(ev)==='maybe'))
+    .sort((a,b)=>eventStartMs(a)-eventStartMs(b))
+    .slice(0,cfg.count);
+}
+function offlineSongsForEvent(ev) {
+  const sl=ev?.setlistId ? slById(ev.setlistId) : null;
+  if(!sl)return [];
+  return (sl.items||[]).map(item=>{
+    const song=songById(item.songId);
+    if(!song)return null;
+    const copy=cloneValue(song);
+    copy.offlineSetlistShift=Number(item.shift||0);
+    copy.offlineSetlistNote=String(item.note||'');
+    copy.offlineSetlistItemId=String(item.id||'');
+    return copy;
+  }).filter(Boolean);
+}
+async function hydrateOfflineSongsIntoState() {
+  if(!window.BandPlanCloud?.listOfflineEventSongs)return;
+  try {
+    const rows=await window.BandPlanCloud.listOfflineEventSongs();
+    if(!Array.isArray(rows)||!rows.length)return;
+    const map=new Map(state.songs.map(s=>[String(s.id),s]));
+    if(navigator.onLine===false) {
+      rows.forEach(row => (row.songs||[]).forEach(song => { if(song?.id) map.set(String(song.id),cloneValue(song)); }));
+      state.songs=Array.from(map.values());
+    }
+  } catch(error) { console.warn('BandPlan offline song hydration failed:',error); }
+}
+async function cleanupEventOfflineSongs() {
+  if(!window.BandPlanCloud?.listOfflineEventSongs)return;
+  try {
+    const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id)));
+    for(const row of rows||[]) {
+      const ev=state.events.find(e=>String(e.id)===String(row.eventId));
+      const stale=!ev || !keep.has(String(row.eventId)) || (eventEndMs(ev)+6*60*60*1000<now) || !ev.setlistId ||
+        !['yes'].includes(eventStatusFor(ev)) && !(offlineSongSettings().maybe && eventStatusFor(ev)==='maybe');
+      if(stale) await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
+    }
+  } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
+}
+async function syncEventOfflineSongs() {
+  if(offlineSongSyncBusy || !window.BandPlanCloud?.saveOfflineEventSongs)return;
+  const cfg=offlineSongSettings();
+  offlineSongSyncBusy=true;
+  try {
+    await cleanupEventOfflineSongs();
+    if(!cfg.auto) return;
+    const eligible=eligibleOfflineEvents();
+    for(const ev of eligible) {
+      const songs=offlineSongsForEvent(ev);
+      const ok=await window.BandPlanCloud.saveOfflineEventSongs({
+        eventId:String(ev.id),setlistId:String(ev.setlistId),eventDate:String(ev.date||''),
+        eventEnd:new Date(eventEndMs(ev)).toISOString(),songs,savedAt:new Date().toISOString(),version:1
+      });
+      if(ok===false && !offlineSongStorageWarned) {
+        offlineSongStorageWarned=true;
+        toast('Не удалось сохранить песни на устройстве. Приложение продолжит работать без офлайн-копии.','warn',5000);
+      }
+    }
+  } catch(error) {
+    console.warn('BandPlan offline song sync failed:',error);
+    if(!offlineSongStorageWarned){offlineSongStorageWarned=true;toast('Не удалось обновить офлайн-копии песен.','warn',5000);}
+  } finally { offlineSongSyncBusy=false; }
+}
+function scheduleOfflineSongSync(delay=900) {
+  clearTimeout(offlineSongSyncTimer);
+  offlineSongSyncTimer=setTimeout(()=>{syncEventOfflineSongs().catch(()=>{});},delay);
+}
+function offlineSongsStorageText(bytes) {
+  const n=Number(bytes||0);
+  if(n<1024)return n+' Б';
+  if(n<1048576)return (n/1024).toFixed(1)+' КБ';
+  return (n/1048576).toFixed(2)+' МБ';
+}
+
 function personalParticipationMap() {
   const map = state.profile && state.profile.eventParticipation;
   return map && typeof map === 'object' ? map : {};
