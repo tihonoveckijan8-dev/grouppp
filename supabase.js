@@ -340,7 +340,7 @@
     if(!currentSession?.user) return;
     try {
       const result=await client.auth.updateUser({
-        data:{bandplan_onboarding_done:true}
+        data:{bandplan_onboarding_done:true,bandplan_onboarding_required:false}
       });
       if(result.error) throw result.error;
       currentSession=result.data?.user ? Object.assign({},currentSession,{user:result.data.user}) : currentSession;
