@@ -9,7 +9,7 @@
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#D9D3EA",
+  "background_color": "#F4F6F8",
   "theme_color": "#2547D0",
   "categories": ["music", "productivity"],
   "shortcuts": [
