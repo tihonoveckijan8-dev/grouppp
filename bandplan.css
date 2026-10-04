@@ -1,10 +1,9 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   BandPlan — Editorial Clay Design System v6.0
-   Файл 2/3 · токены, уровни поверхностей, компоненты, состояния, адаптив
-   Правила: 80% нейтральных поверхностей · 15% тёмной типографики · 5% акцента
-   Глубина: L0 фон → L1 секция → L2 интерактив → L3 overlay → L4 critical
-   Радиусы: 10 · 14 · 18 · 24 · 32 · pill
-   ═══════════════════════════════════════════════════════════════════════ */
+/* BandPlan — Canonical Design System v10
+   1 RESET · 2 TOKENS · 3 BASE · 4 LAYOUT · 5 SIDEBAR · 6 TOPBAR · 7 PAGE HEAD ·
+   8 BUTTONS · 9 SURFACES · 10 FORMS · 11 STATES · 12 CALENDAR · 13 SONGS ·
+   14 SETLISTS · 15 MEMBERS · 16 MODAL · 17 TOASTS · 18 SCENE · 19 ONBOARDING ·
+   20 BOTTOM NAV · 21 RESPONSIVE · 22 PRINT
+*/
 
 /* ─── 1. RESET ───────────────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -631,11 +630,9 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 }
 @page{margin:12mm}
 
-
               
 
-
-/* ══ AUTH ══ */
+/* ─── COMPONENT EXTENSIONS / ACCESSIBILITY / DATA STATES ─────────────── */
 
 .auth-screen{position:fixed;inset:0;z-index:var(--z-onb);display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,var(--accent-soft),transparent 42%),var(--bg);overflow:auto}
 .auth-screen[hidden]{display:none}
@@ -660,25 +657,7 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .auth-username-status.available{color:var(--ok)}.auth-username-status.taken,.auth-username-status.invalid{color:var(--danger,var(--danger))}
 .auth-note{margin:16px 0 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.5}
 
-
 .account-line{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg2);margin-bottom:14px}.account-name{font-weight:700}.friend-code{font-family:var(--mono);letter-spacing:.08em}.friend-tools{margin-bottom:14px}.friends-list{border-top:1px solid var(--line);padding-top:12px}.friend-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.friend-row:last-child{border-bottom:0}
-
-
-
-
-/* ══ PERFORMANCE & VISUAL COMFORT ══ */
-
-
-
-/* ══ STABLE SECTION CONTROLS ══
-   The page header is outside the scrollable content, so keep it visible.
-   Search/filter toolbars stay pinned to the top edge of the content viewport. */
-
-
-
-
-
-/* ══ PREMIUM SETTINGS ══ */
 
 .settings-shell{max-width:1180px;margin:0 auto}
 .settings-shell>.split2{gap:18px}
@@ -704,13 +683,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .settings-leave{min-height:42px;padding:9px 14px;border-radius:12px}
 .settings-card .stat-mini{border-radius:16px;padding:15px 14px;background:var(--surf-1);border:1px solid var(--border);box-shadow:none}
 .settings-card .stat-mini .v{font-size:22px}
-
-
-
-
-
-
-/* ═══ EVENT DETAILS + TELEGRAM-STYLE PARTICIPATION ═══ */
 
 .ev-row[data-act="event-info"],
 .cal-ev[data-act="event-info"],
@@ -793,11 +765,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .event-info-my{padding:12px 14px}
 .event-info-my .event-info-section-head{margin:0}
 
-
-
-
-/* ═══ SETTINGS TABS ═══ */
-
 .settings-shell{display:block}
 .settings-tabs{position:sticky;top:0;z-index:8;display:flex;gap:6px;padding:7px;margin:0 0 var(--s4);overflow-x:auto;scrollbar-width:none;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--border);border-radius:20px;box-shadow:var(--clay-sm),var(--clay-in)}
 .settings-tabs::-webkit-scrollbar{display:none}
@@ -811,11 +778,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .settings-shell[data-settings-tab="interface"] [data-settings-panel]:not([data-settings-panel="interface"]),
 .settings-shell[data-settings-tab="data"] [data-settings-panel]:not([data-settings-panel="data"]),
 .settings-shell[data-settings-tab="app"] [data-settings-panel]:not([data-settings-panel="app"]){display:none}
-
-
-
-
-/* ═══ PREMIUM SETTINGS TABS — REFINED ═══ */
 
 .settings-tabs{
   position:relative;
@@ -927,12 +889,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
   animation:settings-panel-in .2s ease-out both;
 }
 
-
-
-
-
-/* ═══ PROFILE + DATA SETTINGS ═══ */
-
 .profile-settings-grid{
   display:grid;
   grid-template-columns:minmax(0,1.35fr) minmax(300px,.85fr);
@@ -1035,12 +991,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
 .data-action-danger strong{font-size:12.5px;color:var(--text)}
 .data-action-danger span{font-size:11px;color:var(--muted)}
 
-
-
-
-
-/* ═══ SETTINGS BUTTON ALIGNMENT — PROFILE + DATA ═══ */
-
 .profile-actions{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1139,13 +1089,6 @@ body[data-actionbar="1"] .content{padding-bottom:var(--s10)}
   white-space:nowrap;
 }
 
-
-
-
-
-
-/* ═══ DEVICE / BROWSER HARDENING ═══ */
-
 html{
   min-width:320px;
   overflow-x:hidden;
@@ -1170,35 +1113,12 @@ input,select,textarea{max-width:100%;box-sizing:border-box}
   .bottom-nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}
 }
 
-
-
-
-
-
 @supports (height:100svh){
   .app,.main,.sidebar{min-height:100svh}
 }
 @supports (height:100dvh){
   .app,.main,.sidebar{height:100dvh}
 }
-
-
-
-
-
-
-
-/* ═══ MOBILE PLATFORM POLISH — safe areas, touch targets, layout stability ═══ */
-
-
-
-
-
-
-
-
-
-/* ═══ RESPONSIVE REPAIR: collection controls, cards and touch layouts ═══ */
 
 *,*::before,*::after { box-sizing:border-box; }
 svg { flex:0 0 auto; max-width:100%; }
@@ -1229,15 +1149,6 @@ svg { flex:0 0 auto; max-width:100%; }
 .collection-grid.collection-list > .song-card .song-artist,
 .collection-grid.collection-list > .song-card .badge { min-width:0; overflow-wrap:anywhere; }
 
-
-
-
-
-
-
-
-/* V9 — viewport containment and overflow-safe layouts */
-
 html,body{width:100%;max-width:100%;overflow-x:clip}
 .app,.main,.content,#app{min-width:0;max-width:100%}
 .content{overscroll-behavior-x:none;overflow-x:hidden}
@@ -1252,15 +1163,6 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 .modal-card{width:min(680px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
 .overlay,.filter-pop,.search-drop{max-width:calc(100vw - 20px)}
 .actionbar{max-width:100%;min-width:0;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
-
-
-
-
-
-
-
-/* Final layout correction: upcoming event title and type are separate rows.
-   Remove secondary avatar status markers; status is shown once in the controls/pill. */
 
 .participation-collection .ev-row .ev-title{
   display:flex;
@@ -1301,19 +1203,6 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 .member-participation{display:inline-flex;align-items:center;gap:0}
 .member-participation .participation-dot{display:none}
 
-
-
-
-
-/* ═══════════════════════════════════════════════════════════════════════
-   BandPlan — Premium Performance & Cross-Platform Polish v7
-   Safe visual/performance layer: no application logic or data contracts changed.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-
-
-
-/* ─── CANONICAL UI NORMALIZATION ─────────────────────────────────────── */
 html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text);font-family:var(--font);background-image:none}
 .topbar,.sidebar,.bottom-nav,.actionbar{background:var(--surf-1);border-color:var(--border)}
 .card,.hero,.song-card,.sl-item,.stat-mini,.cal-cell,.ev-row,.lib-item,.modal-card,.search-drop,.filter-pop,.toast,.onb-card,.hv-card{background:var(--surf-2);border:1px solid var(--border);border-radius:var(--r-18);box-shadow:var(--shadow-xs)}
