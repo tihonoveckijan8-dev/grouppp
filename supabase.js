@@ -63,6 +63,10 @@
     if(snapshot)await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(Object.assign({},snapshot,{pending_sync:false})));
   }
 
+  const JUST_REGISTERED_KEY = 'bandplan:just-registered';
+  const hasJustRegisteredFlag = () => { try { return sessionStorage.getItem(JUST_REGISTERED_KEY) === '1'; } catch (_) { return false; } };
+  const setJustRegisteredFlag = () => { try { sessionStorage.setItem(JUST_REGISTERED_KEY, '1'); } catch (_) {} };
+  const clearJustRegisteredFlag = () => { try { sessionStorage.removeItem(JUST_REGISTERED_KEY); } catch (_) {} };
   let mode = 'login';
   function disposeRealtime() {
     realtimeGeneration += 1;
@@ -91,10 +95,13 @@
       }
       if (event === 'SIGNED_IN') {
         if (previousUserId && previousUserId !== session?.user?.id) disposeRealtime();
-        if (session?.user) {
-          gate().hidden = true;
-          window.dispatchEvent(new CustomEvent('bandplan:auth-success', { detail: { user: session.user } }));
-        }
+        if (session?.user) gate().hidden = true;
+        // The explicit submitAuth() handoff starts the app exactly once.
+        // The auth listener only keeps the session reference in sync.
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        mode = 'reset';
+        renderGate('Введите новый пароль.');
       }
     });
     authSubscription = result?.data?.subscription || null;
@@ -144,7 +151,10 @@
     button.disabled=true;button.textContent='Подождите…';
     try {
       let result;
-      if(mode==='signup') result=await client.auth.signUp({email,password,options:{data:{full_name:name}}});
+      if(mode==='signup') {
+        result=await client.auth.signUp({email,password,options:{data:{full_name:name}}});
+        if (!result.error) setJustRegisteredFlag();
+      }
       else if(mode==='reset') result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
       else result=await client.auth.signInWithPassword({email,password});
       if(result.error) throw result.error;
@@ -155,6 +165,7 @@
       } else {
         currentSession = result.data?.session || currentSession;
         if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
+        if (mode === 'login' && !hasJustRegisteredFlag()) clearJustRegisteredFlag();
         gate().hidden = true;
         window.dispatchEvent(new CustomEvent('bandplan:auth-success', { detail: { user: currentSession.user } }));
       }
@@ -627,5 +638,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
 })();
