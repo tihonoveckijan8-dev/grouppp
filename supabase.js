@@ -133,6 +133,7 @@
     } catch (_) {}
   };
   let mode = 'login';
+  let passwordRecoveryMode = false;
   function disposeRealtime() {
     realtimeGeneration += 1;
     clearTimeout(refreshTimer);
@@ -176,6 +177,7 @@
       if (event === 'PASSWORD_RECOVERY') {
         authState = 'ready';
         mode = 'reset';
+        passwordRecoveryMode = true;
         renderGate('Введите новый пароль.');
       }
     });
@@ -196,6 +198,7 @@
   function renderGate(message, error=false) {
     const el = gate();
     const signup = mode === 'signup', reset = mode === 'reset';
+    const changingPassword = reset && passwordRecoveryMode;
     el.hidden = false;
     el.innerHTML = '<section class="bp-auth-card"><div class="bp-auth-mark">BP</div><div class="bp-auth-brand">BandPlan</div>' +
       '<h1>' + (signup ? 'Создать аккаунт' : reset ? 'Восстановить пароль' : 'С возвращением') + '</h1>' +
@@ -203,7 +206,7 @@
       '<form id="bpAuthForm" novalidate>' +
       (signup ? '<label class="bp-auth-label" for="bpAuthName">Имя</label><input id="bpAuthName" class="bp-auth-input" type="text" maxlength="60" autocomplete="name" placeholder="Имя и фамилия" required>' : '') +
       '<label class="bp-auth-label" for="bpAuthEmail">Электронная почта</label><input id="bpAuthEmail" class="bp-auth-input" type="email" autocomplete="email" placeholder="name@example.com" required>' +
-      (reset ? '' : '<label class="bp-auth-label" for="bpAuthPassword">Пароль</label><input id="bpAuthPassword" class="bp-auth-input" type="password" minlength="8" autocomplete="' + (signup?'new-password':'current-password') + '" placeholder="Не менее 8 символов" required>') +
+      (reset && !changingPassword ? '' : '<label class="bp-auth-label" for="bpAuthPassword">' + (changingPassword ? 'Новый пароль' : 'Пароль') + '</label><input id="bpAuthPassword" class="bp-auth-input" type="password" minlength="8" autocomplete="' + ((signup || changingPassword)?'new-password':'current-password') + '" placeholder="Не менее 8 символов" required>') +
       '<p class="bp-auth-message ' + (error?'is-error':'') + '" id="bpAuthMessage" role="status">' + escapeHtml(message || '') + '</p>' +
       '<button class="bp-auth-submit" id="bpAuthSubmit" type="submit">' + (signup?'Зарегистрироваться':reset?'Отправить ссылку':'Войти') + '</button></form>' +
       '<div class="bp-auth-links">' +
@@ -223,7 +226,8 @@
     const email=$('#bpAuthEmail').value.trim(), password=$('#bpAuthPassword')?.value || '';
     const name=$('#bpAuthName')?.value.trim() || '';
     const actionMode = mode;
-    if(!email || (actionMode==='signup' && !name) || (actionMode!=='reset' && password.length<8)){
+    const changingPassword = actionMode==='reset' && passwordRecoveryMode;
+    if(!email || (actionMode==='signup' && !name) || ((actionMode!=='reset' || changingPassword) && password.length<8)){
       setMessage(actionMode==='signup'?'Укажите имя, почту и пароль не короче 8 символов.':'Укажите почту и пароль не короче 8 символов.',true);
       return;
     }
@@ -244,8 +248,14 @@
           setJustRegisteredFlag(email);
         }
       } else if(actionMode==='reset') {
-        result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
-        if(result.error) throw result.error;
+        if (passwordRecoveryMode) {
+          result=await client.auth.updateUser({password});
+          if(result.error) throw result.error;
+          passwordRecoveryMode=false;
+        } else {
+          result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+          if(result.error) throw result.error;
+        }
       } else {
         result=await client.auth.signInWithPassword({email,password});
         if(result.error) throw result.error;
@@ -260,7 +270,12 @@
         return;
       }
       if(actionMode==='reset') {
-        renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
+        if (changingPassword) {
+          mode='login';
+          renderGate('Пароль изменён. Теперь войдите с новым паролем.');
+        } else {
+          renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
+        }
         return;
       }
 
@@ -277,7 +292,7 @@
       console.error('BandPlan authentication request failed:', err);
       setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
       button.disabled=false;
-      button.textContent=actionMode==='signup'?'Зарегистрироваться':actionMode==='reset'?'Отправить ссылку':'Войти';
+      button.textContent=actionMode==='signup'?'Зарегистрироваться':changingPassword?'Сохранить новый пароль':actionMode==='reset'?'Отправить ссылку':'Войти';
     }
   }
   let authInitPromise = null;
