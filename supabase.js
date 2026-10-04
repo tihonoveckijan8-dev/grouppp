@@ -112,6 +112,7 @@
     const el = gate();
     const signup = mode === 'signup', reset = mode === 'reset';
     el.hidden = false;
+    document.body.setAttribute('data-auth-required','true');
     el.innerHTML = '<section class="bp-auth-card"><div class="bp-auth-mark">BP</div><div class="bp-auth-brand">BandPlan</div>' +
       '<h1>' + (signup ? 'Создать аккаунт' : reset ? 'Восстановить пароль' : 'С возвращением') + '</h1>' +
       '<p class="bp-auth-desc">' + (signup ? 'Личный профиль для каждого участника коллектива.' : reset ? 'Отправим ссылку для смены пароля на вашу почту.' : 'Войдите, чтобы открыть свои данные и продолжить работу.') + '</p>' +
@@ -127,6 +128,8 @@
         '<button type="button" data-auth-mode="signup">Создать аккаунт</button><button type="button" data-auth-mode="reset">Забыли пароль?</button>')) +
       '</div></section>';
     $('#bpAuthForm',el).addEventListener('submit',submitAuth);
+    const firstField = $('#bpAuthName',el) || $('#bpAuthEmail',el);
+    if (firstField) requestAnimationFrame(() => { try { firstField.focus({preventScroll:true}); } catch(e) { firstField.focus(); } });
     el.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.authMode;renderGate();}));
   }
   function setMessage(message,error=false) {
@@ -163,7 +166,7 @@
     const {data,error}=await client.auth.getSession();
     if(error) {renderGate('Не удалось проверить сессию: '+error.message,true);return null;}
     currentSession=data.session;
-    if(currentSession){gate().hidden=true;return currentSession.user;}
+    if(currentSession){gate().hidden=true;document.body.removeAttribute('data-auth-required');return currentSession.user;}
     mode='login';renderGate();return null;
   }
   function hydratePersonalEventParticipation(events, profile) {
