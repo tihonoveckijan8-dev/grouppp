@@ -214,9 +214,9 @@
       '<p class="bp-auth-desc">' + (signup ? 'Личный профиль для каждого участника коллектива.' : reset ? 'Отправим ссылку для смены пароля на вашу почту.' : 'Войдите, чтобы открыть свои данные и продолжить работу.') + '</p>' +
       '<form id="bpAuthForm" novalidate>' +
       (signup ? '<label class="bp-auth-label" for="bpAuthName">Имя</label><input id="bpAuthName" class="bp-auth-input" type="text" maxlength="60" autocomplete="name" placeholder="Имя и фамилия" required>' : '') +
-      '<label class="bp-auth-label" for="bpAuthEmail">Электронная почта</label><input id="bpAuthEmail" class="bp-auth-input" type="email" autocomplete="email" placeholder="name@example.com" required>' +
-      (reset && !changingPassword ? '' : '<label class="bp-auth-label" for="bpAuthPassword">' + (changingPassword ? 'Новый пароль' : 'Пароль') + '</label><input id="bpAuthPassword" class="bp-auth-input" type="password" minlength="8" autocomplete="' + ((signup || changingPassword)?'new-password':'current-password') + '" placeholder="Не менее 8 символов" required>') +
-      '<p class="bp-auth-message ' + (error?'is-error':'') + '" id="bpAuthMessage" role="status">' + escapeHtml(message || '') + '</p>' +
+      '<label class="bp-auth-label" for="bpAuthEmail">Электронная почта</label><input id="bpAuthEmail" class="bp-auth-input" type="email" autocomplete="email" inputmode="email" enterkeyhint="next" autocapitalize="off" spellcheck="false" placeholder="name@example.com" required>' +
+      (reset && !changingPassword ? '' : '<label class="bp-auth-label" for="bpAuthPassword">' + (changingPassword ? 'Новый пароль' : 'Пароль') + '</label><div class="bp-auth-password-wrap"><input id="bpAuthPassword" class="bp-auth-input" type="password" minlength="8" autocomplete="' + ((signup || changingPassword)?'new-password':'current-password') + '" inputmode="text" enterkeyhint="done" placeholder="Не менее 8 символов" required><button type="button" class="bp-auth-password-toggle" id="bpAuthPasswordToggle" aria-label="Показать пароль" aria-pressed="false">Показать</button></div>') +
+      '<p class="bp-auth-message ' + (error?'is-error':'') + '" id="bpAuthMessage" role="alert" aria-live="assertive">' + escapeHtml(message || '') + '</p>' +
       '<button class="bp-auth-submit" id="bpAuthSubmit" type="submit">' + (signup?'Зарегистрироваться':reset?'Отправить ссылку':'Войти') + '</button></form>' +
       '<div class="bp-auth-links">' +
       (reset ? '<button type="button" data-auth-mode="login">Вернуться ко входу</button>' :
@@ -224,6 +224,17 @@
         '<button type="button" data-auth-mode="signup">Создать аккаунт</button><button type="button" data-auth-mode="reset">Забыли пароль?</button>')) +
       '</div></section>';
     $('#bpAuthForm',el).addEventListener('submit',submitAuth);
+    const passwordToggle = $('#bpAuthPasswordToggle', el);
+    if (passwordToggle) passwordToggle.addEventListener('click', () => {
+      const input = $('#bpAuthPassword', el);
+      if (!input) return;
+      const visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      passwordToggle.textContent = visible ? 'Показать' : 'Скрыть';
+      passwordToggle.setAttribute('aria-label', visible ? 'Показать пароль' : 'Скрыть пароль');
+      passwordToggle.setAttribute('aria-pressed', visible ? 'false' : 'true');
+      input.focus({preventScroll:true});
+    });
     el.querySelectorAll('[data-auth-mode]').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.authMode;renderGate();}));
   }
   function setMessage(message,error=false) {
