@@ -2750,8 +2750,9 @@ function wireNet() {
   const upd = () => {
     if (!bar) return;
     if (navigator.onLine) { bar.hidden = true; bar.innerHTML = ''; }
-    else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span>'; }
+    else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; }
   };
+  bar.addEventListener('click', e => { if (e.target.closest('.netbar-close')) bar.hidden = true; });
   window.addEventListener('online', upd); window.addEventListener('offline', upd); upd();
 }
 function wireStickyHeader() {
