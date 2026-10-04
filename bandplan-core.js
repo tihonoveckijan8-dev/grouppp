@@ -1868,13 +1868,9 @@ function readEventForm(id) {
     id: id || uid('e'), type: t ? t.getAttribute('data-t') : 'gig', title: title, date: date, time: time, end: end,
     location: fv('f_loc'), notes: fv('f_notes'), status: $('#f_status', w).value, repeat: $('#f_repeat', w).value, repeatUntil: until,
     setlistId: $('#f_sl', w).value, personalStatus: my ? my.getAttribute('data-v') : '',
-    participation: Object.assign({}, old && old.participation || {}, (function () {
-      const me = currentMemberForParticipation(), v = my ? my.getAttribute('data-v') : '';
-      if (!me || !v) return {};
-      const key = String(me.accountId || me.id || ''); if (!key) return {};
-      const map = {}; map[key] = v; return map;
-    })()),
-    memberIds: $$('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []  };
+    participation: cloneValue(old && old.participation || {}),
+    participationUpdatedAt: cloneValue(old && old.participationUpdatedAt || {}),
+    memberIds: $('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []  };
 }
 let dynDraft = null;
 function songModal(id) {
@@ -2556,7 +2552,8 @@ document.addEventListener('click', function (e) {
       const personalStatus = data.personalStatus || '';
       delete data.personalStatus;
       if (id) { const i = state.events.findIndex(x => x.id === id); if (i >= 0) state.events[i] = data; } else state.events.push(data);
-      setPersonalEventStatus(data.id, personalStatus);
+      try { setMyParticipation(data, personalStatus, new Date().toISOString()); }
+      catch (participationError) { console.warn('BandPlan event participation write deferred:', participationError); }
       ui.selDate = data.date; ui.month = new Date(data.date + 'T00:00:00');
       modalDirty = false;
       hardClose(modalRoot);
