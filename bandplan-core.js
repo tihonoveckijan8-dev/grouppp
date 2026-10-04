@@ -1839,8 +1839,9 @@ function eventModal(evId, date) {
       return '<div class="event-participant' + (included ? ' is-in' : '') + '" data-member="' + esc(m.id) + '">' +
         '<div class="event-part-main"><span class="event-part-avatar">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span></span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div></div>';
     }).join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
-    '<div class="field"><span class="field-label">Ваше участие</span><div class="seg" id="f_my">' +
-    [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + ((eventStatusFor(d) || state.profile.defaultParticipation || 'yes') === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
+    '<div class="field"><span class="field-label">Ваше участие</span><div id="f_my">' +
+      renderParticipationSwitch(d, {size:'lg', variant:'editor', draft:true, status:eventStatusFor(d) || (ev ? '' : state.profile.defaultParticipation || '')}) +
+    '</div></div>' +
     '<div class="field"><span class="field-label">Состав события</span><div class="row" id="f_members" style="gap:6px">' +
     (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
@@ -1849,14 +1850,6 @@ function eventModal(evId, date) {
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="evSaveBtn" data-act="event-save" data-id="' + (ev ? ev.id : '') + '">' + ic('check', 16) + (ev ? 'Сохранить изменения' : 'Создать событие') + '</button>',
     onMount: function (w) {
       $$('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $$('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
-      $$('#f_my button', w).forEach(b => b.addEventListener('click', () => {
-        $$('#f_my button', w).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b); });
-        const me = currentMemberForParticipation(), box = me ? $('#f_participants [data-member="' + me.id + '"]', w) : null;
-        if (box) {
-          const v = b.getAttribute('data-v'), dot = $('.participation-dot', box);
-          if (dot) { dot.className = 'participation-dot status-' + v; dot.title = participantStatusLabel(v); dot.setAttribute('aria-label', participantStatusLabel(v)); }
-        }
-      }));
       $$('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
     }
   });
