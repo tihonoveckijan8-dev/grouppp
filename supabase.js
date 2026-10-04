@@ -5,7 +5,12 @@
   const KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
   const TABLE = 'bandplan_user_state';
   const client = window.supabase.createClient(URL, KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: 'bandplan-auth-v2'
+    }
   });
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, activeMemberIds = [], lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
   let authSubscription = null;
@@ -173,12 +178,23 @@
       else if(mode==='reset') result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
       else result=await client.auth.signInWithPassword({email,password});
       if(result.error) throw result.error;
+      if(mode === 'login') {
+        const session = result.data?.session;
+        if(!session?.access_token || !session?.refresh_token || !session?.user) {
+          throw new Error('Supabase не вернул полноценную сессию после входа.');
+        }
+        const restored = await client.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token
+        });
+        if(restored.error) throw restored.error;
+        currentSession = restored.data?.session || session;
+      }
       if(mode==='signup' && !result.data.session){
         renderGate('Аккаунт создан. Проверьте почту и подтвердите адрес, затем войдите.');
       } else if(mode==='reset') {
         renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
       } else {
-        currentSession = result.data?.session || currentSession;
         if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
         if (mode === 'login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
         gate().hidden = true;
