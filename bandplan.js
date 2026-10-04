@@ -352,7 +352,7 @@ function defaults() {
     onboardingDone: false
   };
 }
-let state = defaults();
+let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evRepeat: false,
@@ -2225,7 +2225,15 @@ document.addEventListener('click', function (e) {
   const btnLoading = b => { if (b) { b.classList.add('loading'); setTimeout(() => b.classList.remove('loading'), 500); } };
   switch (a) {
     case 'modal-close': stop(); closeModal(); break;
-    case 'account-logout': { stop(); const b=el; b.disabled=true; window.BandPlanCloud.signOut().then(()=>location.reload()).catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');}); break; }
+    case 'account-logout': {
+      stop();
+      const b=el;
+      b.disabled=true;
+      window.BandPlanCloud.signOut()
+        .then(()=>{ if(typeof window.__bandplanHandleSignedOut==='function') window.__bandplanHandleSignedOut(); })
+        .catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');});
+      break;
+    }
     case 'group-leave': {
       stop();
       confirmBox('Выйти из группы?', 'Вы потеряете доступ к её песням, событиям и сет-листам.', async function () {
@@ -3129,7 +3137,43 @@ function showUpdateBoot() {
   document.body.appendChild(el);
 }
 
+function resetForLogout() {
+  try { stop(); } catch (_) {}
+  try { closeModal(); } catch (_) {}
+  try { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); } catch (_) {}
+  state = defaults();
+  ui.skeleton = false;
+  uiInitialized = true;
+  window.__bandplanAppReady = false;
+  window.__bandplanActiveUserId = null;
+  window.__bandplanDurable = null;
+  const view = $('#view');
+  if (view) view.innerHTML = '';
+  const app = document.getElementById('app');
+  if (app) {
+    app.setAttribute('inert', '');
+    app.setAttribute('aria-busy', 'true');
+  }
+  const sceneEl = $('#scene');
+  if (sceneEl) {
+    sceneEl.classList.remove('on');
+    sceneEl.setAttribute('aria-hidden', 'true');
+  }
+  const onb = $('#onb');
+  if (onb) {
+    onb.classList.remove('on');
+    onb.setAttribute('aria-hidden', 'true');
+  }
+  if (window.location.hash !== '#/calendar') {
+    history.replaceState(null, '', '#/calendar');
+  }
+  render();
+}
+
+window.__bandplanHandleSignedOut = resetForLogout;
+
 function init() {
+  if (uiInitialized) return;
   window.addEventListener('bandplan:sync-error', e => toast('Не удалось синхронизировать данные: ' + (e.detail || 'проверьте подключение'), 'err', 6500));
   const had = load();
   applyTheme(); applyAccentVars();
@@ -3205,6 +3249,7 @@ function init() {
   ui.skeleton = false;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
+  uiInitialized = true;
 }
 /*
   Auth handoff: Supabase is the only auth source of truth. The auth module
@@ -3325,7 +3370,19 @@ async function startBandPlan(forceOffline) {
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
   Boot.stage('Готовим интерфейс', 85);
-  try { init(); } catch (e) { Boot.fail({title:'Не удалось подготовить интерфейс',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
+  try {
+    init();
+    // On a second account in the same tab, the UI wiring already exists.
+    // Reload only the authenticated data layer; never attach duplicate handlers.
+    if (uiInitialized && window.__bandplanActiveUserId !== user.id) {
+      ui.skeleton = false;
+      render();
+      bootCloudSync(true, window.__bandplanDurable || null);
+    }
+  } catch (e) {
+    Boot.fail({title:'Не удалось подготовить интерфейс',text:'Сохранённые данные не удалены. Повторите запуск.'});
+    return;
+  }
   Boot.done();
   window.__bandplanActiveUserId = user.id;
   window.__bandplanAppReady = true;
