@@ -628,8 +628,16 @@ function refreshParticipationUI(evId) {
   });
 
   document.querySelectorAll('[data-event-my-state="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
-    node.className = 'event-my-state status-' + (my || 'unset');
-    node.textContent = participantStatusLabel(my);
+    node.className = 'event-my-state my-position status-' + (my || 'unset');
+    const statusNode = node.querySelector('.my-position-status');
+    if (statusNode) statusNode.textContent = participantStatusLabel(my);
+    else node.textContent = participantStatusLabel(my);
+    const roleNode = node.querySelector('.my-position-role');
+    if (roleNode) roleNode.textContent = myRoleLabel() ? ' · ' + myRoleLabel() : '';
+  });
+  const sum = participationSummary(ev);
+  document.querySelectorAll('[data-event-participation-summary="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
+    node.innerHTML = '<span class="status-yes">' + sum.yes + ' · Участвуют</span><span class="status-maybe">' + sum.maybe + ' · Под вопросом</span><span class="status-no">' + sum.no + ' · Не участвуют</span><span class="status-unset">' + sum.unset + ' · Не ответили</span>';
   });
   const pendingNode = document.querySelectorAll('[data-participation-pending="' + CSS.escape(String(ev.id)) + '"]');
   pendingNode.forEach(node => node.remove());
@@ -1817,7 +1825,7 @@ function eventInfoModal(evId, occurrenceDate) {
       (function(){ const s=participationSummary(ev); return '<div class="event-participation-summary" data-event-participation-summary="' + esc(String(ev.id)) + '">' +
         '<span class="status-yes">' + s.yes + ' · Участвуют</span><span class="status-maybe">' + s.maybe + ' · Под вопросом</span><span class="status-no">' + s.no + ' · Не участвуют</span><span class="status-unset">' + s.unset + ' · Не ответили</span></div>'; })() +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
-      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div>' +
+      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span>' + (myRoleLabel() ? '<span class="my-position-role event-info-role">' + esc(myRoleLabel()) + '</span>' : '') + '</div>' +
         '<div data-event-switch="' + esc(String(ev.id)) + '">' + renderParticipationSwitch(ev, {size:'lg', variant:'card'}) + '</div></div>' +
     '</div>';
   openModal({
