@@ -227,8 +227,24 @@
     const name=$('#bpAuthName')?.value.trim() || '';
     const actionMode = mode;
     const changingPassword = actionMode==='reset' && passwordRecoveryMode;
-    if(!email || (actionMode==='signup' && !name) || ((actionMode!=='reset' || changingPassword) && password.length<8)){
-      setMessage(actionMode==='signup'?'Укажите имя, почту и пароль не короче 8 символов.':'Укажите почту и пароль не короче 8 символов.',true);
+    /*
+      Do not impose the registration password policy on existing logins.
+      Supabase must decide whether the stored password is valid. Otherwise an
+      older, perfectly valid account can be blocked in the UI before the
+      request even reaches Auth. The 8-character rule remains for signup and
+      password changes only.
+    */
+    const passwordTooShort =
+      (actionMode==='signup' || changingPassword) && password.length < 8;
+    if(!email || (actionMode==='signup' && !name) || passwordTooShort || ((actionMode==='login' || actionMode==='reset') && !password && changingPassword)){
+      setMessage(
+        actionMode==='signup'
+          ? 'Укажите имя, почту и пароль не короче 8 символов.'
+          : changingPassword
+            ? 'Новый пароль должен быть не короче 8 символов.'
+            : 'Укажите почту и пароль.',
+        true
+      );
       return;
     }
     button.disabled=true;
