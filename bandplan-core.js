@@ -375,6 +375,7 @@ const participationPending = new Set();
 const participationPrevious = new Map();
 let offlineSongSyncTimer = 0;
 let offlineSongSyncBusy = false;
+const offlineSongIndex = new Map();
 let offlineSongStorageWarned = false;
 function offlineSongSettings() {
   const s=state.settings||{};
@@ -421,17 +422,27 @@ function offlineSongsForEvent(ev) {
     return copy;
   }).filter(Boolean);
 }
+function rebuildOfflineSongIndex(rows) {
+  offlineSongIndex.clear();
+  (rows || []).forEach(row => (row.songs || []).forEach(song => {
+    if (song?.id && !offlineSongIndex.has(String(song.id))) offlineSongIndex.set(String(song.id), cloneValue(song));
+  }));
+}
 async function hydrateOfflineSongsIntoState() {
   if(!window.BandPlanCloud?.listOfflineEventSongs)return;
   try {
     const rows=await window.BandPlanCloud.listOfflineEventSongs();
-    if(!Array.isArray(rows)||!rows.length)return;
-    const map=new Map(state.songs.map(s=>[String(s.id),s]));
-    if(navigator.onLine===false) {
-      rows.forEach(row => (row.songs||[]).forEach(song => { if(song?.id) map.set(String(song.id),cloneValue(song)); }));
-      state.songs=Array.from(map.values());
-    }
+    rebuildOfflineSongIndex(Array.isArray(rows) ? rows : []);
   } catch(error) { console.warn('BandPlan offline song hydration failed:',error); }
+}
+function shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep) {
+  if (!ev) return true;
+  const status = eventStatusFor(ev);
+  const participating = status === 'yes' || (cfg.maybe && status === 'maybe');
+  const stillActive = (ev.status || 'upcoming') === 'upcoming' && !!ev.setlistId &&
+    participating && eventEndMs(ev) + 6 * 60 * 60 * 1000 >= now;
+  if (!stillActive) return true;
+  return !keep.has(String(row.eventId)) && eventStartMs(ev) >= now;
 }
 async function cleanupEventOfflineSongs() {
   if(!window.BandPlanCloud?.listOfflineEventSongs)return;
@@ -439,12 +450,12 @@ async function cleanupEventOfflineSongs() {
     const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
     for(const row of rows||[]) {
       const ev=state.events.find(e=>String(e.id)===String(row.eventId));
-      const status=ev ? eventStatusFor(ev) : '';
-      const participating=status==='yes' || (cfg.maybe && status==='maybe');
-      const stillActive=!!ev && (ev.status||'upcoming')==='upcoming' && !!ev.setlistId && participating && eventEndMs(ev)+6*60*60*1000>=now;
-      const stale=!ev || !stillActive || (!keep.has(String(row.eventId)) && eventStartMs(ev)>=now);
-      if(stale) await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
+      if(shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep)) {
+        await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
+      }
     }
+    const remaining=await window.BandPlanCloud.listOfflineEventSongs();
+    rebuildOfflineSongIndex(Array.isArray(remaining) ? remaining : []);
   } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
 }
 async function syncEventOfflineSongs() {
@@ -461,6 +472,7 @@ async function syncEventOfflineSongs() {
         eventId:String(ev.id),setlistId:String(ev.setlistId),eventDate:String(ev.date||''),
         eventEnd:new Date(eventEndMs(ev)).toISOString(),songs,savedAt:new Date().toISOString(),version:1
       });
+      if(ok !== false) songs.forEach(song => { if(song?.id) offlineSongIndex.set(String(song.id), cloneValue(song)); });
       if(ok===false && !offlineSongStorageWarned) {
         offlineSongStorageWarned=true;
         toast('Не удалось сохранить песни на устройстве. Приложение продолжит работать без офлайн-копии.','warn',5000);
@@ -836,7 +848,11 @@ function refreshParticipationUI(evId) {
   }
 }
 
-const songById = id => state.songs.find(s => s.id === id);
+const songById = id => {
+  const key = String(id || '');
+  if (navigator.onLine === false && offlineSongIndex.has(key)) return offlineSongIndex.get(key);
+  return state.songs.find(s => String(s.id) === key);
+};
 const evById = id => state.events.find(e => e.id === id);
 const slById = id => state.setlists.find(s => s.id === id);
 const memById = id => state.members.find(m => m.id === id);
@@ -3697,6 +3713,7 @@ function resetForLogout() {
   // Supabase's SIGNED_OUT event is the only authority for leaving the
   // authenticated shell. The login gate already exists from initial boot;
   // reveal it here instead of reloading or creating a second auth flow.
+  offlineSongIndex.clear();
   const authGate = document.getElementById('bpAuthGate');
   if (authGate) authGate.hidden = false;
   if (window.location.hash !== '#/calendar') {
@@ -3704,6 +3721,10 @@ function resetForLogout() {
   }
   render();
 }
+
+window.__bandplanTestHooks = {
+  shouldCleanupOfflineEventSongRow
+};
 
 window.__bandplanHandleSignedOut = resetForLogout;
 
