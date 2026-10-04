@@ -365,7 +365,7 @@ function defaults() {
 let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
-  evQuery: '', evTypes: [], evMine: false, evRepeat: false,
+  evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
   songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
@@ -1184,7 +1184,7 @@ function vCalendar() {
   if (ac || ui.evQuery) h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
     (ui.evQuery ? '<button class="chip" type="button" data-act="ev-clear">' + ic('search', 13) + '«' + esc(ui.evQuery) + '»<span class="rm">×</span></button>' : '') +
     ui.evTypes.map(t => '<button class="chip" type="button" data-act="ev-type" data-v="' + t + '">' + esc(evType(t).label) + '<span class="rm">×</span></button>').join('') +
-    (ui.evMine ? '<button class="chip" type="button" data-act="ev-mine">Только я участвую<span class="rm">×</span></button>' : '') +
+    (ui.evMine ? '<button class="chip" type="button" data-act="ev-mine">Только я ' + (ui.evMineMode === 'maybe' ? 'участвую или под вопросом' : 'участвую') + '<span class="rm">×</span></button>' : '') +
     (ui.evRepeat ? '<button class="chip" type="button" data-act="ev-repeat">Повторяющиеся<span class="rm">×</span></button>' : '') +
     '<button class="btn btn-tertiary btn-sm" type="button" data-act="ev-reset">Сбросить</button></div>';
 
@@ -1213,7 +1213,7 @@ function filteredUpcoming() {
   return upcoming().filter(function (o) {
     const e = o.ev;
     if (ui.evTypes.length && ui.evTypes.indexOf(e.type) < 0) return false;
-    if (ui.evMine && eventStatusFor(e) !== 'yes') return false;
+    if (ui.evMine && (ui.evMineMode === 'maybe' ? !['yes','maybe'].includes(eventStatusFor(e)) : eventStatusFor(e) !== 'yes')) return false;
     if (ui.evRepeat && (!e.repeat || e.repeat === 'none')) return false;
     if (q && ((e.title || '') + ' ' + (e.location || '') + ' ' + (e.notes || '')).toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1225,7 +1225,8 @@ function openEventFilters() {
     body: '<div class="field"><span class="field-label">Тип события</span><div class="row" style="gap:6px">' +
       Object.keys(EV_TYPES).map(t => '<button class="chip' + (ui.evTypes.indexOf(t) >= 0 ? ' on' : '') + '" type="button" data-act="ev-type" data-v="' + t + '" data-no-dirty="1" aria-pressed="' + (ui.evTypes.indexOf(t) >= 0) + '">' + ic(EV_TYPES[t].ic, 14) + esc(EV_TYPES[t].label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><span class="field-label">Показывать</span><div class="row" style="gap:6px">' +
-      '<button class="chip' + (ui.evMine ? ' on' : '') + '" type="button" data-act="ev-mine" data-no-dirty="1" aria-pressed="' + ui.evMine + '">' + ic('target', 14) + 'Только я участвую</button>' +
+      '<button class="chip' + (ui.evMine ? ' on' : '') + '" type="button" data-act="ev-mine" data-no-dirty="1" aria-pressed="' + ui.evMine + '">' + ic('target', 14) + 'Только я</button>' +
+      (ui.evMine ? '<button class="chip" type="button" data-act="ev-mine-mode" data-no-dirty="1" aria-label="Режим фильтра участия">' + (ui.evMineMode === 'maybe' ? 'Участвую или под вопросом' : 'Только участвую') + '</button>' : '') +
       '<button class="chip' + (ui.evRepeat ? ' on' : '') + '" type="button" data-act="ev-repeat" data-no-dirty="1" aria-pressed="' + ui.evRepeat + '">' + ic('repeat', 14) + 'Повторяющиеся</button></div></div>' +
       '<div class="field"><span class="field-label">Первый день недели</span><div class="seg">' +
       '<button type="button" data-act="weekstart-set" data-v="1" class="' + (state.settings.weekStart !== 0 ? 'on' : '') + '" data-no-dirty="1" data-accent="1">Понедельник</button>' +
@@ -2699,9 +2700,10 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'ev-mine': stop(); ui.evMine = !ui.evMine; render(); if ($('#modalOverlay').classList.contains('on')) { const b = $('#modalOverlay [data-act="ev-mine"]'); if (b) { b.classList.toggle('on', ui.evMine); b.setAttribute('aria-pressed', ui.evMine); } const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
+    case 'ev-mine-mode': stop(); ui.evMineMode = ui.evMineMode === 'yes' ? 'maybe' : 'yes'; render(); if ($('#modalOverlay').classList.contains('on')) { const b = $('#modalOverlay [data-act="ev-mine-mode"]'); if (b) b.textContent = ui.evMineMode === 'maybe' ? 'Участвую или под вопросом' : 'Только участвую'; const d = $('#evFilterDone'); if (d) d.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'ev-repeat': stop(); ui.evRepeat = !ui.evRepeat; render(); if ($('#modalOverlay').classList.contains('on')) { const b = $('#modalOverlay [data-act="ev-repeat"]'); if (b) { b.classList.toggle('on', ui.evRepeat); b.setAttribute('aria-pressed', ui.evRepeat); } const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'ev-clear': stop(); ui.evQuery = ''; render(); break;
-    case 'ev-reset': stop(); ui.evTypes = []; ui.evMine = false; ui.evRepeat = false; ui.evQuery = ''; render(); if ($('#modalOverlay').classList.contains('on')) { const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
+    case 'ev-reset': stop(); ui.evTypes = []; ui.evMine = false; ui.evMineMode = 'yes'; ui.evRepeat = false; ui.evQuery = ''; render(); if ($('#modalOverlay').classList.contains('on')) { const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'new-song': stop(); songModal(null); break;
     case 'edit-song': stop(); songModal(id); break;
     case 'song-save': {
