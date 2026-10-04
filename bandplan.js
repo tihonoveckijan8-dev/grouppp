@@ -3347,16 +3347,60 @@ async function startBandPlan(forceOffline) {
     to load. Start the local application first; cloud sync is attached when
     the Supabase client is available.
   */
+  /*
+    Authentication is mandatory even for offline/local operation.
+    The local cache is an account-scoped workspace, not an authentication
+    mechanism. Never open the application from the generic legacy key merely
+    because the browser/network is offline.
+  */
   if (forceOffline) {
-    KEY = 'bandplan.premium.v6';
+    if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
+      Boot.fail({
+        title:'Не удалось подключить вход в аккаунт',
+        text:'Для открытия BandPlan сначала нужно проверить аккаунт. Проверьте подключение и повторите запуск.',
+        actions:'<button type="button" id="bootRetry">Повторить</button>'
+      });
+      return;
+    }
+    let offlineUser = null;
+    try {
+      Boot.stage('Проверяем вход в аккаунт', 35);
+      offlineUser = await window.BandPlanCloud.initialize();
+    } catch (error) {
+      console.error('BandPlan offline auth initialization failed:', error);
+      Boot.fail({
+        title:'Не удалось проверить вход',
+        text:String(error?.message || 'Не удалось проверить сессию аккаунта.'),
+        actions:'<button type="button" id="bootRetry">Повторить</button>'
+      });
+      return;
+    }
+    if (!offlineUser?.id) {
+      Boot.done();
+      return;
+    }
+
+    /*
+      The account is known, so an explicitly requested offline launch may use
+      only that user's account-scoped local cache.
+    */
+    KEY = 'bandplan.premium.v6:' + offlineUser.id;
     const hadLocal = load();
-    try { init(); } catch (e) { Boot.fail({title:'Не удалось открыть локальные данные',text:'Приложение не изменило сохранённые данные. Повторите запуск.'}); return; }
+    try { init(); } catch (e) {
+      Boot.fail({title:'Не удалось открыть локальные данные',text:'Сохранённые данные аккаунта не изменены. Повторите запуск.'});
+      return;
+    }
+    window.__bandplanActiveUserId = offlineUser.id;
+    window.__bandplanAppReady = true;
     setSyncStatus('offline', 'Офлайн', 0);
     Boot.done();
     if (await shouldOpenAccountOnboarding()) openOnboarding();
     if (!window.__bandplanOfflineResumeBound) {
       window.__bandplanOfflineResumeBound = true;
-      window.addEventListener('online', () => { window.__bandplanOfflineResumeBound = false; startBandPlan(false); }, {once:true});
+      window.addEventListener('online', () => {
+        window.__bandplanOfflineResumeBound = false;
+        startBandPlan(false);
+      }, {once:true});
     }
     return;
   }
