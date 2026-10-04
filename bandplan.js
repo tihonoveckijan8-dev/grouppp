@@ -3306,6 +3306,12 @@ async function startBandPlan(forceOffline) {
   }
   if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
     if (attempt !== window.__bandplanBootAttempt) return;
+    // Offline PWA startup must not wait for an external Supabase CDN.
+    // Authentication remains mandatory when online; offline mode only opens
+    // the already cached local workspace.
+    if (navigator.onLine === false) {
+      return startBandPlan(true);
+    }
     Boot.stage('Подключаем вход в аккаунт', 25);
     // Do not silently bypass authentication when the Supabase bundle is delayed.
     // GitHub Pages/CDN can resolve scripts a little later than the app shell.
