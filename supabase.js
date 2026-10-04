@@ -490,14 +490,25 @@
     const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
     return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster}),updatedAt:lastUpdated};
   }
+  function assertSessionOwner(userId){
+    if(!currentSession?.user?.id || currentSession.user.id!==userId){
+      const error=new Error('Сессия аккаунта изменилась. Синхронизация старого состояния отменена.');
+      error.code='BANDPLAN_SESSION_CHANGED';
+      throw error;
+    }
+  }
   async function saveNow(state) {
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const snapshot=JSON.parse(JSON.stringify(state||{})),uid=currentSession.user.id,updatedAt=new Date().toISOString();
+    assertSessionOwner(uid);
     snapshot.events=(snapshot.events||[]).map(ev=>{const copy=Object.assign({},ev);delete copy.myStatus;return copy;});
     clearTimeout(timer);pending=snapshot;
     await writeDurableState(uid,snapshot,updatedAt,true);
+    assertSessionOwner(uid);
     if(!activeGroupId){
+      assertSessionOwner(uid);
       const membership=await client.rpc('bandplan_get_my_group');
+      assertSessionOwner(uid);
       if(membership.error)throw membership.error;
       const row=Array.isArray(membership.data)?membership.data[0]:membership.data;
       activeGroupId=row?.group_id||null;
@@ -505,15 +516,22 @@
     if(activeGroupId) snapshot.profile=Object.assign({},snapshot.profile||{}, {groupId:activeGroupId, groupDetached:false});
     if(!activeGroupId&&snapshot.onboardingDone&&!snapshot.profile?.groupDetached){
       if(!groupSetupPromise)groupSetupPromise=(async()=>{
+        assertSessionOwner(uid);
         const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});
         if(made.error)throw made.error;
+        assertSessionOwner(uid);
         activeGroupId=made.data?.[0]?.group_id||made.data?.group_id||null;
         return activeGroupId;
       })().finally(()=>{groupSetupPromise=null;});
       await groupSetupPromise;
     }
     if(activeGroupId){
-      if(String(snapshot.profile?.bandName||'').trim().length>=3){const renamed=await client.rpc('bandplan_rename_group',{p_name:snapshot.profile.bandName});if(renamed.error){pending=snapshot;throw renamed.error;}}
+      if(String(snapshot.profile?.bandName||'').trim().length>=3){
+        assertSessionOwner(uid);
+        const renamed=await client.rpc('bandplan_rename_group',{p_name:snapshot.profile.bandName});
+        if(renamed.error){pending=snapshot;throw renamed.error;}
+        assertSessionOwner(uid);
+      }
       const songs=snapshot.songs||[],events=snapshot.events||[],setlists=snapshot.setlists||[];
       /*
         Shared records are synchronized as deltas, not as the entire local
@@ -535,6 +553,7 @@
       const songDelta=delta(sharedBaseline.songs,songs);
       const eventDelta=delta(sharedBaseline.events,events);
       const setlistDelta=delta(sharedBaseline.setlists,setlists);
+      assertSessionOwner(uid);
       const sync=await client.rpc('bandplan_sync_group',{
         p_songs:songDelta.rows,
         p_events:eventDelta.rows,
@@ -555,15 +574,18 @@
         p_delete_setlists:setlistDelta.deleted
       });
       if(sync.error){pending=snapshot;throw sync.error;}
+      assertSessionOwner(uid);
       sharedBaseline={
         songs:Object.fromEntries(songs.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id)),
         events:Object.fromEntries(events.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id)),
         setlists:Object.fromEntries(setlists.map(x=>[String(x.id),JSON.stringify(x)]).filter(([id])=>id))
       };
     }
+    assertSessionOwner(uid);
     const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
     if(error){pending=snapshot;await writeDurableState(uid,snapshot,updatedAt,true);throw error;}
+    assertSessionOwner(uid);
     lastUpdated=data?.updated_at||updatedAt;
     const latestPending=pending&&JSON.stringify(pending)!==JSON.stringify(snapshot)?JSON.parse(JSON.stringify(pending)):null;
     if(latestPending)await writeDurableState(uid,latestPending,new Date().toISOString(),true);
