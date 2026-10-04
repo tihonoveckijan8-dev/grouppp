@@ -3206,19 +3206,6 @@ function init() {
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
 }
-window.addEventListener('bandplan:auth-success', () => {
-  if (window.__bandplanAppReady || window.__bandplanAuthBooting) return;
-  window.__bandplanAuthBooting = true;
-  startBandPlan(false).catch(error => {
-    console.error('BandPlan auth handoff failed:', error);
-    Boot.fail({
-      title: 'Не удалось открыть аккаунт',
-      text: 'Вход выполнен, но приложение не удалось запустить. Попробуйте обновить страницу.',
-      actions: '<button type="button" id="bootRetry">Повторить</button>'
-    });
-  }).finally(() => { window.__bandplanAuthBooting = false; });
-});
-
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
   window.__bandplanBootAttempt = attempt;
@@ -3236,7 +3223,7 @@ async function startBandPlan(forceOffline) {
     try { init(); } catch (e) { Boot.fail({title:'Не удалось открыть локальные данные',text:'Приложение не изменило сохранённые данные. Повторите запуск.'}); return; }
     setSyncStatus('offline', 'Офлайн', 0);
     Boot.done();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    if (await shouldOpenAccountOnboarding()) openOnboarding();
     if (!window.__bandplanOfflineResumeBound) {
       window.__bandplanOfflineResumeBound = true;
       window.addEventListener('online', () => { window.__bandplanOfflineResumeBound = false; startBandPlan(false); }, {once:true});
@@ -3274,7 +3261,7 @@ async function startBandPlan(forceOffline) {
     try { init(); } catch (e) { Boot.fail({title:'Не удалось запустить BandPlan',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
     toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
     Boot.done();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    if (await shouldOpenAccountOnboarding()) openOnboarding();
     return;
   }
   if (!user) { Boot.done(); return; }
