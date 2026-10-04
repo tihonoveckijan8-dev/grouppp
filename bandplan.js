@@ -2260,7 +2260,8 @@ document.addEventListener('click', function (e) {
           state.profile.eventParticipation = {};
           state.profile.groupDetached = true;
           state.onboardingDone = true;
-          try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+          if (!syncIsCurrent()) return;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
           hardClose(modalRoot);
           render();
           toast('Вы вышли из группы', 'ok');
@@ -3026,6 +3027,13 @@ async function shouldOpenAccountOnboarding() {
 }
 
 async function bootCloudSync(hadLocal, durableInfo) {
+  const syncGeneration = (window.__bandplanCloudSyncGeneration || 0) + 1;
+  window.__bandplanCloudSyncGeneration = syncGeneration;
+  const expectedUserId = window.BandPlanCloud?.user?.()?.id || null;
+  const syncIsCurrent = () =>
+    syncGeneration === window.__bandplanCloudSyncGeneration &&
+    !!window.BandPlanCloud?.user?.()?.id &&
+    window.BandPlanCloud.user().id === expectedUserId;
   setSyncStatus(navigator.onLine === false ? 'offline' : 'syncing', navigator.onLine === false ? 'Офлайн' : 'Синхронизация', 0);
   if (!window.BandPlanCloud) {
     if (await shouldOpenAccountOnboarding()) openOnboarding();
@@ -3037,12 +3045,15 @@ async function bootCloudSync(hadLocal, durableInfo) {
       If IndexedDB contains a pending snapshot, it is newer than the last
       confirmed cloud state. Never overwrite it with remote data on boot.
     */
+    if (!syncIsCurrent()) return;
     if (durableInfo?.pendingSync && durableInfo.state) {
       normalizeCloudState(durableInfo.state);
       let pendingConfirmed = false;
       if (navigator.onLine !== false) {
         try {
           await window.BandPlanCloud.saveNow(state);
+          if (!syncIsCurrent()) return;
+          if (!syncIsCurrent()) return;
           pendingConfirmed = true;
         } catch (syncError) {
           console.warn('BandPlan pending offline sync deferred:', syncError);
@@ -3050,13 +3061,16 @@ async function bootCloudSync(hadLocal, durableInfo) {
       }
       if (pendingConfirmed) {
         try {
+          if (!syncIsCurrent()) return;
           const confirmed = await window.BandPlanCloud.load();
+          if (!syncIsCurrent()) return;
           if (confirmed?.state && hasMeaningfulState(confirmed.state)) normalizeCloudState(confirmed.state);
         } catch (loadError) {
           console.warn('BandPlan remote confirmation deferred:', loadError);
         }
       }
     } else {
+      if (!syncIsCurrent()) return;
       const remote = await window.BandPlanCloud.load();
       const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
       if (remoteState && hasMeaningfulState(remoteState)) {
@@ -3068,6 +3082,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
         } else {
           normalizeCloudState(defaults());
           await window.BandPlanCloud.saveNow(state);
+          if (!syncIsCurrent()) return;
         }
       } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
         normalizeCloudState(local);
@@ -3084,7 +3099,9 @@ async function bootCloudSync(hadLocal, durableInfo) {
     render();
     if (await shouldOpenAccountOnboarding()) openOnboarding();
     setSyncStatus('ok', 'Синхронизировано', 2200);
+    if (!syncIsCurrent()) return;
     window.BandPlanCloud.subscribe(function (incoming) {
+      if (!syncIsCurrent()) return;
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
 
       const beforeEvents = JSON.parse(JSON.stringify(state.events || []));
@@ -3157,6 +3174,7 @@ function showUpdateBoot() {
 }
 
 function resetForLogout() {
+  window.__bandplanCloudSyncGeneration = (window.__bandplanCloudSyncGeneration || 0) + 1;
   try { stop(); } catch (_) {}
   try { closeModal(); } catch (_) {}
   try { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); } catch (_) {}
@@ -3364,7 +3382,12 @@ async function startBandPlan(forceOffline) {
     source of truth when it already exists.
   */
   let legacyState = null;
-  try {
+  const switchingAccount = !!(uiInitialized && window.__bandplanActiveUserId && window.__bandplanActiveUserId !== user.id);
+  /*
+    A localStorage key from a previous authenticated user must never seed the
+    next account. Legacy migration is allowed only during the very first boot.
+  */
+  if (!uiInitialized) try {
     for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) {
       const legacyRaw = localStorage.getItem(legacyKey);
       if (!legacyRaw) continue;
@@ -3375,6 +3398,16 @@ async function startBandPlan(forceOffline) {
       }
     }
   } catch (e) {}
+  if (switchingAccount) {
+    /*
+      The DOM wiring is reusable, but authenticated application state is not.
+      Reset it before init/bootCloudSync so the previous user's songs/events/
+      members can never be treated as this user's local state.
+    */
+    state = defaults();
+    ui.skeleton = true;
+    window.__bandplanDurable = null;
+  }
 
   KEY = 'bandplan.premium.v6:' + user.id;
   try {
@@ -3397,6 +3430,12 @@ async function startBandPlan(forceOffline) {
   try {
     const alreadyInitialized = uiInitialized;
     init();
+    /*
+      Mark the authenticated owner before starting cloud hydration. This also
+      makes stale async work from the previous account fail its generation/user
+      guard.
+    */
+    window.__bandplanActiveUserId = user.id;
     // On a second account in the same tab, the UI wiring already exists.
     // Reload only the authenticated data layer; never attach duplicate handlers.
     if (alreadyInitialized && window.__bandplanActiveUserId !== user.id) {
