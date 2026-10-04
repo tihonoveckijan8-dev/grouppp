@@ -40,21 +40,6 @@ jobs:
             git push
           fi
 
-      - name: Vendor pinned Supabase SDK
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p vendor
-          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"             --output vendor/supabase.min.js
-          test -s vendor/supabase.min.js
-          git add vendor/supabase.min.js
-          if ! git diff --cached --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: vendor Supabase JS 2.117.2"
-            git push
-          fi
-
       - name: Install Playwright
         run: npm install --no-save --no-package-lock playwright@1.63.0
 
