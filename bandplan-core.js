@@ -1276,10 +1276,10 @@ function monthHTML(y, mo) {
     if (k === ui.selDate) cls.push('sel');
     const calEventColor = list.length ? (evType(list[0].ev.type).color || 'var(--accent)') : 'var(--accent)';
     if (list.length) cls.push('cal-has-events');
-    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
     const nearest = list.find(o => (o.ev.status || 'upcoming') === 'upcoming' && o.date >= today()) || list[0];
     const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
-    h += '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
+    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
+      '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
       (nearest ? '<i class="cal-my-dot status-' + (nearestStatus || 'unset') + '" title="' + esc('Моя позиция: ' + participantStatusLabel(nearestStatus)) + '" aria-label="' + esc('Моя позиция: ' + participantStatusLabel(nearestStatus)) + '"></i>' : '') + '</div>';
     if (list.length) {
       h += '<div class="cal-events">';
