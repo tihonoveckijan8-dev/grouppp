@@ -632,7 +632,7 @@ function load() {
     return true;
   } catch (e) { return false; }
 }
-function save() { expandCache.clear(); searchCorpus = null; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); }
+function save() { expandCache.clear(); searchCorpus = null; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast('Не удалось сохранить: хранилище браузера недоступно', 'err'); } if (window.BandPlanCloud) window.BandPlanCloud.schedule(state); scheduleOfflineSongSync(); }
 function commit() { save(); render(); }
 
 function persistParticipationLocal() {
@@ -3488,6 +3488,8 @@ async function bootCloudSync(hadLocal, durableInfo) {
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
+    await hydrateOfflineSongsIntoState();
+    scheduleOfflineSongSync(300);
     if (!syncIsCurrent()) return;
     if (await shouldOpenAccountOnboarding()) {
       if (!syncIsCurrent()) return;
@@ -3772,6 +3774,9 @@ async function startBandPlan(forceOffline) {
     }
     window.__bandplanActiveUserId = offlineUser.id;
     window.__bandplanAppReady = true;
+    await hydrateOfflineSongsIntoState();
+    render();
+    scheduleOfflineSongSync(300);
     setSyncStatus('offline', 'Офлайн', 0);
     Boot.done();
     if (await shouldOpenAccountOnboarding()) openOnboarding();
