@@ -79,7 +79,7 @@ jobs:
           if (!swResponse.ok) throw new Error('Service worker is not reachable');
           const sw = await swResponse.text();
           for (const eventName of ['install','fetch','activate']) {
-            const pattern = new RegExp("addEventListener\\\\(['\\\"]" + eventName + "['\\\"]\\\\)");
+            const pattern = new RegExp("addEventListener\\\\([\\\"']" + eventName + "[\\\"']\\\\s*,");
             if (!pattern.test(sw)) throw new Error('Service worker is missing ' + eventName + ' handler');
           }
           const indexResponse = await fetch(base + '/');
