@@ -1,0 +1,74 @@
+name: BandPlan Lighthouse
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install build tool
+        run: npm install --no-package-lock
+
+      - name: Ensure browser assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p fonts vendor
+          if [ ! -s vendor/supabase.min.js ]; then
+            curl --fail --location --retry 3 --retry-delay 2               "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"               --output vendor/supabase.min.js
+          fi
+          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/fontsource/fonts/manrope:vf@5.3.0/latin-wght-normal.woff2"             --output fonts/manrope-latin-wght-normal.woff2
+          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/fontsource/fonts/manrope:vf@5.3.0/cyrillic-wght-normal.woff2"             --output fonts/manrope-cyrillic-wght-normal.woff2
+
+      - name: Build production
+        run: npm run build
+
+      - name: Start local production server
+        run: |
+          python3 -m http.server 4173 --directory dist > /tmp/bandplan-http.log 2>&1 &
+          echo $! > /tmp/bandplan-http.pid
+          sleep 2
+
+      - name: Run Lighthouse
+        run: |
+          npx --yes lighthouse@latest http://127.0.0.1:4173/             --only-categories=performance,accessibility,pwa             --output=json             --output-path=/tmp/lighthouse.json             --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+
+      - name: Enforce Lighthouse budgets
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const report = JSON.parse(fs.readFileSync('/tmp/lighthouse.json','utf8'));
+          const scores = Object.fromEntries(
+            Object.entries(report.categories).map(([k,v]) => [k, Math.round((v.score || 0) * 100)])
+          );
+          console.log(JSON.stringify(scores));
+          const failures = [];
+          if ((scores.performance ?? 0) < 90) failures.push('Performance < 90');
+          if ((scores.accessibility ?? 0) < 95) failures.push('Accessibility < 95');
+          if ((scores.pwa ?? 0) < 90) failures.push('PWA < 90');
+          if (failures.length) {
+            console.error(failures.join('; '));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandplan-lighthouse
+          path: /tmp/lighthouse.json
