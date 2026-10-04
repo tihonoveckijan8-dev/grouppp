@@ -838,11 +838,12 @@ function buildChrome() {
     '<div style="min-width:0"><div class="nm">' + esc(p.name || 'Профиль не заполнен') + '</div><div class="rl">' + esc(rolesLabel(myRoles())) + '</div></div>';
   $('#tbAvatar').textContent = ((p.name || 'B').charAt(0)).toUpperCase();
 
-  const th = state.settings.theme;
-  const thIco = ic(th === 'light' ? 'moon' : th === 'dark' ? 'bolt' : th === 'amoled' ? 'sun' : 'sun', 18);
-  const thLbl = th === 'light' ? 'Тёмная тема' : th === 'dark' ? 'AMOLED-тема' : th === 'amoled' ? 'Светлая тема' : 'Светлая тема';
-  $('#themeQuick').innerHTML = thIco + '<span>' + thLbl + '</span>';
-  $('#tbTheme').innerHTML = thIco; $('#tbTheme').setAttribute('aria-label', thLbl);
+  const nextTheme = nextThemeMeta(state.settings.theme);
+  const thIco = ic(nextTheme.icon, 18);
+  const thLbl = nextTheme.label;
+  $('#themeQuick').innerHTML = thIco + '<span>' + esc(thLbl) + '</span>';
+  $('#themeQuick').setAttribute('aria-label', 'Переключить тему: ' + esc(thLbl));
+  $('#tbTheme').innerHTML = thIco; $('#tbTheme').setAttribute('aria-label', 'Переключить тему: ' + esc(thLbl));
   $('#sceneQuick').innerHTML = ic('monitor', 18) + '<span>Сценический режим</span>';
   $('#tbCust').innerHTML = ic('palette', 19);
   $('#searchIco').innerHTML = ic('search', 19);
@@ -1549,7 +1550,7 @@ function vSettings() {
   h += '<section class="card rise settings-card" data-settings-panel="interface" style="animation-delay:.07s;grid-column:1/-1"><div class="card-h"><div><h2>' + ic('palette', 18) + ' Оформление интерфейса</h2></div></div>' +
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
-    [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt'], ['glass', 'Liquid Glass', 'sparkles']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
+    THEMES.map(t => '<button type="button" data-act="theme-set" data-v="' + t.id + '" class="' + (s.theme === t.id ? 'on' : '') + '" aria-pressed="' + (s.theme === t.id) + '" data-accent="1">' + ic(t.icon, 14) + esc(t.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
     ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"></button>').join('') +
     '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:var(--tap);height:var(--tap);border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
@@ -2034,40 +2035,107 @@ function quickScene() {
 }
 
 /* ═══ 19. THEME / ACCENT ═══ */
+const THEMES = Object.freeze([
+  {id:'light', label:'Светлая', icon:'sun', themeColor:'#F4F6F8'},
+  {id:'dark', label:'Тёмная', icon:'moon', themeColor:'#14161C'},
+  {id:'amoled', label:'AMOLED', icon:'bolt', themeColor:'#000000'},
+  {id:'glass', label:'Liquid Glass', icon:'sparkles', themeColor:'#E9EEF5'}
+]);
+const THEME_IDS = Object.freeze(THEMES.map(t => t.id));
+const themeById = id => THEMES.find(t => t.id === id) || THEMES[0];
+function themeMeta(id) { return themeById(id); }
+function nextThemeMeta(id) {
+  const i = Math.max(0, THEME_IDS.indexOf(id));
+  return THEMES[(i + 1) % THEMES.length];
+}
+function colorLuminance(hex) {
+  const n = parseInt(String(hex).slice(1), 16);
+  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
+    v /= 255;
+    return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+  });
+  return .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
+}
+function colorContrast(a, b) {
+  const la = colorLuminance(a), lb = colorLuminance(b);
+  return (Math.max(la, lb) + .05) / (Math.min(la, lb) + .05);
+}
+function shadeColor(hex, amount) {
+  const n = parseInt(String(hex).slice(1), 16);
+  const f = v => clamp(Math.round(amount < 0 ? v * (1 + amount) : v + (255 - v) * amount), 0, 255);
+  return '#' + [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)].map(v => pad(v.toString(16))).join('');
+}
+function accessibleAccent(input, themeId) {
+  const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#2547D0';
+  const bg = themeMeta(themeId).themeColor;
+  const candidates = [base];
+  for (let i = 1; i <= 12; i++) {
+    candidates.push(shadeColor(base, i * .055), shadeColor(base, -i * .055));
+  }
+  let best = base, bestScore = -Infinity;
+  candidates.forEach(candidate => {
+    const onWhite = colorContrast(candidate, '#FFFFFF');
+    const onBlack = colorContrast(candidate, '#111827');
+    const onAccent = onWhite >= onBlack ? '#FFFFFF' : '#111827';
+    const textRatio = Math.max(onWhite, onBlack);
+    const bgRatio = colorContrast(candidate, bg);
+    const score = Math.min(textRatio / 4.5, bgRatio / 3) - (candidate === base ? 0 : .002 * candidates.indexOf(candidate));
+    if (score > bestScore) { bestScore = score; best = candidate; }
+  });
+  return best;
+}
+function applyThemeMeta(themeId) {
+  const meta = themeMeta(themeId);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', meta.themeColor));
+  return meta;
+}
 function persistBootPrefs() {
   try {
     const st = state.settings || {};
-    const theme = ['light','dark','amoled','glass'].includes(st.theme) ? st.theme : 'light';
-    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent : '#2547D0';
-    const onAccent = document.documentElement.style.getPropertyValue('--on-accent') || '#fff';
-    localStorage.setItem('bandplan.boot', JSON.stringify({theme, accent, onAccent: onAccent.trim(), density: st.density || 'comfortable'}));
+    const theme = THEME_IDS.includes(st.theme) ? st.theme : 'light';
+    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent.toUpperCase() : '#2547D0';
+    const appliedAccent = document.documentElement.style.getPropertyValue('--accent') || accent;
+    const onAccent = document.documentElement.style.getPropertyValue('--on-accent') || '#FFFFFF';
+    localStorage.setItem('bandplan.boot', JSON.stringify({
+      theme, accent, accentApplied: appliedAccent.trim(), onAccent: onAccent.trim(),
+      density: st.density || 'comfortable'
+    }));
   } catch (e) {}
 }
 function applyTheme() {
   const s = state.settings;
-  if (!['light','dark','amoled','glass'].includes(s.theme)) s.theme = 'light';
-  document.documentElement.setAttribute('data-theme', s.theme || 'light');
+  if (!THEME_IDS.includes(s.theme)) s.theme = 'light';
+  const meta = themeMeta(s.theme);
+  document.documentElement.setAttribute('data-theme', meta.id);
   document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
   document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
-  const c = s.theme === 'light' ? '#F4F6F8' : s.theme === 'dark' ? '#14161C' : s.theme === 'amoled' ? '#000000' : '#E9EEF5';
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', c));
+  applyThemeMeta(meta.id);
+  applyAccentVars();
   persistBootPrefs();
 }
 function cycleTheme() {
-  const o = ['light', 'dark', 'amoled', 'glass'];
-  setTheme(o[(o.indexOf(state.settings.theme) + 1) % o.length]);
+  const next = nextThemeMeta(state.settings.theme);
+  setTheme(next.id);
 }
 function setTheme(t) {
-  state.settings.theme = t; applyTheme(); save(); renderWithTransition(render);
-  toast('Тема: ' + ({ light: 'светлая', dark: 'тёмная', amoled: 'AMOLED', glass: 'Liquid Glass' }[t] || 'светлая'), 'info', 2000);
+  const next = themeMeta(t);
+  state.settings.theme = next.id;
+  applyTheme(); save(); renderWithTransition(render);
+  toast('Тема: ' + next.label, 'info', 2000);
 }
-function applyAccent(hex) { if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return; state.settings.accent = hex; applyAccentVars(); save(); renderWithTransition(render); }
+function applyAccent(hex) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  state.settings.accent = hex.toUpperCase();
+  applyAccentVars(); save(); renderWithTransition(render);
+}
 function applyAccentVars() {
-  const hex = state.settings.accent || '#2547D0', r = document.documentElement.style;
-  const dark = shade(hex, -.16), press = shade(hex, -.3);
-  const onAccent = contrast(hex, '#FFFFFF') >= contrast(hex, '#111827') ? '#FFFFFF' : '#111827';
+  const themeId = THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light';
+  const hex = accessibleAccent(state.settings.accent || '#2547D0', themeId);
+  const r = document.documentElement.style;
+  const dark = shadeColor(hex, -.16), press = shadeColor(hex, -.3);
+  const onAccent = colorContrast(hex, '#FFFFFF') >= colorContrast(hex, '#111827') ? '#FFFFFF' : '#111827';
   r.setProperty('--accent', hex);
-  r.setProperty('--accent-hover', dark);
+  r.setProperty('--accent-hover', shadeColor(hex, -.12));
   r.setProperty('--accent-press', press);
   r.setProperty('--on-accent', onAccent);
   r.setProperty('--accent-soft', hex + '14');
@@ -2076,35 +2144,12 @@ function applyAccentVars() {
   r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
   r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
   persistBootPrefs();
-  /* Один выбранный акцентный цвет управляет всей системой UI-акцентов.
-     Семантические переменные сохраняются для совместимости компонентов,
-     но визуально больше не вводят сторонние цвета. */
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
-  // Status colors stay semantic: accent changes interactive UI, not yes/maybe/no meaning.
-  /* Participation keeps the selected hue; state is differentiated by intensity. */
   r.setProperty('--part-yes', hex);
-  r.setProperty('--part-maybe', shade(hex, .38));
-  r.setProperty('--part-no', shade(hex, -.28));
-  r.setProperty('--part-unset', shade(hex, -.12));
-
-  function contrast(a, b) {
-    const la = luminance(a), lb = luminance(b);
-    return (Math.max(la, lb) + .05) / (Math.min(la, lb) + .05);
-  }
-  function luminance(h) {
-    const n = parseInt(h.slice(1), 16);
-    const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
-      v /= 255;
-      return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
-    });
-    return .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
-  }
-  function shade(h, amt) {
-    const n = parseInt(h.slice(1), 16);
-    const f = v => clamp(Math.round(amt < 0 ? v * (1 + amt) : v + (255 - v) * amt), 0, 255);
-    return '#' + [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)].map(v => pad(v.toString(16))).join('');
-  }
+  r.setProperty('--part-maybe', shadeColor(hex, .38));
+  r.setProperty('--part-no', shadeColor(hex, -.28));
+  r.setProperty('--part-unset', shadeColor(hex, -.12));
 }
 
 /* ═══ 20. ONBOARDING ═══ */
@@ -2141,7 +2186,7 @@ function drawOnb() {
     h += '<div class="onb-hero">' + ic('check', 28) + '</div><h2>Всё готово</h2>' +
       '<p class="lead">Оформление, роли и данные можно изменить в любой момент в разделе «Настройки».</p>' +
       '<div class="field"><span class="field-label">Тема</span><div class="seg" id="ob_theme">' +
-      [['light', 'Светлая'], ['dark', 'Тёмная'], ['amoled', 'AMOLED']].map(t => '<button type="button" data-v="' + t[0] + '" class="' + (onbData.theme === t[0] ? 'on' : '') + '" data-accent="1">' + t[1] + '</button>').join('') + '</div></div>';
+      THEMES.map(t => '<button type="button" data-v="' + t.id + '" class="' + (onbData.theme === t.id ? 'on' : '') + '" data-accent="1">' + ic(t.icon, 14) + esc(t.label) + '</button>').join('') + '</div></div>';
   }
   h += '<div class="onb-foot">' + (onbStep > 0 ? '<button class="btn btn-secondary" type="button" id="ob_back">' + ic('left', 16) + 'Назад</button>' : '<span></span>') +
     (onbStep < 3 ? '<button class="btn btn-primary" type="button" id="ob_next">Продолжить' + ic('right', 16) + '</button>' : '<button class="btn btn-primary" type="button" id="ob_done">' + ic('check', 16) + 'Начать работу</button>') + '</div></div>';
