@@ -1,6 +1,6 @@
 /* BandPlan offline app shell — resilient cache install and safe updates */
-const V = 'bandplan-v69';
-const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'supabase.js', 'vendor/supabase.min.js'];
+const V = 'bandplan-' + Date.now();
+const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
@@ -30,10 +30,24 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|supabase\.js|bandplan\.css|manifest\.webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|supabase\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
     const cached = await caches.match(request, {ignoreSearch:true});
     if (shell) {
+      const refresh = async () => {
+        try {
+          const response = await fetch(request, {cache:'no-cache'});
+          if (response && response.ok) {
+            const copy = response.clone();
+            const cache = await caches.open(V);
+            await cache.put(request, copy);
+          }
+        } catch (_) {}
+      };
+      if (cached) {
+        event.waitUntil(refresh());
+        return cached;
+      }
       try {
         const response = await fetch(request, {cache:'no-cache'});
         if (response && response.ok) {
@@ -42,7 +56,7 @@ self.addEventListener('fetch', event => {
         }
         return response;
       } catch (_) {
-        return cached || await caches.match('index.html') || Response.error();
+        return await caches.match('index.html') || Response.error();
       }
     }
     if (cached) return cached;
