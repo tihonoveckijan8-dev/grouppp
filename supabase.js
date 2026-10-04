@@ -36,9 +36,9 @@
       const legacyScore = authSessionScore(legacyRaw);
       const shouldRecoverLegacy =
         !standardRaw ||
-        !standardScore.validShape ||
+        !standardScore.hasRefreshToken ||
         (legacyScore.hasRefreshToken && legacyScore.expiresAt > standardScore.expiresAt);
-      if (shouldRecoverLegacy && legacyScore.validShape) {
+      if (shouldRecoverLegacy && legacyScore.hasRefreshToken) {
         localStorage.setItem(AUTH_STORAGE_KEY, legacyRaw);
       }
     }
