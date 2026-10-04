@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Lighthouse
         run: |
-          npx --yes lighthouse@latest http://127.0.0.1:4173/             --only-categories=performance,accessibility,pwa             --output=json             --output-path=/tmp/lighthouse.json             --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          npx --yes lighthouse@latest http://127.0.0.1:4173/             --only-categories=performance,accessibility             --output=json             --output-path=/tmp/lighthouse.json             --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
 
       - name: Enforce Lighthouse budgets
         run: |
@@ -60,11 +60,33 @@ jobs:
           const failures = [];
           if ((scores.performance ?? 0) < 90) failures.push('Performance < 90');
           if ((scores.accessibility ?? 0) < 95) failures.push('Accessibility < 95');
-          if ((scores.pwa ?? 0) < 90) failures.push('PWA < 90');
           if (failures.length) {
             console.error(failures.join('; '));
             process.exit(1);
           }
+          NODE
+
+      - name: Validate PWA shell
+        run: |
+          node --input-type=module <<'NODE'
+          const base = 'http://127.0.0.1:4173';
+          const manifestResponse = await fetch(base + '/manifest.webmanifest');
+          if (!manifestResponse.ok) throw new Error('PWA manifest is not reachable');
+          const manifest = await manifestResponse.json();
+          if (!manifest.name || !manifest.start_url || !manifest.display) throw new Error('PWA manifest is incomplete');
+          const swResponse = await fetch(base + '/sw.js');
+          if (!swResponse.ok) throw new Error('Service worker is not reachable');
+          const sw = await swResponse.text();
+          for (const token of ["addEventListener('install'", "addEventListener('fetch'", "addEventListener('activate'"]) {
+            if (!sw.includes(token)) throw new Error('Service worker is missing ' + token);
+          }
+          const indexResponse = await fetch(base + '/');
+          if (!indexResponse.ok) throw new Error('PWA entry point is not reachable');
+          const index = await indexResponse.text();
+          if (!index.includes('rel="manifest"') || !index.includes('apple-mobile-web-app-capable')) {
+            throw new Error('PWA install metadata is incomplete');
+          }
+          console.log('PWA shell validation: PASS');
           NODE
 
       - name: Upload Lighthouse report
