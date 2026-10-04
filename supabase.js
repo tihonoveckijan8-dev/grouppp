@@ -64,9 +64,26 @@
   }
 
   const JUST_REGISTERED_KEY = 'bandplan:just-registered';
+  const JUST_REGISTERED_EMAIL_KEY = 'bandplan:just-registered-email';
   const hasJustRegisteredFlag = () => { try { return sessionStorage.getItem(JUST_REGISTERED_KEY) === '1'; } catch (_) { return false; } };
-  const setJustRegisteredFlag = () => { try { sessionStorage.setItem(JUST_REGISTERED_KEY, '1'); } catch (_) {} };
-  const clearJustRegisteredFlag = () => { try { sessionStorage.removeItem(JUST_REGISTERED_KEY); } catch (_) {} };
+  const setJustRegisteredFlag = (email) => {
+    try {
+      sessionStorage.setItem(JUST_REGISTERED_KEY, '1');
+      if (email) sessionStorage.setItem(JUST_REGISTERED_EMAIL_KEY, String(email).trim().toLowerCase());
+    } catch (_) {}
+  };
+  const isJustRegisteredForEmail = (email) => {
+    try {
+      return hasJustRegisteredFlag() &&
+        sessionStorage.getItem(JUST_REGISTERED_EMAIL_KEY) === String(email || '').trim().toLowerCase();
+    } catch (_) { return false; }
+  };
+  const clearJustRegisteredFlag = () => {
+    try {
+      sessionStorage.removeItem(JUST_REGISTERED_KEY);
+      sessionStorage.removeItem(JUST_REGISTERED_EMAIL_KEY);
+    } catch (_) {}
+  };
   let mode = 'login';
   function disposeRealtime() {
     realtimeGeneration += 1;
@@ -93,11 +110,9 @@
         renderGate();
         return;
       }
-      if (event === 'SIGNED_IN') {
-        if (previousUserId && previousUserId !== session?.user?.id) disposeRealtime();
-        if (session?.user) gate().hidden = true;
-        // The explicit submitAuth() handoff starts the app exactly once.
-        // The auth listener only keeps the session reference in sync.
+      if (event === 'SIGNED_IN' && previousUserId && previousUserId !== session?.user?.id) {
+        disposeRealtime();
+        location.reload();
       }
       if (event === 'PASSWORD_RECOVERY') {
         mode = 'reset';
@@ -153,7 +168,7 @@
       let result;
       if(mode==='signup') {
         result=await client.auth.signUp({email,password,options:{data:{full_name:name}}});
-        if (!result.error) setJustRegisteredFlag();
+        if (!result.error) setJustRegisteredFlag(email);
       }
       else if(mode==='reset') result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
       else result=await client.auth.signInWithPassword({email,password});
@@ -165,9 +180,9 @@
       } else {
         currentSession = result.data?.session || currentSession;
         if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
-        if (mode === 'login' && !hasJustRegisteredFlag()) clearJustRegisteredFlag();
+        if (mode === 'login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
         gate().hidden = true;
-        window.dispatchEvent(new CustomEvent('bandplan:auth-success', { detail: { user: currentSession.user } }));
+        location.reload();
       }
     } catch(err) {
       setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
