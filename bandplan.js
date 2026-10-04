@@ -877,7 +877,7 @@ function vCalendar() {
     '<div class="tb-search grow">' + ic('search', 18) +
     '<label class="sr-only" for="evQ">Поиск участий</label>' +
     '<input id="evQ" class="bare-input" type="search" placeholder="Поиск по названию, месту или заметке" value="' + esc(ui.evQuery) + '">' +
-    (ui.evQuery ? '<button class="icon-btn" type="button" data-act="ev-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
+    (ui.evQuery ? '<button class="icon-btn" type="button" data-act="ev-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
     '<button class="btn ' + (ac ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="ev-filter-open">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры' + (ac ? ' · ' + evFilterCount() : '') + '</span></button></div>';
   if (ac || ui.evQuery) h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
     (ui.evQuery ? '<button class="chip" type="button" data-act="ev-clear">' + ic('search', 13) + '«' + esc(ui.evQuery) + '»<span class="rm">×</span></button>' : '') +
@@ -1095,7 +1095,7 @@ function vSongs() {
   let h = '<div class="toolbar">' +
     '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
-    (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
+    (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
     '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
@@ -1315,7 +1315,7 @@ function vSetlist(id) {
   lib.forEach(function (s) {
     h += '<div class="lib-item" draggable="true" data-lib="' + s.id + '"><span class="lk">' + esc(s.key || '—') + '</span>' +
       '<span class="grow nowrap">' + esc(s.title) + '</span>' +
-      '<button class="icon-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" style="width:34px;height:34px">' + ic('plus', 15) + '</button></div>';
+      '<button class="icon-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" style="width:var(--tap);height:var(--tap)">' + ic('plus', 15) + '</button></div>';
   });
   return h + '</div></section></div></div>';
 }
@@ -1418,7 +1418,7 @@ function vSettings() {
     [['light', 'Светлая', 'sun'], ['dark', 'Тёмная', 'moon'], ['amoled', 'AMOLED', 'bolt']].map(t => '<button type="button" data-act="theme-set" data-v="' + t[0] + '" class="' + (s.theme === t[0] ? 'on' : '') + '" aria-pressed="' + (s.theme === t[0]) + '" data-accent="1">' + ic(t[2], 14) + t[1] + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
     ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"></button>').join('') +
-    '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:30px;height:26px;border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
+    '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:var(--tap);height:var(--tap);border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
     '</div>' +
     '<div class="field"><span class="field-label">Запись аккордов</span><div class="seg">' +
     [['auto', 'Как в оригинале'], ['sharp', 'Диезы (C#)'], ['flat', 'Бемоли (Db)']].map(o => '<button type="button" data-act="notation-set" data-v="' + o[0] + '" class="' + (s.notation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -2037,7 +2037,7 @@ function memberRowHTML(m, i) {
     '<div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
     '<div class="grow"><label class="sr-only" for="ob_mn_' + i + '">Имя участника</label><input class="input mb-s" id="ob_mn_' + i + '" data-ob-name="' + i + '" maxlength="50" value="' + esc(m.name) + '" placeholder="Имя участника">' +
     '<div class="row" style="gap:6px" data-ob-role="' + i + '">' +
-    ROLES.map(r => '<button type="button" class="chip' + (m.role === r.k ? ' on' : '') + '" data-r="' + r.k + '" style="padding:7px 11px;font-size:11.5px;min-height:34px" aria-pressed="' + (m.role === r.k) + '">' + esc(r.label) + '</button>').join('') + '</div></div>' +
+    ROLES.map(r => '<button type="button" class="chip' + (m.role === r.k ? ' on' : '') + '" data-r="' + r.k + '" style="padding:7px 11px;font-size:11.5px;min-height:var(--tap)" aria-pressed="' + (m.role === r.k) + '">' + esc(r.label) + '</button>').join('') + '</div></div>' +
     (i > 0 ? '<button class="icon-btn" type="button" data-ob-del="' + i + '" aria-label="Удалить участника">' + ic('x', 15) + '</button>' : '') + '</div>';
 }
 function bindMemberInputs(el) {
