@@ -3080,7 +3080,16 @@ document.addEventListener('click', function (e) {
     }
     case 'print-setlist': stop(); printSetlist(id); break;
     case 'offline-songs-refresh': { stop(); forceOfflineEventSongs(id).catch(error => toast(error.message || 'Не удалось обновить офлайн-копию','err',5000)); break; }
-    case 'offline-songs-delete': { stop(); window.BandPlanCloud?.deleteOfflineEventSongs?.(id).then(()=>{ refreshOfflineEventInfo(id); toast('Песни удалены с устройства','info',2200); }); break; }
+    case 'offline-songs-delete': {
+      stop();
+      window.BandPlanCloud?.deleteOfflineEventSongs?.(id).then(async()=>{
+        const rows=await window.BandPlanCloud?.listOfflineEventSongs?.();
+        rebuildOfflineSongIndex(Array.isArray(rows) ? rows : []);
+        refreshOfflineEventInfo(id);
+        toast('Песни удалены с устройства','info',2200);
+      });
+      break;
+    }
     case 'scene-setlist': { stop(); const sl = slById(id); if (!sl) break; if (!(sl.items || []).length) { toast('В сет-листе нет песен — добавьте их в программу', 'warn'); break; } openScene(buildList(sl), 0, 0, sl.eventId || ''); break; }
     case 'scene-quick': stop(); quickScene(); break;
     case 'mem-add': stop(); memberModal(null); break;
