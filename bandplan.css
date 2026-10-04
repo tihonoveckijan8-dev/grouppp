@@ -1634,3 +1634,162 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   }
 }
 }
+
+/* ─── 23. PREMIUM UI POLISH — safe, selector-preserving ─────────────────
+   Direction: quiet premium SaaS, strong hierarchy, restrained depth.
+   This layer intentionally overrides presentation only; it does not rename
+   selectors, IDs, data attributes, states, or interaction hooks.
+*/
+@layer tokens{
+  :root{
+    --surface-hover:color-mix(in srgb,var(--surf-2) 82%,var(--accent) 18%);
+    --shadow-control:0 1px 2px rgba(16,24,40,.05);
+    --shadow-card:0 1px 2px rgba(16,24,40,.035),0 8px 24px rgba(16,24,40,.045);
+    --shadow-float:0 12px 32px rgba(16,24,40,.10);
+    --focus-ring:0 0 0 3px var(--accent-ring);
+  }
+  [data-theme="dark"],[data-theme="amoled"]{
+    --shadow-control:0 1px 2px rgba(0,0,0,.28);
+    --shadow-card:0 1px 2px rgba(0,0,0,.20),0 10px 28px rgba(0,0,0,.22);
+    --shadow-float:0 16px 40px rgba(0,0,0,.38);
+  }
+  [data-theme="glass"]{
+    --shadow-control:0 1px 2px rgba(31,45,61,.04);
+    --shadow-card:0 1px 2px rgba(31,45,61,.035),0 10px 28px rgba(31,45,61,.055);
+    --shadow-float:0 16px 40px rgba(31,45,61,.12);
+  }
+}
+
+@layer components{
+  /* Shell: flatter content, depth reserved for actual elevation. */
+  .sidebar{
+    box-shadow:inset -1px 0 0 var(--border);
+    border-right-color:transparent;
+  }
+  .brand{padding-bottom:var(--s5)}
+  .brand-mark{box-shadow:var(--shadow-control)}
+  .nav-item{border:1px solid transparent}
+  .nav-item.active{border-color:color-mix(in srgb,var(--accent) 16%,transparent)}
+  .nav-item.active::before{left:-5px;width:3px}
+  .side-profile{box-shadow:var(--shadow-control)}
+
+  .topbar{padding-top:var(--s4);padding-bottom:var(--s3)}
+  .topbar.stuck{box-shadow:var(--shadow-control)}
+  .tb-search{
+    height:46px;
+    border-color:color-mix(in srgb,var(--border) 88%,var(--text) 12%);
+    box-shadow:var(--shadow-control);
+  }
+  .tb-search:focus-within{box-shadow:var(--focus-ring)}
+  .avatar-btn{box-shadow:var(--shadow-control)}
+
+  .page-head{padding-bottom:var(--s6)}
+  .page-head h1{letter-spacing:-.028em}
+  .page-head .sub{max-width:58ch}
+
+  .btn-primary{box-shadow:var(--shadow-control)}
+  .btn-primary:hover{box-shadow:var(--shadow-control)}
+  .btn-secondary,.btn-tertiary,.icon-btn,.avatar-btn{box-shadow:var(--shadow-control)}
+  .btn-secondary:hover,.btn-tertiary:hover,.icon-btn:hover,.avatar-btn:hover{
+    box-shadow:var(--shadow-control);
+  }
+  .btn:focus-visible,.icon-btn:focus-visible,.avatar-btn:focus-visible,
+  .nav-item:focus-visible,.chip:focus-visible,.input:focus-visible,
+  .select:focus-visible,.textarea:focus-visible,.settings-tab:focus-visible{
+    box-shadow:var(--focus-ring);
+  }
+
+  .card,.song-card,.ev-row,.sl-item,.memb-row,.stat-mini,.hero{
+    box-shadow:var(--shadow-card);
+  }
+  .card-interactive:hover,.song-card:hover,.ev-row:hover,.memb-row:hover{
+    box-shadow:var(--shadow-card);
+    transform:translateY(-1px);
+  }
+  .card,.song-card,.hero{border-radius:var(--r-18)}
+  .card-h{margin-bottom:var(--s4)}
+  .song-card{padding:var(--s5)}
+  .song-acts{padding-top:var(--s3)}
+  .key-badge{box-shadow:none}
+  .ev-row{border-color:color-mix(in srgb,var(--border) 92%,var(--text) 8%)}
+  .ev-date{box-shadow:none}
+  .sl-item{box-shadow:var(--shadow-control)}
+  .memb-row{background:var(--surf-1);box-shadow:none}
+
+  .modal-card,.onb-card{
+    box-shadow:var(--shadow-float);
+    border-radius:var(--r-18);
+  }
+  .modal-head{margin-bottom:var(--s5)}
+  .modal-foot{margin-top:var(--s5)}
+  .toast{box-shadow:var(--shadow-float)}
+
+  .filter-pop,.search-drop{
+    box-shadow:var(--shadow-float);
+    border-radius:var(--r-18);
+  }
+
+  /* Glass remains a contextual surface, never a content-wide effect. */
+  [data-theme="glass"] .topbar,
+  [data-theme="glass"] .topbar.stuck,
+  [data-theme="glass"] .bottom-nav,
+  [data-theme="glass"] .actionbar,
+  [data-theme="glass"] .search-drop,
+  [data-theme="glass"] .filter-pop,
+  [data-theme="glass"] .toast{
+    background:color-mix(in srgb,var(--surf-1) 82%,transparent);
+    border-color:var(--border);
+    -webkit-backdrop-filter:blur(16px) saturate(135%);
+    backdrop-filter:blur(16px) saturate(135%);
+  }
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .song-card,
+  [data-theme="glass"] .ev-row,
+  [data-theme="glass"] .sl-item,
+  [data-theme="glass"] .memb-row,
+  [data-theme="glass"] .hero{
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+
+  .bottom-nav{
+    box-shadow:0 -4px 18px rgba(16,24,40,.06);
+    border-top-color:var(--border);
+  }
+  .actionbar{
+    box-shadow:0 -4px 18px rgba(16,24,40,.06);
+  }
+
+  @media(max-width:900px){
+    .page-head{padding-bottom:var(--s4)}
+    .content{padding-top:2px}
+  }
+  @media(max-width:640px){
+    .topbar{padding-top:var(--s2);padding-bottom:var(--s2)}
+    .page-head h1{font-size:26px}
+    .card,.song-card{border-radius:var(--r-16)}
+    .modal-card{border-radius:var(--r-18) var(--r-18) 0 0}
+    .modal-card:not(.modal-fullscreen){box-shadow:0 -10px 36px rgba(16,24,40,.12)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .card-interactive:hover,.song-card:hover,.ev-row:hover,.memb-row:hover{transform:none}
+  }
+  @media(prefers-contrast:more){
+    .sidebar{border-right:1px solid var(--border)}
+    .card,.song-card,.ev-row,.sl-item,.memb-row,.modal-card{border-color:var(--border-2)}
+  }
+  @media(prefers-reduced-transparency:reduce){
+    [data-theme="glass"] .topbar,
+    [data-theme="glass"] .topbar.stuck,
+    [data-theme="glass"] .bottom-nav,
+    [data-theme="glass"] .actionbar,
+    [data-theme="glass"] .search-drop,
+    [data-theme="glass"] .filter-pop,
+    [data-theme="glass"] .toast{
+      -webkit-backdrop-filter:none;
+      backdrop-filter:none;
+      background:var(--surf-4);
+    }
+  }
+}
+
