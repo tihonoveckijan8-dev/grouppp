@@ -3206,6 +3206,22 @@ function init() {
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
 }
+/*
+  Auth handoff: the auth module is the single source of truth. After a
+  successful sign-in it asks the already-running app shell to resume the same
+  authenticated boot sequence; no page reload and no second auth implementation.
+*/
+window.addEventListener('bandplan:auth-ready', () => {
+  if (window.__bandplanAppReady || window.__bandplanAuthResumePromise) return;
+  window.__bandplanAuthResumePromise = (async () => {
+    try {
+      await startBandPlan(false);
+    } finally {
+      window.__bandplanAuthResumePromise = null;
+    }
+  })();
+});
+
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
   window.__bandplanBootAttempt = attempt;
