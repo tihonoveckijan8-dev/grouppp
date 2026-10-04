@@ -97,7 +97,7 @@
   async function durableSnapshot(userId){return idbRequest(IDB_SNAPSHOT,'readonly',store=>store.get(userId));}
   async function durableQueue(userId){return idbRequest(IDB_QUEUE,'readonly',store=>store.get(userId));}
   async function writeDurableState(userId,state,updatedAt,pendingSync){
-    const record={user_id:userId,state:JSON.parse(JSON.stringify(state||{})),updated_at:updatedAt||new Date().toISOString(),pending_sync:!!pendingSync};
+    const record={user_id:userId,state:cloneValue(state||{}),updated_at:updatedAt||new Date().toISOString(),pending_sync:!!pendingSync};
     await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(record));
     if(pendingSync)await idbRequest(IDB_QUEUE,'readwrite',store=>store.put({user_id:userId,state:record.state,updated_at:record.updated_at}));
     else await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(userId));
@@ -106,7 +106,7 @@
     const uid=currentSession?.user?.id;if(!uid)return null;
     const queued=await durableQueue(uid),snapshot=await durableSnapshot(uid),record=queued||snapshot;
     if(!record?.state)return null;
-    const state=JSON.parse(JSON.stringify(record.state)),pendingSync=!!queued||!!record.pending_sync;
+    const state=cloneValue(record.state),pendingSync=!!queued||!!record.pending_sync;
     if(pendingSync)pending=state;
     return {state,updatedAt:record.updated_at||'',pendingSync};
   }
@@ -188,6 +188,10 @@
     });
     authSubscription = result?.data?.subscription || null;
   }
+  const cloneValue = value => {
+    if (typeof structuredClone === 'function') return structuredClone(value);
+    return JSON.parse(JSON.stringify(value));
+  };
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function setAuthShellLocked(locked) {
