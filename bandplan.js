@@ -973,8 +973,19 @@ function monthHTML(y, mo) {
     if (k === ui.selDate) cls.push('sel');
     h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') + '</div>';
-    list.slice(0, 3).forEach(o => { h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + o.ev.id + '" data-date="' + o.date + '" role="button" tabindex="0">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>'; });
-    if (list.length > 3) h += '<div class="cal-more">ещё ' + (list.length - 3) + '</div>';
+    if (list.length) {
+      h += '<div class="cal-events">';
+      list.slice(0, 3).forEach(o => {
+        const type = evType(o.ev.type);
+        const label = [o.ev.title, o.ev.time, type.label].filter(Boolean).join(', ');
+        h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
+      });
+      if (list.length > 3) {
+        const remaining = list.length - 3;
+        h += '<div class="cal-more" data-count="' + remaining + '" aria-hidden="true">ещё ' + remaining + '</div>';
+      }
+      h += '</div>';
+    }
     h += '</div>';
   }
   h += '</div><div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>

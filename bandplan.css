@@ -4562,3 +4562,64 @@ body {
     min-height: 40px;
   }
 }
+
+/* Month calendar: compact, category-colored event markers on phones */
+.cal-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .cal-events {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1px;
+    width: 100%;
+    min-height: 12px;
+    margin-top: auto;
+  }
+  .cal-events .cal-ev {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    flex: 0 0 12px;
+    width: 12px !important;
+    min-width: 12px !important;
+    height: 12px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: transparent !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden;
+  }
+  .cal-events .cal-ev::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+  .cal-events .ce-gig::before { background: var(--info); }
+  .cal-events .ce-rehearsal::before { background: var(--ok); }
+  .cal-events .ce-recording::before { background: var(--plum); }
+  .cal-events .ce-meeting::before { background: var(--warn); }
+  .cal-events .cal-more {
+    padding: 0 2px;
+    color: var(--text-2);
+    font-size: 0;
+    font-weight: var(--fw-bold);
+    line-height: 1;
+  }
+  .cal-events .cal-more::after {
+    content: "+" attr(data-count);
+    font-size: 10px;
+  }
+}
