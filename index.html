@@ -4,9 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="color-scheme" content="light dark">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161C" media="(prefers-color-scheme: dark)">
 <script id="bandplan-boot-init">
 try{
   var bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpDoc=document.documentElement;
+  if(!bpBoot){try{for(var k=0;k<localStorage.length;k++){var key=localStorage.key(k)||'';if(key.indexOf('bandplan.premium.v6:')===0){var raw=JSON.parse(localStorage.getItem(key)||'null');if(raw&&raw.settings){bpBoot={theme:raw.settings.theme,accent:raw.settings.accent};break;}}}}catch(_e){}}
   var bpTheme=(bpBoot&&['light','dark','amoled'].includes(bpBoot.theme))?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
   bpDoc.dataset.theme=bpTheme;
   if(bpBoot&&/^#[0-9a-fA-F]{6}$/.test(bpBoot.accent||'')){bpDoc.style.setProperty('--accent',bpBoot.accent);bpDoc.style.setProperty('--on-accent',bpBoot.onAccent||'#fff');}
@@ -15,9 +20,6 @@ try{
   document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',bpColor)});
 }catch(e){}
 </script>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14161C" media="(prefers-color-scheme: dark)">
 <style id="bandplan-boot-theme">
   html,body{background:#F4F6F8;color:#111827}
   body{min-height:100%;margin:0}
