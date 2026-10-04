@@ -232,10 +232,10 @@
   function authErrorMessage(error, actionMode='login') {
     const raw = String(error?.message || '').trim();
     const code = String(error?.code || '').toLowerCase();
-    const status = Number(error?.status || 0);
+    const httpStatus = Number(error?.status || 0);
     const text = raw.toLowerCase();
 
-    if (status === 429 || /too many|rate limit|rate_limit|over_request/.test(text) || code.includes('rate')) {
+    if (httpStatus === 429 || /too many|rate limit|rate_limit|over_request/.test(text) || code.includes('rate')) {
       return 'Слишком много попыток. Подождите немного и попробуйте снова.';
     }
     if (/invalid login credentials|invalid credentials|invalid email or password/.test(text)) {
@@ -268,7 +268,7 @@
     event.preventDefault();
     const form=event.currentTarget, button=$('#bpAuthSubmit');
     const email=$('#bpAuthEmail').value.trim(), password=$('#bpAuthPassword')?.value || '';
-    const name=$('#bpAuthName')?.value.trim() || '';
+    const accountName=$('#bpAuthName')?.value.trim() || '';
     const actionMode = mode;
     const changingPassword = actionMode==='reset' && passwordRecoveryMode;
     /*
@@ -280,7 +280,7 @@
     */
     const passwordTooShort =
       (actionMode==='signup' || changingPassword) && password.length < 8;
-    if(!email || (actionMode==='signup' && !name) || passwordTooShort || ((actionMode==='login' || actionMode==='reset') && !password && changingPassword)){
+    if(!email || (actionMode==='signup' && !accountName) || passwordTooShort || ((actionMode==='login' || actionMode==='reset') && !password && changingPassword)){
       setMessage(
         actionMode==='signup'
           ? 'Укажите имя, почту и пароль не короче 8 символов.'
@@ -299,7 +299,7 @@
         result=await client.auth.signUp({
           email,
           password,
-          options:{data:{full_name:name,bandplan_onboarding_required:true}}
+          options:{data:{full_name:accountName,bandplan_onboarding_required:true}}
         });
         if(result.error) throw result.error;
         if(result.data?.session?.user) {
