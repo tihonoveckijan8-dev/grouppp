@@ -2997,13 +2997,14 @@ async function shouldOpenAccountOnboarding() {
       }
     }
 
-    // Only an account explicitly marked as requiring onboarding, or the
-    // one-time registration session flag, may open the wizard. A normal
-    // existing-account sign-in never opens it just because a row is missing.
+    // If authentication succeeded but no durable account profile exists,
+    // this is an unprovisioned account and must complete the profile wizard.
+    // Existing accounts have already returned above through hasAccountIdentity().
     if (onboardingRequired) return true;
-    if (window.BandPlanCloud?.isJustRegistered) {
-      return !!window.BandPlanCloud.isJustRegistered();
+    if (window.BandPlanCloud?.isJustRegistered && window.BandPlanCloud.isJustRegistered()) {
+      return true;
     }
+    if (user && String(meta.full_name || meta.name || '').trim()) return true;
   } catch (e) {
     console.warn('BandPlan onboarding identity check failed:', e);
   }
