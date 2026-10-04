@@ -370,6 +370,7 @@ const ui = {
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
+const participationPrevious = new Map();
 function personalParticipationMap() {
   const map = state.profile && state.profile.eventParticipation;
   return map && typeof map === 'object' ? map : {};
@@ -382,7 +383,12 @@ function eventStatusFor(ev) {
   const key=me && (me.accountId||me.id);
   if(key && Object.prototype.hasOwnProperty.call(shared,String(key))) return shared[String(key)]||'';
   const map=personalParticipationMap();
-  return Object.prototype.hasOwnProperty.call(map,id) ? (map[id]||'') : '';
+  const legacy = Object.prototype.hasOwnProperty.call(map,id) ? (map[id]||'') : String(ev.myStatus||'');
+  if (legacy && key && ['yes','maybe','no'].includes(legacy)) {
+    setEventParticipantStatus(ev, me, legacy, ev.participationUpdatedAt?.[String(key)] || new Date().toISOString());
+    return legacy;
+  }
+  return legacy || '';
 }
 function currentMemberForParticipation() {
   const uid = window.BandPlanCloud && window.BandPlanCloud.user ? window.BandPlanCloud.user()?.id : '';
@@ -536,6 +542,27 @@ function refreshMemberParticipationUI() {
   });
 }
 
+window.addEventListener('bandplan:participation-synced', event => {
+  const d=event.detail||{}, ev=evById(String(d.eventId||''));
+  if(!ev)return;
+  const status=String(d.status||'');
+  setMyParticipation(ev,status,String(d.updatedAt||new Date().toISOString()));
+  participationPrevious.delete(String(ev.id));
+  participationPending.delete(String(ev.id));
+  persistParticipationLocal();
+  refreshParticipationUI(ev.id);
+});
+window.addEventListener('bandplan:participation-error', event => {
+  const d=event.detail||{}, ev=evById(String(d.eventId||''));
+  if(!ev)return;
+  const key=String(ev.id), previous=participationPrevious.get(key)||'';
+  setMyParticipation(ev,previous,new Date().toISOString());
+  participationPrevious.delete(key);
+  participationPending.delete(key);
+  persistParticipationLocal();
+  refreshParticipationUI(ev.id);
+  toast('Не удалось отправить отметку: ' + String(d.message||'Сервер отклонил запрос.'),'err',5200);
+});
 function applyRealtimeParticipation(change) {
   const eventId=String(change?.event_id||'').trim();
   const userId=String(change?.user_id||'').trim();
@@ -2593,15 +2620,21 @@ document.addEventListener('click', function (e) {
         return;
       }
       const stamp=new Date().toISOString();
+      participationPrevious.set(eventId,previous);
       setMyParticipation(ev,value,stamp);
       participationPending.add(eventId);
       persistParticipationLocal();
       refreshParticipationUI(eventId);
       const buttons=document.querySelectorAll('[data-act="my-status"][data-id="'+CSS.escape(eventId)+'"]');
       buttons.forEach(btn=>{btn.disabled=true;btn.setAttribute('aria-busy','true');});
-      const queue=async()=>{ try{ await window.BandPlanCloud?.queueEventParticipation?.(eventId,value,stamp); toast('Ответ сохранён на устройстве · ждёт отправки','info',2600); }catch(queueError){ console.warn('Participation queue failed:',queueError); toast('Не удалось сохранить ответ офлайн. Попробуйте ещё раз.','err',5000); } };
+      const queue=async()=>{ try{ await window.BandPlanCloud?.queueEventParticipation?.(eventId,value,stamp); toast('Ответ сохранён на устройстве · ждёт отправки','info',2600); }catch(queueError){ 
+        participationPrevious.delete(eventId); participationPending.delete(eventId);
+        setMyParticipation(ev,previous,new Date().toISOString()); persistParticipationLocal(); refreshParticipationUI(eventId);
+        console.warn('Participation queue failed:',queueError); toast('Не удалось сохранить ответ офлайн. Попробуйте ещё раз.','err',5000);
+      } };
       const rollback=(message)=>{
         setMyParticipation(ev,previous,new Date().toISOString());
+        participationPrevious.delete(eventId);
         participationPending.delete(eventId);
         persistParticipationLocal(); refreshParticipationUI(eventId);
         buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');});
@@ -2615,6 +2648,7 @@ document.addEventListener('click', function (e) {
         const remoteStatus=remote&&typeof remote==='object' ? String(remote.status||'') : value;
         const remoteAt=remote&&typeof remote==='object' ? String(remote.updated_at||stamp) : stamp;
         setMyParticipation(ev,remoteStatus,remoteAt);
+        participationPrevious.delete(eventId);
         participationPending.delete(eventId);
         persistParticipationLocal();
         refreshParticipationUI(eventId);
