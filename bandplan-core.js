@@ -1267,7 +1267,10 @@ function monthHTML(y, mo) {
     const calEventColor = list.length ? (evType(list[0].ev.type).color || 'var(--accent)') : 'var(--accent)';
     if (list.length) cls.push('cal-has-events');
     h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
-      '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') + '</div>';
+    const nearest = list.find(o => (o.ev.status || 'upcoming') === 'upcoming' && o.date >= today()) || list[0];
+    const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
+    h += '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
+      (nearest ? '<i class="cal-my-dot status-' + (nearestStatus || 'unset') + '" title="' + esc('Моя позиция: ' + participantStatusLabel(nearestStatus)) + '" aria-label="' + esc('Моя позиция: ' + participantStatusLabel(nearestStatus)) + '"></i>' : '') + '</div>';
     if (list.length) {
       h += '<div class="cal-events">';
       list.slice(0, 3).forEach(o => {
@@ -1700,7 +1703,7 @@ function vSettings() {
     const statusTitle = summary.event ? participantStatusLabel(summary.status) + ' · ' + summary.event.title : participantStatusLabel(summary.status);
     h += '<div class="memb-row" data-member-key="' + esc(String(m.accountId || m.id || '')) + '">' +
       '<div class="avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
-      '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + '</div>' +
+      '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + (window.BandPlanCloud?.user?.()?.id && String(m.accountId || m.id) === String(window.BandPlanCloud.user().id) ? ' <span class="member-you">Вы</span>' : '') + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       '<div class="member-status-wrap">' +
         '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
