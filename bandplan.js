@@ -2230,7 +2230,6 @@ document.addEventListener('click', function (e) {
       const b=el;
       b.disabled=true;
       window.BandPlanCloud.signOut()
-        .then(()=>{ if(typeof window.__bandplanHandleSignedOut==='function') window.__bandplanHandleSignedOut(); })
         .catch(err=>{b.disabled=false;toast('Не удалось выйти: '+(err.message||''),'err');});
       break;
     }
@@ -3170,6 +3169,11 @@ function resetForLogout() {
     onb.classList.remove('on');
     onb.setAttribute('aria-hidden', 'true');
   }
+  // Supabase's SIGNED_OUT event is the only authority for leaving the
+  // authenticated shell. The login gate already exists from initial boot;
+  // reveal it here instead of reloading or creating a second auth flow.
+  const authGate = document.getElementById('bpAuthGate');
+  if (authGate) authGate.hidden = false;
   if (window.location.hash !== '#/calendar') {
     history.replaceState(null, '', '#/calendar');
   }
@@ -3313,22 +3317,16 @@ async function startBandPlan(forceOffline) {
       return startBandPlan(true);
     }
     Boot.stage('Подключаем вход в аккаунт', 25);
-    // Do not silently bypass authentication when the Supabase bundle is delayed.
-    // GitHub Pages/CDN can resolve scripts a little later than the app shell.
-    if (!window.__bandplanAuthRetry) window.__bandplanAuthRetry = 0;
-    if (window.__bandplanAuthRetry < 20) {
-      window.__bandplanAuthRetry += 1;
-      setTimeout(() => startBandPlan(false), 250);
-      return;
-    }
+    // The Supabase script tags are blocking dependencies, so BandPlan must not
+    // poll with timers waiting for the auth client. If the client is absent at
+    // this point, report the dependency failure immediately.
     Boot.fail({
       title:'Не удалось подключить вход в аккаунт',
-      text:'Сервис авторизации не загрузился. Проверьте интернет и повторите запуск.',
+      text:'Сервис авторизации не загрузился. Проверьте подключение и повторите запуск.',
       actions:'<button type="button" id="bootRetry">Повторить</button>'
     });
     return;
   }
-  window.__bandplanAuthRetry = 0;
   let user = null;
   try {
     Boot.stage('Проверяем сессию', 25);
