@@ -347,11 +347,16 @@ const ACCENTS = ['#2547D0', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
 function defaults() {
+  const bootTheme = ['light','dark','amoled','glass'].includes(document.documentElement.dataset.theme)
+    ? document.documentElement.dataset.theme : 'light';
+  const bootAccent = /^#[0-9a-fA-F]{6}$/.test(
+    document.documentElement.style.getPropertyValue('--accent').trim()
+  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#2547D0';
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
     settings: {
-      theme: 'light', accent: '#2547D0', notation: 'auto', weekStart: 1,
+      theme: bootTheme, accent: bootAccent, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true
     },
     onboardingDone: false
@@ -2156,7 +2161,13 @@ function applyAccentVars() {
 let onbStep = 0, onbData = null;
 function openOnboarding() {
   onbStep = 0;
-  onbData = { name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes', members: [{ name: '', role: 'vocal' }], theme: 'light', accent: '#2547D0', demo: false };
+  onbData = {
+    name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes',
+    members: [{ name: '', role: 'vocal' }],
+    theme: THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light',
+    accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#2547D0',
+    demo: false
+  };
   drawOnb(); $('#onb').classList.add('on');
 }
 function drawOnb() {
