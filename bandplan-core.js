@@ -405,6 +405,19 @@ function participantStatusFor(ev, member) {
 function participantStatusLabel(v) {
   return ({yes:'Участвует', maybe:'Под вопросом', no:'Не участвует'}[v] || 'Не отмечено');
 }
+function myRoleLabel() {
+  const me=currentMemberForParticipation();
+  const roles = me ? rolesOf(me) : myRoles();
+  const label = rolesLabel(roles);
+  return label === '—' ? '' : label;
+}
+function renderMyPositionBadge(ev, options) {
+  const o=options||{}, status=eventStatusFor(ev)||'unset', role=myRoleLabel();
+  return '<span class="event-my-state my-position status-' + status + '" data-event-my-state="' + esc(String(ev?.id||'')) + '">' +
+    '<span class="my-position-status">' + esc(participantStatusLabel(status)) + '</span>' +
+    (role ? '<span class="my-position-role">' + (o.compact===false ? '' : ' · ') + esc(role) + '</span>' : '') +
+  '</span>';
+}
 function participationSummary(ev) {
   const counts = {yes:0, maybe:0, no:0, unset:0};
   const members = (ev?.memberIds || []).map(memById).filter(Boolean);
@@ -1341,7 +1354,7 @@ function evRow(o, withPart) {
     '<h3 class="ev-title"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
     (e.repeat && e.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[e.repeat]) + '</span>' : '') +
     (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') +
-    '<span class="event-my-state status-' + (eventStatusFor(e) || 'unset') + '" data-event-my-state="' + esc(String(e.id)) + '">' + esc(participantStatusLabel(eventStatusFor(e))) + '</span></h3>' +
+    renderMyPositionBadge(e) + '</h3>' +
     '<div class="ev-meta">' +
     (e.time ? '<span>' + ic('clock', 12) + esc(e.time) + (e.end ? '–' + esc(e.end) : '') + '</span>' : '') +
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
