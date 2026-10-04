@@ -84,6 +84,11 @@ const Boot = (() => {
 })();
 
 /* ═══ 1. HELPERS ═══ */
+const cloneValue = value => {
+  if (typeof structuredClone === 'function') return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
+};
+
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
 const uid = p => (p || 'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -1715,7 +1720,7 @@ let dynDraft = null;
 function songModal(id) {
   const s = id ? songById(id) : null;
   const d = s || { title: '', artist: '', key: 'Am', bpm: '', duration: '', tags: [], lyrics: '', fav: false };
-  dynDraft = s && s.dynamics ? JSON.parse(JSON.stringify(s.dynamics)) : { instruments: [], sections: [], levels: {} };
+  dynDraft = s && s.dynamics ? cloneValue(s.dynamics) : { instruments: [], sections: [], levels: {} };
   const tpl = '[Куплет 1]\nAm      F       C       G\nСтрока текста песни\nAm      F       G\nВторая строка\n\n[Припев]\nF       G       Em      Am\nТекст припева';
   const body =
     '<div class="f2"><div class="field"><label class="field-label" for="f_stitle">Название *</label><input class="input" id="f_stitle" maxlength="90" value="' + esc(d.title) + '" placeholder="Название песни"><span class="err"></span></div>' +
@@ -1774,7 +1779,7 @@ function readSongForm(id) {
     bpm: bpm, duration: durParse(fv('f_sdur')),
     tags: fv('f_stags').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).slice(0, 8),
     lyrics: $('#f_slyr', w).value, fav: old ? !!old.fav : false, addedAt: old ? old.addedAt : today(),
-    dynamics: dynDraft ? JSON.parse(JSON.stringify(dynDraft)) : (old ? old.dynamics : null)
+    dynamics: dynDraft ? cloneValue(dynDraft) : (old ? old.dynamics : null)
   };
 }
 function setlistModal(id) {
