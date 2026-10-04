@@ -3166,7 +3166,11 @@ async function bootCloudSync(hadLocal, durableInfo) {
     });
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
-    setSyncStatus(navigator.onLine === false ? 'offline' : 'err', navigator.onLine === false ? 'Офлайн' : 'Ошибка синхронизации', 0);
+    // Do not turn a Supabase/Auth/database error into an "Офлайн" state just
+    // because navigator.onLine is false. That value is advisory and is known
+    // to be unreliable in PWAs. A real offline state is entered explicitly
+    // by the offline boot path or the browser offline event.
+    setSyncStatus('err', 'Ошибка синхронизации', 0);
     if (await shouldOpenAccountOnboarding()) openOnboarding();
     if (!window.__bandplanSyncRetryBound) {
       window.__bandplanSyncRetryBound = true;
@@ -3355,9 +3359,11 @@ async function startBandPlan(forceOffline) {
     // Offline PWA startup must not wait for an external Supabase CDN.
     // Authentication remains mandatory when online; offline mode only opens
     // the already cached local workspace.
-    if (navigator.onLine === false) {
-      return startBandPlan(true);
-    }
+    // navigator.onLine is only a browser hint and can be false while the
+    // device still has working connectivity (especially in installed PWAs,
+    // VPN/proxy environments and after network handoffs). Never bypass Auth
+    // solely because that hint says offline. initialize() must be allowed to
+    // restore the persisted Supabase session first.
     Boot.stage('Подключаем вход в аккаунт', 25);
     // The Supabase script tags are blocking dependencies, so BandPlan must not
     // poll with timers waiting for the auth client. If the client is absent at
