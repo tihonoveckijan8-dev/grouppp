@@ -48,6 +48,24 @@ try {
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
 
+  const responsive = [];
+  for (const width of [360, 390, 430, 768, 1280]) {
+    await page.setViewportSize({width, height: 900});
+    const metrics = await page.evaluate(() => ({
+      width: innerWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      emailHeight: document.querySelector('#bpAuthEmail')?.getBoundingClientRect().height || 0,
+      passwordHeight: document.querySelector('#bpAuthPassword')?.getBoundingClientRect().height || 0,
+      submitHeight: document.querySelector('#bpAuthSubmit')?.getBoundingClientRect().height || 0
+    }));
+    assert.ok(metrics.scrollWidth <= metrics.width + 1, `Horizontal overflow at ${width}px`);
+    assert.ok(metrics.emailHeight >= 44, `Email target too small at ${width}px`);
+    assert.ok(metrics.passwordHeight >= 44, `Password target too small at ${width}px`);
+    assert.ok(metrics.submitHeight >= 44, `Submit target too small at ${width}px`);
+    responsive.push(metrics);
+  }
+  await page.setViewportSize({width: 1280, height: 900});
+
   const result = await page.evaluate(() => ({
     cloud: typeof window.BandPlanCloud !== 'undefined',
     authForm: !!document.querySelector('#bpAuthForm'),
@@ -68,7 +86,7 @@ try {
   assert.deepEqual(consoleErrors, [], 'Browser console.error detected');
 
   console.log('BandPlan auth smoke: PASS');
-  console.log(JSON.stringify(result));
+  console.log(JSON.stringify({...result, responsive}));
 } finally {
   await browser.close();
   await new Promise(resolve => server.close(resolve));
