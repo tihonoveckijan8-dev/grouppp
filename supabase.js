@@ -162,9 +162,8 @@
     renderGate('Проверяем сессию…');
     const {data,error}=await client.auth.getSession();
     if(error) {
-      console.warn('BandPlan session check failed; showing clean login state:', error);
+      console.warn('BandPlan session check failed:', error);
       currentSession=null;
-      try { await client.auth.signOut({scope:'local'}); } catch (_) {}
       mode='login';
       renderGate('Войдите в аккаунт, чтобы продолжить.');
       return null;
