@@ -2984,6 +2984,11 @@ async function shouldOpenAccountOnboarding() {
       return false;
     }
 
+    // Registration intent is stored in Supabase metadata, not only in
+    // sessionStorage, so email-confirmation flows can finish onboarding even
+    // after the confirmation link opens a new tab/device.
+    const onboardingRequired = meta.bandplan_onboarding_required === true;
+
     if (window.BandPlanCloud?.hasAccountIdentity) {
       const hasIdentity = await window.BandPlanCloud.hasAccountIdentity();
       if (hasIdentity) {
@@ -2993,9 +2998,10 @@ async function shouldOpenAccountOnboarding() {
       }
     }
 
-    // Only the registration flow is allowed to open the wizard.
-    // A normal sign-in must go straight into the app, even if an old account
-    // is missing an account row or local snapshot.
+    // Only an account explicitly marked as requiring onboarding, or the
+    // one-time registration session flag, may open the wizard. A normal
+    // existing-account sign-in never opens it just because a row is missing.
+    if (onboardingRequired) return true;
     if (window.BandPlanCloud?.isJustRegistered) {
       return !!window.BandPlanCloud.isJustRegistered();
     }
