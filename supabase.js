@@ -137,7 +137,11 @@
         sharedBaseline = {songs:{},events:{},setlists:{}};
         disposeRealtime();
         mode = 'login';
-        renderGate();
+        if(typeof window.__bandplanHandleSignedOut==='function') {
+          window.__bandplanHandleSignedOut();
+        } else {
+          renderGate();
+        }
         return;
       }
       if (event === 'PASSWORD_RECOVERY') {
