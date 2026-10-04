@@ -78,8 +78,9 @@ jobs:
           const swResponse = await fetch(base + '/sw.js');
           if (!swResponse.ok) throw new Error('Service worker is not reachable');
           const sw = await swResponse.text();
-          for (const token of ["addEventListener('install'", "addEventListener('fetch'", "addEventListener('activate'"]) {
-            if (!sw.includes(token)) throw new Error('Service worker is missing ' + token);
+          for (const eventName of ['install','fetch','activate']) {
+            const pattern = new RegExp("addEventListener\\\\(['\\\"]" + eventName + "['\\\"]\\\\)");
+            if (!pattern.test(sw)) throw new Error('Service worker is missing ' + eventName + ' handler');
           }
           const indexResponse = await fetch(base + '/');
           if (!indexResponse.ok) throw new Error('PWA entry point is not reachable');
