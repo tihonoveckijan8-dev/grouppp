@@ -3053,7 +3053,6 @@ async function bootCloudSync(hadLocal, durableInfo) {
         try {
           await window.BandPlanCloud.saveNow(state);
           if (!syncIsCurrent()) return;
-          if (!syncIsCurrent()) return;
           pendingConfirmed = true;
         } catch (syncError) {
           console.warn('BandPlan pending offline sync deferred:', syncError);
@@ -3077,6 +3076,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
         if (isKnownDemoState(remoteState) && hasMeaningfulState(local) && !isKnownDemoState(local)) {
           normalizeCloudState(local);
           await window.BandPlanCloud.saveNow(state);
+          if (!syncIsCurrent()) return;
         } else if (!isKnownDemoState(remoteState)) {
           normalizeCloudState(remoteState);
         } else {
@@ -3087,17 +3087,25 @@ async function bootCloudSync(hadLocal, durableInfo) {
       } else if (hasMeaningfulState(local) && !isKnownDemoState(local)) {
         normalizeCloudState(local);
         await window.BandPlanCloud.saveNow(state);
+        if (!syncIsCurrent()) return;
       } else {
         normalizeCloudState(defaults());
         await window.BandPlanCloud.saveNow(state);
+        if (!syncIsCurrent()) return;
       }
     }
+    if (!syncIsCurrent()) return;
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
     applyTheme();
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
-    if (await shouldOpenAccountOnboarding()) openOnboarding();
+    if (!syncIsCurrent()) return;
+    if (await shouldOpenAccountOnboarding()) {
+      if (!syncIsCurrent()) return;
+      openOnboarding();
+    }
+    if (!syncIsCurrent()) return;
     setSyncStatus('ok', 'Синхронизировано', 2200);
     if (!syncIsCurrent()) return;
     window.BandPlanCloud.subscribe(function (incoming) {
