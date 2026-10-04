@@ -700,7 +700,7 @@ function applyRealtimeParticipation(change) {
   persistParticipationLocal();
   refreshParticipationUI(eventId);
   refreshMemberParticipationUI();
-}
+  scheduleOfflineSongSync(150);
 
 function refreshParticipationUI(evId) {
   const ev = evById(evId);
@@ -1227,6 +1227,7 @@ function render() {
     v.innerHTML = '<div class="card">' + stateHTML('err', 'Не удалось отобразить раздел', 'Данные сохранены локально. Повторите попытку или вернитесь в расписание.', '<button class="btn btn-primary" type="button" data-act="reload-view">Повторить</button>') + '</div>';
   }
   afterRender(r);
+  scheduleOfflineSongSync(1400);
 }
 function afterRender(r) {
   if (r.name === 'setlist' && r.id) bindDnD(r.id);
@@ -3635,7 +3636,12 @@ function init() {
   $('#scBody').addEventListener('scroll', updateBar, { passive: true });
   $('#scBody').addEventListener('wheel', () => { if (scene.auto) setAuto(false); }, { passive: true });
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake(); });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake();
+    if (!document.hidden) scheduleOfflineSongSync(150);
+  });
+  window.addEventListener('online', () => scheduleOfflineSongSync(150));
+  window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     // When a new app version takes control, reload once so installed clients
