@@ -788,11 +788,11 @@ function render() {
   else if (r.name === 'song') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/songs">Репертуар</a>' + ic('right', 12) + '<span class="nowrap">' + esc((songById(r.id) || {}).title || '') + '</span></nav>';
     acts = '<button class="btn btn-secondary" type="button" data-act="print-song" data-id="' + esc(r.id) + '">' + ic('print', 17) + 'Печать</button><button class="btn btn-primary" type="button" data-act="edit-song" data-id="' + esc(r.id) + '">' + ic('edit', 17) + 'Изменить песню</button>';
-    actionBarHTML = '<div class="actionbar"><button class="btn btn-secondary btn-icon" type="button" data-act="edit-song" data-id="' + esc(r.id) + '" aria-label="Изменить песню">' + ic('edit', 18) + '</button><button class="btn btn-secondary btn-icon" type="button" data-act="print-song" data-id="' + esc(r.id) + '" aria-label="Печать песни">' + ic('print', 18) + '</button><button class="btn btn-primary" type="button" data-act="scene-song" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button></div>';
+    actionBarHTML = '';
   } else if (r.name === 'setlist') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/setlists">Сет-листы</a>' + ic('right', 12) + '<span class="nowrap">' + esc((slById(r.id) || {}).name || '') + '</span></nav>';
     acts = '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + esc(r.id) + '">' + ic('print', 17) + 'Печать</button><button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
-    actionBarHTML = '<div class="actionbar"><button class="btn btn-secondary btn-icon" type="button" data-act="print-setlist" data-id="' + esc(r.id) + '" aria-label="Печать сет-листа">' + ic('print', 18) + '</button><button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button></div>';
+    actionBarHTML = '';
   } else if (r.name === 'settings') acts = '<button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 17) + 'Скачать копию</button>';
   $('#pageHead').innerHTML = '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
     (acts ? '<div class="ph-acts">' + acts + '</div>' : '');
