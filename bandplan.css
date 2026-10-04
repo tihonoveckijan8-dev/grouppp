@@ -4623,3 +4623,52 @@ body {
     font-size: 10px;
   }
 }
+
+/* Mobile setlist editor: stable song rows and comfortable action targets */
+.sl-row-actions {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+@media (max-width: 640px) {
+  .sl-item-song {
+    display: grid !important;
+    grid-template-columns: 20px 28px minmax(0, 1fr) !important;
+    grid-template-areas: "grip num info" "actions actions actions";
+    align-items: center;
+    gap: 8px !important;
+    padding: 12px !important;
+  }
+  .sl-item-song > .grip {
+    grid-area: grip;
+    justify-self: center;
+    margin: 0;
+    padding: 4px;
+  }
+  .sl-item-song > .sl-num { grid-area: num; justify-self: center; }
+  .sl-item-song > .sl-info { grid-area: info; width: 100%; min-width: 0; }
+  .sl-item-song > .sl-row-actions {
+    grid-area: actions;
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  .sl-item-song .sl-row-actions > .icon-btn,
+  .sl-item-missing > .icon-btn {
+    box-sizing: border-box;
+    flex: 0 0 40px;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0;
+  }
+  .sl-item-song .sl-row-actions .mini-stepper button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+}

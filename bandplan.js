@@ -1274,8 +1274,8 @@ function vSetlist(id) {
   if (!(sl.items || []).length) h += stateHTML('empty', 'Программа пуста', 'Перетащите сюда песни из библиотеки или добавьте их кнопкой «+».', '<button class="btn btn-primary btn-sm" type="button" data-act="sl-rename" data-id="' + sl.id + '">Настроить сет-лист</button>');
   else (sl.items || []).forEach(function (it, i) {
     const s = songById(it.songId);
-    if (!s) { h += '<div class="sl-item"><div class="sl-num">' + (i + 1) + '</div><div class="sl-info"><div class="sl-name t-muted">Песня удалена из репертуара</div></div><button class="icon-btn" type="button" data-act="sl-item-del" data-sl="' + sl.id + '" data-item="' + it.id + '" aria-label="Убрать">' + ic('x', 16) + '</button></div>'; return; }
-    h += '<div class="sl-item" draggable="true" data-item="' + it.id + '">' +
+    if (!s) { h += '<div class="sl-item sl-item-missing"><div class="sl-num">' + (i + 1) + '</div><div class="sl-info"><div class="sl-name t-muted">Песня удалена из репертуара</div></div><button class="icon-btn" type="button" data-act="sl-item-del" data-sl="' + sl.id + '" data-item="' + it.id + '" aria-label="Убрать">' + ic('x', 16) + '</button></div>'; return; }
+    h += '<div class="sl-item sl-item-song" draggable="true" data-item="' + it.id + '">' +
       '<span class="grip" title="Перетащить" aria-hidden="true">' + ic('grip', 18) + '</span>' +
       '<div class="sl-num" aria-hidden="true">' + (i + 1) + '</div>' +
       '<div class="sl-info" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" style="cursor:pointer">' +
@@ -1283,6 +1283,7 @@ function vSetlist(id) {
       '<div class="sl-sub"><span class="num">' + esc(finalKey(s, it.shift)) + (it.shift ? ' <i style="color:var(--warn);font-style:normal">(' + (it.shift > 0 ? '+' : '') + it.shift + ')</i>' : '') + '</span>' +
       (s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '') + (s.duration ? '<span class="num">' + fmtDur(s.duration) + '</span>' : '') +
       (it.note ? '<span>' + esc(it.note) + '</span>' : '') + '</div></div>' +
+      '<div class="sl-row-actions" role="group" aria-label="Управление песней в сет-листе">' +
       '<div class="mini-stepper" role="group" aria-label="Транспонирование">' +
       '<button type="button" data-act="sl-shift" data-sl="' + sl.id + '" data-item="' + it.id + '" data-d="-1" aria-label="Опустить">♭</button>' +
       '<span aria-live="polite">' + (it.shift > 0 ? '+' : '') + (it.shift || 0) + '</span>' +
@@ -1290,7 +1291,7 @@ function vSetlist(id) {
       '<button class="icon-btn" type="button" data-act="sl-item-move" data-sl="' + sl.id + '" data-item="' + it.id + '" data-d="-1" aria-label="Переместить выше"' + (i === 0 ? ' disabled' : '') + '>' + ic('up', 16) + '</button>' +
       '<button class="icon-btn" type="button" data-act="sl-item-move" data-sl="' + sl.id + '" data-item="' + it.id + '" data-d="1" aria-label="Переместить ниже"' + (i === sl.items.length - 1 ? ' disabled' : '') + '>' + ic('down', 16) + '</button>' +
       '<button class="icon-btn" type="button" data-act="sl-item-note" data-sl="' + sl.id + '" data-item="' + it.id + '" aria-label="Заметка к песне">' + ic('edit', 16) + '</button>' +
-      '<button class="icon-btn" type="button" data-act="sl-item-del" data-sl="' + sl.id + '" data-item="' + it.id + '" aria-label="Убрать из программы">' + ic('x', 16) + '</button></div>';
+      '<button class="icon-btn" type="button" data-act="sl-item-del" data-sl="' + sl.id + '" data-item="' + it.id + '" aria-label="Убрать из программы">' + ic('x', 16) + '</button></div></div>';
   });
   h += '</div><div class="row mt" style="gap:var(--s3)"><span class="badge b-brand num">' + (sl.items || []).length + ' ' + plural((sl.items || []).length, 'песня', 'песни', 'песен') + '</span>' +
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(setlistDur(sl)) + '</span>' +
