@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
 
       - name: Install build tool
         run: npm install --no-package-lock
