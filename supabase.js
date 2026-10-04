@@ -253,36 +253,46 @@
       button.textContent=actionMode==='signup'?'Зарегистрироваться':actionMode==='reset'?'Отправить ссылку':'Войти';
     }
   }
+  let authInitPromise = null;
   async function initialize() {
-    bindAuthLifecycle();
-    authState='loading';
+    if (authInitPromise) return authInitPromise;
+    authInitPromise = (async () => {
+      bindAuthLifecycle();
+      authState='loading';
 
-    // Keep the auth gate hidden while Supabase restores its persisted session.
-    // The boot screen is the initialization state; showing Login before
-    // getSession() resolves creates the classic login -> refresh -> login race.
-    gate().hidden=true;
-
-    const {data,error}=await client.auth.getSession();
-    if(error) {
-      console.error('BandPlan session check failed:', error);
-      currentSession=null;
-      authState='ready';
-      mode='login';
-      renderGate('Не удалось восстановить вход. Войдите снова.',true);
-      return null;
-    }
-
-    currentSession=data?.session||null;
-    authState='ready';
-    cleanupLegacyAuthStorage();
-    if(currentSession?.user) {
+      // Keep the auth gate hidden for the entire initial session resolution.
+      // Login/onboarding is rendered only after Supabase has definitively
+      // reported that there is no persisted session.
       gate().hidden=true;
-      return currentSession.user;
-    }
 
-    mode='login';
-    renderGate();
-    return null;
+      const {data,error}=await client.auth.getSession();
+      if(error) {
+        console.error('BandPlan session check failed:', error);
+        currentSession=null;
+        authState='ready';
+        mode='login';
+        renderGate('Не удалось восстановить вход. Войдите снова.',true);
+        return null;
+      }
+
+      currentSession=data?.session||null;
+      authState='ready';
+      if(currentSession?.user) {
+        cleanupLegacyAuthStorage();
+        gate().hidden=true;
+        return currentSession.user;
+      }
+
+      cleanupLegacyAuthStorage();
+      mode='login';
+      renderGate();
+      return null;
+    })();
+    try {
+      return await authInitPromise;
+    } finally {
+      authInitPromise = null;
+    }
   }
   function hydratePersonalEventParticipation(events, profile) {
     const nextProfile = Object.assign({}, profile || {});
@@ -310,13 +320,14 @@
 
     try {
       const { data, error } = await client.from('bandplan_accounts')
-        .select('display_name,roles')
+        .select('user_id,display_name,roles')
         .eq('user_id', user.id)
         .maybeSingle();
-      if(!error && String(data?.display_name || '').trim() &&
-        Array.isArray(data?.roles) && data.roles.length > 0) {
-        return true;
-      }
+      // The account row itself is the durable profile existence signal.
+      // Do not require a particular name/role shape here: older accounts can
+      // have partial profile data and must never be sent through onboarding
+      // again just because one profile field is temporarily empty.
+      if(!error && data?.user_id === user.id) return true;
       if(error) console.warn('BandPlan account identity check failed:', error);
     } catch(error) {
       console.warn('BandPlan account identity check failed:', error);
@@ -385,7 +396,7 @@
     }
     const accountSettings=accountProfile?.personal_settings&&typeof accountProfile.personal_settings==='object' ? accountProfile.personal_settings : {};
     const settings=Object.assign({},accountSettings,pstate.settings||{});
-    const hasAccountIdentity=!!String(accountProfile?.display_name||'').trim() && Array.isArray(accountProfile?.roles) && accountProfile.roles.length>0;
+    const hasAccountIdentity=accountProfile?.user_id===uid;
     const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
     const personalEvents=hydratePersonalEventParticipation(pstate.events||[],profile);
     if(!activeGroupId){
