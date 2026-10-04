@@ -695,7 +695,27 @@ window.addEventListener('error', event => {
   if (!event?.error) return;
   console.error('BandPlan uncaught error:', event.error);
 });
+window.addEventListener('popstate', () => {
+  if (!modalHistoryPushed) return;
+  modalHistoryPushed = false;
+  if (modalRoot) hardClose(modalRoot, {keepHistory:true});
+});
+document.addEventListener('focusin', event => {
+  const target = event.target;
+  if (!target || !/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || window.innerWidth > 640) return;
+  if ($('#scene').classList.contains('on')) return;
+  setTimeout(() => {
+    if (!target.isConnected) return;
+    try {
+      target.scrollIntoView({
+        block:'center', inline:'nearest',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      });
+    } catch (_) {}
+  }, 60);
+});
 let modalRoot = null, confirmCb = null, lastFocus = null, modalDirty = false, trapHandler = null;
+let modalHistoryPushed = false;
 function closeModal(force) {
   if (!modalRoot) return;
   if (modalDirty && !force) {
@@ -705,7 +725,8 @@ function closeModal(force) {
   }
   hardClose(modalRoot);
 }
-function hardClose(node) {
+function hardClose(node, opts) {
+  const keepHistory = !!(opts && opts.keepHistory);
   const ov = $('#modalOverlay');
   if (node && node.parentNode === ov) node.remove();
   if (!ov.children.length) { ov.classList.remove('on', 'is-fullscreen'); ov.innerHTML = ''; }
@@ -715,10 +736,14 @@ function hardClose(node) {
   if (!modalRoot && !$('#scene').classList.contains('on')) document.body.style.overflow = '';
   if (lastFocus && lastFocus.focus && !modalRoot) { try { lastFocus.focus(); } catch (e) { } lastFocus = null; }
   updateDirtyNote();
+  if (!modalRoot && modalHistoryPushed && !keepHistory) {
+    modalHistoryPushed = false;
+    try { history.back(); } catch (_) {}
+  }
 }
 function updateDirtyNote() { const n = $('.dirty-note'); if (n) n.classList.toggle('on', modalDirty); }
 function openModal(o) {
-  if (modalRoot) hardClose(modalRoot);
+  if (modalRoot) hardClose(modalRoot, {keepHistory:true});
   lastFocus = document.activeElement; modalDirty = false;
   const ov = $('#modalOverlay');
   ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (o.fullscreen ? ' modal-fullscreen' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
@@ -732,7 +757,25 @@ function openModal(o) {
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
   document.body.style.overflow = 'hidden';
+  if (!modalHistoryPushed) {
+    try { history.pushState({__bandplanModal:true}, '', location.href); modalHistoryPushed = true; } catch (_) {}
+  }
   ov.onmousedown = e => { if (e.target === ov) closeModal(); };
+  let modalTouchY = 0, modalTouchX = 0, modalTouching = false;
+  modalRoot.addEventListener('touchstart', function (e) {
+    if (window.innerWidth > 640 || !e.touches[0]) return;
+    const target = e.target;
+    if (target.closest('button,input,textarea,select,a')) return;
+    modalTouchY = e.touches[0].clientY; modalTouchX = e.touches[0].clientX; modalTouching = true;
+  }, {passive:true});
+  modalRoot.addEventListener('touchend', function (e) {
+    if (!modalTouching || window.innerWidth > 640 || !e.changedTouches[0]) return;
+    modalTouching = false;
+    const dy = e.changedTouches[0].clientY - modalTouchY;
+    const dx = e.changedTouches[0].clientX - modalTouchX;
+    const body = $('.modal-body', modalRoot);
+    if (dy > 80 && Math.abs(dy) > Math.abs(dx) * 1.25 && (!body || body.scrollTop <= 2)) closeModal();
+  }, {passive:true});
   trapHandler = function (e) {
     if (e.key !== 'Tab' || !modalRoot) return;
     const f = $$('a[href],button:not([disabled]),input:not([type=hidden]),select,textarea,[tabindex]:not([tabindex="-1"])', modalRoot).filter(x => x.offsetParent !== null);
@@ -1120,7 +1163,7 @@ function monthHTML(y, mo) {
       list.slice(0, 3).forEach(o => {
         const type = evType(o.ev.type);
         const label = [o.ev.title, o.ev.time, type.label].filter(Boolean).join(', ');
-        h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
+        h += '<div class="cal-ev ce-' + o.ev.type + '" style="--cal-dot-color:' + esc(type.color || 'var(--accent)') + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
       });
       if (list.length > 3) {
         const remaining = list.length - 3;
@@ -1130,7 +1173,16 @@ function monthHTML(y, mo) {
     }
     h += '</div>';
   }
-  h += '</div><div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>
+  h += '</div>';
+  const selected = ui.selDate && byDay[ui.selDate] ? byDay[ui.selDate] : [];
+  if (ui.selDate && new Date(ui.selDate + 'T00:00:00').getMonth() === mo) {
+    h += '<section class="cal-selected-day card" aria-labelledby="calSelectedTitle"><div class="card-h"><div><h2 id="calSelectedTitle">Выбранный день</h2><div class="sub">' + esc(pdateFull(ui.selDate)) + ' · ' + selected.length + ' ' + plural(selected.length, 'событие', 'события', 'событий') + '</div></div>' +
+      '<button class="btn btn-primary btn-sm" type="button" data-act="new-event" data-date="' + esc(ui.selDate) + '">' + ic('plus', 15) + '<span class="btn-lbl">Добавить</span></button></div>';
+    if (selected.length) selected.forEach(o => { h += evRow(o, true); });
+    else h += stateHTML('empty', 'Нет событий', 'На выбранную дату пока ничего не запланировано.', '<button class="btn btn-primary" type="button" data-act="new-event" data-date="' + esc(ui.selDate) + '">Создать событие</button>');
+    h += '</section>';
+  }
+  h += '<div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>
     '<span><i style="background:' + EV_TYPES[t].color + '" aria-hidden="true"></i>' + EV_TYPES[t].label + '</span>').join('') + '</div>';
   return h;
 }
@@ -2403,7 +2455,7 @@ document.addEventListener('click', function (e) {
     }
     case 'cal-today': stop(); ui.month = new Date(); ui.selDate = today(); if (parseHash().name !== 'calendar') go('#/calendar'); else render(); break;
     case 'cal-view': stop(); ui.calView = el.getAttribute('data-v'); state.settings.calView = ui.calView; save(); render(); break;
-    case 'cal-day': { stop(); ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); dayCellModal(ui.selDate); break; }
+    case 'cal-day': { stop(); ui.selDate = el.getAttribute('data-date'); ui.month = new Date(ui.selDate + 'T00:00:00'); render(); break; }
     case 'tg-day': stop(); ui.selDate = el.getAttribute('data-date'); ui.calView = 'day'; render(); break;
     case 'tg-col': stop(); if (e.target.closest('.tg-ev')) break; ui.selDate = el.getAttribute('data-date'); eventModal(null, el.getAttribute('data-date')); break;
     case 'new-event': stop(); eventModal(null, el.getAttribute('data-date') || ui.selDate); break;
