@@ -649,18 +649,21 @@
       else roster.push({id:a.user_id,accountId:a.user_id,name:a.display_name,roles:a.roles||[],role:(a.roles||[])[0]||'',note:''});
     });
     const groupProfile=Object.assign({},profile);if(groupInfo.data?.name)groupProfile.bandName=groupInfo.data.name;
-    const participationByEvent={};
+    const participationByEvent={}, participationUpdatedAtByEvent={};
     (participation.data||[]).forEach(row=>{
       const eventId=String(row.event_id||'').trim(),userId=String(row.user_id||'').trim();
       if(!eventId||!userId)return;
       if(!participationByEvent[eventId])participationByEvent[eventId]={};
+      if(!participationUpdatedAtByEvent[eventId])participationUpdatedAtByEvent[eventId]={};
       if(row.status)participationByEvent[eventId][userId]=String(row.status);
+      if(row.updated_at)participationUpdatedAtByEvent[eventId][userId]=String(row.updated_at);
     });
     const baseEvents=(events.data||[]).map(x=>x.data).map(ev=>{
       const copy=Object.assign({},ev);
       // The participation table is the source of truth. Always replace the
       // embedded map, including with an empty map after a user clears a status.
       copy.participation=Object.assign({},participationByEvent[String(ev?.id||'').trim()]||{});
+      copy.participationUpdatedAt=Object.assign({},participationUpdatedAtByEvent[String(ev?.id||'').trim()]||{});
       return copy;
     });
     const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
