@@ -2198,6 +2198,9 @@ async function finishOnboarding() {
   if(window.BandPlanCloud?.markOnboardingComplete) {
     await window.BandPlanCloud.markOnboardingComplete();
   }
+  if(window.BandPlanCloud?.clearJustRegistered) {
+    window.BandPlanCloud.clearJustRegistered();
+  }
 
   applyTheme();
   applyAccentVars();
@@ -2959,14 +2962,14 @@ function isKnownDemoState(s) {
     mems.some(x => members.indexOf(String(x && x.name || '')) >= 0);
 }
 async function shouldOpenAccountOnboarding() {
-  // Never show the profile wizard to an account that has already been
-  // configured. The decision must not depend on a stale local cache.
+  // The profile wizard is a post-registration step, never a login step.
   if (state.onboardingDone) return false;
 
   try {
     const user = window.BandPlanCloud?.user?.();
     const meta = user?.user_metadata || {};
 
+    // A durable marker always wins: this account has already completed setup.
     if (meta.bandplan_onboarding_done === true) {
       state.onboardingDone = true;
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
@@ -2982,27 +2985,17 @@ async function shouldOpenAccountOnboarding() {
       }
     }
 
-    /*
-      Existing Supabase accounts must never be treated as a brand-new
-      registration just because the profile snapshot is temporarily
-      unavailable. A real first registration is the only case where the
-      onboarding wizard is allowed to appear automatically.
-    */
-    if (user?.created_at && user?.last_sign_in_at) {
-      const created = Date.parse(user.created_at);
-      const signedIn = Date.parse(user.last_sign_in_at);
-      if (Number.isFinite(created) && Number.isFinite(signedIn) &&
-          signedIn - created > 120000) {
-        state.onboardingDone = true;
-        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
-        return false;
-      }
+    // Only the registration flow is allowed to open the wizard.
+    // A normal sign-in must go straight into the app, even if an old account
+    // is missing an account row or local snapshot.
+    if (window.BandPlanCloud?.isJustRegistered) {
+      return !!window.BandPlanCloud.isJustRegistered();
     }
   } catch (e) {
     console.warn('BandPlan onboarding identity check failed:', e);
   }
 
-  return true;
+  return false;
 }
 
 async function bootCloudSync(hadLocal, durableInfo) {
