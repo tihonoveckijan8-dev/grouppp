@@ -1072,4 +1072,5 @@
   requestStoragePersistence();
   openOfflineDb().catch(error=>console.warn('BandPlan IndexedDB initialization deferred:',error));
   window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,queueEventParticipation,flushEventParticipationQueue,saveOfflineEventSongs,listOfflineEventSongs,getOfflineEventSongs,deleteOfflineEventSongs,clearOfflineEventSongs,offlineEventSongsBytes,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
+  initialize().catch(error=>console.error('BandPlan auth initialization failed:',error));
 })();
