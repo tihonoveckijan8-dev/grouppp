@@ -185,6 +185,9 @@
   }
   const $ = (s, root=document) => root.querySelector(s);
   const escapeHtml = value => String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function setAuthShellLocked(locked) {
+    document.documentElement.classList.toggle('bp-auth-required', !!locked);
+  }
   function gate() {
     let el = $('#bpAuthGate');
     if (!el) {
@@ -196,6 +199,7 @@
     return el;
   }
   function renderGate(message, error=false) {
+    setAuthShellLocked(true);
     const el = gate();
     const signup = mode === 'signup', reset = mode === 'reset';
     const changingPassword = reset && passwordRecoveryMode;
@@ -297,6 +301,7 @@
 
       if(!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
       if(actionMode==='login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
+      setAuthShellLocked(false);
       gate().hidden=true;
 
       // The auth module remains the single source of truth. The app shell is
@@ -337,6 +342,7 @@
       authState='ready';
       if(currentSession?.user) {
         cleanupLegacyAuthStorage();
+        setAuthShellLocked(false);
         gate().hidden=true;
         return currentSession.user;
       }
