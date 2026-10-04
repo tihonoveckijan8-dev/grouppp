@@ -1,6 +1,11 @@
 /* BandPlan — Supabase Auth + isolated per-account cloud state */
 (function () {
   'use strict';
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+    window.__bandplanSupabaseSdkError = true;
+    console.error('BandPlan: Supabase SDK не загрузился.');
+    return;
+  }
   const SUPABASE_URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
   const TABLE = 'bandplan_user_state';
