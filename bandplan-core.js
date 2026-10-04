@@ -179,7 +179,8 @@ const ICONS = {
   rows: '<rect x="3" y="4.5" width="18" height="5" rx="2"/><rect x="3" y="14.5" width="18" height="5" rx="2"/>',
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.4-1.2-1.7-1.2-2.9 0-.8.7-1.3 1.6-1.3H16a5 5 0 0 0 5-5c0-3.9-4-7-9-7z"/><circle cx="7.8" cy="11" r="1.1" fill="currentColor"/><circle cx="11" cy="7.5" r="1.1" fill="currentColor"/><circle cx="15.6" cy="8.4" r="1.1" fill="currentColor"/>',
-  inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>'
+  sparkles: '<path d="M12 2.8l1.4 4.8L18.2 9l-4.8 1.4L12 15.2l-1.4-4.8L5.8 9l4.8-1.4z"/><path d="M19 14.8l.7 2.5 2.5.7-2.5.7-.7 2.5-.7-2.5-2.5-.7 2.5-.7z"/><path d="M5 16.2l.5 1.8 1.8.5-1.8.5L5 20.8l-.5-1.8-1.8-.5 1.8-.5z"/>',
+      inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>'
 };
 function ic(n, s) { s = s || 18; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>'; }
 
@@ -2396,21 +2397,30 @@ function shadeColor(hex, amount) {
   const f = v => clamp(Math.round(amount < 0 ? v * (1 + amount) : v + (255 - v) * amount), 0, 255);
   return '#' + [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)].map(v => pad(v.toString(16))).join('');
 }
+function onAccentFor(hex) {
+  const white = colorContrast(hex, '#FFFFFF');
+  const ink = colorContrast(hex, '#111827');
+  return white >= ink ? '#FFFFFF' : '#111827';
+}
 function accessibleAccent(input, themeId) {
   const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#2547D0';
   const bg = themeMeta(themeId).themeColor;
   const candidates = [base];
-  for (let i = 1; i <= 12; i++) {
-    candidates.push(shadeColor(base, i * .055), shadeColor(base, -i * .055));
+  for (let i = 1; i <= 24; i++) {
+    const amount = i * .035;
+    candidates.push(shadeColor(base, amount), shadeColor(base, -amount));
   }
-  let best = base, bestScore = -Infinity;
-  candidates.forEach(candidate => {
-    const onWhite = colorContrast(candidate, '#FFFFFF');
-    const onBlack = colorContrast(candidate, '#111827');
-    const onAccent = onWhite >= onBlack ? '#FFFFFF' : '#111827';
-    const textRatio = Math.max(onWhite, onBlack);
+  const valid = candidates.filter(candidate => {
+    const onAccent = onAccentFor(candidate);
+    return colorContrast(candidate, onAccent) >= 4.5 && colorContrast(candidate, bg) >= 3;
+  });
+  const pool = valid.length ? valid : candidates;
+  let best = pool[0], bestScore = -Infinity;
+  pool.forEach((candidate, index) => {
+    const textRatio = colorContrast(candidate, onAccentFor(candidate));
     const bgRatio = colorContrast(candidate, bg);
-    const score = Math.min(textRatio / 4.5, bgRatio / 3) - (candidate === base ? 0 : .002 * candidates.indexOf(candidate));
+    const distance = colorContrast(candidate, base);
+    const score = Math.min(textRatio / 4.5, bgRatio / 3) - Math.abs(distance - 1) * .015 - index * .0001;
     if (score > bestScore) { bestScore = score; best = candidate; }
   });
   return best;
@@ -2464,7 +2474,7 @@ function applyAccentVars() {
   const hex = accessibleAccent(state.settings.accent || '#2547D0', themeId);
   const r = document.documentElement.style;
   const dark = shadeColor(hex, -.16), press = shadeColor(hex, -.3);
-  const onAccent = colorContrast(hex, '#FFFFFF') >= colorContrast(hex, '#111827') ? '#FFFFFF' : '#111827';
+  const onAccent = onAccentFor(hex);
   r.setProperty('--accent', hex);
   r.setProperty('--accent-hover', shadeColor(hex, -.12));
   r.setProperty('--accent-press', press);
