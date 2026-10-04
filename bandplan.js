@@ -3371,10 +3371,11 @@ async function startBandPlan(forceOffline) {
   }
   Boot.stage('Готовим интерфейс', 85);
   try {
+    const alreadyInitialized = uiInitialized;
     init();
     // On a second account in the same tab, the UI wiring already exists.
     // Reload only the authenticated data layer; never attach duplicate handlers.
-    if (uiInitialized && window.__bandplanActiveUserId !== user.id) {
+    if (alreadyInitialized && window.__bandplanActiveUserId !== user.id) {
       ui.skeleton = false;
       render();
       bootCloudSync(true, window.__bandplanDurable || null);
