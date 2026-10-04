@@ -3151,6 +3151,19 @@ function init() {
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
 }
+window.addEventListener('bandplan:auth-success', () => {
+  if (window.__bandplanAppReady || window.__bandplanAuthBooting) return;
+  window.__bandplanAuthBooting = true;
+  startBandPlan(false).catch(error => {
+    console.error('BandPlan auth handoff failed:', error);
+    Boot.fail({
+      title: 'Не удалось открыть аккаунт',
+      text: 'Вход выполнен, но приложение не удалось запустить. Попробуйте обновить страницу.',
+      actions: '<button type="button" id="bootRetry">Повторить</button>'
+    });
+  }).finally(() => { window.__bandplanAuthBooting = false; });
+});
+
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
   window.__bandplanBootAttempt = attempt;
@@ -3250,6 +3263,7 @@ async function startBandPlan(forceOffline) {
   Boot.stage('Готовим интерфейс', 85);
   try { init(); } catch (e) { Boot.fail({title:'Не удалось подготовить интерфейс',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
   Boot.done();
+  window.__bandplanAppReady = true;
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
 })();
