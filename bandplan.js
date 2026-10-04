@@ -3177,16 +3177,23 @@ async function startBandPlan(forceOffline) {
   }
   if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
     if (attempt !== window.__bandplanBootAttempt) return;
-    Boot.stage('Готовим локальные данные', 70);
-    console.error('BandPlan: Supabase client is unavailable; starting in local/offline mode.');
-    KEY = 'bandplan.premium.v6';
-    const hadLocal = load();
-    try { init(); } catch (e) { Boot.fail({title:'Не удалось запустить BandPlan',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
-    toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
-    Boot.done();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    Boot.stage('Подключаем вход в аккаунт', 25);
+    // Do not silently bypass authentication when the Supabase bundle is delayed.
+    // GitHub Pages/CDN can resolve scripts a little later than the app shell.
+    if (!window.__bandplanAuthRetry) window.__bandplanAuthRetry = 0;
+    if (window.__bandplanAuthRetry < 20) {
+      window.__bandplanAuthRetry += 1;
+      setTimeout(() => startBandPlan(false), 250);
+      return;
+    }
+    Boot.fail({
+      title:'Не удалось подключить вход в аккаунт',
+      text:'Сервис авторизации не загрузился. Проверьте интернет и повторите запуск.',
+      actions:'<button type="button" id="bootRetry">Повторить</button>'
+    });
     return;
   }
+  window.__bandplanAuthRetry = 0;
   let user = null;
   try {
     Boot.stage('Проверяем сессию', 25);
