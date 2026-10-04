@@ -2871,16 +2871,29 @@ function wireImport() {
     rd.readAsText(f);
   });
 }
+function setSyncStatus(kind, text, hideAfter) {
+  const el = $('#syncStatus');
+  if (!el) return;
+  clearTimeout(el._hideTimer);
+  el.className = 'sync-status ' + (kind || '');
+  const labels = {syncing:'Синхронизация',ok:'Синхронизировано',offline:'Офлайн',err:'Ошибка синхронизации',update:'Доступна новая версия'};
+  const icons = {syncing:'repeat',ok:'checkCircle',offline:'wifiOff',err:'alert',update:'bolt'};
+  el.innerHTML = ic(icons[kind] || 'info', 15) + '<span class="sync-label">' + esc(text || labels[kind] || '') + '</span>';
+  el.hidden = false;
+  el.title = text || labels[kind] || '';
+  if (hideAfter) el._hideTimer = setTimeout(() => { if (el) el.hidden = true; }, hideAfter);
+}
+
 function wireNet() {
   const bar = $('#netBar');
   const upd = () => {
     if (!bar) return;
-    if (navigator.onLine) { bar.hidden = true; bar.innerHTML = ''; }
-    else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; }
+    if (navigator.onLine) { bar.hidden = true; bar.innerHTML = ''; if (!bar.classList.contains('sync-error')) setSyncStatus('', '', 0); }
+    else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.remove('sync-error'); setSyncStatus('offline','Офлайн',0); }
   };
   bar.addEventListener('click', e => { if (e.target.closest('.netbar-close')) bar.hidden = true; });
   window.addEventListener('online', upd); window.addEventListener('offline', upd);
-  window.addEventListener('bandplan:sync-error', e => { if (bar && navigator.onLine) { bar.hidden = false; bar.innerHTML = ic('alert', 16) + '<span>Ошибка синхронизации. Данные сохранены локально.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.add('sync-error'); } });
+  window.addEventListener('bandplan:sync-error', e => { setSyncStatus('err', e.detail || 'Ошибка синхронизации', 0); if (bar && navigator.onLine) { bar.hidden = false; bar.innerHTML = ic('alert', 16) + '<span>Ошибка синхронизации. Данные сохранены локально.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.add('sync-error'); } });
   upd();
 }
 function wireStickyHeader() {
@@ -2930,6 +2943,7 @@ function isKnownDemoState(s) {
     mems.some(x => members.indexOf(String(x && x.name || '')) >= 0);
 }
 async function bootCloudSync(hadLocal, durableInfo) {
+  setSyncStatus(navigator.onLine === false ? 'offline' : 'syncing', navigator.onLine === false ? 'Офлайн' : 'Синхронизация', 0);
   if (!window.BandPlanCloud) {
     if (!hadLocal || !state.onboardingDone) openOnboarding();
     return;
@@ -2986,6 +3000,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
     ui.calView = state.settings.calView || 'month';
     render();
     if (!state.onboardingDone) openOnboarding();
+    setSyncStatus('ok', 'Синхронизировано', 2200);
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
 
@@ -3041,8 +3056,21 @@ async function bootCloudSync(hadLocal, durableInfo) {
     });
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
+    setSyncStatus(navigator.onLine === false ? 'offline' : 'err', navigator.onLine === false ? 'Офлайн' : 'Ошибка синхронизации', 0);
     if (!hadLocal || !state.onboardingDone) openOnboarding();
+    if (!window.__bandplanSyncRetryBound) {
+      window.__bandplanSyncRetryBound = true;
+      window.addEventListener('online', () => { window.__bandplanSyncRetryBound = false; bootCloudSync(true, window.__bandplanDurable || null); }, {once:true});
+    }
   }
+}
+
+function showUpdateBoot() {
+  if (document.getElementById('boot-update')) return;
+  const el = document.createElement('div');
+  el.id = 'boot-update'; el.className = 'boot'; el.setAttribute('role','status'); el.setAttribute('aria-live','polite');
+  el.innerHTML = '<div class="boot-core"><div class="boot-mark" aria-hidden="true"><span>BP</span></div><div class="boot-name">BandPlan</div><div class="boot-stage">Обновляем BandPlan</div><div class="boot-bar" aria-hidden="true"><b style="transform:scaleX(1)"></b></div></div><div class="boot-foot">Music Group OS</div>';
+  document.body.appendChild(el);
 }
 
 function init() {
@@ -3083,8 +3111,17 @@ function init() {
           registration.update().catch(() => {});
         };
         const activateWaitingWorker = () => {
-          if (registration.waiting && navigator.serviceWorker.controller) {
-            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          if (!registration.waiting || !navigator.serviceWorker.controller) return;
+          setSyncStatus('update', 'Доступна новая версия', 0);
+          const status = $('#syncStatus');
+          if (status) {
+            status.innerHTML = ic('bolt', 15) + '<span class="sync-label">Новая версия</span><button type="button" aria-label="Обновить BandPlan">Обновить</button>';
+            status.hidden = false;
+            const btn = status.querySelector('button');
+            if (btn) btn.onclick = () => {
+              showUpdateBoot();
+              registration.waiting.postMessage({type:'SKIP_WAITING'});
+            };
           }
         };
         registration.addEventListener('updatefound', () => {
@@ -3117,6 +3154,7 @@ function init() {
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
   window.__bandplanBootAttempt = attempt;
+  if (!forceOffline && navigator.onLine !== false) Boot.stage('Запускаем BandPlan', 8);
   window.__bandplanStarted = true;
   Boot.stage(forceOffline || navigator.onLine === false ? 'Нет сети — открываем локальные данные' : 'Запускаем BandPlan', forceOffline || navigator.onLine === false ? 60 : 8);
   /*
@@ -3124,6 +3162,19 @@ async function startBandPlan(forceOffline) {
     to load. Start the local application first; cloud sync is attached when
     the Supabase client is available.
   */
+  if (forceOffline) {
+    KEY = 'bandplan.premium.v6';
+    const hadLocal = load();
+    init();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    setSyncStatus('offline', 'Офлайн', 0);
+    Boot.done();
+    if (!window.__bandplanOfflineResumeBound) {
+      window.__bandplanOfflineResumeBound = true;
+      window.addEventListener('online', () => { window.__bandplanOfflineResumeBound = false; startBandPlan(false); }, {once:true});
+    }
+    return;
+  }
   if (!window.BandPlanCloud || typeof window.BandPlanCloud.initialize !== 'function') {
     if (attempt !== window.__bandplanBootAttempt) return;
     Boot.stage('Готовим локальные данные', 70);
