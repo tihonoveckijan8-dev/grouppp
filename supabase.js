@@ -52,7 +52,19 @@
   function cleanupLegacyAuthStorage() {
     try { localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY); } catch (_) {}
   }
+  const fetchWithTimeout = (input, init={}) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const sourceSignal = init?.signal;
+    if (sourceSignal) {
+      if (sourceSignal.aborted) controller.abort();
+      else sourceSignal.addEventListener('abort', () => controller.abort(), {once:true});
+    }
+    return globalThis.fetch(input, {...init, signal:controller.signal})
+      .finally(() => clearTimeout(timeout));
+  };
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    global: {fetch: fetchWithTimeout},
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -648,7 +660,7 @@
         p_personal_settings:snapshot.settings||{},
         p_delete_songs:songDelta.deleted,
         p_delete_events:eventDelta.deleted,
-        p_delete_setlists:setlistDelta.deleted
+        p_delete_setlists:setlistDelta.deletedd
       });
       if(sync.error){pending=snapshot;throw sync.error;}
       assertSessionOwner(uid);
@@ -672,7 +684,7 @@
   function schedule(state) {
     if(!currentSession?.user)return;
     pending=JSON.parse(JSON.stringify(state||{}));clearTimeout(timer);
-    timer=setTimeout(()=>{if(pending && navigator.onLine!==false)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
+    timer=setTimeout(()=>{if(pending)saveNow(pending).catch(e=>{console.warn('BandPlan account save failed:',e);window.dispatchEvent(new CustomEvent('bandplan:sync-error',{detail:e?.message||'Ошибка синхронизации'}));});},350);
   }
   function subscribe(onState,onParticipation) {
     if(!currentSession?.user)return ()=>{};
