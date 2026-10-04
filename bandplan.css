@@ -1793,3 +1793,397 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   }
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   BANDPLAN 12UI-INSPIRED REDESIGN v1
+   A visible product-level visual direction, implemented as a presentation
+   layer. Existing selectors, IDs, data attributes and interaction states
+   remain untouched.
+*/
+@layer tokens{
+  :root{
+    --bp-canvas:#F2F4F7;
+    --bp-panel:rgba(255,255,255,.92);
+    --bp-panel-solid:#FFFFFF;
+    --bp-ink:#101828;
+    --bp-ink-2:#475467;
+    --bp-line:#E4E7EC;
+    --bp-line-strong:#D0D5DD;
+    --bp-blue:#3155D9;
+    --bp-blue-soft:#EEF2FF;
+    --bp-green:#15956B;
+    --bp-shadow:0 1px 2px rgba(16,24,40,.03),0 10px 30px rgba(16,24,40,.055);
+    --bp-shadow-lg:0 20px 60px rgba(16,24,40,.12);
+    --bp-radius:18px;
+  }
+  [data-theme="dark"],[data-theme="amoled"]{
+    --bp-canvas:var(--bg);
+    --bp-panel:var(--surf-2);
+    --bp-panel-solid:var(--surf-2);
+    --bp-ink:var(--text);
+    --bp-ink-2:var(--text-2);
+    --bp-line:var(--border);
+    --bp-line-strong:var(--border-2);
+    --bp-shadow:0 1px 2px rgba(0,0,0,.22),0 14px 34px rgba(0,0,0,.22);
+    --bp-shadow-lg:0 24px 70px rgba(0,0,0,.42);
+  }
+  [data-theme="glass"]{
+    --bp-canvas:var(--bg);
+    --bp-panel:rgba(255,255,255,.62);
+    --bp-panel-solid:var(--surf-4);
+    --bp-shadow:0 1px 2px rgba(31,45,61,.04),0 14px 36px rgba(31,45,61,.08);
+  }
+}
+
+@layer components{
+  /* 1. Product shell — deliberately stronger visual change */
+  body{background:var(--bp-canvas)}
+  .app{grid-template-columns:236px minmax(0,1fr);background:var(--bp-canvas)}
+  .main{background:var(--bp-canvas)}
+  .sidebar{
+    width:236px;
+    margin:12px 0 12px 12px;
+    height:calc(100dvh - 24px);
+    border:1px solid var(--bp-line);
+    border-radius:22px;
+    padding:18px 12px 12px;
+    background:var(--bp-panel);
+    box-shadow:var(--bp-shadow);
+    overflow:hidden;
+  }
+  .brand{
+    padding:4px 8px 20px;
+    margin-bottom:8px;
+    border-bottom:1px solid var(--bp-line);
+  }
+  .brand-mark{
+    width:40px;height:40px;border-radius:12px;
+    box-shadow:none;
+    background:var(--bp-blue);
+  }
+  .brand-name{font-size:15px;letter-spacing:-.02em}
+  .brand-sub{font-size:10px}
+  .nav{gap:4px;padding:4px 0}
+  .nav-item{
+    min-height:42px;
+    padding:9px 10px;
+    border-radius:12px;
+    color:var(--bp-ink-2);
+    font-size:13px;
+  }
+  .nav-item:hover{background:var(--surf-3);color:var(--bp-ink)}
+  .nav-item.active{
+    color:var(--bp-blue);
+    background:var(--bp-blue-soft);
+    border-color:transparent;
+  }
+  .nav-item.active::before{left:-12px;width:3px;height:22px}
+  .side-profile{
+    margin:8px 0 4px;
+    padding:9px;
+    border-radius:14px;
+    background:var(--bp-panel-solid);
+    border-color:var(--bp-line);
+    box-shadow:none;
+  }
+  .sidebar-foot{border-top:1px solid var(--bp-line);padding-top:10px}
+
+  /* 2. Floating topbar */
+  .topbar{
+    padding:14px 28px 10px;
+    background:transparent;
+    border:0;
+  }
+  .tb-inner{
+    min-height:52px;
+    padding:6px 6px 6px 8px;
+    border:1px solid var(--bp-line);
+    border-radius:18px;
+    background:var(--bp-panel);
+    box-shadow:0 1px 2px rgba(16,24,40,.025),0 8px 24px rgba(16,24,40,.04);
+  }
+  .tb-search{
+    height:40px;
+    background:transparent;
+    border-color:transparent;
+    box-shadow:none;
+    border-radius:12px;
+  }
+  .tb-search:hover{background:var(--surf-3);border-color:transparent}
+  .tb-search:focus-within{
+    background:var(--surf-2);
+    border-color:var(--bp-blue);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .avatar-btn{width:40px;height:40px;box-shadow:none;border-color:var(--bp-line)}
+  .sync-status{min-height:30px}
+
+  /* 3. Content hierarchy */
+  .content{padding:0 28px 40px}
+  .page-head{
+    padding:18px 0 22px;
+    max-width:1240px;
+  }
+  .page-head h1{
+    font-size:30px;
+    font-weight:750;
+    letter-spacing:-.04em;
+  }
+  .page-head .sub{font-size:13px;color:var(--bp-ink-2)}
+  .crumb{font-size:11px;margin-bottom:10px}
+
+  /* 4. Stronger but quieter surfaces */
+  .card,.song-card,.ev-row,.sl-item,.memb-row,.stat-mini,.hero{
+    border:1px solid var(--bp-line);
+    box-shadow:var(--bp-shadow);
+    background:var(--bp-panel-solid);
+  }
+  .card,.song-card,.hero{border-radius:var(--bp-radius)}
+  .card{padding:20px}
+  .card-h{margin-bottom:16px}
+  .card-h h2{font-size:15px;letter-spacing:-.02em}
+  .card-h .sub{font-size:11px}
+  .song-card{padding:18px}
+  .song-card:hover,.ev-row:hover,.memb-row:hover{
+    border-color:var(--bp-line-strong);
+    box-shadow:var(--bp-shadow);
+    transform:translateY(-2px);
+  }
+  .ev-row{border-radius:16px;padding:15px 16px}
+  .ev-date{border-radius:12px}
+  .sl-item{border-radius:14px}
+  .memb-row{border-radius:14px;box-shadow:none}
+
+  /* 5. Hero gets a real product identity without gradients */
+  .hero{
+    padding:28px;
+    background:var(--bp-panel-solid);
+    border-color:color-mix(in srgb,var(--bp-blue) 16%,var(--bp-line));
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:4px;
+    background:var(--bp-blue);
+  }
+  .hero h1{font-size:32px;letter-spacing:-.045em}
+  .hero .hero-metrics{gap:8px}
+  .hero .stat-mini{
+    background:var(--surf-1);
+    border-color:var(--bp-line);
+    box-shadow:none;
+    border-radius:14px;
+  }
+
+  /* 6. Controls — compact, tactile, consistent */
+  .btn{
+    border-radius:11px;
+    font-size:13px;
+    font-weight:650;
+    letter-spacing:-.005em;
+  }
+  .btn-primary{
+    background:var(--bp-blue);
+    border-color:var(--bp-blue);
+    box-shadow:0 3px 10px rgba(49,85,217,.18);
+  }
+  .btn-primary:hover{
+    background:var(--accent-hover);
+    border-color:var(--accent-hover);
+    transform:translateY(-1px);
+    box-shadow:0 5px 16px rgba(49,85,217,.22);
+  }
+  .btn-secondary,.btn-tertiary,.icon-btn{
+    border-color:var(--bp-line);
+    border-radius:11px;
+    box-shadow:none;
+  }
+  .btn-secondary:hover,.btn-tertiary:hover,.icon-btn:hover{
+    border-color:var(--bp-line-strong);
+    background:var(--surf-3);
+  }
+  .icon-btn{width:42px;height:42px}
+  .input,.select,.textarea{
+    border-radius:11px;
+    border-color:var(--bp-line-strong);
+    background:var(--bp-panel-solid);
+  }
+  .input:focus,.select:focus,.textarea:focus{
+    border-color:var(--bp-blue);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  .chip{border-radius:10px}
+
+  /* 7. Calendar — less boxy, stronger date hierarchy */
+  .cal-head{
+    padding:10px 0 14px;
+  }
+  .cal-head .seg{
+    border-radius:11px;
+    padding:3px;
+    background:var(--surf-3);
+    border-color:var(--bp-line);
+  }
+  .cal-head .seg button{border-radius:8px}
+  .cal-head .seg button.on{box-shadow:0 1px 2px rgba(16,24,40,.08)}
+  .cal-grid{
+    gap:1px;
+    padding:1px;
+    border:1px solid var(--bp-line);
+    border-radius:16px;
+    overflow:hidden;
+    background:var(--bp-line);
+  }
+  .cal-cell{
+    background:var(--bp-panel-solid);
+    border:0;
+    min-height:108px;
+    padding:8px;
+  }
+  .cal-cell:hover{background:var(--surf-1)}
+  .cal-cell.today{
+    box-shadow:inset 0 0 0 2px var(--bp-blue);
+  }
+  .cal-num{font-size:12px;font-weight:700}
+  .cal-ev{
+    border-radius:8px;
+    padding:5px 7px;
+    font-size:10.5px;
+    border:1px solid color-mix(in srgb,var(--cal-dot-color,var(--accent)) 20%,transparent);
+  }
+
+  /* 8. Modal = workspace, not floating tiny dialog */
+  .overlay{background:rgba(16,24,40,.46)}
+  .modal-card{
+    width:min(760px,calc(100vw - 48px));
+    max-height:min(88dvh,900px);
+    border-radius:22px;
+    border:1px solid var(--bp-line);
+    background:var(--bp-panel-solid);
+    box-shadow:var(--bp-shadow-lg);
+  }
+  .modal-head{
+    padding-bottom:14px;
+    border-bottom:1px solid var(--bp-line);
+  }
+  .modal-head h3{font-size:20px;letter-spacing:-.03em}
+  .modal-foot{
+    border-top:1px solid var(--bp-line);
+    padding-top:14px;
+  }
+
+  /* 9. Settings / onboarding / auth belong to the same product family */
+  .settings-card{
+    border-radius:18px;
+    background:var(--bp-panel-solid);
+    border-color:var(--bp-line);
+    box-shadow:var(--bp-shadow);
+  }
+  .settings-tabs{
+    border-radius:15px;
+    background:var(--bp-panel-solid);
+    border-color:var(--bp-line);
+    box-shadow:var(--bp-shadow);
+  }
+  .settings-tab.on{
+    background:var(--bp-blue);
+    color:#fff;
+    border-color:var(--bp-blue);
+    box-shadow:0 3px 10px rgba(49,85,217,.18);
+  }
+  .bp-auth-gate{
+    background:var(--bp-canvas);
+  }
+  .bp-auth-card{
+    border-radius:22px;
+    background:var(--bp-panel-solid);
+    border-color:var(--bp-line);
+    box-shadow:var(--bp-shadow-lg);
+  }
+
+  /* 10. Glass: clearly visible only in floating surfaces */
+  [data-theme="glass"] .sidebar{
+    background:rgba(255,255,255,.48);
+    -webkit-backdrop-filter:blur(20px) saturate(145%);
+    backdrop-filter:blur(20px) saturate(145%);
+  }
+  [data-theme="glass"] .tb-inner,
+  [data-theme="glass"] .modal-card,
+  [data-theme="glass"] .bottom-nav,
+  [data-theme="glass"] .actionbar{
+    background:rgba(255,255,255,.58);
+    border-color:rgba(255,255,255,.72);
+    -webkit-backdrop-filter:blur(20px) saturate(145%);
+    backdrop-filter:blur(20px) saturate(145%);
+  }
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .song-card,
+  [data-theme="glass"] .ev-row,
+  [data-theme="glass"] .hero{
+    background:rgba(255,255,255,.82);
+  }
+
+  /* 11. Mobile is an intentional layout */
+  @media(max-width:900px){
+    .content{padding:0 18px calc(var(--bn) + 28px)}
+    .topbar{padding:10px 18px 8px}
+    .tb-inner{border-radius:15px}
+    .page-head{padding:16px 0 18px}
+    .page-head h1{font-size:27px}
+    .hero{padding:22px}
+  }
+  @media(max-width:640px){
+    .content{padding-left:12px;padding-right:12px}
+    .topbar{padding-left:12px;padding-right:12px}
+    .tb-inner{padding:5px;border-radius:14px}
+    .page-head{padding:14px 0 14px}
+    .page-head h1{font-size:24px}
+    .card,.song-card{border-radius:15px;padding:16px}
+    .hero{border-radius:16px;padding:18px}
+    .hero h1{font-size:25px}
+    .modal-card{
+      width:100%;
+      max-height:96dvh;
+      border-radius:22px 22px 0 0;
+    }
+    .bottom-nav{
+      padding-left:8px;
+      padding-right:8px;
+      background:var(--bp-panel);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .bottom-nav a{
+      min-height:52px;
+      border-radius:12px;
+    }
+    .bottom-nav a.active{
+      background:var(--bp-blue-soft);
+      color:var(--bp-blue);
+    }
+  }
+  @media(max-width:390px){
+    .content{padding-left:9px;padding-right:9px}
+    .topbar{padding-left:9px;padding-right:9px}
+    .page-head h1{font-size:22px}
+    .hero{padding:16px}
+    .hero h1{font-size:23px}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .song-card:hover,.ev-row:hover,.memb-row:hover,.btn-primary:hover{transform:none}
+  }
+  @media(prefers-reduced-transparency:reduce){
+    [data-theme="glass"] .sidebar,
+    [data-theme="glass"] .tb-inner,
+    [data-theme="glass"] .modal-card,
+    [data-theme="glass"] .bottom-nav,
+    [data-theme="glass"] .actionbar{
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+      background:var(--surf-4);
+    }
+  }
+}
+
