@@ -1367,3 +1367,69 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
 .boot-slow{width:min(100%,360px);color:var(--muted);font-size:13px}.boot-slow p{margin:0 0 10px}.boot-acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.boot-acts button{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--border);background:var(--surf-2);color:var(--text);font:inherit;font-weight:700}.boot-acts #bootOffline{background:var(--accent);color:var(--on-accent);border-color:transparent}.boot-error-ic{width:56px;height:56px;border:1px solid currentColor;border-radius:50%;display:grid;place-items:center}.boot-error-title{font-size:20px;font-weight:800}.boot-error-text{max-width:44ch;color:var(--muted);font-size:14px;line-height:1.5}.boot.is-error .boot-ring,.boot.is-error .boot-eq{display:none}
 
 .boot{transition:opacity .28s cubic-bezier(.2,.8,.2,1),transform .28s cubic-bezier(.2,.8,.2,1)}.boot-foot{position:absolute;bottom:max(20px,env(safe-area-inset-bottom));font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* Premium auth UI refinement — visual only; auth behavior/selectors unchanged. */
+
+.bp-auth-gate{
+  background:
+    radial-gradient(circle at 50% 0%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 34%),
+    var(--bg);
+  backdrop-filter:saturate(1.05);
+}
+.bp-auth-card{
+  position:relative;
+  width:min(420px,100%);
+  padding:32px;
+  border:1px solid color-mix(in srgb,var(--border) 78%,transparent);
+  border-radius:26px;
+  background:color-mix(in srgb,var(--surf-2) 94%,transparent);
+  box-shadow:0 24px 70px color-mix(in srgb,var(--text) 10%,transparent),0 2px 8px color-mix(in srgb,var(--text) 5%,transparent);
+  overflow:hidden;
+}
+.bp-auth-card::before{
+  content:"";
+  position:absolute;inset:0 0 auto;height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 38%,transparent),transparent);
+  pointer-events:none;
+}
+.bp-auth-mark{
+  width:46px;height:46px;margin-bottom:18px;border-radius:14px;
+  display:grid;place-items:center;
+  background:var(--accent);color:var(--on-accent);
+  box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 22%,transparent);
+}
+.bp-auth-brand{margin-bottom:28px;font-size:13px;letter-spacing:-.01em;color:var(--text-2)}
+.bp-auth-card h1{margin-bottom:9px;font-size:30px;letter-spacing:-.045em}
+.bp-auth-desc{margin-bottom:25px;max-width:36ch;font-size:13px;line-height:1.6}
+.bp-auth-label{margin-bottom:8px;font-size:11px;letter-spacing:.01em}
+.bp-auth-input{
+  min-height:48px;margin-bottom:14px;padding:12px 14px;
+  border-radius:13px;
+  background:color-mix(in srgb,var(--surf-1) 92%,transparent);
+  border-color:var(--border-2);
+  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.bp-auth-input:hover{border-color:color-mix(in srgb,var(--text) 22%,var(--border))}
+.bp-auth-input:focus{
+  background:var(--surf-1);
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-ring),0 6px 18px color-mix(in srgb,var(--accent) 7%,transparent);
+}
+.bp-auth-submit{
+  min-height:48px;margin-top:7px;border-radius:13px;
+  box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 18%,transparent);
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.bp-auth-submit:hover{transform:translateY(-1px);box-shadow:0 11px 28px color-mix(in srgb,var(--accent) 24%,transparent)}
+.bp-auth-submit:active{transform:translateY(0)}
+.bp-auth-links{margin-top:20px;gap:2px 14px}
+.bp-auth-links button{min-height:40px;padding:7px 3px}
+@media(max-width:480px){
+  .bp-auth-gate{padding:16px}
+  .bp-auth-card{width:100%;padding:26px 20px;border-radius:22px}
+  .bp-auth-card h1{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){
+  .bp-auth-input,.bp-auth-submit{transition:none}
+  .bp-auth-submit:hover,.bp-auth-submit:active{transform:none}
+}
