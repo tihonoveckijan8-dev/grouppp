@@ -80,7 +80,7 @@
   let participationChannel = null;
 
   /* Durable offline cache: per-account snapshot + latest pending sync. */
-  const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=1, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue';
+  const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=2, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue', IDB_PARTICIPATION='participation_queue';
   let idbPromise=null;
   function openOfflineDb(){
     if(!('indexedDB' in window)) return Promise.resolve(null);
@@ -90,6 +90,11 @@
       req.onupgradeneeded=()=>{const db=req.result;
         if(!db.objectStoreNames.contains(IDB_SNAPSHOT))db.createObjectStore(IDB_SNAPSHOT,{keyPath:'user_id'});
         if(!db.objectStoreNames.contains(IDB_QUEUE))db.createObjectStore(IDB_QUEUE,{keyPath:'user_id'});
+        if(!db.objectStoreNames.contains(IDB_PARTICIPATION)){
+          const store=db.createObjectStore(IDB_PARTICIPATION,{keyPath:'key'});
+          store.createIndex('user_id','user_id',{unique:false});
+          store.createIndex('event_id','event_id',{unique:false});
+        }
       };
       req.onsuccess=()=>resolve(req.result);
       req.onerror=()=>reject(req.error||new Error('IndexedDB недоступен'));
@@ -126,6 +131,73 @@
     await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(userId));
     const snapshot=await durableSnapshot(userId);
     if(snapshot)await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(Object.assign({},snapshot,{pending_sync:false})));
+  }
+  async function clearParticipationQueue(userId){
+    if(!userId || !('indexedDB' in window)) return;
+    const db=await openOfflineDb(); if(!db) return;
+    await new Promise(resolve=>{
+      let tx;
+      try { tx=db.transaction(IDB_PARTICIPATION,'readwrite'); } catch (_) { resolve(); return; }
+      const store=tx.objectStore(IDB_PARTICIPATION), req=store.index('user_id').openCursor(IDBKeyRange.only(String(userId)));
+      req.onsuccess=()=>{
+        const cursor=req.result;
+        if(cursor){ cursor.delete(); cursor.continue(); }
+      };
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>resolve();
+      tx.onabort=()=>resolve();
+    });
+  }
+  async function queueEventParticipation(eventId,status,updatedAt){
+    const uid=String(currentSession?.user?.id||'');
+    const id=String(eventId||'').trim();
+    if(!uid||!id) throw new Error('Требуется вход в аккаунт.');
+    const cleanStatus=String(status||'');
+    if(cleanStatus&&!['yes','maybe','no'].includes(cleanStatus)) throw new Error('Некорректный статус участия.');
+    const stamp=updatedAt||new Date().toISOString();
+    await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.put({
+      key:uid+':'+id,user_id:uid,event_id:id,status:cleanStatus,updated_at:stamp,group_id:activeGroupId||null
+    }));
+    return {queued:true,event_id:id,status:cleanStatus,updated_at:stamp};
+  }
+  async function participationQueueRows(){
+    const uid=String(currentSession?.user?.id||'');
+    if(!uid)return [];
+    const db=await openOfflineDb(); if(!db)return [];
+    return await new Promise(resolve=>{
+      let tx;
+      try { tx=db.transaction(IDB_PARTICIPATION,'readonly'); } catch (_) { resolve([]); return; }
+      const req=tx.objectStore(IDB_PARTICIPATION).index('user_id').getAll(String(uid));
+      req.onsuccess=()=>resolve(Array.isArray(req.result)?req.result:[]);
+      req.onerror=()=>resolve([]);
+    });
+  }
+  function participationErrorRetryable(error){
+    const code=String(error?.code||'').toUpperCase();
+    const msg=String(error?.message||error||'').toLowerCase();
+    return !['EVENT_NOT_FOUND','GROUP_REQUIRED','AUTH_REQUIRED','INVALID_PARTICIPATION_STATUS'].includes(code) &&
+      !msg.includes('event_not_found') && !msg.includes('group_required') && !msg.includes('auth_required') &&
+      !msg.includes('invalid_participation_status') && !msg.includes('permission denied') && !msg.includes('row-level security');
+  }
+  async function flushEventParticipationQueue(){
+    if(!currentSession?.user || navigator.onLine===false) return {sent:0,failed:0};
+    const rows=(await participationQueueRows()).sort((a,b)=>String(a.updated_at||'').localeCompare(String(b.updated_at||'')));
+    let sent=0,failed=0;
+    for(const row of rows){
+      try{
+        await writeEventParticipation(row.event_id,row.status,row.updated_at);
+        await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.delete(row.key));
+        sent++;
+      }catch(error){
+        if(participationErrorRetryable(error)){ failed++; continue; }
+        await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.delete(row.key));
+        window.dispatchEvent(new CustomEvent('bandplan:participation-error',{detail:{
+          eventId:row.event_id,message:error?.message||'Сервер отклонил отметку участия.'
+        }}));
+        failed++;
+      }
+    }
+    return {sent,failed};
   }
 
   const JUST_REGISTERED_KEY = 'bandplan:just-registered';
@@ -785,16 +857,18 @@
     }
     return data?.[0]||null;
   }
-  async function setEventParticipation(eventId,status){
+  async function writeEventParticipation(eventId,status,updatedAt){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const uid=String(currentSession.user.id);
     const id=String(eventId||'').trim();
     const cleanStatus=String(status||'');
     if(!id)throw new Error('Не удалось определить событие.');
     if(cleanStatus&&!['yes','maybe','no'].includes(cleanStatus))throw new Error('Некорректный статус участия.');
+    const stamp=updatedAt||new Date().toISOString();
     const {data,error}=await client.rpc('bandplan_set_event_participation',{
       p_event_id:id,
-      p_status:cleanStatus
+      p_status:cleanStatus,
+      p_updated_at:stamp
     });
     if(error)throw error;
     // Postgres functions returning TABLE produce an array, while scalar/json
@@ -818,6 +892,10 @@
       }
     }
     return result;
+  }
+  async function setEventParticipation(eventId,status,updatedAt){
+    const stamp=updatedAt||new Date().toISOString();
+    return writeEventParticipation(eventId,status,stamp);
   }
   async function deleteAccount(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
@@ -867,6 +945,7 @@
   window.addEventListener('online',async()=>{
     if(!currentSession?.user)return;
     try{await hydrateLocalCache();}catch(e){console.warn('BandPlan durable queue restore failed:',e);}
+    try{await flushEventParticipationQueue();}catch(e){console.warn('BandPlan participation queue flush failed:',e);}
     if(pending){
       const snap=JSON.parse(JSON.stringify(pending));
       try{
@@ -886,6 +965,7 @@
     pending=null;
     await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(uid));
     await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.delete(uid));
+    await clearParticipationQueue(uid);
   }
   async function leaveGroup(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
@@ -909,6 +989,11 @@
     await clearLocalCache();
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
-  async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
+  async function signOut(){
+    clearTimeout(timer);pending=null;disposeRealtime();
+    const uid=currentSession?.user?.id;
+    if(uid) await clearParticipationQueue(uid);
+    await client.auth.signOut();
+  }
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,queueEventParticipation,flushEventParticipationQueue,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
 })();
