@@ -186,25 +186,22 @@
     const personal=await client.from(TABLE).select('state,updated_at').eq('user_id',uid).maybeSingle();
     if(personal.error) throw personal.error;
     const pstate=personal.data?.state||{};lastUpdated=personal.data?.updated_at||'';
+    const groupLookup=await client.rpc('bandplan_get_my_group');
+    if(groupLookup.error)throw groupLookup.error;
+    const groupRow=Array.isArray(groupLookup.data)?groupLookup.data[0]:groupLookup.data;
+    activeGroupId=groupRow?.group_id||null;
 
     /*
-      Identity is durable account data, not onboarding UI state. Read it before
-      group membership so a temporary group/RPC problem can never make the app
-      ask an existing member for their name and role again.
+      The account row is the durable identity source for the member's name and
+      roles. Keep the personal snapshot as the primary source, but hydrate
+      missing/stale role data from the account so a fresh device never asks
+      the member to choose the role again.
     */
     let accountProfile=null;
     try{
       const account=await client.from('bandplan_accounts').select('display_name,roles,personal_settings').eq('user_id',uid).maybeSingle();
       if(!account.error) accountProfile=account.data||null;
     }catch(e){ console.warn('BandPlan account profile hydration skipped:',e); }
-    const authName=String(currentSession.user.user_metadata?.full_name||currentSession.user.user_metadata?.name||'').trim();
-    if(!accountProfile) accountProfile={display_name:authName,roles:[],personal_settings:{}};
-    if(!String(accountProfile.display_name||'').trim() && authName) accountProfile.display_name=authName;
-
-    const groupLookup=await client.rpc('bandplan_get_my_group');
-    if(groupLookup.error)throw groupLookup.error;
-    const groupRow=Array.isArray(groupLookup.data)?groupLookup.data[0]:groupLookup.data;
-    activeGroupId=groupRow?.group_id||null;
     const profile=Object.assign({},pstate.profile||{});
     if(activeGroupId) profile.groupId=activeGroupId;
     if(accountProfile?.display_name) profile.name=accountProfile.display_name;
@@ -215,8 +212,7 @@
     const accountSettings=accountProfile?.personal_settings&&typeof accountProfile.personal_settings==='object' ? accountProfile.personal_settings : {};
     const settings=Object.assign({},accountSettings,pstate.settings||{});
     const hasAccountIdentity=!!String(accountProfile?.display_name||'').trim() && Array.isArray(accountProfile?.roles) && accountProfile.roles.length>0;
-    const hasStoredIdentity=!!String(profile.name||'').trim() && Array.isArray(profile.roles) && profile.roles.length>0;
-    const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity||hasStoredIdentity)});
+    const hydratedPersonal=Object.assign({},pstate,{profile,settings,onboardingDone:!!(pstate.onboardingDone||hasAccountIdentity)});
     const personalEvents=hydratePersonalEventParticipation(pstate.events||[],profile);
     if(!activeGroupId){
       delete profile.groupId;
@@ -563,12 +559,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  async function getAccountProfile(){
-    if(!currentSession?.user) return null;
-    const uid=currentSession.user.id;
-    const account=await client.from('bandplan_accounts').select('display_name,roles,personal_settings').eq('user_id',uid).maybeSingle();
-    if(account.error) throw account.error;
-    return account.data||null;
-  }
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,getAccountProfile,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache};
 })();
