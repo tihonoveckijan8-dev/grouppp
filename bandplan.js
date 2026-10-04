@@ -2943,10 +2943,27 @@ function isKnownDemoState(s) {
   return songs.some(x => titles.indexOf(String(x && x.title || '')) >= 0 || String(x && x.artist || '') === 'Neon Coast') ||
     mems.some(x => members.indexOf(String(x && x.name || '')) >= 0);
 }
+async function shouldOpenAccountOnboarding() {
+  if (state.onboardingDone) return false;
+  try {
+    if (window.BandPlanCloud?.hasAccountIdentity) {
+      const hasIdentity = await window.BandPlanCloud.hasAccountIdentity();
+      if (hasIdentity) {
+        state.onboardingDone = true;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn('BandPlan onboarding identity check failed:', e);
+  }
+  return true;
+}
+
 async function bootCloudSync(hadLocal, durableInfo) {
   setSyncStatus(navigator.onLine === false ? 'offline' : 'syncing', navigator.onLine === false ? 'Офлайн' : 'Синхронизация', 0);
   if (!window.BandPlanCloud) {
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    if (await shouldOpenAccountOnboarding()) openOnboarding();
     return;
   }
   try {
@@ -3000,7 +3017,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
     applyAccentVars();
     ui.calView = state.settings.calView || 'month';
     render();
-    if (!state.onboardingDone) openOnboarding();
+    if (await shouldOpenAccountOnboarding()) openOnboarding();
     setSyncStatus('ok', 'Синхронизировано', 2200);
     window.BandPlanCloud.subscribe(function (incoming) {
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
@@ -3058,7 +3075,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
   } catch (e) {
     console.warn('BandPlan cloud sync unavailable:', e);
     setSyncStatus(navigator.onLine === false ? 'offline' : 'err', navigator.onLine === false ? 'Офлайн' : 'Ошибка синхронизации', 0);
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
+    if (await shouldOpenAccountOnboarding()) openOnboarding();
     if (!window.__bandplanSyncRetryBound) {
       window.__bandplanSyncRetryBound = true;
       window.addEventListener('online', () => { window.__bandplanSyncRetryBound = false; bootCloudSync(true, window.__bandplanDurable || null); }, {once:true});
