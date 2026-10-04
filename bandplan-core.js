@@ -435,11 +435,13 @@ async function hydrateOfflineSongsIntoState() {
 async function cleanupEventOfflineSongs() {
   if(!window.BandPlanCloud?.listOfflineEventSongs)return;
   try {
-    const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id)));
+    const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
     for(const row of rows||[]) {
       const ev=state.events.find(e=>String(e.id)===String(row.eventId));
-      const stale=!ev || !keep.has(String(row.eventId)) || (eventEndMs(ev)+6*60*60*1000<now) || !ev.setlistId ||
-        !['yes'].includes(eventStatusFor(ev)) && !(offlineSongSettings().maybe && eventStatusFor(ev)==='maybe');
+      const status=ev ? eventStatusFor(ev) : '';
+      const participating=status==='yes' || (cfg.maybe && status==='maybe');
+      const stillActive=!!ev && (ev.status||'upcoming')==='upcoming' && !!ev.setlistId && participating && eventEndMs(ev)+6*60*60*1000>=now;
+      const stale=!ev || !stillActive || (!keep.has(String(row.eventId)) && eventStartMs(ev)>=now);
       if(stale) await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
     }
   } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
