@@ -78,7 +78,7 @@ const Boot = (() => {
       startBandPlan(true);
     });
     if (retry) retry.addEventListener('click', () => location.reload());
-    if (navigator.onLine === false) stage('Нет сети — открываем локальные данные', 60);
+    if (navigator.onLine === false) stage('Нет сети — проверяем сохранённый вход', 60);
   }
   return {stage, slow, fail, done};
 })();
