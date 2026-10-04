@@ -728,6 +728,7 @@ function applyRealtimeParticipation(change) {
   refreshParticipationUI(eventId);
   refreshMemberParticipationUI();
   scheduleOfflineSongSync(150);
+}
 
 function refreshParticipationUI(evId) {
   const ev = evById(evId);
