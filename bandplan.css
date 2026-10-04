@@ -34,7 +34,11 @@ table{border-collapse:separate;border-spacing:0}
 }
 
 @layer tokens{
-/* ─── 2. TOKENS ──────────────────────────────────────────────────────── */
+
+@media(prefers-contrast:more){
+  :root{--border:#7A8492;--border-2:#667180;--border-3:#4E5968}
+  [data-theme="dark"],[data-theme="amoled"]{--border:rgba(255,255,255,.32);--border-2:rgba(255,255,255,.46);--border-3:rgba(255,255,255,.62)}
+}/* ─── 2. TOKENS ──────────────────────────────────────────────────────── */
 :root{--skel-hi:rgba(255,255,255,.40);
 --accent:#2547D0;--accent-hover:#1D3BB4;--accent-press:#16308F;--accent-soft:rgba(37,71,208,.08);--accent-soft-2:rgba(37,71,208,.14);--accent-ring:rgba(37,71,208,.36);--on-accent:#FFFFFF;
 --bg:#F4F6F8;--bg-deep:#E9EEF4;--surf-1:#F8FAFC;--surf-2:#FFFFFF;--surf-3:#EEF2F6;--surf-4:#FFFFFF;--border:#DCE2EA;--border-2:#C8D0DB;--border-3:#AEB8C6;--text:#111827;--text-2:#344054;--muted:#667085;--inverse:#F8FAFC;
@@ -831,8 +835,6 @@ html[data-reduced="true"] .skel::after{display:none}
   .modal-foot .btn{width:auto;flex:1}
 }
 @media(prefers-contrast:more){
-  :root{--border:#7A8492;--border-2:#667180;--border-3:#4E5968}
-  [data-theme="dark"],[data-theme="amoled"]{--border:rgba(255,255,255,.32);--border-2:rgba(255,255,255,.46);--border-3:rgba(255,255,255,.62)}
   .btn:focus-visible,.icon-btn:focus-visible,.avatar-btn:focus-visible,.input:focus-visible,.select:focus-visible,.textarea:focus-visible{outline-width:3px}
 }
 @media(hover:hover){.card-interactive:hover,.song-card:hover,.ev-row:hover,.memb-row:hover{transform:translateY(-1px);box-shadow:var(--shadow-1)}}
