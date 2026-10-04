@@ -3207,12 +3207,18 @@ function init() {
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
 }
 /*
-  Auth handoff: the auth module is the single source of truth. After a
-  successful sign-in it asks the already-running app shell to resume the same
-  authenticated boot sequence; no page reload and no second auth implementation.
+  Auth handoff: Supabase is the only auth source of truth. The auth module
+  calls this resume hook after a successful login; the application boot itself
+  remains single-instance and is never started through a second auth listener.
 */
-window.addEventListener('bandplan:auth-ready', () => {
-  if (window.__bandplanAppReady || window.__bandplanAuthResumePromise) return;
+window.__bandplanResumeAuthenticated = async function (user) {
+  if (!user?.id) return;
+  if (window.__bandplanAppReady && window.__bandplanActiveUserId === user.id) {
+    const gate = document.getElementById('bpAuthGate');
+    if (gate) gate.hidden = true;
+    return;
+  }
+  if (window.__bandplanAuthResumePromise) return window.__bandplanAuthResumePromise;
   window.__bandplanAuthResumePromise = (async () => {
     try {
       await startBandPlan(false);
@@ -3220,7 +3226,8 @@ window.addEventListener('bandplan:auth-ready', () => {
       window.__bandplanAuthResumePromise = null;
     }
   })();
-});
+  return window.__bandplanAuthResumePromise;
+};
 
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
@@ -3320,6 +3327,7 @@ async function startBandPlan(forceOffline) {
   Boot.stage('Готовим интерфейс', 85);
   try { init(); } catch (e) { Boot.fail({title:'Не удалось подготовить интерфейс',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
   Boot.done();
+  window.__bandplanActiveUserId = user.id;
   window.__bandplanAppReady = true;
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
