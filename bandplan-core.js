@@ -959,15 +959,23 @@ document.addEventListener('focusin', event => {
   const target = event.target;
   if (!target || !/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || window.innerWidth > 640) return;
   if ($('#scene').classList.contains('on')) return;
-  setTimeout(() => {
-    if (!target.isConnected) return;
+  const scrollIntoView = () => {
+    if (!target.isConnected || document.activeElement !== target) return;
     try {
       target.scrollIntoView({
         block:'center', inline:'nearest',
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
       });
     } catch (_) {}
-  }, 60);
+  };
+  setTimeout(scrollIntoView, 60);
+  if (window.visualViewport) {
+    const once = () => {
+      window.visualViewport.removeEventListener('resize', once);
+      setTimeout(scrollIntoView, 40);
+    };
+    window.visualViewport.addEventListener('resize', once, {once:true});
+  }
 });
 let modalRoot = null, confirmCb = null, lastFocus = null, modalDirty = false, trapHandler = null;
 let modalHistoryPushed = false;
