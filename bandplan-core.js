@@ -3359,7 +3359,7 @@ async function startBandPlan(forceOffline) {
   window.__bandplanBootAttempt = attempt;
   if (!forceOffline && navigator.onLine !== false) Boot.stage('Запускаем BandPlan', 8);
   window.__bandplanStarted = true;
-  Boot.stage(forceOffline || navigator.onLine === false ? 'Нет сети — открываем локальные данные' : 'Запускаем BandPlan', forceOffline || navigator.onLine === false ? 60 : 8);
+  Boot.stage(forceOffline || navigator.onLine === false ? 'Нет сети — проверяем сохранённый вход' : 'Запускаем BandPlan', forceOffline || navigator.onLine === false ? 60 : 8);
   /*
     The UI must never remain a blank shell when the optional cloud SDK fails
     to load. Start the local application first; cloud sync is attached when
