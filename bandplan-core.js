@@ -2321,8 +2321,9 @@ function drawOnb() {
       '<div class="field"><label class="field-label" for="ob_name">Как вас зовут *</label><input class="input" id="ob_name" maxlength="50" value="' + esc(onbData.name) + '" placeholder="Имя и фамилия"><span class="err"></span></div>' +
       '<div class="field"><span class="field-label">Ваши роли в группе * (можно несколько)</span><div class="row" style="gap:6px" id="ob_roles">' +
       ROLES.map(r => '<button type="button" class="chip' + ((onbData.roles || []).indexOf(r.k) >= 0 ? ' on' : '') + '" data-r="' + r.k + '" aria-pressed="' + ((onbData.roles || []).indexOf(r.k) >= 0) + '">' + ic(r.icon, 13) + esc(r.label) + '</button>').join('') + '</div></div>' +
-      '<div class="field"><span class="field-label">Участие в событиях по умолчанию</span><div class="seg" id="ob_part">' +
-      [['yes', 'Участвую'], ['maybe', 'Под вопросом'], ['no', 'Не участвую']].map(o => '<button type="button" data-v="' + o[0] + '" class="' + (onbData.participation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>';
+      '<div class="field"><span class="field-label">Участие в событиях по умолчанию</span><div id="ob_part">' +
+      renderParticipationSwitch({id:'__onboarding__'}, {size:'lg', variant:'onboarding', draft:true, status:onbData.participation}) +
+    '</div></div>';
   } else if (onbStep === 1) {
     h += '<div class="onb-hero">' + ic('users', 28) + '</div><h2>Ваш коллектив</h2>' +
       '<p class="lead">Название появится в шапке, на главном экране и в печатных сет-листах.</p>' +
@@ -2346,7 +2347,6 @@ function drawOnb() {
   const bind = (id, ev, fn) => { const e = $('#' + id, el); if (e) e.addEventListener(ev, fn); };
   if (onbStep === 0) {
     $$('#ob_roles .chip', el).forEach(b => b.addEventListener('click', () => { const k = b.getAttribute('data-r'), i = onbData.roles.indexOf(k); if (i >= 0) onbData.roles.splice(i, 1); else onbData.roles.push(k); onbData.role = onbData.roles[0] || ''; b.classList.toggle('on', i < 0); b.setAttribute('aria-pressed', i < 0); const rb = $('#ob_roles', el); if (rb) rb.classList.remove('invalid'); }));
-    $$('#ob_part button', el).forEach(b => b.addEventListener('click', () => { onbData.participation = b.getAttribute('data-v'); $$('#ob_part button', el).forEach(x => x.classList.toggle('on', x === b)); }));
     bind('ob_name', 'input', e => { onbData.name = e.target.value; });
   }
   if (onbStep === 1) {
@@ -2595,13 +2595,17 @@ document.addEventListener('click', function (e) {
       const isDraft=el.getAttribute('data-draft')==='1';
       const ev=evById(eventId);
       if (isDraft && !ev) {
-        $('#f_my [data-act="my-status"]', modalRoot).forEach(btn => {
-          const active=btn.getAttribute('data-v')===value;
-          btn.classList.toggle('on',active);
-          btn.classList.toggle('status-yes',active&&value==='yes');
-          btn.classList.toggle('status-maybe',active&&value==='maybe');
-          btn.classList.toggle('status-no',active&&value==='no');
-          btn.setAttribute('aria-pressed',String(active));
+        if (eventId === '__onboarding__') onbData.participation = value;
+        const roots = [modalRoot && $('#f_my', modalRoot), $('#ob_part')].filter(Boolean);
+        roots.forEach(root => {
+          $('[data-act="my-status"]', root).forEach(btn => {
+            const active=btn.getAttribute('data-v')===value;
+            btn.classList.toggle('on',active);
+            btn.classList.toggle('status-yes',active&&value==='yes');
+            btn.classList.toggle('status-maybe',active&&value==='maybe');
+            btn.classList.toggle('status-no',active&&value==='no');
+            btn.setAttribute('aria-pressed',String(active));
+          });
         });
         return;
       }
