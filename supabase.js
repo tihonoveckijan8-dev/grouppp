@@ -113,15 +113,26 @@
     else if (groupChannel) { client.removeChannel(groupChannel); groupChannel = null; }
     participationChannel = null;
   }
+  let authState = 'loading';
+
   function bindAuthLifecycle() {
     if (authSubscription) return;
     const result = client.auth.onAuthStateChange((event, session) => {
-      const previousUserId = currentSession?.user?.id || null;
       currentSession = session || null;
+      if (event === 'INITIAL_SESSION') {
+        authState = 'ready';
+        return;
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        authState = 'ready';
+        return;
+      }
       if (event === 'SIGNED_OUT') {
+        authState = 'ready';
         clearTimeout(timer);
         pending = null;
         activeGroupId = null;
+        activeMemberIds = [];
         lastUpdated = '';
         sharedBaseline = {songs:{},events:{},setlists:{}};
         disposeRealtime();
@@ -129,11 +140,8 @@
         renderGate();
         return;
       }
-      if (event === 'SIGNED_IN' && previousUserId && previousUserId !== session?.user?.id) {
-        disposeRealtime();
-        location.reload();
-      }
       if (event === 'PASSWORD_RECOVERY') {
+        authState = 'ready';
         mode = 'reset';
         renderGate('Введите новый пароль.');
       }
@@ -181,58 +189,89 @@
     const form=event.currentTarget, button=$('#bpAuthSubmit');
     const email=$('#bpAuthEmail').value.trim(), password=$('#bpAuthPassword')?.value || '';
     const name=$('#bpAuthName')?.value.trim() || '';
-    if(!email || (mode==='signup' && !name) || (mode!=='reset' && password.length<8)){setMessage(mode==='signup'?'Укажите имя, почту и пароль не короче 8 символов.':'Укажите почту и пароль не короче 8 символов.',true);return;}
-    button.disabled=true;button.textContent='Подождите…';
+    const actionMode = mode;
+    if(!email || (actionMode==='signup' && !name) || (actionMode!=='reset' && password.length<8)){
+      setMessage(actionMode==='signup'?'Укажите имя, почту и пароль не короче 8 символов.':'Укажите почту и пароль не короче 8 символов.',true);
+      return;
+    }
+    button.disabled=true;
+    button.textContent='Подождите…';
     try {
       let result;
-      if(mode==='signup') {
+      if(actionMode==='signup') {
         result=await client.auth.signUp({email,password,options:{data:{full_name:name}}});
-        if (!result.error) setJustRegisteredFlag(email);
-      }
-      else if(mode==='reset') result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
-      else result=await client.auth.signInWithPassword({email,password});
-      if(result.error) throw result.error;
-      if(mode === 'login') {
-        /*
-          signInWithPassword already establishes and persists the session when
-          persistSession=true. Calling setSession here would rotate/use the
-          refresh token a second time and can race with the auth listener.
-        */
-        const session = result.data?.session;
-        if(!session?.user) throw new Error('Supabase не вернул пользователя после входа.');
-        currentSession = session;
-      }
-      if(mode==='signup' && !result.data.session){
-        renderGate('Аккаунт создан. Проверьте почту и подтвердите адрес, затем войдите.');
-      } else if(mode==='reset') {
-        renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
+        if(result.error) throw result.error;
+        if(result.data?.session?.user) {
+          currentSession=result.data.session;
+          authState='ready';
+          setJustRegisteredFlag(email);
+        }
+      } else if(actionMode==='reset') {
+        result=await client.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+        if(result.error) throw result.error;
       } else {
-        if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
-        if (mode === 'login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
-        gate().hidden = true;
-        window.dispatchEvent(new CustomEvent('bandplan:auth-ready', {
-          detail: { userId: currentSession.user.id }
-        }));
+        result=await client.auth.signInWithPassword({email,password});
+        if(result.error) throw result.error;
+        const session=result.data?.session;
+        if(!session?.user) throw new Error('Supabase не вернул пользователя после входа.');
+        currentSession=session;
+        authState='ready';
+      }
+
+      if(actionMode==='signup' && !result.data?.session) {
+        renderGate('Аккаунт создан. Проверьте почту и подтвердите адрес, затем войдите.');
+        return;
+      }
+      if(actionMode==='reset') {
+        renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
+        return;
+      }
+
+      if(!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
+      if(actionMode==='login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
+      gate().hidden=true;
+
+      // The auth module remains the single source of truth. The app shell is
+      // resumed exactly once after sign-in; no second auth client is created.
+      if(typeof window.__bandplanResumeAuthenticated==='function') {
+        await window.__bandplanResumeAuthenticated(currentSession.user);
       }
     } catch(err) {
+      console.error('BandPlan authentication request failed:', err);
       setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
-      button.disabled=false;button.textContent=mode==='signup'?'Зарегистрироваться':mode==='reset'?'Отправить ссылку':'Войти';
+      button.disabled=false;
+      button.textContent=actionMode==='signup'?'Зарегистрироваться':actionMode==='reset'?'Отправить ссылку':'Войти';
     }
   }
   async function initialize() {
     bindAuthLifecycle();
-    renderGate('Проверяем сессию…');
+    authState='loading';
+
+    // Keep the auth gate hidden while Supabase restores its persisted session.
+    // The boot screen is the initialization state; showing Login before
+    // getSession() resolves creates the classic login -> refresh -> login race.
+    gate().hidden=true;
+
     const {data,error}=await client.auth.getSession();
     if(error) {
-      console.warn('BandPlan session check failed:', error);
+      console.error('BandPlan session check failed:', error);
       currentSession=null;
+      authState='ready';
       mode='login';
-      renderGate('Войдите в аккаунт, чтобы продолжить.');
+      renderGate('Не удалось восстановить вход. Войдите снова.',true);
       return null;
     }
-    currentSession=data.session;
-    if(currentSession){gate().hidden=true;return currentSession.user;}
-    mode='login';renderGate();return null;
+
+    currentSession=data?.session||null;
+    authState='ready';
+    if(currentSession?.user) {
+      gate().hidden=true;
+      return currentSession.user;
+    }
+
+    mode='login';
+    renderGate();
+    return null;
   }
   function hydratePersonalEventParticipation(events, profile) {
     const nextProfile = Object.assign({}, profile || {});
@@ -683,5 +722,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
 })();
