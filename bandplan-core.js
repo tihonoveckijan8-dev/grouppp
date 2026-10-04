@@ -3722,9 +3722,13 @@ function resetForLogout() {
   render();
 }
 
-window.__bandplanTestHooks = {
-  shouldCleanupOfflineEventSongRow
-};
+if (location.search.includes('bandplan-test=1')) {
+  window.__bandplanTestHooks = {
+    shouldCleanupOfflineEventSongRow,
+    rebuildOfflineSongIndex,
+    offlineSongLookup: id => offlineSongIndex.get(String(id || '')) || null
+  };
+}
 
 window.__bandplanHandleSignedOut = resetForLogout;
 
