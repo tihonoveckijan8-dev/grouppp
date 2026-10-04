@@ -9,6 +9,7 @@ declare
   v_group_id uuid;
   v_group_name text;
   v_personal jsonb;
+  v_next_owner uuid;
 begin
   if v_uid is null then raise exception 'AUTH_REQUIRED'; end if;
 
@@ -19,6 +20,25 @@ begin
   order by gm.joined_at asc nulls last limit 1;
 
   if v_group_id is null then return; end if;
+
+  if exists (
+    select 1 from public.bandplan_groups g
+    where g.id=v_group_id and g.owner_id=v_uid
+  ) then
+    select gm.user_id into v_next_owner
+    from public.bandplan_group_members gm
+    where gm.group_id=v_group_id and gm.user_id<>v_uid
+    order by gm.joined_at asc nulls last, gm.user_id
+    limit 1;
+
+    if v_next_owner is null then
+      raise exception 'GROUP_OWNER_CANNOT_LEAVE_ALONE';
+    end if;
+
+    update public.bandplan_groups g
+    set owner_id=v_next_owner, updated_at=now()
+    where g.id=v_group_id and g.owner_id=v_uid;
+  end if;
 
   update public.bandplan_group_state gs
   set state=jsonb_set(coalesce(gs.state,'{}'::jsonb),'{members}',
