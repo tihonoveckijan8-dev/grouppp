@@ -876,7 +876,7 @@ function vCalendar() {
   h += '<div class="toolbar mt">' +
     '<div class="tb-search grow">' + ic('search', 18) +
     '<label class="sr-only" for="evQ">Поиск участий</label>' +
-    '<input id="evQ" type="search" placeholder="Поиск по названию, месту или заметке" value="' + esc(ui.evQuery) + '" style="border:none;background:none;outline:none;font-size:var(--fs-body-s);flex:1;min-width:0;box-shadow:none">' +
+    '<input id="evQ" class="bare-input" type="search" placeholder="Поиск по названию, месту или заметке" value="' + esc(ui.evQuery) + '">' +
     (ui.evQuery ? '<button class="icon-btn" type="button" data-act="ev-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
     '<button class="btn ' + (ac ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="ev-filter-open">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры' + (ac ? ' · ' + evFilterCount() : '') + '</span></button></div>';
   if (ac || ui.evQuery) h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
