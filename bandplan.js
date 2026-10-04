@@ -48,6 +48,7 @@ const Boot = (() => {
     const actions = opts && opts.actions || '<button type="button" id="bootRetry">Повторить</button>';
     if (core) core.innerHTML = '<div class="boot-error-ic" aria-hidden="true">' + ic('alert', 24) + '</div><div class="boot-error-title">' + esc(title) + '</div><div class="boot-error-text">' + esc(body) + '</div><div class="boot-acts">' + actions + '</div>';
     el.setAttribute('aria-label', title + '. ' + body);
+    const retry = document.getElementById('bootRetry'); if (retry) retry.addEventListener('click', () => location.reload(), {once:true});
   }
   function done() {
     if (!el || finished) return;
@@ -3164,7 +3165,7 @@ async function startBandPlan(forceOffline) {
   if (forceOffline) {
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
-    init();
+    try { init(); } catch (e) { Boot.fail({title:'Не удалось открыть локальные данные',text:'Приложение не изменило сохранённые данные. Повторите запуск.'}); return; }
     setSyncStatus('offline', 'Офлайн', 0);
     Boot.done();
     if (!hadLocal || !state.onboardingDone) openOnboarding();
@@ -3180,7 +3181,7 @@ async function startBandPlan(forceOffline) {
     console.error('BandPlan: Supabase client is unavailable; starting in local/offline mode.');
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
-    init();
+    try { init(); } catch (e) { Boot.fail({title:'Не удалось запустить BandPlan',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
     toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
     Boot.done();
     if (!hadLocal || !state.onboardingDone) openOnboarding();
@@ -3195,7 +3196,7 @@ async function startBandPlan(forceOffline) {
     console.warn('BandPlan cloud initialization failed; opening local app:', error);
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
-    init();
+    try { init(); } catch (e) { Boot.fail({title:'Не удалось запустить BandPlan',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
     toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
     Boot.done();
     if (!hadLocal || !state.onboardingDone) openOnboarding();
@@ -3240,7 +3241,7 @@ async function startBandPlan(forceOffline) {
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
   Boot.stage('Готовим интерфейс', 85);
-  init();
+  try { init(); } catch (e) { Boot.fail({title:'Не удалось подготовить интерфейс',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
   Boot.done();
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
