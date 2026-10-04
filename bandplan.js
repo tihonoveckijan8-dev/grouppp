@@ -3018,7 +3018,9 @@ async function shouldOpenAccountOnboarding() {
     if (window.BandPlanCloud?.isJustRegistered && window.BandPlanCloud.isJustRegistered()) {
       return true;
     }
-    if (user && String(meta.full_name || meta.name || '').trim()) return true;
+    // Do not infer "new account" from generic Auth metadata such as full_name.
+    // Existing accounts legitimately have full_name; only the explicit
+    // registration marker or the durable account row may open onboarding.
   } catch (e) {
     console.warn('BandPlan onboarding identity check failed:', e);
   }
