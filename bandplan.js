@@ -2932,9 +2932,12 @@ function wireNet() {
     else { bar.hidden = false; bar.innerHTML = ic('wifiOff', 16) + '<span>Нет сети. BandPlan работает офлайн — все изменения сохраняются на устройстве.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.remove('sync-error'); setSyncStatus('offline','Офлайн',0); }
   };
   bar.addEventListener('click', e => { if (e.target.closest('.netbar-close')) bar.hidden = true; });
+  // Network events are only UI hints. Do not run an initial offline check:
+  // authenticated cloud sync is the authority and will report its real result.
   window.addEventListener('online', upd); window.addEventListener('offline', upd);
   window.addEventListener('bandplan:sync-error', e => { setSyncStatus('err', e.detail || 'Ошибка синхронизации', 0); if (bar && navigator.onLine) { bar.hidden = false; bar.innerHTML = ic('alert', 16) + '<span>Ошибка синхронизации. Данные сохранены локально.</span><button class="netbar-close" type="button" aria-label="Закрыть уведомление">×</button>'; bar.classList.add('sync-error'); } });
-  upd();
+  // Intentionally no initial upd(): navigator.onLine can be false even when
+  // Supabase is reachable, which previously showed a false "Офлайн" badge.
 }
 function wireStickyHeader() {
   const c = $('#view'), tb = $('#topbar');
@@ -3036,7 +3039,10 @@ async function bootCloudSync(hadLocal, durableInfo) {
     syncGeneration === window.__bandplanCloudSyncGeneration &&
     !!window.BandPlanCloud?.user?.()?.id &&
     window.BandPlanCloud.user().id === expectedUserId;
-  setSyncStatus(navigator.onLine === false ? 'offline' : 'syncing', navigator.onLine === false ? 'Офлайн' : 'Синхронизация', 0);
+  // Do not use navigator.onLine as the source of truth for cloud state.
+  // It is only a browser hint and can report false in PWAs while Supabase is
+  // reachable. The successful cloud load below decides whether we are online.
+  setSyncStatus('syncing', 'Синхронизация', 0);
   if (!window.BandPlanCloud) {
     if (await shouldOpenAccountOnboarding()) openOnboarding();
     return;
