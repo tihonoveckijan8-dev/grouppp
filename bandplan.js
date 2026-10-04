@@ -444,7 +444,7 @@ function refreshMemberParticipationUI() {
     const member = memById(row.getAttribute('data-member-key'));
     if (!member) return;
     const summary = memberParticipationSummary(member);
-    const status = summary.status || 'unset';
+    const participationStatus = summary.status || 'unset';
     const label = participantStatusLabel(summary.status);
     const title = summary.event ? label + ' · ' + summary.event.title : label;
     row.querySelectorAll('.participation-dot').forEach(dot => {
@@ -946,7 +946,7 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 function heroHTML() {
   const up = upcoming(), next = up[0], p = state.profile, song = state.songs[0];
   const my = next ? (eventStatusFor(next.ev) || '') : '';
-  const status = my ? participantStatusLabel(my) : 'Не отмечено';
+  const participationStatus = my ? participantStatusLabel(my) : 'Не отмечено';
   const statusCls = my ? 'b-ok' : 'b-muted';
   const nextMeta = next ? [
     pdateFull(next.date),
@@ -1132,8 +1132,8 @@ function timeGrid(days) {
     occ.filter(o => o.date === k).forEach(function (o) {
       const e = o.ev, t = evType(e.type);
       const sm = clamp(mins(e.time), H0 * 60, H1 * 60), em = clamp(mins(e.end) || sm + 90, sm + 30, H1 * 60);
-      const top = (sm - H0 * 60) / 60 * HPH, hh = Math.max(24, (em - sm) / 60 * HPH - 3);
-      h += '<div class="tg-ev" style="top:' + top + 'px;height:' + hh + 'px;border-left-color:' + t.color + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
+      const eventTop = (sm - H0 * 60) / 60 * HPH, hh = Math.max(24, (em - sm) / 60 * HPH - 3);
+      h += '<div class="tg-ev" style="top:' + eventTop + 'px;height:' + hh + 'px;border-left-color:' + t.color + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
         '<b>' + esc(e.title) + '</b><span>' + esc(e.time || '') + (e.end ? '–' + esc(e.end) : '') + '</span></div>';
     });
     if (k === todayK) {
@@ -2507,11 +2507,11 @@ document.addEventListener('click', function (e) {
     case 'sl-rename': stop(); setlistModal(id); break;
     case 'sl-save': {
       stop(); btnLoading(el);
-      const name = fv('f_slname'); if (!name) { fieldError('f_slname', 'Введите название сет-листа'); break; }
+      const setlistName = fv('f_slname'); if (!setlistName) { fieldError('f_slname', 'Введите название сет-листа'); break; }
       let sl = id ? slById(id) : null;
       const picks = $$('.f_slsong:checked', modalRoot).map(c => c.value);
-      if (sl) { sl.name = name; sl.note = fv('f_slnote'); }
-      else { sl = { id: uid('sl'), name: name, note: fv('f_slnote'), eventId: '', items: picks.map(sid => ({ id: uid('i'), songId: sid, shift: 0, note: '' })) }; state.setlists.push(sl); }
+      if (sl) { sl.name = setlistName; sl.note = fv('f_slnote'); }
+      else { sl = { id: uid('sl'), name: setlistName, note: fv('f_slnote'), eventId: '', items: picks.map(sid => ({ id: uid('i'), songId: sid, shift: 0, note: '' })) }; state.setlists.push(sl); }
       sl.updatedAt = new Date().toISOString();
       modalDirty = false; hardClose(modalRoot); save(); go('#/setlist/' + sl.id); render();
       toast(id ? 'Сет-лист обновлён' : 'Сет-лист создан', 'ok');
@@ -2600,9 +2600,9 @@ document.addEventListener('click', function (e) {
     case 'mem-edit': stop(); memberModal(id); break;
     case 'mem-save': {
       stop(); btnLoading(el);
-      const name = fv('f_mname'); if (!name) { fieldError('f_mname', 'Введите имя участника'); break; }
+      const memberName = fv('f_mname'); if (!memberName) { fieldError('f_mname', 'Введите имя участника'); break; }
       const roleEls = $$('#f_mrole .chip.on', modalRoot);
-      const data = { id: id || uid('m'), name: name, roles: roleEls.length ? roleEls.map(x => x.getAttribute('data-r')) : ['other'], role: roleEls.length ? roleEls[0].getAttribute('data-r') : 'other', note: fv('f_mnote') };
+      const data = { id: id || uid('m'), name: memberName, roles: roleEls.length ? roleEls.map(x => x.getAttribute('data-r')) : ['other'], role: roleEls.length ? roleEls[0].getAttribute('data-r') : 'other', note: fv('f_mnote') };
       if (id) { const i = state.members.findIndex(x => x.id === id); if (i >= 0) { data.accountId = state.members[i].accountId || ''; state.members[i] = data; } }
       else state.members.push(data);
       modalDirty = false; hardClose(modalRoot); commit(); toast(id ? 'Данные участника обновлены' : 'Участник добавлен в состав', 'ok');
@@ -3275,11 +3275,11 @@ function init() {
         const activateWaitingWorker = () => {
           if (!registration.waiting || !navigator.serviceWorker.controller) return;
           setSyncStatus('update', 'Доступна новая версия', 0);
-          const status = $('#syncStatus');
-          if (status) {
-            status.innerHTML = ic('bolt', 15) + '<span class="sync-label">Новая версия</span><button type="button" aria-label="Обновить BandPlan">Обновить</button>';
-            status.hidden = false;
-            const btn = status.querySelector('button');
+          const statusEl = $('#syncStatus');
+          if (statusEl) {
+            statusEl.innerHTML = ic('bolt', 15) + '<span class="sync-label">Новая версия</span><button type="button" aria-label="Обновить BandPlan">Обновить</button>';
+            statusEl.hidden = false;
+            const btn = statusEl.querySelector('button');
             if (btn) btn.onclick = () => {
               showUpdateBoot();
               registration.waiting.postMessage({type:'SKIP_WAITING'});
