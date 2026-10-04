@@ -11,13 +11,39 @@
     once, then let supabase-js own session persistence.
   */
   const LEGACY_AUTH_STORAGE_KEY = 'bandplan-auth-v2';
+  const AUTH_STORAGE_KEY = 'sb-' + new URL(URL).hostname.split('.')[0] + '-auth-token';
+
+  /*
+    Recover the newest valid persisted session when an older repair left two
+    auth stores behind. Supabase's default key is explicit here so a future
+    client configuration change cannot silently move the session again.
+  */
+  function authSessionScore(raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      const expiresAt = Number(parsed?.expires_at || parsed?.session?.expires_at || 0);
+      const refreshToken = String(parsed?.refresh_token || parsed?.session?.refresh_token || '').trim();
+      return {expiresAt: Number.isFinite(expiresAt) ? expiresAt : 0, hasRefreshToken: !!refreshToken, validShape: !!parsed};
+    } catch (_) {
+      return {expiresAt: 0, hasRefreshToken: false, validShape: false};
+    }
+  }
   try {
-    const standardKey = 'sb-' + new URL(URL).hostname.split('.')[0] + '-auth-token';
-    if (!localStorage.getItem(standardKey)) {
-      const legacy = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
-      if (legacy) localStorage.setItem(standardKey, legacy);
+    const standardRaw = localStorage.getItem(AUTH_STORAGE_KEY);
+    const legacyRaw = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+    if (legacyRaw) {
+      const standardScore = authSessionScore(standardRaw || '');
+      const legacyScore = authSessionScore(legacyRaw);
+      const shouldRecoverLegacy =
+        !standardRaw ||
+        !standardScore.validShape ||
+        (legacyScore.hasRefreshToken && legacyScore.expiresAt > standardScore.expiresAt);
+      if (shouldRecoverLegacy && legacyScore.validShape) {
+        localStorage.setItem(AUTH_STORAGE_KEY, legacyRaw);
+      }
     }
   } catch (_) {}
+
   function cleanupLegacyAuthStorage() {
     try { localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY); } catch (_) {}
   }
@@ -25,7 +51,8 @@
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      storageKey: AUTH_STORAGE_KEY
     }
   });
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, activeMemberIds = [], lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
