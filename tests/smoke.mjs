@@ -47,6 +47,12 @@ try {
   await page.goto('http://127.0.0.1:4173/', {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
+  const cloudApi = await page.evaluate(() => ({
+    queueParticipation: typeof window.BandPlanCloud?.queueEventParticipation === 'function',
+    flushParticipation: typeof window.BandPlanCloud?.flushEventParticipationQueue === 'function'
+  }));
+  assert.equal(cloudApi.queueParticipation, true, 'Participation offline queue API missing');
+  assert.equal(cloudApi.flushParticipation, true, 'Participation queue flush API missing');
 
   const themes = [
     ['light', '#F4F6F8'],
