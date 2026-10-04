@@ -375,6 +375,15 @@
       // resumed exactly once after sign-in; no second auth client is created.
       if(typeof window.__bandplanResumeAuthenticated==='function') {
         await window.__bandplanResumeAuthenticated(currentSession.user);
+      } else if (window.__bandplanCorePromise) {
+        await window.__bandplanCorePromise;
+        if (typeof window.__bandplanResumeAuthenticated === 'function') {
+          await window.__bandplanResumeAuthenticated(currentSession.user);
+        } else {
+          throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
+        }
+      } else {
+        throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
       }
     } catch(err) {
       console.error('BandPlan authentication request failed:', err);
