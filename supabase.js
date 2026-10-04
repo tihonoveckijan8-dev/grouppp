@@ -80,7 +80,7 @@
   let participationChannel = null;
 
   /* Durable offline cache: per-account snapshot + latest pending sync. */
-  const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=2, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue', IDB_PARTICIPATION='participation_queue';
+  const IDB_NAME='bandplan-cloud-v1', IDB_VERSION=3, IDB_SNAPSHOT='snapshots', IDB_QUEUE='sync_queue', IDB_PARTICIPATION='participation_queue', IDB_OFFLINE_SONGS='event_offline_songs';
   let idbPromise=null;
   function openOfflineDb(){
     if(!('indexedDB' in window)) return Promise.resolve(null);
@@ -94,6 +94,12 @@
           const store=db.createObjectStore(IDB_PARTICIPATION,{keyPath:'key'});
           store.createIndex('user_id','user_id',{unique:false});
           store.createIndex('event_id','event_id',{unique:false});
+        }
+        if(!db.objectStoreNames.contains(IDB_OFFLINE_SONGS)){
+          const store=db.createObjectStore(IDB_OFFLINE_SONGS,{keyPath:'key'});
+          store.createIndex('account_id','accountId',{unique:false});
+          store.createIndex('event_id','eventId',{unique:false});
+          store.createIndex('event_date','eventDate',{unique:false});
         }
       };
       req.onsuccess=()=>resolve(req.result);
@@ -132,6 +138,62 @@
     const snapshot=await durableSnapshot(userId);
     if(snapshot)await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(Object.assign({},snapshot,{pending_sync:false})));
   }
+  async function saveOfflineEventSongs(record){
+    const uid=String(currentSession?.user?.id||'');
+    const eventId=String(record?.eventId||'').trim();
+    if(!uid||!eventId) return false;
+    const value=Object.assign({},record,{
+      key:uid+':'+eventId,accountId:uid,eventId,
+      savedAt:record?.savedAt||new Date().toISOString(),
+      version:Number(record?.version||1)
+    });
+    const result=await idbRequest(IDB_OFFLINE_SONGS,'readwrite',store=>store.put(value));
+    return result !== null;
+  }
+  async function listOfflineEventSongs(){
+    const uid=String(currentSession?.user?.id||'');
+    if(!uid)return [];
+    const db=await openOfflineDb(); if(!db)return [];
+    return await new Promise(resolve=>{
+      let tx; try{tx=db.transaction(IDB_OFFLINE_SONGS,'readonly');}catch(_){resolve([]);return;}
+      const req=tx.objectStore(IDB_OFFLINE_SONGS).index('account_id').getAll(uid);
+      req.onsuccess=()=>resolve(Array.isArray(req.result)?req.result:[]);
+      req.onerror=()=>resolve([]);
+    });
+  }
+  async function getOfflineEventSongs(eventId){
+    const uid=String(currentSession?.user?.id||''); const id=String(eventId||'').trim();
+    if(!uid||!id)return null;
+    return idbRequest(IDB_OFFLINE_SONGS,'readonly',store=>store.get(uid+':'+id));
+  }
+  async function deleteOfflineEventSongs(eventId){
+    const uid=String(currentSession?.user?.id||''); const id=String(eventId||'').trim();
+    if(!uid||!id)return;
+    await idbRequest(IDB_OFFLINE_SONGS,'readwrite',store=>store.delete(uid+':'+id));
+  }
+  async function clearOfflineEventSongs(){
+    const uid=String(currentSession?.user?.id||'');
+    if(!uid || !('indexedDB' in window)) return;
+    const db=await openOfflineDb(); if(!db)return;
+    await new Promise(resolve=>{
+      let tx; try{tx=db.transaction(IDB_OFFLINE_SONGS,'readwrite');}catch(_){resolve();return;}
+      const req=tx.objectStore(IDB_OFFLINE_SONGS).index('account_id').openCursor(IDBKeyRange.only(uid));
+      req.onsuccess=()=>{const cursor=req.result;if(cursor){cursor.delete();cursor.continue();}};
+      tx.oncomplete=()=>resolve();tx.onerror=()=>resolve();tx.onabort=()=>resolve();
+    });
+  }
+  async function offlineEventSongsBytes(){
+    const rows=await listOfflineEventSongs();
+    try{return new Blob([JSON.stringify(rows)]).size;}catch(_){return 0;}
+  }
+  async function requestStoragePersistence(){
+    try{
+      if(navigator.storage?.persist && navigator.storage?.persisted){
+        if(!(await navigator.storage.persisted())) await navigator.storage.persist();
+      }
+    }catch(_){}
+  }
+
   async function clearParticipationQueue(userId){
     if(!userId || !('indexedDB' in window)) return;
     const db=await openOfflineDb(); if(!db) return;
@@ -921,6 +983,7 @@
       console.warn('BandPlan local Auth sign-out after account deletion failed:',signOutError);
     }
     try{await clearLocalCache();}catch(e){}
+    try{await clearOfflineEventSongs();}catch(e){}
     try{localStorage.clear();}catch(e){}
     activeGroupId=null;
     lastUpdated='';
@@ -972,6 +1035,7 @@
     await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(uid));
     await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.delete(uid));
     await clearParticipationQueue(uid);
+    await clearOfflineEventSongs();
   }
   async function leaveGroup(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
@@ -999,7 +1063,9 @@
     clearTimeout(timer);pending=null;disposeRealtime();
     const uid=currentSession?.user?.id;
     if(uid) await clearParticipationQueue(uid);
+    await clearOfflineEventSongs();
     await client.auth.signOut();
   }
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,queueEventParticipation,flushEventParticipationQueue,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
+  requestStoragePersistence();
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,queueEventParticipation,flushEventParticipationQueue,saveOfflineEventSongs,listOfflineEventSongs,getOfflineEventSongs,deleteOfflineEventSongs,clearOfflineEventSongs,offlineEventSongsBytes,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
 })();
