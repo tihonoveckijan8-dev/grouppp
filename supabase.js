@@ -185,8 +185,11 @@
     let sent=0,failed=0;
     for(const row of rows){
       try{
-        await writeEventParticipation(row.event_id,row.status,row.updated_at);
+        const remote=await writeEventParticipation(row.event_id,row.status,row.updated_at);
         await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.delete(row.key));
+        window.dispatchEvent(new CustomEvent('bandplan:participation-synced',{detail:{
+          eventId:row.event_id,status:String(remote?.status||''),updatedAt:String(remote?.updated_at||row.updated_at||'')
+        }}));
         sent++;
       }catch(error){
         if(participationErrorRetryable(error)){ failed++; continue; }
