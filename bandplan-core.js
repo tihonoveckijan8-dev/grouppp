@@ -677,6 +677,19 @@ function toast(msg, type, ms) {
     node.classList.add('out'); setTimeout(() => node.remove(), 220);
   }
 }
+window.addEventListener('unhandledrejection', event => {
+  const reason = event.reason;
+  console.error('BandPlan unhandled rejection:', reason);
+  event.preventDefault();
+  const message = reason?.name === 'AbortError'
+    ? 'Запрос превысил время ожидания. Попробуйте ещё раз.'
+    : 'Произошла непредвиденная ошибка. Данные не удалены.';
+  try { toast(message, 'err', 5200); } catch (_) {}
+});
+window.addEventListener('error', event => {
+  if (!event?.error) return;
+  console.error('BandPlan uncaught error:', event.error);
+});
 let modalRoot = null, confirmCb = null, lastFocus = null, modalDirty = false, trapHandler = null;
 function closeModal(force) {
   if (!modalRoot) return;
