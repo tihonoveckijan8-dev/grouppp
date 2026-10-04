@@ -161,7 +161,14 @@
     bindAuthLifecycle();
     renderGate('Проверяем сессию…');
     const {data,error}=await client.auth.getSession();
-    if(error) {renderGate('Не удалось проверить сессию: '+error.message,true);return null;}
+    if(error) {
+      console.warn('BandPlan session check failed; showing clean login state:', error);
+      currentSession=null;
+      try { await client.auth.signOut({scope:'local'}); } catch (_) {}
+      mode='login';
+      renderGate('Войдите в аккаунт, чтобы продолжить.');
+      return null;
+    }
     currentSession=data.session;
     if(currentSession){gate().hidden=true;return currentSession.user;}
     mode='login';renderGate();return null;
