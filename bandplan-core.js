@@ -472,7 +472,32 @@ function scheduleOfflineSongSync(delay=900) {
   clearTimeout(offlineSongSyncTimer);
   offlineSongSyncTimer=setTimeout(()=>{syncEventOfflineSongs().catch(()=>{});},delay);
 }
-function offlineSongsStorageText(bytes) {
+async function refreshOfflineEventInfo(eventId) {
+  const box=document.querySelector('[data-offline-event-songs="' + CSS.escape(String(eventId)) + '"]');
+  if(!box || !window.BandPlanCloud?.getOfflineEventSongs)return;
+  try {
+    const row=await window.BandPlanCloud.getOfflineEventSongs(String(eventId));
+    if(!row){ box.innerHTML=''; box.hidden=true; return; }
+    const count=Array.isArray(row.songs)?row.songs.length:0;
+    const stamp=row.savedAt?new Date(row.savedAt):null;
+    const when=stamp && !Number.isNaN(stamp.getTime()) ? stamp.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'недавно';
+    box.hidden=false;
+    box.innerHTML='<div class="offline-song-copy"><strong>' + ic('download',13) + 'Песни сохранены на устройстве</strong><span>' + count + ' ' + plural(count,'песня','песни','песен') + ' · обновлено ' + esc(when) + '</span></div>' +
+      '<div class="offline-song-actions"><button class="btn btn-tertiary btn-sm" type="button" data-act="offline-songs-refresh" data-id="' + esc(String(eventId)) + '">Обновить</button><button class="btn btn-tertiary btn-sm" type="button" data-act="offline-songs-delete" data-id="' + esc(String(eventId)) + '">Удалить с устройства</button></div>';
+  } catch(error) { console.warn('BandPlan offline event info failed:',error); }
+}
+async function forceOfflineEventSongs(eventId) {
+  const ev=evById(String(eventId||''));
+  if(!ev || !offlineSongsForEvent(ev).length || !window.BandPlanCloud?.saveOfflineEventSongs)return;
+  const ok=await window.BandPlanCloud.saveOfflineEventSongs({
+    eventId:String(ev.id),setlistId:String(ev.setlistId||''),eventDate:String(ev.date||''),
+    eventEnd:new Date(eventEndMs(ev)).toISOString(),songs:offlineSongsForEvent(ev),savedAt:new Date().toISOString(),version:1
+  });
+  if(ok===false) throw new Error('IndexedDB недоступна или заполнена.');
+  await refreshOfflineEventInfo(ev.id);
+  toast('Офлайн-копия песен обновлена','ok',2200);
+}
+function offlineSongsStorageText(bytes) {function offlineSongsStorageText(bytes) {
   const n=Number(bytes||0);
   if(n<1024)return n+' Б';
   if(n<1048576)return (n/1024).toFixed(1)+' КБ';
@@ -1935,6 +1960,7 @@ function eventInfoModal(evId, occurrenceDate) {
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
       (function(){ const s=participationSummary(ev); return '<div class="event-participation-summary" data-event-participation-summary="' + esc(String(ev.id)) + '">' +
         '<span class="status-yes">' + s.yes + ' · Участвуют</span><span class="status-maybe">' + s.maybe + ' · Под вопросом</span><span class="status-no">' + s.no + ' · Не участвуют</span><span class="status-unset">' + s.unset + ' · Не ответили</span></div>'; })() +
+      '<div class="offline-event-songs" data-offline-event-songs="' + esc(String(ev.id)) + '" hidden></div>' +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
       '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span>' + (myRoleLabel() ? '<span class="my-position-role event-info-role">' + esc(myRoleLabel()) + '</span>' : '') + '</div>' +
         '<div data-event-switch="' + esc(String(ev.id)) + '">' + renderParticipationSwitch(ev, {size:'lg', variant:'card'}) + '</div></div>' +
@@ -1950,6 +1976,7 @@ function eventInfoModal(evId, occurrenceDate) {
       '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button>' +
       '<button class="btn btn-primary" type="button" data-act="event-edit" data-id="' + esc(ev.id) + '">' + ic('edit', 16) + 'Изменить</button>'
   });
+  refreshOfflineEventInfo(ev.id);
 }
 function eventModal(evId, date) {
   const ev = evId ? evById(evId) : null;
@@ -2975,6 +3002,8 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'print-setlist': stop(); printSetlist(id); break;
+    case 'offline-songs-refresh': { stop(); forceOfflineEventSongs(id).catch(error => toast(error.message || 'Не удалось обновить офлайн-копию','err',5000)); break; }
+    case 'offline-songs-delete': { stop(); window.BandPlanCloud?.deleteOfflineEventSongs?.(id).then(()=>{ refreshOfflineEventInfo(id); toast('Песни удалены с устройства','info',2200); }); break; }
     case 'scene-setlist': { stop(); const sl = slById(id); if (!sl) break; if (!(sl.items || []).length) { toast('В сет-листе нет песен — добавьте их в программу', 'warn'); break; } openScene(buildList(sl), 0, 0, sl.eventId || ''); break; }
     case 'scene-quick': stop(); quickScene(); break;
     case 'mem-add': stop(); memberModal(null); break;
