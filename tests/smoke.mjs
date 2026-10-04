@@ -48,6 +48,34 @@ try {
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
 
+  const themes = [
+    ['light', '#F4F6F8'],
+    ['dark', '#14161C'],
+    ['amoled', '#000000'],
+    ['glass', '#E9EEF5']
+  ];
+  for (const [theme, expectedColor] of themes) {
+    await page.evaluate(({theme}) => {
+      const current = JSON.parse(localStorage.getItem('bandplan.boot') || '{}');
+      localStorage.setItem('bandplan.boot', JSON.stringify({
+        ...current, theme, accent: '#2547D0', accentApplied: '#2547D0', onAccent: '#FFFFFF'
+      }));
+    }, {theme});
+    await page.reload({waitUntil:'domcontentloaded'});
+    await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
+    await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
+    const themeState = await page.evaluate(() => ({
+      theme: document.documentElement.dataset.theme,
+      color: document.querySelector('meta[name="theme-color"]')?.getAttribute('content') || '',
+      accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+      onAccent: getComputedStyle(document.documentElement).getPropertyValue('--on-accent').trim()
+    }));
+    assert.equal(themeState.theme, theme, `Boot theme mismatch for ${theme}`);
+    assert.equal(themeState.color.toUpperCase(), expectedColor, `Theme color mismatch for ${theme}`);
+    assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
+    assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
+  }
+
   const responsive = [];
   for (const width of [360, 390, 430, 768, 1280]) {
     await page.setViewportSize({width, height: 900});
