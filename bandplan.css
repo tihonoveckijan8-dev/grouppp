@@ -25,7 +25,50 @@ table{border-collapse:separate;border-spacing:0}
 --shadow-xs:0 1px 3px rgba(16,24,40,.05);--shadow-sm:0 4px 14px rgba(16,24,40,.07);--shadow-md:0 10px 28px rgba(16,24,40,.09);--shadow-lg:0 18px 48px rgba(16,24,40,.14);--shadow-accent:0 6px 18px rgba(37,71,208,.20);
 --sb:264px;--bn:66px;--maxw:1320px;--lsize:15px;--z-nav:20;--z-drop:1000;--z-modal:1200;--z-toast:1300;--z-scene:1400;--z-onb:1500;--ease:cubic-bezier(.2,.8,.2,1);--t-btn:180ms var(--ease);--t-card:220ms var(--ease);--t-pop:200ms var(--ease);--t-overlay:280ms var(--ease)}
 [data-theme="dark"]{--bg:#14161C;--bg-deep:#0F1116;--surf-1:#1A1D25;--surf-2:#20242E;--surf-3:#171A21;--surf-4:#22262F;--border:rgba(255,255,255,.09);--border-2:rgba(255,255,255,.15);--border-3:rgba(255,255,255,.22);--text:#ECEEF3;--text-2:#C3C8D4;--muted:#939AAA;--inverse:#14161C;--accent:#7C97F5;--accent-hover:#93AAFF;--accent-press:#6482E8;--accent-soft:rgba(124,151,245,.14);--accent-soft-2:rgba(124,151,245,.22);--accent-ring:rgba(124,151,245,.45);--on-accent:#0E1220;--ok:#62C79C;--ok-bg:rgba(98,199,156,.14);--warn:#DCAC5C;--warn-bg:rgba(220,172,92,.14);--danger:#E28880;--danger-bg:rgba(226,136,128,.14);--info:#8CA6F7;--info-bg:rgba(140,166,247,.14);--plum:#BE93D0;--plum-bg:rgba(190,147,208,.14);--disabled:#5B6070;--shadow-xs:0 1px 3px rgba(0,0,0,.35);--shadow-sm:0 5px 16px rgba(0,0,0,.28);--shadow-md:0 12px 30px rgba(0,0,0,.34);--shadow-lg:0 20px 52px rgba(0,0,0,.48);--shadow-accent:0 6px 18px rgba(0,0,0,.42)}
-[data-theme="amoled"]{--bg:#000;--bg-deep:#000;--surf-1:#0A0A0D;--surf-2:#101014;--surf-3:#07070A;--surf-4:#121217;--border:rgba(255,255,255,.11);--border-2:rgba(255,255,255,.18);--border-3:rgba(255,255,255,.26);--text:#F1F2F6;--text-2:#C7CBD6;--muted:#8E94A2;--inverse:#000;--shadow-xs:0 1px 3px rgba(0,0,0,.72);--shadow-sm:0 5px 16px rgba(0,0,0,.8);--shadow-md:0 12px 30px rgba(0,0,0,.9);--shadow-lg:0 20px 52px rgba(0,0,0,.95)}
+[data-theme="amoled"]{--bg:#000;--bg-deep:#000;--surf-1:#0A0A0D;--surf-2:#101014;--surf-3:#07070A;--surf-4:#121217;--border:rgba(255,255,255,.11);--border-2:rgba(255,255,255,.18);--border-3:rgba(255,255,255,.26);--text:#F1F2F6;--text-2:#C7CBD6;--muted:#8E94A2;--inverse:#000;--shadow-xs:0 1px 3px rgba(0,0,0,.72);--shadow-sm:0 5px 16px rgba(0,0,0,.8);--shadow-md:0 12px 30px rgba(0,0,0,.9);--shadow-lg:0 20px 52px rgba(0,0,0,.95)}[data-theme="glass"]{
+  --bg:#E9EEF5;--bg-deep:#DDE5EF;--surf-1:rgba(255,255,255,.56);--surf-2:rgba(255,255,255,.68);
+  --surf-3:rgba(255,255,255,.42);--surf-4:rgba(255,255,255,.78);
+  --border:rgba(255,255,255,.62);--border-2:rgba(255,255,255,.78);--border-3:rgba(255,255,255,.9);
+  --text:#172033;--text-2:#3C4658;--muted:#667085;--inverse:#F8FAFC;
+  --shadow-xs:0 1px 4px rgba(31,45,61,.06);--shadow-sm:0 8px 24px rgba(31,45,61,.08);
+  --shadow-md:0 14px 34px rgba(31,45,61,.11);--shadow-lg:0 24px 64px rgba(31,45,61,.16);
+}
+[data-theme="glass"] body,
+body[data-theme="glass"]{background:
+  radial-gradient(circle at 8% 4%,rgba(124,151,245,.16),transparent 30%),
+  radial-gradient(circle at 92% 8%,rgba(255,255,255,.72),transparent 34%),
+  var(--bg);
+}
+[data-theme="glass"] .sidebar,
+[data-theme="glass"] .topbar,
+[data-theme="glass"] .bottom-nav,
+[data-theme="glass"] .modal-card{
+  background:rgba(255,255,255,.62);
+  border-color:rgba(255,255,255,.72);
+  -webkit-backdrop-filter:blur(22px) saturate(145%);
+  backdrop-filter:blur(22px) saturate(145%);
+}
+[data-theme="glass"] .topbar{box-shadow:0 8px 28px rgba(31,45,61,.06)}
+[data-theme="glass"] .card{
+  background:rgba(255,255,255,.52);
+  border-color:rgba(255,255,255,.62);
+  -webkit-backdrop-filter:blur(16px) saturate(135%);
+  backdrop-filter:blur(16px) saturate(135%);
+}
+[data-theme="glass"] .nav-item:hover,
+[data-theme="glass"] .btn-secondary:hover,
+[data-theme="glass"] .chip:hover{background:rgba(255,255,255,.52)}
+[data-theme="glass"] .overlay.is-fullscreen{background:rgba(233,238,245,.94)}
+[data-theme="glass"] .overlay.is-fullscreen .modal-card{
+  background:rgba(255,255,255,.76);
+  -webkit-backdrop-filter:blur(24px) saturate(145%);
+  backdrop-filter:blur(24px) saturate(145%);
+}
+@media(prefers-reduced-transparency:reduce){
+  [data-theme="glass"] .sidebar,[data-theme="glass"] .topbar,[data-theme="glass"] .bottom-nav,
+  [data-theme="glass"] .modal-card,[data-theme="glass"] .card{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surf-4)}
+}
+
 /* ─── 3. BASE ────────────────────────────────────────────────────────── */
 html,body{height:100%}
 body{
