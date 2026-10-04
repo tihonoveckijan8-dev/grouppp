@@ -36,7 +36,7 @@ begin
     end if;
 
     update public.bandplan_groups g
-    set owner_id=v_next_owner, updated_at=now()
+    set owner_id=v_next_owner
     where g.id=v_group_id and g.owner_id=v_uid;
   end if;
 
