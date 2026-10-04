@@ -105,7 +105,7 @@ try {
   }
 
   const responsive = [];
-  for (const width of [360, 390, 430, 768, 1280]) {
+  for (const width of [360, 390, 430, 768, 1024, 1280]) {
     await page.setViewportSize({width, height: 900});
     const metrics = await page.evaluate(() => ({
       width: innerWidth,
@@ -120,6 +120,30 @@ try {
     assert.ok(metrics.submitHeight >= 44, `Submit target too small at ${width}px`);
     responsive.push(metrics);
   }
+  await page.setViewportSize({width: 390, height: 844});
+  const landscape = await page.evaluate(() => ({
+    width: innerWidth,
+    height: innerHeight,
+    scrollWidth: document.documentElement.scrollWidth,
+    emailHeight: document.querySelector('#bpAuthEmail')?.getBoundingClientRect().height || 0,
+    passwordHeight: document.querySelector('#bpAuthPassword')?.getBoundingClientRect().height || 0,
+    submitHeight: document.querySelector('#bpAuthSubmit')?.getBoundingClientRect().height || 0
+  }));
+  assert.ok(landscape.scrollWidth <= landscape.width + 1, 'Horizontal overflow before landscape check');
+  await page.setViewportSize({width: 844, height: 390});
+  const landscapeMetrics = await page.evaluate(() => ({
+    width: innerWidth,
+    height: innerHeight,
+    scrollWidth: document.documentElement.scrollWidth,
+    emailHeight: document.querySelector('#bpAuthEmail')?.getBoundingClientRect().height || 0,
+    passwordHeight: document.querySelector('#bpAuthPassword')?.getBoundingClientRect().height || 0,
+    submitHeight: document.querySelector('#bpAuthSubmit')?.getBoundingClientRect().height || 0
+  }));
+  assert.equal(landscapeMetrics.width, 844, 'Landscape viewport was not applied');
+  assert.ok(landscapeMetrics.scrollWidth <= landscapeMetrics.width + 1, 'Horizontal overflow in phone landscape');
+  assert.ok(landscapeMetrics.emailHeight >= 44, 'Email target too small in landscape');
+  assert.ok(landscapeMetrics.passwordHeight >= 44, 'Password target too small in landscape');
+  assert.ok(landscapeMetrics.submitHeight >= 44, 'Submit target too small in landscape');
   await page.setViewportSize({width: 1280, height: 900});
 
   const result = await page.evaluate(() => ({
