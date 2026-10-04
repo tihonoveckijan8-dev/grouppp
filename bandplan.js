@@ -783,7 +783,7 @@ function render() {
   let acts = '', crumb = '';
   actionBarHTML = '';
   if (r.name === 'calendar') acts = '<button class="btn btn-secondary" type="button" data-act="cal-today">' + ic('target', 17) + 'Сегодня</button><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Новое событие</button>';
-  else if (r.name === 'songs') acts = '<button class="btn btn-secondary ph-only-desktop" type="button" data-act="song-filter-open">' + ic('filter', 17) + 'Фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить песню</button>';
+  else if (r.name === 'songs') acts = '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить песню</button>';
   else if (r.name === 'setlists') acts = '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>';
   else if (r.name === 'song') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/songs">Репертуар</a>' + ic('right', 12) + '<span class="nowrap">' + esc((songById(r.id) || {}).title || '') + '</span></nav>';
@@ -971,7 +971,9 @@ function monthHTML(y, mo) {
     if (d.getMonth() !== mo) cls.push('out');
     if (k === today()) cls.push('today');
     if (k === ui.selDate) cls.push('sel');
-    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
+    const calEventColor = list.length ? (evType(list[0].ev.type).color || 'var(--accent)') : 'var(--accent)';
+    if (list.length) cls.push('cal-has-events');
+    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') + '</div>';
     if (list.length) {
       h += '<div class="cal-events">';
