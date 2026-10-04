@@ -1580,9 +1580,10 @@ function vSetlist(id) {
   const sl = slById(id);
   if (!sl) return '<div class="card">' + stateHTML('err', 'Сет-лист не найден', 'Возможно, он был удалён.', '<a class="btn btn-primary" href="#/setlists">Вернуться к сет-листам</a>') + '</div>';
   const up = expand(today(), iso(new Date(Date.now() + 86400000 * 365)));
+  const linkedEvent = sl.eventId ? evById(sl.eventId) : state.events.find(e => e.setlistId === sl.id && (e.status || 'upcoming') === 'upcoming');
   let h = '<div class="split"><div class="stack">';
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="overflow-wrap:anywhere">' + esc(sl.name) + '</h2>' +
-    '<div class="sub">Перетащите песни из библиотеки или нажмите «+» рядом с песней</div></div>' +
+    '<div class="sub">Перетащите песни из библиотеки или нажмите «+» рядом с песней</div>' + (linkedEvent ? '<div class="setlist-my-position">' + renderMyPositionBadge(linkedEvent, {compact:false}) + '</div>' : '') + '</div>' +
     '<div class="row"><button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки">' + ic('edit', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа">' + ic('print', 16) + '</button></div></div>' +
     '<div class="dropzone" id="dropZone">';
@@ -2004,11 +2005,11 @@ function addToSetlistModal(songId) {
 }
 
 /* ═══ 16. SCENE ═══ */
-const scene = { list: [], i: 0, shift: 0, size: 26, speed: 60, auto: false, raf: null, last: 0, wake: null };
+const scene = { list: [], i: 0, shift: 0, size: 26, speed: 60, auto: false, raf: null, last: 0, wake: null, eventId: '' };
 const buildList = sl => (sl.items || []).map(it => ({ songId: it.songId, shift: it.shift || 0, note: it.note || '' }));
-function openScene(list, i, shift) {
+function openScene(list, i, shift, eventId) {
   if (!list || !list.length) { toast('Нет песен для сценического режима', 'warn'); return; }
-  scene.list = list; scene.i = clamp(i || 0, 0, list.length - 1); scene.shift = shift || 0;
+  scene.list = list; scene.i = clamp(i || 0, 0, list.length - 1); scene.shift = shift || 0; scene.eventId = String(eventId || '');
   scene.size = state.settings.sceneSize || 26; scene.speed = state.settings.sceneSpeed || 60;
   $('#scene').classList.add('on'); $('#scene').setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -2032,6 +2033,9 @@ function drawScene() {
   const shift = (it.shift || 0) + scene.shift;
   $('#scTitle').textContent = s.title;
   $('#scMeta').textContent = [transposeKey(s.key || '—', shift), s.bpm ? s.bpm + ' BPM' : '', fmtDur(s.duration), (scene.i + 1) + ' / ' + scene.list.length].filter(Boolean).join(' · ');
+  const sceneEvent = scene.eventId ? evById(scene.eventId) : null;
+  const scenePos = $('#scPosition');
+  if (scenePos) scenePos.innerHTML = sceneEvent ? renderMyPositionBadge(sceneEvent, {compact:false}) : '';
   const d = s.dynamics;
   let dyn = '';
   if (d) myRoles().filter(r => (d.instruments || []).indexOf(r) >= 0).forEach(function (role) {
@@ -2860,7 +2864,7 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'print-setlist': stop(); printSetlist(id); break;
-    case 'scene-setlist': { stop(); const sl = slById(id); if (!sl) break; if (!(sl.items || []).length) { toast('В сет-листе нет песен — добавьте их в программу', 'warn'); break; } openScene(buildList(sl), 0, 0); break; }
+    case 'scene-setlist': { stop(); const sl = slById(id); if (!sl) break; if (!(sl.items || []).length) { toast('В сет-листе нет песен — добавьте их в программу', 'warn'); break; } openScene(buildList(sl), 0, 0, sl.eventId || ''); break; }
     case 'scene-quick': stop(); quickScene(); break;
     case 'mem-add': stop(); memberModal(null); break;
     case 'mem-edit': stop(); memberModal(id); break;
