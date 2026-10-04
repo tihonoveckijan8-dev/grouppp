@@ -4551,3 +4551,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero::after { display: none; }
 }
+
+/* UI/UX accessibility refinements */
+:root[data-theme="light"] { --muted: #626B78 !important; }
+@media (max-width: 380px) {
+  .tb-tools .icon-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
