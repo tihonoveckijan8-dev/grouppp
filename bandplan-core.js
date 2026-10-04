@@ -499,7 +499,7 @@ async function forceOfflineEventSongs(eventId) {
   await refreshOfflineEventInfo(ev.id);
   toast('Офлайн-копия песен обновлена','ok',2200);
 }
-function offlineSongsStorageText(bytes) {function offlineSongsStorageText(bytes) {
+function offlineSongsStorageText(bytes) {
   const n=Number(bytes||0);
   if(n<1024)return n+' Б';
   if(n<1048576)return (n/1024).toFixed(1)+' КБ';
