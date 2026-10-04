@@ -3149,7 +3149,6 @@ function init() {
   ui.skeleton = false;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
-  else if (!had || !state.onboardingDone) openOnboarding();
 }
 async function startBandPlan(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
@@ -3166,9 +3165,9 @@ async function startBandPlan(forceOffline) {
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
     init();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
     setSyncStatus('offline', 'Офлайн', 0);
     Boot.done();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
     if (!window.__bandplanOfflineResumeBound) {
       window.__bandplanOfflineResumeBound = true;
       window.addEventListener('online', () => { window.__bandplanOfflineResumeBound = false; startBandPlan(false); }, {once:true});
@@ -3182,9 +3181,9 @@ async function startBandPlan(forceOffline) {
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
     init();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
     toast('Облачная синхронизация временно недоступна. Локальные данные сохранены; обновите страницу для повторного подключения.', 'err', 9000);
     Boot.done();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
     return;
   }
   let user = null;
@@ -3197,9 +3196,9 @@ async function startBandPlan(forceOffline) {
     KEY = 'bandplan.premium.v6';
     const hadLocal = load();
     init();
-    if (!hadLocal || !state.onboardingDone) openOnboarding();
     toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
     Boot.done();
+    if (!hadLocal || !state.onboardingDone) openOnboarding();
     return;
   }
   if (!user) { Boot.done(); return; }
