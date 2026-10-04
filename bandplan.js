@@ -3255,13 +3255,12 @@ async function startBandPlan(forceOffline) {
     user = await window.BandPlanCloud.initialize();
     if (attempt !== window.__bandplanBootAttempt) return;
   } catch (error) {
-    console.warn('BandPlan cloud initialization failed; opening local app:', error);
-    KEY = 'bandplan.premium.v6';
-    const hadLocal = load();
-    try { init(); } catch (e) { Boot.fail({title:'Не удалось запустить BandPlan',text:'Сохранённые данные не удалены. Повторите запуск.'}); return; }
-    toast('Не удалось подключиться к облаку. Приложение открыто с локальными данными; проверьте интернет и обновите страницу для синхронизации.', 'warn', 9000);
-    Boot.done();
-    if (await shouldOpenAccountOnboarding()) openOnboarding();
+    console.error('BandPlan authentication initialization failed:', error);
+    Boot.fail({
+      title: 'Не удалось проверить вход',
+      text: String(error?.message || 'Supabase не ответил. Вход не был пропущен.'),
+      actions: '<button type="button" id="bootRetry">Повторить</button>'
+    });
     return;
   }
   if (!user) { Boot.done(); return; }
