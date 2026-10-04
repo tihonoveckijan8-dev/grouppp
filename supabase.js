@@ -689,6 +689,15 @@
     const uid=currentSession.user.id;
     const {error}=await client.rpc('bandplan_delete_my_account');
     if(error)throw error;
+
+    /*
+      The RPC deletes the server-side account. Explicitly revoke the local
+      Supabase session while currentSession is still populated; otherwise the
+      public signOut wrapper below can become a no-op after we null it.
+    */
+    try{await client.auth.signOut({scope:'local'});}catch(signOutError){
+      console.warn('BandPlan local Auth sign-out after account deletion failed:',signOutError);
+    }
     try{await clearLocalCache();}catch(e){}
     try{localStorage.clear();}catch(e){}
     activeGroupId=null;
