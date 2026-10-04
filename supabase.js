@@ -309,6 +309,10 @@
       }
       if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED' || authEvent === 'USER_UPDATED') {
         authState = 'ready';
+        if (currentSession?.user) {
+          window.__bandplanAuthUserId = currentSession.user.id;
+          window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
+        }
         return;
       }
       if (authEvent === 'SIGNED_OUT') {
@@ -515,13 +519,10 @@
       // resumed exactly once after sign-in; no second auth client is created.
       if(typeof window.__bandplanResumeAuthenticated==='function') {
         await window.__bandplanResumeAuthenticated(currentSession.user);
-      } else if (window.__bandplanCorePromise) {
-        await window.__bandplanCorePromise;
-        if (typeof window.__bandplanResumeAuthenticated === 'function') {
-          await window.__bandplanResumeAuthenticated(currentSession.user);
-        } else {
-          throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
-        }
+      } else if (typeof window.__bandplanEnsureCore === 'function') {
+        await window.__bandplanEnsureCore();
+        if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
+        await window.__bandplanResumeAuthenticated(currentSession.user);
       } else {
         throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
       }
@@ -560,6 +561,8 @@
         cleanupLegacyAuthStorage();
         setAuthShellLocked(false);
         gate().hidden=true;
+        window.__bandplanAuthUserId = currentSession.user.id;
+        window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
         return currentSession.user;
       }
 
