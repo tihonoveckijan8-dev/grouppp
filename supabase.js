@@ -1,8 +1,8 @@
 /* BandPlan — Supabase Auth + isolated per-account cloud state */
 (function () {
   'use strict';
-  const URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
-  const KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
+  const SUPABASE_URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
   const TABLE = 'bandplan_user_state';
   /*
     Use Supabase's standard browser storage key. A previous repair introduced a
@@ -11,7 +11,7 @@
     once, then let supabase-js own session persistence.
   */
   const LEGACY_AUTH_STORAGE_KEY = 'bandplan-auth-v2';
-  const AUTH_STORAGE_KEY = 'sb-' + new URL(URL).hostname.split('.')[0] + '-auth-token';
+  const AUTH_STORAGE_KEY = 'sb-' + new globalThis.URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token';
 
   /*
     Recover the newest valid persisted session when an older repair left two
@@ -47,7 +47,7 @@
   function cleanupLegacyAuthStorage() {
     try { localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY); } catch (_) {}
   }
-  const client = window.supabase.createClient(URL, KEY, {
+  const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -147,17 +147,17 @@
 
   function bindAuthLifecycle() {
     if (authSubscription) return;
-    const result = client.auth.onAuthStateChange((event, session) => {
+    const result = client.auth.onAuthStateChange((authEvent, session) => {
       currentSession = session || null;
-      if (event === 'INITIAL_SESSION') {
+      if (authEvent === 'INITIAL_SESSION') {
         authState = 'ready';
         return;
       }
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+      if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED' || authEvent === 'USER_UPDATED') {
         authState = 'ready';
         return;
       }
-      if (event === 'SIGNED_OUT') {
+      if (authEvent === 'SIGNED_OUT') {
         authState = 'ready';
         clearTimeout(timer);
         pending = null;
@@ -174,7 +174,7 @@
         }
         return;
       }
-      if (event === 'PASSWORD_RECOVERY') {
+      if (authEvent === 'PASSWORD_RECOVERY') {
         authState = 'ready';
         mode = 'reset';
         passwordRecoveryMode = true;
@@ -224,6 +224,41 @@
   function setMessage(message,error=false) {
     const el=$('#bpAuthMessage'); if(el){el.textContent=message;el.classList.toggle('is-error',!!error);}
   }
+  function authErrorMessage(error, actionMode='login') {
+    const raw = String(error?.message || '').trim();
+    const code = String(error?.code || '').toLowerCase();
+    const status = Number(error?.status || 0);
+    const text = raw.toLowerCase();
+
+    if (status === 429 || /too many|rate limit|rate_limit|over_request/.test(text) || code.includes('rate')) {
+      return 'Слишком много попыток. Подождите немного и попробуйте снова.';
+    }
+    if (/invalid login credentials|invalid credentials|invalid email or password/.test(text)) {
+      return 'Неверная почта или пароль.';
+    }
+    if (/email not confirmed|email_not_confirmed|confirm.*email/.test(text)) {
+      return 'Почта не подтверждена. Проверьте письмо от Supabase и подтвердите адрес.';
+    }
+    if (/user already registered|already registered|already been registered/.test(text)) {
+      return 'Аккаунт с этой почтой уже существует. Войдите или восстановите пароль.';
+    }
+    if (/invalid email|email.*invalid/.test(text)) {
+      return 'Введите корректный адрес электронной почты.';
+    }
+    if (/password.*(weak|short)|weak password|password should be/.test(text)) {
+      return actionMode === 'signup'
+        ? 'Пароль слишком слабый. Используйте не менее 8 символов.'
+        : 'Пароль не подходит.';
+    }
+    if (/network|failed to fetch|fetch failed|load failed|offline|connection/.test(text)) {
+      return 'Не удалось связаться с сервером. Проверьте интернет-соединение и попробуйте снова.';
+    }
+    if (actionMode === 'reset' && /not found|user.*not/.test(text)) {
+      return 'Не удалось найти аккаунт с этой почтой.';
+    }
+    return raw || 'Не удалось выполнить запрос. Попробуйте ещё раз.';
+  }
+
   async function submitAuth(event) {
     event.preventDefault();
     const form=event.currentTarget, button=$('#bpAuthSubmit');
@@ -311,7 +346,7 @@
       }
     } catch(err) {
       console.error('BandPlan authentication request failed:', err);
-      setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
+      setMessage(authErrorMessage(err, actionMode),true);
       button.disabled=false;
       button.textContent=actionMode==='signup'?'Зарегистрироваться':changingPassword?'Сохранить новый пароль':actionMode==='reset'?'Отправить ссылку':'Войти';
     }
