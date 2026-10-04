@@ -1256,7 +1256,7 @@ function render() {
 }
 function afterRender(r) {
   if (r.name === 'setlist' && r.id) bindDnD(r.id);
-  if (r.name === 'settings') bindSettings();
+  if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
   if (r.name === 'calendar') scrollTimeGrid();
 }
 function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new Date(); sc.scrollTop = clamp((n.getHours() - 8) * 48, 0, 800); } }
@@ -1893,6 +1893,17 @@ function vSettings() {
     '</div>' +
     '<div class="data-actions">' +
       '<div class="data-action-group"><div class="data-action-title">Резервная копия</div><div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 16) + 'Скачать JSON</button><button class="btn btn-secondary" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить файл</button></div><div class="data-meta">Объём: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</div></div>' +
+      '<div class="data-action-group offline-song-settings"><div class="data-action-title">Песни ближайших событий офлайн</div>' +
+        '<div class="data-meta">Песни сет-листов сохраняются на устройстве для работы без сети. Очистка не затрагивает облако.</div>' +
+        '<div class="offline-song-settings-grid">' +
+          '<label class="check"><input type="checkbox" id="offlineSongAuto" ' + (s.offlineSongsAutoSave !== false ? 'checked' : '') + '><span>Автосохранение</span></label>' +
+          '<label class="field compact"><span class="field-label">Окно, дней</span><input class="input" id="offlineSongDays" type="number" min="1" max="90" inputmode="numeric" value="' + esc(String(s.offlineSongsDays || 30)) + '"></label>' +
+          '<label class="field compact"><span class="field-label">Ближайших событий</span><input class="input" id="offlineSongCount" type="number" min="1" max="10" inputmode="numeric" value="' + esc(String(s.offlineSongsNearestCount || 3)) + '"></label>' +
+          '<label class="check"><input type="checkbox" id="offlineSongMaybe" ' + (s.offlineSongsSaveMaybe === true ? 'checked' : '') + '><span>Сохранять при «Под вопросом»</span></label>' +
+        '</div>' +
+        '<div class="offline-song-storage"><span>Занято на устройстве: <strong id="offlineSongBytes">—</strong></span><span>По умолчанию: 3 события / 30 дней</span></div>' +
+        '<div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="offline-song-refresh-all">' + ic('refresh', 16) + 'Обновить сейчас</button><button class="btn btn-danger" type="button" data-act="offline-song-clear-all">' + ic('trash', 16) + 'Очистить всё</button></div>' +
+      '</div>' +
       '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX', 16) + 'Удалить аккаунт</button></div></div>' +
     '</div></section>';
 
@@ -1920,6 +1931,15 @@ function bindSettings() {
   on('accentCustom', 'input', debounce(e => applyAccent(e.target.value)));
   on('setWeekStart', 'change', e => { state.settings.weekStart = +e.target.value; save(); render(); });
   on('setDefView', 'change', e => { state.settings.calView = e.target.value; ui.calView = e.target.value; save(); render(); });
+  on('offlineSongAuto', 'change', e => { state.settings.offlineSongsAutoSave = !!e.target.checked; save(); render(); });
+  on('offlineSongMaybe', 'change', e => { state.settings.offlineSongsSaveMaybe = !!e.target.checked; save(); render(); });
+  on('offlineSongDays', 'change', e => { state.settings.offlineSongsDays = clamp(+e.target.value || 30, 1, 90); save(); render(); });
+  on('offlineSongCount', 'change', e => { state.settings.offlineSongsNearestCount = clamp(+e.target.value || 3, 1, 10); save(); render(); });
+}
+async function refreshOfflineSettingsUI() {
+  const node=$('#offlineSongBytes');
+  if(!node || !window.BandPlanCloud?.offlineEventSongsBytes)return;
+  try { node.textContent=offlineSongsStorageText(await window.BandPlanCloud.offlineEventSongsBytes()); } catch(_) { node.textContent='—'; }
 }
 
 /* ═══ 15. FORM MODALS ═══ */
@@ -2690,6 +2710,8 @@ document.addEventListener('click', function (e) {
     case 'toast-mode': stop(); state.settings.toastMode = el.getAttribute('data-v'); save(); render(); break;
     case 'toggle-chords': stop(); state.settings.showChords = state.settings.showChords === false; save(); render(); break;
     case 'scene-chords': stop(); state.settings.showChords = state.settings.showChords === false; save(); drawScene(); break;
+    case 'offline-song-refresh-all': { stop(); syncEventOfflineSongs().then(refreshOfflineSettingsUI).catch(()=>{}); toast('Офлайн-копии обновляются','info',1800); break; }
+    case 'offline-song-clear-all': { stop(); confirmBox('Очистить офлайн-копии?', 'Песни будут удалены только с этого устройства. Облачные песни и сет-листы останутся без изменений.', async function(){ try{ await window.BandPlanCloud?.clearOfflineEventSongs?.(); await refreshOfflineSettingsUI(); render(); toast('Офлайн-копии очищены','ok'); }catch(error){toast(error.message||'Не удалось очистить копии','err',5000);} }, 'Очистить всё', true); break; }
     case 'pwa-install': stop(); doInstall(); break;
     case 'dyn-ramp': { stop(); const k = el.getAttribute('data-ins'), up = el.getAttribute('data-d') === 'up', ss = dynDraft.sections || []; dynDraft.levels[k] = dynDraft.levels[k] || {}; ss.forEach((x, i) => { const f = ss.length > 1 ? i / (ss.length - 1) : 1; dynDraft.levels[k][x] = DYN_LEVELS[1 + Math.round((up ? f : 1 - f) * 5)]; }); renderDynBlock(); break; }
     case 'dyn-copy': { stop(); const k = el.getAttribute('data-ins'); dynDraft.instruments.forEach(o => { if (o !== k) dynDraft.levels[o] = Object.assign({}, dynDraft.levels[k] || {}); }); renderDynBlock(); break; }
