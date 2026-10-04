@@ -1138,6 +1138,7 @@ function heroHTML() {
     (next ? '<button class="btn btn-primary btn-lg" type="button" data-act="event-info" data-id="' + esc(next.ev.id) + '" data-date="' + esc(next.date) + '">' + ic('calendar', 18) + 'Открыть событие</button>' :
       '<button class="btn btn-primary btn-lg" type="button" data-act="new-event">' + ic('plus', 18) + 'Создать событие</button>') +
     '<button class="btn btn-tertiary btn-lg" type="button" data-act="scene-quick">' + ic('monitor', 18) + 'Сценический режим</button></div>' +
+    (next ? '<div class="hero-position">' + renderMyPositionBadge(next.ev, {compact:false}) + '</div>' : '') +
     '<div class="hero-metrics">' +
     heroMetric(up.length, 'предстоящих ' + plural(up.length, 'событие', 'события', 'событий')) +
     heroMetric(state.songs.length, 'песен в репертуаре') +
