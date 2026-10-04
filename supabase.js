@@ -203,7 +203,11 @@
     try {
       let result;
       if(actionMode==='signup') {
-        result=await client.auth.signUp({email,password,options:{data:{full_name:name}}});
+        result=await client.auth.signUp({
+          email,
+          password,
+          options:{data:{full_name:name,bandplan_onboarding_required:true}}
+        });
         if(result.error) throw result.error;
         if(result.data?.session?.user) {
           currentSession=result.data.session;
