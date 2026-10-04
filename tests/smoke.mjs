@@ -44,7 +44,7 @@ page.on('console', message => {
 page.on('pageerror', error => pageErrors.push(error.message));
 
 try {
-  await page.goto('http://127.0.0.1:4173/', {waitUntil:'domcontentloaded'});
+  await page.goto('http://127.0.0.1:4173/?bandplan-test=1', {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
   const lazyCore = await page.evaluate(() => ({
@@ -75,6 +75,49 @@ try {
   assert.equal(offlineStore.hasEventOfflineSongs, true, 'Offline event songs store missing');
   assert.equal(offlineStore.hasSyncQueue, true, 'Existing sync_queue was not preserved');
   assert.ok(offlineStore.version >= 3, 'IndexedDB schema was not upgraded to v3');
+  const offlineCleanup = await page.evaluate(() => {
+    const fn = window.__bandplanTestHooks?.shouldCleanupOfflineEventSongRow;
+    if (typeof fn !== 'function') return null;
+    const now = Date.now();
+    const cfg = {maybe:false};
+    const base = {id:'future-1', date:new Date(now + 86400000).toISOString().slice(0,10), time:'12:00', status:'upcoming', setlistId:'sl-1', myStatus:'yes'};
+    return {
+      active: fn({eventId:'future-1'}, base, now, cfg, new Set(['future-1'])),
+      cancelled: fn({eventId:'cancelled'}, {...base, id:'cancelled', status:'cancelled'}, now, cfg, new Set(['cancelled'])),
+      no: fn({eventId:'no'}, {...base, id:'no', myStatus:'no'}, now, cfg, new Set(['no'])),
+      missing: fn({eventId:'missing'}, null, now, cfg, new Set()),
+      maybeDisabled: fn({eventId:'maybe'}, {...base, id:'maybe', myStatus:'maybe'}, now, cfg, new Set(['maybe']))
+    };
+  });
+  assert.ok(offlineCleanup, 'Offline cleanup test hook missing');
+  assert.equal(offlineCleanup.active, false, 'Current eligible offline event was incorrectly marked stale');
+  assert.equal(offlineCleanup.cancelled, true, 'Cancelled event was not marked stale');
+  assert.equal(offlineCleanup.no, true, 'Event after switching to no was not marked stale');
+  assert.equal(offlineCleanup.missing, true, 'Deleted event was not marked stale');
+  assert.equal(offlineCleanup.maybeDisabled, true, 'Maybe event should not be kept when maybe-save is disabled');
+
+  const accountIsolation = await page.evaluate(async () => {
+    return await new Promise((resolve, reject) => {
+      const req = indexedDB.open('bandplan-cloud-v1');
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction('event_offline_songs','readwrite');
+        const store = tx.objectStore('event_offline_songs');
+        store.put({key:'account-a:event-a',accountId:'account-a',eventId:'event-a',songs:[{id:'song-a'}]});
+        store.put({key:'account-b:event-b',accountId:'account-b',eventId:'event-b',songs:[{id:'song-b'}]});
+        tx.oncomplete = () => {
+          const readTx = db.transaction('event_offline_songs','readonly');
+          const get = readTx.objectStore('event_offline_songs').index('account_id').getAll('account-a');
+          get.onsuccess = () => { db.close(); resolve(get.result.map(x => x.eventId)); };
+          get.onerror = () => reject(get.error);
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  });
+  assert.deepEqual(accountIsolation, ['event-a'], 'Offline songs are not isolated by account');
+
 
   const themes = [
     ['light', '#F4F6F8'],
