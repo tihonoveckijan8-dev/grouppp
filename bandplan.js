@@ -3392,7 +3392,8 @@ async function startBandPlan(forceOffline) {
     source of truth when it already exists.
   */
   let legacyState = null;
-  const switchingAccount = !!(uiInitialized && window.__bandplanActiveUserId && window.__bandplanActiveUserId !== user.id);
+  const previousActiveUserId = window.__bandplanActiveUserId || null;
+  const switchingAccount = !!(uiInitialized && previousActiveUserId && previousActiveUserId !== user.id);
   /*
     A localStorage key from a previous authenticated user must never seed the
     next account. Legacy migration is allowed only during the very first boot.
@@ -3446,9 +3447,12 @@ async function startBandPlan(forceOffline) {
       guard.
     */
     window.__bandplanActiveUserId = user.id;
-    // On a second account in the same tab, the UI wiring already exists.
-    // Reload only the authenticated data layer; never attach duplicate handlers.
-    if (alreadyInitialized && window.__bandplanActiveUserId !== user.id) {
+    // After logout the DOM wiring intentionally remains reusable. Every
+    // subsequent authenticated handoff must therefore rehydrate the current
+    // account, even when it is the same account as before logout. This avoids
+    // blank/default state and prevents the previous user's state from leaking
+    // into a new session.
+    if (alreadyInitialized) {
       ui.skeleton = false;
       render();
       bootCloudSync(true, window.__bandplanDurable || null);
