@@ -2535,7 +2535,7 @@ document.addEventListener('click', function (e) {
     case 'dup-setlist': {
       stop();
       const sl = slById(id); if (!sl) break;
-      const c = JSON.parse(JSON.stringify(sl));
+      const c = cloneValue(sl);
       c.id = uid('sl'); c.name = sl.name + ' (копия)'; c.eventId = ''; c.updatedAt = new Date().toISOString();
       (c.items || []).forEach(it => { it.id = uid('i'); });
       state.setlists.push(c); save(); go('#/setlist/' + c.id); render(); toast('Копия сет-листа создана', 'ok');
@@ -3053,7 +3053,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
     return;
   }
   try {
-    const local = JSON.parse(JSON.stringify(state));
+    const local = cloneValue(state);
     /*
       If IndexedDB contains a pending snapshot, it is newer than the last
       confirmed cloud state. Never overwrite it with remote data on boot.
@@ -3125,7 +3125,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
       if (!syncIsCurrent()) return;
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
 
-      const beforeEvents = JSON.parse(JSON.stringify(state.events || []));
+      const beforeEvents = cloneValue(state.events || []);
       const before = JSON.stringify({
         profile: state.profile,
         settings: state.settings,
