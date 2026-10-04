@@ -2195,19 +2195,32 @@ async function finishOnboarding() {
   state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), note: 'это вы' }];
   state.onboardingDone = true;
 
-  if(window.BandPlanCloud?.markOnboardingComplete) {
-    await window.BandPlanCloud.markOnboardingComplete();
-  }
-  if(window.BandPlanCloud?.clearJustRegistered) {
-    window.BandPlanCloud.clearJustRegistered();
-  }
-
+  let cloudConfirmed = false;
   applyTheme();
   applyAccentVars();
-  try {
-    await save();
-  } catch(error) {
-    console.warn('BandPlan onboarding save deferred:', error);
+
+  /*
+    Provision the server account/group before writing the Auth onboarding marker.
+    The marker must never suppress onboarding on another device while the
+    authoritative Supabase account row is still missing.
+  */
+  if(window.BandPlanCloud?.saveNow && navigator.onLine !== false) {
+    try {
+      await window.BandPlanCloud.saveNow(state);
+      cloudConfirmed = true;
+    } catch(error) {
+      console.warn('BandPlan onboarding remote save deferred:', error);
+      save();
+    }
+  } else {
+    save();
+  }
+
+  if(cloudConfirmed && window.BandPlanCloud?.markOnboardingComplete) {
+    await window.BandPlanCloud.markOnboardingComplete();
+  }
+  if(cloudConfirmed && window.BandPlanCloud?.clearJustRegistered) {
+    window.BandPlanCloud.clearJustRegistered();
   }
   $('#onb').classList.remove('on');
   $('#onb').setAttribute('aria-hidden', 'true');
