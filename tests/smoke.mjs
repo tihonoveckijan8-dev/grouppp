@@ -53,6 +53,20 @@ try {
   }));
   assert.equal(cloudApi.queueParticipation, true, 'Participation offline queue API missing');
   assert.equal(cloudApi.flushParticipation, true, 'Participation queue flush API missing');
+  const offlineStore = await page.evaluate(async () => {
+    return await new Promise((resolve, reject) => {
+      const req = indexedDB.open('bandplan-cloud-v1');
+      req.onsuccess = () => {
+        const db = req.result;
+        resolve({version: db.version, hasEventOfflineSongs: db.objectStoreNames.contains('event_offline_songs'), hasSyncQueue: db.objectStoreNames.contains('sync_queue')});
+        db.close();
+      };
+      req.onerror = () => reject(req.error);
+    });
+  });
+  assert.equal(offlineStore.hasEventOfflineSongs, true, 'Offline event songs store missing');
+  assert.equal(offlineStore.hasSyncQueue, true, 'Existing sync_queue was not preserved');
+  assert.ok(offlineStore.version >= 3, 'IndexedDB schema was not upgraded to v3');
 
   const themes = [
     ['light', '#F4F6F8'],
