@@ -399,6 +399,43 @@ function participantStatusFor(ev, member) {
 function participantStatusLabel(v) {
   return ({yes:'Участвует', maybe:'Под вопросом', no:'Не участвует'}[v] || 'Не отмечено');
 }
+function participationSummary(ev) {
+  const counts = {yes:0, maybe:0, no:0, unset:0};
+  const members = (ev?.memberIds || []).map(memById).filter(Boolean);
+  members.forEach(member => {
+    const status = participantStatusFor(ev, member) || 'unset';
+    counts[Object.prototype.hasOwnProperty.call(counts, status) ? status : 'unset']++;
+  });
+  return counts;
+}
+function participationMutable(ev) {
+  return !!ev && (ev.status || 'upcoming') === 'upcoming' && String(ev.date || '') >= today();
+}
+function renderParticipationSwitch(ev, options) {
+  const o = options || {};
+  const draft = !!o.draft;
+  const status = draft ? String(o.status || '') : (eventStatusFor(ev) || '');
+  const size = o.size || 'md', variant = o.variant || 'inline';
+  const pending = !draft && ev && participationPending.has(String(ev.id));
+  const disabled = !!o.disabled || (!draft && !participationMutable(ev));
+  const states = [
+    ['yes','Участвую','check','main'],
+    ['maybe','Под вопросом','info','secondary'],
+    ['no','Не участвую','x','main']
+  ];
+  let html = '<div class="part-switch part-switch-' + esc(size) + ' part-switch-' + esc(variant) + '" role="group" aria-label="Ваше участие"' + (disabled ? ' aria-disabled="true"' : '') + '>';
+  states.forEach(p => {
+    const active = status === p[0];
+    html += '<button class="part-btn part-btn-' + p[3] + (p[1] === 'Под вопросом' ? ' part-btn-secondary' : '') + (active ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
+      (draft ? ' data-draft="1"' : '') + ' aria-pressed="' + active + '"' + (disabled ? ' disabled' : '') + ' aria-label="' + p[1] + (active ? ' — выбрано' : '') + '">' + ic(p[2], 13) + '<span>' + p[1] + '</span></button>';
+  });
+  if (status) {
+    html += '<button class="part-reset" type="button" data-v="" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
+      (draft ? ' data-draft="1"' : '') + (disabled ? ' disabled' : '') + ' aria-label="Сбросить отметку участия">' + ic('x', 13) + '<span>Сбросить</span></button>';
+  }
+  if (pending) html += '<span class="participation-pending" data-participation-pending="' + esc(String(ev.id)) + '">' + ic('clock', 12) + '<span>Ожидает отправки</span></span>';
+  return html + '</div>';
+}
 function memberParticipationSummary(member) {
   const events = state.events
     .filter(e => e && (e.status || 'upcoming') === 'upcoming' && (e.memberIds || []).indexOf(member.id) >= 0)
@@ -413,13 +450,39 @@ function setPersonalEventStatus(id, value) {
   state.profile.eventParticipation = Object.assign({}, personalParticipationMap(), { [String(id)]: value || '' });
   if (!value) delete state.profile.eventParticipation[String(id)];
 }
-function setEventParticipantStatus(ev, member, value) {
+function setEventParticipantStatus(ev, member, value, updatedAt) {
   if (!ev || !member) return;
   const key = String(member.accountId || member.id || '');
   if (!key) return;
   ev.participation = Object.assign({}, ev.participation || {});
-  if (value) ev.participation[key] = value;
-  else delete ev.participation[key];
+  ev.participationUpdatedAt = Object.assign({}, ev.participationUpdatedAt || {});
+  if (value) {
+    ev.participation[key] = value;
+    ev.participationUpdatedAt[key] = updatedAt || new Date().toISOString();
+  } else {
+    delete ev.participation[key];
+    delete ev.participationUpdatedAt[key];
+  }
+}
+function setMyParticipation(ev, value, updatedAt) {
+  if (!ev || !participationMutable(ev)) return {status:eventStatusFor(ev), updatedAt:''};
+  const me = currentMemberForParticipation();
+  const key = String(me?.accountId || me?.id || '');
+  if (!key) throw new Error('Не удалось определить ваш профиль в группе.');
+  const stamp = updatedAt || new Date().toISOString();
+  const clean = String(value || '');
+  if (clean && !['yes','maybe','no'].includes(clean)) throw new Error('Некорректный статус участия.');
+  ev.participation = Object.assign({}, ev.participation || {});
+  ev.participationUpdatedAt = Object.assign({}, ev.participationUpdatedAt || {});
+  if (clean) {
+    ev.participation[key] = clean;
+    ev.participationUpdatedAt[key] = stamp;
+  } else {
+    delete ev.participation[key];
+    delete ev.participationUpdatedAt[key];
+  }
+  setPersonalEventStatus(ev.id, clean);
+  return {status:clean, updatedAt:stamp};
 }
 function stripSharedEventPersonalFields(events) {
   return (events || []).map(ev => {
@@ -454,15 +517,13 @@ function refreshMemberParticipationUI() {
     const member = memById(row.getAttribute('data-member-key'));
     if (!member) return;
     const summary = memberParticipationSummary(member);
-    const participationStatus = summary.status || 'unset';
-    const label = participantStatusLabel(summary.status);
+    const status = summary.status || 'unset';
+    const label = participantStatusLabel(status);
     const title = summary.event ? label + ' · ' + summary.event.title : label;
     row.querySelectorAll('.participation-dot').forEach(dot => {
       dot.className = 'participation-dot participation-dot-avatar status-' + status;
-      if (dot.classList.contains('participation-dot-avatar')) {
-        dot.title = title;
-        dot.setAttribute('aria-label', title);
-      }
+      dot.title = title;
+      dot.setAttribute('aria-label', title);
     });
     const badge = row.querySelector('.member-participation');
     if (badge) {
@@ -482,10 +543,12 @@ function applyRealtimeParticipation(change) {
   const ev=evById(eventId);
   if(!ev)return;
   ev.participation=Object.assign({},ev.participation||{});
-  if(change.deleted||!change.status) delete ev.participation[userId];
-  else ev.participation[userId]=String(change.status);
+  const incomingAt = String(change.updated_at || '');
+  const currentAt = String((ev.participationUpdatedAt || {})[userId] || '');
+  if (currentAt && incomingAt && incomingAt < currentAt) return;
+  setEventParticipantStatus(ev, {accountId:userId,id:userId}, change.deleted ? '' : String(change.status || ''), incomingAt || new Date().toISOString());
   const me=window.BandPlanCloud?.user ? window.BandPlanCloud.user() : null;
-  if(me?.id && String(me.id)===userId) setPersonalEventStatus(eventId,change.deleted?'':String(change.status));
+  if(me?.id && String(me.id)===userId) setPersonalEventStatus(eventId,change.deleted?'':String(change.status||''));
   persistParticipationLocal();
   refreshParticipationUI(eventId);
   refreshMemberParticipationUI();
@@ -528,6 +591,13 @@ function refreshParticipationUI(evId) {
     node.className = 'event-my-state status-' + (my || 'unset');
     node.textContent = participantStatusLabel(my);
   });
+  const pendingNode = document.querySelectorAll('[data-participation-pending="' + CSS.escape(String(ev.id)) + '"]');
+  pendingNode.forEach(node => node.remove());
+  if (participationPending.has(String(ev.id))) {
+    document.querySelectorAll('.part-switch[data-event-switch="' + CSS.escape(String(ev.id)) + '"]').forEach(sw => {
+      if (!sw.querySelector('[data-participation-pending]')) sw.insertAdjacentHTML('beforeend', '<span class="participation-pending" data-participation-pending="' + esc(String(ev.id)) + '">' + ic('clock', 12) + '<span>Ожидает отправки</span></span>');
+    });
+  }
 
   const overlay = document.querySelector('#modalOverlay');
   if (overlay) {
@@ -1251,8 +1321,7 @@ function evRow(o, withPart) {
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
     (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
-    (withPart && !done ? '<div class="part-switch" role="group" aria-label="Ваше участие">' + [['yes', 'Участвую', 'check'], ['maybe', 'Под вопросом', 'info'], ['no', 'Не участвую', 'x']].map(p =>
-      '<button class="part-btn' + (eventStatusFor(e) === p[0] ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + e.id + '" aria-pressed="' + (eventStatusFor(e) === p[0]) + '">' + ic(p[2], 12) + '<span>' + p[1] + '</span></button>').join('') + '</div>' : '') +
+    (withPart ? '<div data-event-switch="' + esc(String(e.id)) + '">' + renderParticipationSwitch(e, {size:'sm', variant:'row'}) + '</div>' : '') +
     '</div>' +
     '<div class="ev-acts">' +
     (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
@@ -1672,7 +1741,7 @@ function eventInfoModal(evId, occurrenceDate) {
   const t = evType(ev.type), date = occurrenceDate || ev.date;
   const sl = ev.setlistId ? slById(ev.setlistId) : null;
   const members = (ev.memberIds || []).map(memById).filter(Boolean);
-  const my = eventStatusFor(ev) || state.profile.defaultParticipation || '';
+  const my = eventStatusFor(ev) || '';
   const myLabel = participantStatusLabel(my);
   const participants = members.length ? members.map(m => {
     const ps = participantStatusFor(ev, m);
@@ -1701,11 +1770,11 @@ function eventInfoModal(evId, occurrenceDate) {
         (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong></div>' : '') +
       '</div>' +
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
+      (function(){ const s=participationSummary(ev); return '<div class="event-participation-summary" data-event-participation-summary="' + esc(String(ev.id)) + '">' +
+        '<span class="status-yes">' + s.yes + ' · Участвуют</span><span class="status-maybe">' + s.maybe + ' · Под вопросом</span><span class="status-no">' + s.no + ' · Не участвуют</span><span class="status-unset">' + s.unset + ' · Не ответили</span></div>'; })() +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
       '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span></div>' +
-        '<div class="part-switch event-info-part-switch" role="group" aria-label="Ваше участие">' +
-          [['yes','Участвую','check'],['maybe','Под вопросом','info'],['no','Не участвую','x']].map(p => '<button class="part-btn' + (my === p[0] ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev.id) + '" aria-pressed="' + (my === p[0]) + '">' + ic(p[2],12) + '<span>' + p[1] + '</span></button>').join('') +
-        '</div></div>' +
+        '<div data-event-switch="' + esc(String(ev.id)) + '">' + renderParticipationSwitch(ev, {size:'lg', variant:'card'}) + '</div></div>' +
     '</div>';
   openModal({
     title: 'Событие',
@@ -2501,44 +2570,62 @@ document.addEventListener('click', function (e) {
     case 'event-undone': { stop(); const ev = evById(id); if (ev) { ev.status = 'upcoming'; commit(); toast('Событие возвращено в план', 'info'); } break; }
     case 'my-status': {
       stop();
-      const ev=evById(id); if(!ev)break;
-      const eventId=String(ev.id);
+      const eventId=String(id||'');
+      const value=String(el.getAttribute('data-v')||'');
+      const isDraft=el.getAttribute('data-draft')==='1';
+      const ev=evById(eventId);
+      if (isDraft && !ev) {
+        $('#f_my [data-act="my-status"]', modalRoot).forEach(btn => {
+          const active=btn.getAttribute('data-v')===value;
+          btn.classList.toggle('on',active);
+          btn.classList.toggle('status-yes',active&&value==='yes');
+          btn.classList.toggle('status-maybe',active&&value==='maybe');
+          btn.classList.toggle('status-no',active&&value==='no');
+          btn.setAttribute('aria-pressed',String(active));
+        });
+        return;
+      }
+      if(!ev || !participationMutable(ev))break;
       if(participationPending.has(eventId))break;
-      const v=el.getAttribute('data-v');
       const previous=eventStatusFor(ev)||'';
-      const next=previous===v?'':v;
-      const me=currentMemberForParticipation();
+      if(previous===value && value){
+        toast('Этот статус уже выбран. Для снятия используйте «Сбросить».','info',2200);
+        return;
+      }
+      const stamp=new Date().toISOString();
+      setMyParticipation(ev,value,stamp);
       participationPending.add(eventId);
-      setPersonalEventStatus(eventId,next);
-      if(me)setEventParticipantStatus(ev,me,next);
       persistParticipationLocal();
       refreshParticipationUI(eventId);
       const buttons=document.querySelectorAll('[data-act="my-status"][data-id="'+CSS.escape(eventId)+'"]');
       buttons.forEach(btn=>{btn.disabled=true;btn.setAttribute('aria-busy','true');});
-      if(!window.BandPlanCloud?.setEventParticipation){
+      const queue=async()=>{ try{ await window.BandPlanCloud?.queueEventParticipation?.(eventId,value,stamp); toast('Ответ сохранён на устройстве · ждёт отправки','info',2600); }catch(queueError){ console.warn('Participation queue failed:',queueError); toast('Не удалось сохранить ответ офлайн. Попробуйте ещё раз.','err',5000); } };
+      const rollback=(message)=>{
+        setMyParticipation(ev,previous,new Date().toISOString());
         participationPending.delete(eventId);
+        persistParticipationLocal(); refreshParticipationUI(eventId);
         buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');});
+        toast(message,'err',5200);
+      };
+      if (navigator.onLine === false || !window.BandPlanCloud?.setEventParticipation) {
+        queue().finally(()=>buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');}));
         break;
       }
-      window.BandPlanCloud.setEventParticipation(eventId,next).then(remote=>{
-        const remoteStatus=remote&&typeof remote==='object' ? String(remote.status||'') : next;
-        if(remoteStatus!==next){
-          setPersonalEventStatus(eventId,remoteStatus);
-          if(me)setEventParticipantStatus(ev,me,remoteStatus);
-        }
+      window.BandPlanCloud.setEventParticipation(eventId,value,stamp).then(remote=>{
+        const remoteStatus=remote&&typeof remote==='object' ? String(remote.status||'') : value;
+        const remoteAt=remote&&typeof remote==='object' ? String(remote.updated_at||stamp) : stamp;
+        setMyParticipation(ev,remoteStatus,remoteAt);
+        participationPending.delete(eventId);
         persistParticipationLocal();
         refreshParticipationUI(eventId);
       }).catch(err=>{
-        setPersonalEventStatus(eventId,previous);
-        if(me)setEventParticipantStatus(ev,me,previous);
-        persistParticipationLocal();
-        refreshParticipationUI(eventId);
-        toast('Не удалось синхронизировать участие: '+(err.message||'Ошибка сети'),'err',6000);
+        const msg=String(err?.message||err||'Ошибка сети');
+        const retryable=!/EVENT_NOT_FOUND|GROUP_REQUIRED|AUTH_REQUIRED|INVALID_PARTICIPATION_STATUS|permission denied|row-level security/i.test(msg);
+        if(retryable) queue().finally(()=>buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');}));
+        else rollback('Сервер отклонил отметку: событие больше недоступно или нет прав.');
       }).finally(()=>{
-        participationPending.delete(eventId);
-        document.querySelectorAll('[data-act="my-status"][data-id="'+CSS.escape(eventId)+'"]').forEach(btn=>{
-          btn.disabled=false;btn.removeAttribute('aria-busy');
-        });
+        if(!navigator.onLine) return;
+        buttons.forEach(btn=>{btn.disabled=false;btn.removeAttribute('aria-busy');});
       });
       break;
     }
