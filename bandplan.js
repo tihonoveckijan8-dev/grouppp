@@ -438,6 +438,11 @@ function refreshParticipationUI(evId) {
     });
   });
 
+  document.querySelectorAll('[data-event-my-state="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
+    node.className = 'event-my-state status-' + (my || 'unset');
+    node.textContent = participantStatusLabel(my);
+  });
+
   const overlay = document.querySelector('#modalOverlay');
   if (overlay) {
     overlay.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
@@ -1033,7 +1038,8 @@ function evRow(o, withPart) {
     '<div class="ev-body">' +
     '<h3 class="ev-title"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
     (e.repeat && e.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[e.repeat]) + '</span>' : '') +
-    (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') + '</h3>' +
+    (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') +
+    '<span class="event-my-state status-' + (eventStatusFor(e) || 'unset') + '" data-event-my-state="' + esc(String(e.id)) + '">' + esc(participantStatusLabel(eventStatusFor(e))) + '</span></h3>' +
     '<div class="ev-meta">' +
     (e.time ? '<span>' + ic('clock', 12) + esc(e.time) + (e.end ? '–' + esc(e.end) : '') + '</span>' : '') +
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
@@ -2162,7 +2168,16 @@ document.addEventListener('click', function (e) {
       if (id) { const i = state.events.findIndex(x => x.id === id); if (i >= 0) state.events[i] = data; } else state.events.push(data);
       setPersonalEventStatus(data.id, personalStatus);
       ui.selDate = data.date; ui.month = new Date(data.date + 'T00:00:00');
-      modalDirty = false; hardClose(modalRoot); commit();
+      modalDirty = false;
+      hardClose(modalRoot);
+      save();
+      try { render(); }
+      catch (renderError) {
+        console.error('BandPlan event saved; view refresh failed:', renderError);
+        const view = $('#view');
+        if (view) view.innerHTML = stateHTML('err', 'Событие сохранено', 'Не удалось обновить экран. Откройте расписание повторно — данные уже сохранены.', '<button class="btn btn-primary" type="button" data-act="cal-today">Открыть расписание</button>');
+        document.body.style.overflow = '';
+      }
       toast(id ? 'Изменения события сохранены' : 'Событие добавлено в расписание', 'ok');
       break;
     }
