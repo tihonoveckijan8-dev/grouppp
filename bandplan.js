@@ -1092,7 +1092,7 @@ function vSongs() {
   const list = filteredSongs(), tags = allTags();
   let h = '<div class="toolbar">' +
     '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
-    '<input id="songQ" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '" style="border:none;background:none;outline:none;font-size:var(--fs-body-s);flex:1;min-width:0;box-shadow:none">' +
+    '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:34px;height:34px">' + ic('x', 15) + '</button>' : '') + '</div>' +
     '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
   if (songFilterActive() || ui.songQuery) {
@@ -1305,7 +1305,7 @@ function vSetlist(id) {
     '<button class="btn btn-primary btn-block" type="button" data-act="sl-meta-save" data-id="' + sl.id + '">' + ic('check', 16) + 'Сохранить изменения</button></section>';
   h += '<section class="card rise" style="animation-delay:.08s"><div class="card-h"><div><h2>Библиотека песен</h2><div class="sub">' + state.songs.length + ' ' + plural(state.songs.length, 'песня', 'песни', 'песен') + ' в репертуаре</div></div></div>' +
     '<div class="tb-search mb" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
-    '<input id="libQ" type="search" placeholder="Поиск песни…" value="' + esc(ui.libQuery) + '" style="border:none;background:none;outline:none;font-size:13.5px;flex:1;min-width:0;box-shadow:none"></div>' +
+    '<input id="libQ" class="bare-input" type="search" placeholder="Поиск песни…" value="' + esc(ui.libQuery) + '"></div>' +
     '<div class="lib-list" id="libList">';
   const q = ui.libQuery.toLowerCase().trim();
   const lib = state.songs.filter(s => !q || ((s.title || '') + ' ' + (s.artist || '')).toLowerCase().indexOf(q) >= 0).sort((a, b) => a.title.localeCompare(b.title, 'ru'));
@@ -1905,7 +1905,7 @@ function applyTheme() {
   document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
   document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
   const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute('content', s.theme === 'light' ? '#F7F7F5' : s.theme === 'dark' ? '#111318' : '#000000');
+  if (m) m.setAttribute('content', s.theme === 'light' ? '#F4F6F8' : s.theme === 'dark' ? '#14161C' : '#000000');
 }
 function cycleTheme() {
   const o = ['light', 'dark', 'amoled'];
@@ -1934,12 +1934,7 @@ function applyAccentVars() {
      но визуально больше не вводят сторонние цвета. */
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
-  r.setProperty('--ok', hex);
-  r.setProperty('--ok-bg', hex + '14');
-  r.setProperty('--warn', hex);
-  r.setProperty('--warn-bg', hex + '14');
-  r.setProperty('--plum', hex);
-  r.setProperty('--plum-bg', hex + '14');
+  // Status colors stay semantic: accent changes interactive UI, not yes/maybe/no meaning.
   /* Participation keeps the selected hue; state is differentiated by intensity. */
   r.setProperty('--part-yes', hex);
   r.setProperty('--part-maybe', shade(hex, .38));
