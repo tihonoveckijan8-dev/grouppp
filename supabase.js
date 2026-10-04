@@ -4,12 +4,26 @@
   const URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
   const KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
   const TABLE = 'bandplan_user_state';
+  /*
+    Use Supabase's standard browser storage key. A previous repair introduced a
+    custom key, which split the app into two independent auth stores and made
+    previously valid sessions appear logged out. Migrate the old temporary key
+    once, then let supabase-js own session persistence.
+  */
+  const LEGACY_AUTH_STORAGE_KEY = 'bandplan-auth-v2';
+  try {
+    const standardKey = 'sb-' + new URL(URL).hostname.split('.')[0] + '-auth-token';
+    if (!localStorage.getItem(standardKey)) {
+      const legacy = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+      if (legacy) localStorage.setItem(standardKey, legacy);
+    }
+    localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
+  } catch (_) {}
   const client = window.supabase.createClient(URL, KEY, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: 'bandplan-auth-v2'
+      detectSessionInUrl: true
     }
   });
   let currentSession = null, timer = null, pending = null, channel = null, groupChannel = null, activeGroupId = null, activeMemberIds = [], lastUpdated = '', refreshTimer = null, realtimePollTimer = null, realtimeSharedReady = false, groupSetupPromise = null, sharedBaseline = {songs:{},events:{},setlists:{}};
@@ -179,16 +193,14 @@
       else result=await client.auth.signInWithPassword({email,password});
       if(result.error) throw result.error;
       if(mode === 'login') {
+        /*
+          signInWithPassword already establishes and persists the session when
+          persistSession=true. Calling setSession here would rotate/use the
+          refresh token a second time and can race with the auth listener.
+        */
         const session = result.data?.session;
-        if(!session?.access_token || !session?.refresh_token || !session?.user) {
-          throw new Error('Supabase не вернул полноценную сессию после входа.');
-        }
-        const restored = await client.auth.setSession({
-          access_token: session.access_token,
-          refresh_token: session.refresh_token
-        });
-        if(restored.error) throw restored.error;
-        currentSession = restored.data?.session || session;
+        if(!session?.user) throw new Error('Supabase не вернул пользователя после входа.');
+        currentSession = session;
       }
       if(mode==='signup' && !result.data.session){
         renderGate('Аккаунт создан. Проверьте почту и подтвердите адрес, затем войдите.');
@@ -198,7 +210,9 @@
         if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
         if (mode === 'login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
         gate().hidden = true;
-        location.reload();
+        window.dispatchEvent(new CustomEvent('bandplan:auth-ready', {
+          detail: { userId: currentSession.user.id }
+        }));
       }
     } catch(err) {
       setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
