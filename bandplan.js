@@ -2183,18 +2183,33 @@ function collectStep(el) {
   if (onbStep === 1) { const b = $('#ob_band', el); if (b) onbData.bandName = b.value; const d = $('#ob_banddesc', el); if (d) onbData.bandDesc = d.value; }
   if (onbStep === 2) { /* roster is account-driven */ }
 }
-function finishOnboarding() {
+async function finishOnboarding() {
   state.profile.name = onbData.name.trim() || 'Участник';
-  state.profile.roles = (onbData.roles || []).slice(); state.profile.role = state.profile.roles[0] || onbData.role;
+  state.profile.roles = (onbData.roles || []).slice();
+  state.profile.role = state.profile.roles[0] || onbData.role;
   state.profile.bandName = onbData.bandName.trim() || 'Моя группа';
   state.profile.bandDesc = onbData.bandDesc;
   state.profile.defaultParticipation = onbData.participation;
-  state.settings.theme = onbData.theme; state.settings.accent = onbData.accent;
+  state.settings.theme = onbData.theme;
+  state.settings.accent = onbData.accent;
   state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), note: 'это вы' }];
   state.onboardingDone = true;
-  applyTheme(); applyAccentVars(); save();
-  $('#onb').classList.remove('on'); $('#onb').setAttribute('aria-hidden', 'true');
-  go('#/calendar'); render();
+
+  if(window.BandPlanCloud?.markOnboardingComplete) {
+    await window.BandPlanCloud.markOnboardingComplete();
+  }
+
+  applyTheme();
+  applyAccentVars();
+  try {
+    await save();
+  } catch(error) {
+    console.warn('BandPlan onboarding save deferred:', error);
+  }
+  $('#onb').classList.remove('on');
+  $('#onb').setAttribute('aria-hidden', 'true');
+  go('#/calendar');
+  render();
   toast('BandPlan готов · роль: ' + roleLabel(state.profile.role), 'ok');
 }
 
