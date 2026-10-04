@@ -193,18 +193,58 @@
     return { events: cleanEvents, profile: nextProfile };
   }
   async function hasAccountIdentity() {
-    if (!currentSession?.user) return false;
+    const user=currentSession?.user;
+    if(!user) return false;
+
+    // The auth user's metadata is a durable cross-device marker that the
+    // one-time profile onboarding has already been completed. It is checked
+    // first so a temporary profile/RLS/network failure can never turn an
+    // existing account into a "new" account again.
+    if(user.user_metadata?.bandplan_onboarding_done===true) return true;
+
     try {
       const { data, error } = await client.from('bandplan_accounts')
         .select('display_name,roles')
-        .eq('user_id', currentSession.user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
-      if (error) throw error;
-      return !!(String(data?.display_name || '').trim() &&
-        Array.isArray(data?.roles) && data.roles.length > 0);
-    } catch (error) {
+      if(!error && String(data?.display_name || '').trim() &&
+        Array.isArray(data?.roles) && data.roles.length > 0) {
+        return true;
+      }
+      if(error) console.warn('BandPlan account identity check failed:', error);
+    } catch(error) {
       console.warn('BandPlan account identity check failed:', error);
-      return false;
+    }
+
+    // A confirmed personal snapshot is also enough to suppress onboarding.
+    // This keeps the login flow stable while the account row is being
+    // refreshed/synchronized.
+    try {
+      const local=await durableSnapshot(user.id);
+      const p=local?.state?.profile;
+      if(local?.state?.onboardingDone &&
+        String(p?.name||'').trim() &&
+        ((Array.isArray(p?.roles)&&p.roles.length>0)||String(p?.role||'').trim())) {
+        return true;
+      }
+    } catch(error) {
+      console.warn('BandPlan local identity check failed:', error);
+    }
+    return false;
+  }
+
+  async function markOnboardingComplete() {
+    if(!currentSession?.user) return;
+    try {
+      const result=await client.auth.updateUser({
+        data:{bandplan_onboarding_done:true}
+      });
+      if(result.error) throw result.error;
+      currentSession=result.data?.user ? Object.assign({},currentSession,{user:result.data.user}) : currentSession;
+    } catch(error) {
+      // The database/account row remains the source of truth; metadata is an
+      // additional durable guard against showing onboarding on a later login.
+      console.warn('BandPlan onboarding marker update failed:',error);
     }
   }
 
@@ -587,5 +627,5 @@
     return Array.isArray(data)?(data[0]||null):(data||null);
   }
   async function signOut(){clearTimeout(timer);pending=null;disposeRealtime();await client.auth.signOut();}
-  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity};
+  window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,load,saveNow,schedule,subscribe,signOut,leaveGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete};
 })();
