@@ -89,9 +89,12 @@
         renderGate();
         return;
       }
-      if (event === 'SIGNED_IN' && previousUserId && previousUserId !== session?.user?.id) {
-        disposeRealtime();
-        location.reload();
+      if (event === 'SIGNED_IN') {
+        if (previousUserId && previousUserId !== session?.user?.id) disposeRealtime();
+        if (session?.user) {
+          gate().hidden = true;
+          window.dispatchEvent(new CustomEvent('bandplan:auth-success', { detail: { user: session.user } }));
+        }
       }
     });
     authSubscription = result?.data?.subscription || null;
@@ -150,7 +153,10 @@
       } else if(mode==='reset') {
         renderGate('Если адрес зарегистрирован, на него отправлена ссылка для восстановления.');
       } else {
-        location.reload();
+        currentSession = result.data?.session || currentSession;
+        if (!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
+        gate().hidden = true;
+        window.dispatchEvent(new CustomEvent('bandplan:auth-success', { detail: { user: currentSession.user } }));
       }
     } catch(err) {
       setMessage(err.message || 'Не удалось выполнить запрос. Попробуйте ещё раз.',true);
