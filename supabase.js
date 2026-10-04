@@ -360,20 +360,12 @@
       console.warn('BandPlan account identity check failed:', error);
     }
 
-    // A confirmed personal snapshot is also enough to suppress onboarding.
-    // This keeps the login flow stable while the account row is being
-    // refreshed/synchronized.
-    try {
-      const local=await durableSnapshot(user.id);
-      const p=local?.state?.profile;
-      if(local?.state?.onboardingDone &&
-        String(p?.name||'').trim() &&
-        ((Array.isArray(p?.roles)&&p.roles.length>0)||String(p?.role||'').trim())) {
-        return true;
-      }
-    } catch(error) {
-      console.warn('BandPlan local identity check failed:', error);
-    }
+    /*
+      Do not treat IndexedDB/local state as proof that the account exists.
+      A stale or partially-created local profile must not suppress the
+      first-run wizard forever. The authoritative identity is the Supabase
+      account row (or the durable auth metadata marker above).
+    */
     return false;
   }
 
