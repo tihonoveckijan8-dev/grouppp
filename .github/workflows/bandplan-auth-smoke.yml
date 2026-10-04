@@ -21,6 +21,25 @@ jobs:
         with:
           node-version: 22
 
+      - name: Vendor pinned browser assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p vendor fonts
+          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"             --output vendor/supabase.min.js
+          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/fontsource/fonts/manrope:vf@5.3.0/latin-wght-normal.woff2"             --output fonts/manrope-latin-wght-normal.woff2
+          curl --fail --location --retry 3 --retry-delay 2             "https://cdn.jsdelivr.net/fontsource/fonts/manrope:vf@5.3.0/cyrillic-wght-normal.woff2"             --output fonts/manrope-cyrillic-wght-normal.woff2
+          test -s vendor/supabase.min.js
+          test -s fonts/manrope-latin-wght-normal.woff2
+          test -s fonts/manrope-cyrillic-wght-normal.woff2
+          git add vendor/supabase.min.js fonts/manrope-latin-wght-normal.woff2 fonts/manrope-cyrillic-wght-normal.woff2
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: vendor pinned browser assets"
+            git push
+          fi
+
       - name: Vendor pinned Supabase SDK
         shell: bash
         run: |
