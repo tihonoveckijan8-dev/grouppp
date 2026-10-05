@@ -344,11 +344,12 @@ const EV_TYPES = {
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
 const PALETTE = ['#2547D0', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
 const ACCENTS = ['#2547D0', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
+const ACCENT_LABELS = Object.freeze({'#2547D0':'Blue','#1B3A6B':'Indigo','#1F7A5A':'Teal','#6E4483':'Violet','#8F6311':'Amber','#A93B32':'Rose','#2C6E80':'Ocean','#4C525F':'Slate','#7A5230':'Umber'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
 function defaults() {
-  const bootTheme = ['light','dark','amoled','glass'].includes(document.documentElement.dataset.theme)
+  const bootTheme = ['light','dark','amoled'].includes(document.documentElement.dataset.theme)
     ? document.documentElement.dataset.theme : 'light';
   const bootAccent = /^#[0-9a-fA-F]{6}$/.test(
     document.documentElement.style.getPropertyValue('--accent').trim()
@@ -1051,6 +1052,7 @@ function openModal(o) {
     (o.footer ? '<div class="modal-foot">' + (o.guard === false ? '' : '<span class="dirty-note">' + ic('info', 14) + 'Есть несохранённые изменения</span>') + o.footer + '</div>' : '') + '</div>';
   ov.classList.toggle('fullscreen', !!o.fullscreen);
   ov.classList.toggle('is-fullscreen', !!o.fullscreen);
+  ov.classList.toggle('is-sheet', !!o.sheet);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
   document.body.style.overflow = 'hidden';
@@ -1188,8 +1190,6 @@ function buildChrome() {
   $('#themeQuick').innerHTML = thIco + '<span>' + esc(thLbl) + '</span>';
   $('#themeQuick').setAttribute('aria-label', 'Переключить тему: ' + esc(thLbl));
   $('#sceneQuick').innerHTML = ic('monitor', 18) + '<span>Сценический режим</span>';
-  $('#searchIco').innerHTML = ic('search', 19);
-  $('#searchClear').innerHTML = ic('x', 16);
   $('[data-act="scene-prev"]').innerHTML = ic('left', 20);
   $('[data-act="scene-close"]').innerHTML = ic('x', 20);
   $('[data-act="scene-next"]').innerHTML = ic('right', 20);
@@ -1239,11 +1239,6 @@ function render() {
   const r = parseHash(), hd = HEADERS[r.name] || HEADERS.calendar;
   document.body.setAttribute('data-route', r.name);
   buildChrome(); updateNav(navKey(r.name));
-  const sw = $('#searchWrap');
-  if (sw) {
-    sw.style.display = '';
-    $('#globalSearch').setAttribute('aria-expanded', 'false');
-  }
   let acts = '', crumb = '';
   actionBarHTML = '';
   if (r.name === 'calendar') acts = '<button class="btn btn-secondary" type="button" data-act="cal-today">' + ic('target', 17) + 'Сегодня</button><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Новое событие</button>';
@@ -1251,7 +1246,7 @@ function render() {
   else if (r.name === 'setlists') acts = '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>';
   else if (r.name === 'song') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/songs">Репертуар</a>' + ic('right', 12) + '<span class="nowrap">' + esc((songById(r.id) || {}).title || '') + '</span></nav>';
-    acts = '<button class="btn btn-secondary" type="button" data-act="print-song" data-id="' + esc(r.id) + '">' + ic('print', 17) + 'Печать</button><button class="btn btn-primary" type="button" data-act="edit-song" data-id="' + esc(r.id) + '">' + ic('edit', 17) + 'Изменить песню</button>';
+    acts = '<button class="btn btn-primary" type="button" data-act="edit-song" data-id="' + esc(r.id) + '">' + ic('edit', 17) + 'Изменить песню</button>';
     actionBarHTML = '';
   } else if (r.name === 'setlist') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/setlists">Сет-листы</a>' + ic('right', 12) + '<span class="nowrap">' + esc((slById(r.id) || {}).name || '') + '</span></nav>';
@@ -1398,7 +1393,7 @@ function filteredUpcoming() {
 }
 function openEventFilters() {
   openModal({
-    title: 'Фильтры расписания', sub: 'Применяются сразу к списку ближайших участий', guard: false,
+    title: 'Фильтры расписания', sub: 'Применяются сразу к списку ближайших участий', guard: false, sheet: true,
     body: '<div class="field"><span class="field-label">Тип события</span><div class="row" style="gap:6px">' +
       Object.keys(EV_TYPES).map(t => '<button class="chip' + (ui.evTypes.indexOf(t) >= 0 ? ' on' : '') + '" type="button" data-act="ev-type" data-v="' + t + '" data-no-dirty="1" aria-pressed="' + (ui.evTypes.indexOf(t) >= 0) + '">' + ic(EV_TYPES[t].ic, 14) + esc(EV_TYPES[t].label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><span class="field-label">Показывать</span><div class="row" style="gap:6px">' +
@@ -1608,29 +1603,27 @@ function vSongs() {
   h += '<div class="collection-grid collection-list songs-list">';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
-    const dyn = (s.dynamics && s.dynamics.instruments || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
       '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + esc(s.key || '—') + '</div>' +
-      '<div style="min-width:0"><h3 class="song-name">' + esc(s.title) + '</h3></div></div>' +
+      '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div></div>' +
       '<div class="song-meta">' +
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
       (s.duration ? '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(s.duration) + '</span>' : '') +
-      (dyn ? '<span class="badge b-warn">' + ic('wave', 11) + dyn + ' парт.</span>' : '<span class="badge b-muted">' + ic('wave', 11) + 'без динамики</span>') +
       (s.tags || []).slice(0, 2).map(t => '<span class="badge b-muted">' + esc(t) + '</span>').join('') +
       (used ? '<span class="badge b-ok">' + ic('list', 11) + used + '</span>' : '') + '</div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Открыть на сцене">' + ic('monitor', 15) + '</button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сет-лист">' + ic('list', 15) + '</button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать">' + ic('print', 15) + '</button>' +
-      '<button class="btn btn-primary btn-sm song-open" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button></div></article>';
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
+      '<button class="btn btn-primary btn-sm song-open" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article';
   });
   return h + '</div>';
 }
 function openSongFilters() {
   const tags = allTags();
   openModal({
-    title: 'Фильтры репертуара', sub: 'Сортировка, тональность, теги и избранное', guard: false,
+    title: 'Фильтры репертуара', sub: 'Сортировка, тональность, теги и избранное', guard: false, sheet: true,
     body: '<div class="field"><label class="field-label" for="fSort">Сортировка</label><select class="select" id="fSort" data-no-dirty="1">' +
       [['title', 'По названию (А–Я)'], ['artist', 'По исполнителю'], ['key', 'По тональности'], ['bpm', 'По темпу (быстрые сначала)'], ['added', 'Недавно добавленные']]
         .map(o => '<option value="' + o[0] + '"' + (ui.songSort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>' +
@@ -1745,12 +1738,12 @@ function vSetlists() {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
-      '<div style="min-width:0"><h3 class="song-name">' + esc(sl.name) + '</h3></div></div>' +
+      '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div></div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа">' + ic('print', 15) + '</button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Создать копию">' + ic('copy', 15) + '</button>' +
-      '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист">' + ic('trash', 15) + '</button>' +
-      '<button class="btn btn-primary btn-sm" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 15) + 'Сцена</button></div></article>';
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
+      '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 15) + '<span class="btn-txt">Удалить</span></button>' +
+      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article';
   });
   return h + '</div>';
 }
@@ -1909,7 +1902,7 @@ function vSettings() {
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
     THEMES.map(t => '<button type="button" data-act="theme-set" data-v="' + t.id + '" class="' + (s.theme === t.id ? 'on' : '') + '" aria-pressed="' + (s.theme === t.id) + '" data-accent="1">' + ic(t.icon, 14) + esc(t.label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
-    ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"></button>').join('') +
+    ACCENTS.map(a => '<button class="sw' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"><span class="sw-dot" style="background:' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (s.accent.toLowerCase() === a.toLowerCase() ? ic('check', 14) : '') + '</button>').join('') +
     '<label class="chip" style="gap:var(--s2)">Свой цвет<input type="color" id="accentCustom" value="' + esc(s.accent) + '" style="width:var(--tap);height:var(--tap);border:none;background:none;padding:0" aria-label="Выбрать свой цвет"></label></div>' +
     '</div>' +
     '<div class="field"><span class="field-label">Запись аккордов</span><div class="seg">' +
@@ -2411,8 +2404,7 @@ function quickScene() {
 const THEMES = Object.freeze([
   {id:'light', label:'Светлая', icon:'sun', themeColor:'#F4F6F8'},
   {id:'dark', label:'Тёмная', icon:'moon', themeColor:'#14161C'},
-  {id:'amoled', label:'AMOLED', icon:'bolt', themeColor:'#000000'},
-  {id:'glass', label:'Liquid Glass', icon:'sparkles', themeColor:'#E9EEF5'}
+  {id:'amoled', label:'AMOLED', icon:'bolt', themeColor:'#000000'}
 ]);
 const THEME_IDS = Object.freeze(THEMES.map(t => t.id));
 const themeById = id => THEMES.find(t => t.id === id) || THEMES[0];
@@ -2571,7 +2563,7 @@ function drawOnb() {
       '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="err"></span></div>' +
       '<div class="field"><label class="field-label" for="ob_banddesc">О группе</label><textarea class="input" id="ob_banddesc" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(onbData.bandDesc) + '</textarea></div>' +
       '<div class="field"><span class="field-label">Акцентный цвет интерфейса</span><div class="swatches">' +
-      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" style="background:' + a + '" aria-label="Акцент ' + a + '"></button>').join('') + '</div></div>';
+      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '"><span class="sw-dot" style="background:' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (onbData.accent === a ? ic('check', 14) : '') + '</button>').join('') + '</div></div>';
   } else if (onbStep === 2) {
     h += '<div class="onb-hero">' + ic('wave', 28) + '</div><h2>Состав группы</h2>' +
       '<p class="lead">Группа создастся с вашим аккаунтом. Остальных участников не нужно вводить вручную: пригласите их кодом после запуска, и их имена и роли появятся у всех автоматически.</p>' +
@@ -3237,7 +3229,6 @@ document.addEventListener('click', function (e) {
       }, 'Удалить все данные', true);
       break;
     }
-    case 'search-clear': stop(); { const i = $('#globalSearch'); i.value = ''; ui.searchQ = ''; closeSearch(); i.focus(); $('#searchWrap').classList.remove('has-q'); break; }
     case 'scene-close': stop(); closeScene(); break;
     case 'scene-prev': stop(); if (scene.i > 0) { scene.i--; drawScene(); setAuto(scene.auto); } break;
     case 'scene-next': stop(); if (scene.i < scene.list.length - 1) { scene.i++; drawScene(); setAuto(scene.auto); } else toast('Это последняя песня в программе', 'info', 2000); break;
@@ -3328,14 +3319,6 @@ document.addEventListener('keydown', function (e) {
   const sceneOn = $('#scene').classList.contains('on');
   const modalOn = $('#modalOverlay').classList.contains('on');
   const typing = /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '');
-  if ((e.ctrlKey || e.metaKey) && ['k', 'K', 'л', 'Л'].indexOf(e.key) >= 0) {
-    if (document.body.getAttribute('data-route') !== 'calendar') return;
-    e.preventDefault();
-    const inp = $('#globalSearch');
-    if ($('#searchDrop').classList.contains('open')) { closeSearch(); inp.blur(); }
-    else { inp.focus(); inp.select(); ui.searchQ = inp.value; drawSearch(); }
-    return;
-  }
   if (sceneOn) {
     if (e.key === 'Escape') { e.preventDefault(); closeScene(); return; }
     if (e.key === 'ArrowRight') { e.preventDefault(); if (scene.i < scene.list.length - 1) { scene.i++; drawScene(); setAuto(scene.auto); } return; }
@@ -3366,7 +3349,6 @@ document.addEventListener('keydown', function (e) {
   const k = e.key.toLowerCase();
   if (k === 'n' || k === 'т') { e.preventDefault(); songModal(null); }
   else if (k === 's' || k === 'ы') { e.preventDefault(); setlistModal(null); }
-  else if (k === '/' || k === '?') { if (document.body.getAttribute('data-route') === 'calendar') { e.preventDefault(); $('#globalSearch').focus(); } }
 });
 
 /* ═══ 25. EXPORT / IMPORT / NET / STICKY ═══ */
