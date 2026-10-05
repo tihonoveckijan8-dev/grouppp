@@ -2920,14 +2920,31 @@ document.addEventListener('click', function (e) {
         }
         toast(id ? 'Изменения события сохранены' : 'Событие сохранено', 'ok');
 
-        // Persist after the UI is already responsive. The cloud scheduler
-        // stores the durable snapshot and sends the event to Supabase.
+        // Persist the local snapshot immediately after the UI is responsive.
+        // Send this event snapshot to Supabase directly instead of waiting for
+        // the normal 350ms debounce: realtime can otherwise refresh the old
+        // server state before the newly created event reaches the database.
         setTimeout(() => {
-          try { save(); }
-          catch (saveError) {
+          try {
+            expandCache.clear();
+            searchCorpus = null;
+            try { localStorage.setItem(KEY, JSON.stringify(state)); }
+            catch (storageError) {
+              console.warn('BandPlan event local persistence failed:', storageError);
+            }
+            if (window.BandPlanCloud && typeof window.BandPlanCloud.saveNow === 'function') {
+              window.BandPlanCloud.saveNow(state).catch(saveError => {
+                console.error('BandPlan event cloud save failed:', saveError);
+                window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
+                  detail: saveError?.message || 'Не удалось синхронизировать событие с сервером.'
+                }));
+              });
+            }
+            scheduleOfflineSongSync();
+          } catch (saveError) {
             console.error('BandPlan deferred event save failed:', saveError);
             window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
-              detail: saveError?.message || 'Не удалось поставить событие в очередь синхронизации.'
+              detail: saveError?.message || 'Не удалось сохранить событие.'
             }));
           }
         }, 0);
