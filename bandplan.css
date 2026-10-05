@@ -4476,17 +4476,29 @@ body[data-route="setlists"] .setlists-search-row{
   display:block;
   width:100%;
   max-width:100%;
-  margin-left:0;
-  margin-right:0;
+  margin:0;
   padding:0;
 }
+/* The search field and every setlist card use the same horizontal box. */
 body[data-route="setlists"] .setlists-search-row .tb-search{
   display:flex;
-  width:100%;
-  max-width:100%;
+  width:100% !important;
+  max-width:none !important;
   min-width:0;
   box-sizing:border-box;
   margin:0;
+  align-self:stretch;
+}
+body[data-route="setlists"] .setlists-list{
+  width:100%;
+  max-width:100%;
+  margin-left:0;
+  margin-right:0;
+}
+body[data-route="setlists"] .setlists-list > article.song-card{
+  width:100%;
+  max-width:none;
+  box-sizing:border-box;
 }
 @media(max-width:640px){
   body[data-route="songs"] .songs-search-row .tb-search,
