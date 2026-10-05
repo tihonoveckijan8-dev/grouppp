@@ -3435,6 +3435,9 @@ function setSyncStatus(kind, text, hideAfter) {
 
 function wireNet() {
   const bar = $('#netBar');
+  // The old top network banner was intentionally removed from the UI.
+  // Keep the network lifecycle hook safe for existing sync code.
+  if (!bar) return; 
   const upd = () => {
     if (!bar) return;
     if (navigator.onLine) { bar.hidden = true; bar.innerHTML = ''; if (!bar.classList.contains('sync-error')) setSyncStatus('', '', 0); }
