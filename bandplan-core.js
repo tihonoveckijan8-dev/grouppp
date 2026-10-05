@@ -3799,7 +3799,7 @@ function init() {
         const registration = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
         // Check immediately on launch; browsers otherwise throttle update checks.
         const checkForAppUpdate = () => {
-          if (!navigator.onLine) return;
+          if (!navigator.onLine || document.hidden) return;
           registration.update().catch(() => {});
         };
         const activateWaitingWorker = () => {
@@ -3825,8 +3825,9 @@ function init() {
         });
         activateWaitingWorker();
         checkForAppUpdate();
-        // Frequent checks keep an already-open installed app current.
-        window.setInterval(checkForAppUpdate, 30 * 1000);
+        // Keep long-lived PWAs current without polling the network aggressively.
+        // Focus/visibility/online events still trigger an immediate check.
+        window.setInterval(checkForAppUpdate, 5 * 60 * 1000);
         window.addEventListener('online', checkForAppUpdate);
         window.addEventListener('focus', checkForAppUpdate);
         document.addEventListener('visibilitychange', () => {
