@@ -2814,3 +2814,9 @@ svg{flex:0 0 auto}
     display:none!important;
   }
 }
+
+@media (max-width:760px){
+  .settings-shell .settings-card[data-settings-panel="profile"] .field:has(#setName){
+    display:none!important;
+  }
+}
