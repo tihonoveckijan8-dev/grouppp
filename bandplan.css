@@ -4017,3 +4017,90 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
     padding-right:10px;
   }
 }
+
+/* UNIFIED ACCENT + CLAY THEME PASS — 2026-10-05
+   All neutral/interactive UI uses the active theme tokens.
+   Participation/status colors intentionally remain semantic. */
+:where(.btn-primary,.btn-accent,.settings-tab.on,.seg button.on,.chip.on,
+       .nav-link.on,.bottom-nav a.on,.tab.on,.filter-chip.on,
+       .switch input:checked + .switch-ui,.check input:checked + .check-ui){
+  --ui-active:var(--accent);
+}
+.btn-primary,.btn-accent{
+  color:var(--on-accent)!important;
+  background:var(--accent)!important;
+  border-color:var(--accent)!important;
+  box-shadow:
+    -3px -3px 7px var(--clay-light),
+    4px 5px 10px var(--clay-dark),
+    0 3px 10px var(--accent-ring)!important;
+}
+.btn-primary:hover,.btn-accent:hover{
+  background:var(--accent-hover)!important;
+  border-color:var(--accent-hover)!important;
+}
+.btn-primary:active,.btn-accent:active{
+  background:var(--accent-press)!important;
+  border-color:var(--accent-press)!important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.16)!important;
+}
+.btn:not(.btn-primary):not(.btn-accent),
+.btn-icon,.icon-btn,.settings-tab,.seg button,.chip{
+  border-color:var(--border);
+}
+.btn:not(.btn-primary):not(.btn-accent),
+.btn-icon,.icon-btn{
+  background:var(--surf-2);
+  color:var(--text);
+  box-shadow:
+    -3px -3px 7px var(--clay-light),
+    4px 5px 10px var(--clay-dark);
+}
+.btn:not(.btn-primary):not(.btn-accent):hover,
+.btn-icon:hover,.icon-btn:hover{
+  border-color:var(--accent-ring);
+  color:var(--accent);
+  background:var(--surf-3);
+}
+.btn:focus-visible,.btn-icon:focus-visible,.icon-btn:focus-visible,
+.settings-tab:focus-visible,.seg button:focus-visible,.chip:focus-visible,
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px;
+}
+.settings-tab.on,.seg button.on,.chip.on,.filter-chip.on{
+  color:var(--accent)!important;
+  border-color:var(--accent-ring);
+  background:var(--accent-soft);
+}
+.settings-tab.on::after{background:var(--accent)!important}
+.card,.song-card,.event-card,.settings-card,.member-card,.setlist-card,
+.profile-account-box,.profile-role-box,.data-action-group,.data-stat{
+  border-color:var(--border);
+}
+.card:hover,.song-card:hover,.event-card:hover,.member-card:hover,.setlist-card:hover{
+  border-color:var(--accent-ring);
+}
+a:not(.btn):not(.bottom-nav a):hover{
+  color:var(--accent);
+}
+.badge.accent,.badge.info,.badge-primary{
+  color:var(--accent)!important;
+  background:var(--accent-soft)!important;
+  border-color:var(--accent-ring)!important;
+}
+/* Theme readability: never use pure-white text on dark neutral controls. */
+[data-theme="dark"] .btn:not(.btn-primary):not(.btn-accent),
+[data-theme="amoled"] .btn:not(.btn-primary):not(.btn-accent),
+[data-theme="dark"] .btn-icon,[data-theme="amoled"] .btn-icon,
+[data-theme="dark"] .icon-btn,[data-theme="amoled"] .icon-btn{
+  color:var(--text);
+  background:var(--surf-2);
+}
+/* Keep semantic participation colors independent from the selected accent. */
+.part-avatar.part-yes::after{background:var(--ok)}
+.part-avatar.part-maybe::after{background:var(--warn)}
+.part-avatar.part-no::after{background:var(--danger)}
+.participation-label.status-yes,.member-participation.status-yes{color:var(--ok)!important}
+.participation-label.status-maybe,.member-participation.status-maybe{color:var(--warn)!important}
+.participation-label.status-no,.member-participation.status-no{color:var(--danger)!important}
