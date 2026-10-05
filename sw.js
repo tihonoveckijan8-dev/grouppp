@@ -1,5 +1,5 @@
 /* BandPlan offline app shell — resilient cache install and safe updates */
-const V = 'bandplan-' + Date.now();
+const V = 'bandplan-20261005-3';
 const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-splash.svg', 'icon-maskable-splash.svg', 'apple-touch-icon.png', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
@@ -32,7 +32,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|supabase\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
-    const cached = await caches.match(request, {ignoreSearch:true});
+    const cached = await caches.match(request);
     if (shell) {
       const refresh = async () => {
         try {
