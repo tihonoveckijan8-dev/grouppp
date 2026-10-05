@@ -342,9 +342,9 @@ const EV_TYPES = {
   meeting: { label: 'Встреча', cls: 'b-warn', ic: 'users', color: 'var(--warn)' }
 };
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
-const PALETTE = ['#2547D0', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
-const ACCENTS = ['#2547D0', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
-const ACCENT_LABELS = Object.freeze({'#2547D0':'Синий','#1B3A6B':'Индиго','#1F7A5A':'Зелёно-бирюзовый','#6E4483':'Фиолетовый','#8F6311':'Янтарный','#A93B32':'Розовый','#2C6E80':'Океанский','#4C525F':'Графитовый','#7A5230':'Умбровый'});
+const PALETTE = ['#1E46E8', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
+const ACCENTS = ['#1E46E8', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
+const ACCENT_LABELS = Object.freeze({'#1E46E8':'Синий','#1B3A6B':'Индиго','#1F7A5A':'Зелёно-бирюзовый','#6E4483':'Фиолетовый','#8F6311':'Янтарный','#A93B32':'Розовый','#2C6E80':'Океанский','#4C525F':'Графитовый','#7A5230':'Умбровый'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
@@ -353,7 +353,7 @@ function defaults() {
     ? document.documentElement.dataset.theme : 'light';
   const bootAccent = /^#[0-9a-fA-F]{6}$/.test(
     document.documentElement.style.getPropertyValue('--accent').trim()
-  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#2547D0';
+  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#1E46E8';
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
@@ -667,7 +667,7 @@ function load() {
     state = Object.assign(defaults(), d);
     state.profile = Object.assign(defaults().profile, d.profile || {});
     state.settings = Object.assign(defaults().settings, d.settings || {});
-    if (!state.settings.accent || ['#6c5ce7', '#2f55d4'].indexOf(state.settings.accent.toLowerCase()) >= 0) state.settings.accent = '#2547D0';
+    if (!state.settings.accent || ['#6c5ce7', '#2f55d4'].indexOf(state.settings.accent.toLowerCase()) >= 0) state.settings.accent = '#1E46E8';
     state.members = d.members || []; state.events = d.events || [];
     state.songs = d.songs || []; state.setlists = d.setlists || [];
     return true;
@@ -2449,7 +2449,7 @@ function onAccentFor(hex) {
   return white >= ink ? '#FFFFFF' : '#111827';
 }
 function accessibleAccent(input, themeId) {
-  const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#2547D0';
+  const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#1E46E8';
   const bg = themeMeta(themeId).themeColor;
   const candidates = [base];
   for (let i = 1; i <= 24; i++) {
@@ -2480,7 +2480,7 @@ function persistBootPrefs() {
   try {
     const st = state.settings || {};
     const theme = THEME_IDS.includes(st.theme) ? st.theme : 'light';
-    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent.toUpperCase() : '#2547D0';
+    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent.toUpperCase() : '#1E46E8';
     const appliedAccent = document.documentElement.style.getPropertyValue('--accent') || accent;
     const onAccent = document.documentElement.style.getPropertyValue('--on-accent') || '#FFFFFF';
     localStorage.setItem('bandplan.boot', JSON.stringify({
@@ -2517,7 +2517,7 @@ function applyAccent(hex) {
 }
 function applyAccentVars() {
   const themeId = THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light';
-  const hex = accessibleAccent(state.settings.accent || '#2547D0', themeId);
+  const hex = accessibleAccent(state.settings.accent || '#1E46E8', themeId);
   const r = document.documentElement.style;
   const dark = shadeColor(hex, -.16), press = shadeColor(hex, -.3);
   const onAccent = onAccentFor(hex);
@@ -2552,7 +2552,7 @@ function openOnboarding() {
     name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes',
     members: [{ name: '', role: 'vocal' }],
     theme: THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light',
-    accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#2547D0',
+    accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#1E46E8',
     demo: false
   };
   drawOnb(); $('#onb').classList.add('on');
