@@ -2933,12 +2933,17 @@ document.addEventListener('click', function (e) {
               console.warn('BandPlan event local persistence failed:', storageError);
             }
             if (window.BandPlanCloud && typeof window.BandPlanCloud.saveNow === 'function') {
-              window.BandPlanCloud.saveNow(state).catch(saveError => {
-                console.error('BandPlan event cloud save failed:', saveError);
-                window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
-                  detail: saveError?.message || 'Не удалось синхронизировать событие с сервером.'
-                }));
-              });
+              window.__bandplanEventSavePending = true;
+              Promise.resolve(window.BandPlanCloud.saveNow(state))
+                .catch(saveError => {
+                  console.error('BandPlan event cloud save failed:', saveError);
+                  window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
+                    detail: saveError?.message || 'Не удалось синхронизировать событие с сервером.'
+                  }));
+                })
+                .finally(() => {
+                  window.__bandplanEventSavePending = false;
+                });
             }
             scheduleOfflineSongSync();
           } catch (saveError) {
@@ -3768,6 +3773,10 @@ async function bootCloudSync(hadLocal, durableInfo) {
     setSyncStatus('ok', 'Синхронизировано', 2200);
     if (!syncIsCurrent()) return;
     window.BandPlanCloud.subscribe(function (incoming) {
+      // A newly created/edited event is persisted in the background. Do not
+      // let a realtime refresh with the previous server snapshot overwrite
+      // the just-rendered local event while that save is in flight.
+      if (window.__bandplanEventSavePending) return;
       if (!syncIsCurrent()) return;
       if (!incoming || typeof incoming !== 'object' || isKnownDemoState(incoming)) return;
 
