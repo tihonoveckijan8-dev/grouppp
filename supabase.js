@@ -335,6 +335,17 @@
         mode = 'login';
         passwordRecoveryMode = false;
         renderGate();
+        // After logout the login form must be completely clean. Do this only
+        // in the SIGNED_OUT path so normal validation/error rerenders do not
+        // erase text the user is currently entering.
+        try {
+          const loginForm = document.getElementById('bpAuthForm');
+          if (loginForm) {
+            loginForm.reset();
+            loginForm.querySelectorAll('input').forEach(input => { input.value = ''; });
+            loginForm.querySelectorAll('textarea').forEach(input => { input.value = ''; });
+          }
+        } catch (_) {}
         return;
       }
       if (authEvent === 'PASSWORD_RECOVERY') {
