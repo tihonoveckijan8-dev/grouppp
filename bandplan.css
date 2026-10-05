@@ -1809,8 +1809,8 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     --bp-ink-2:#475467;
     --bp-line:#E4E7EC;
     --bp-line-strong:#D0D5DD;
-    --bp-blue:#3155D9;
-    --bp-blue-soft:#EEF2FF;
+    --bp-blue:var(--accent);
+    --bp-blue-soft:var(--accent-surface);
     --bp-green:#15956B;
     --bp-shadow:0 1px 2px rgba(16,24,40,.03),0 10px 30px rgba(16,24,40,.055);
     --bp-shadow-lg:0 20px 60px rgba(16,24,40,.12);
@@ -1988,13 +1988,13 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   .btn-primary{
     background:var(--bp-blue);
     border-color:var(--bp-blue);
-    box-shadow:0 3px 10px rgba(49,85,217,.18);
+    box-shadow:var(--shadow-accent);
   }
   .btn-primary:hover{
     background:var(--accent-hover);
     border-color:var(--accent-hover);
     transform:translateY(-1px);
-    box-shadow:0 5px 16px rgba(49,85,217,.22);
+    box-shadow:var(--shadow-accent-hover);
   }
   .btn-secondary,.btn-tertiary,.icon-btn{
     border-color:var(--bp-line);
@@ -2045,7 +2045,7 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   }
   .cal-cell:hover{background:var(--surf-1)}
   .cal-cell.today{
-    box-shadow:inset 0 0 0 2px var(--bp-blue);
+    box-shadow:inset 0 0 0 2px var(--accent-border);
   }
   .cal-num{font-size:12px;font-weight:700}
   .cal-ev{
@@ -2090,7 +2090,7 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   }
   .settings-tab.on{
     background:var(--bp-blue);
-    color:#fff;
+    color:var(--on-accent);
     border-color:var(--bp-blue);
     box-shadow:0 3px 10px rgba(49,85,217,.18);
   }
