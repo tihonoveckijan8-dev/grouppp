@@ -1,13 +1,12 @@
-/* BandPlan bootstrap — the application runtime is loaded only after Supabase confirms an authenticated user. */
+/* BandPlan bootstrap — load the application runtime deterministically after the Supabase client is available. */
 (() => {
   'use strict';
+
   const loadCore = () => {
     if (window.__bandplanCorePromise) return window.__bandplanCorePromise;
     window.__bandplanCorePromise = import('./bandplan-core.js').catch(error => {
       console.error('BandPlan core failed to load:', error);
       const boot = document.getElementById('boot');
-      const stage = document.getElementById('bootStage');
-      if (stage) stage.textContent = 'Не удалось загрузить приложение';
       if (boot) {
         boot.classList.add('is-error');
         const core = boot.querySelector('.boot-core');
@@ -24,7 +23,14 @@
     });
     return window.__bandplanCorePromise;
   };
+
+  /*
+    Do not make core loading depend on the one-shot auth-ready CustomEvent.
+    Supabase may restore an existing session before this module's listener is
+    attached. The core already treats Supabase Auth as the source of truth and
+    waits for initialize(), so loading it deterministically is safer and avoids
+    the "login succeeds but the app never opens" race.
+  */
   window.__bandplanEnsureCore = loadCore;
-  window.addEventListener('bandplan:auth-ready', () => loadCore(), {once:true});
-  if (window.__bandplanAuthUserId) loadCore();
+  loadCore();
 })();
