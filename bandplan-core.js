@@ -1873,7 +1873,7 @@ function moveItem(slId, itemId, at) {
 function vSettings() {
   const s = state.settings, p = state.profile;
   const settingsTab = ui.settingsTab || 'profile';
-  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль'],['group','Группа'],['interface','Интерфейс'],['data','Данные'],['account','Аккаунт'],['app','Приложение']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div><div class="settings-tab-content">';
+  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль'],['group','Группа'],['interface','Интерфейс'],['data','Данные'],['app','Приложение']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div><div class="settings-tab-content">';
   h += '<section class="card rise settings-card" data-settings-panel="profile"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
     '<div class="profile-settings-grid">' +
     '<div class="profile-settings-main">' +
@@ -1882,8 +1882,21 @@ function vSettings() {
       '<div class="field"><label class="field-label" for="setBandDesc">О группе</label><textarea class="input" id="setBandDesc" rows="2" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(p.bandDesc || '') + '</textarea></div>' +
     '</div>' +
     '<div class="profile-settings-side">' +
-      '<div class="profile-role-box"><span class="field-label">Роли и инструменты</span><div class="profile-role-list">' +
-    ROLES.map(r => '<button class="chip' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '">' + ic(r.icon, 14) + esc(r.label) + '</button>').join('') + '</div></div></div></div>' +
+      '<div class="profile-role-box">' +
+        '<div class="profile-role-identity"><span class="profile-role-avatar">' + esc((p.name || '?').charAt(0).toUpperCase()) + '</span><div><strong>' + esc(p.name || 'Имя не указано') + '</strong><span>' + esc(window.BandPlanCloud?.user?.()?.email || '') + '</span></div></div>' +
+        '<span class="field-label">Роли и инструменты</span>' +
+        '<details class="profile-roles-dropdown">' +
+          '<summary><span class="profile-roles-selected">' + (myRoles().length ? myRoles().map(k => '<span class="profile-role-selected-chip">' + esc(roleLabel(k)) + '</span>').join('') : '<span class="profile-roles-placeholder">Выберите роли</span>') + '</span><span class="profile-roles-chevron" aria-hidden="true">' + ic('chevronDown', 16) + '</span></summary>' +
+          '<div class="profile-role-options">' +
+            ROLES.map(r => '<button class="profile-role-option' + (myRoles().indexOf(r.k) >= 0 ? ' on' : '') + '" type="button" data-act="role-set" data-v="' + r.k + '" aria-pressed="' + (myRoles().indexOf(r.k) >= 0) + '"><span class="profile-role-option-check">' + (myRoles().indexOf(r.k) >= 0 ? ic('check', 14) : '') + '</span><span class="profile-role-option-icon">' + ic(r.icon, 14) + '</span><span>' + esc(r.label) + '</span></button>').join('') +
+          '</div>' +
+        '</details>' +
+      '</div>' +
+      '<div class="profile-account-box"><div class="card-h"><div><h3>Аккаунт</h3><div class="sub">Управление входом и безопасностью</div></div></div>' +
+        '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Электронная почта</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div>' +
+        '<div class="profile-account-danger"><span>Удаление аккаунта необратимо.</span><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX',16) + 'Удалить аккаунт</button></div>' +
+      '</div>' +
+    '</div></div>' +
     '</section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
@@ -1953,11 +1966,9 @@ function vSettings() {
         '<div class="offline-song-storage"><span>Занято на устройстве: <strong id="offlineSongBytes">—</strong></span><span>По умолчанию: 3 события / 30 дней</span></div>' +
         '<div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="offline-song-refresh-all">' + ic('refresh', 16) + 'Обновить сейчас</button><button class="btn btn-danger" type="button" data-act="offline-song-clear-all">' + ic('trash', 16) + 'Очистить всё</button></div>' +
       '</div>' +
-      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX', 16) + 'Удалить аккаунт</button></div></div>' +
+      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button></div></div>' +
     '</div></section>';
 
-  h += '<section class="card rise settings-card" data-settings-panel="account" style="animation-delay:.12s"><div class="card-h"><div><h2>Аккаунт и безопасность</h2><div class="sub">Управление текущей сессией</div></div></div>' +
-    '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Вход в аккаунт</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div></section>';
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
     '' +
     '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span></div>' +
