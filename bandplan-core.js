@@ -344,7 +344,7 @@ const EV_TYPES = {
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
 const PALETTE = ['#2547D0', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
 const ACCENTS = ['#2547D0', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
-const ACCENT_LABELS = Object.freeze({'#2547D0':'Blue','#1B3A6B':'Indigo','#1F7A5A':'Teal','#6E4483':'Violet','#8F6311':'Amber','#A93B32':'Rose','#2C6E80':'Ocean','#4C525F':'Slate','#7A5230':'Umber'});
+const ACCENT_LABELS = Object.freeze({'#2547D0':'Синий','#1B3A6B':'Индиго','#1F7A5A':'Зелёно-бирюзовый','#6E4483':'Фиолетовый','#8F6311':'Янтарный','#A93B32':'Розовый','#2C6E80':'Океанский','#4C525F':'Графитовый','#7A5230':'Умбровый'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
@@ -1044,7 +1044,7 @@ function openModal(o) {
   if (modalRoot) hardClose(modalRoot, {keepHistory:true});
   lastFocus = document.activeElement; modalDirty = false;
   const ov = $('#modalOverlay');
-  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (o.fullscreen ? ' modal-fullscreen' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
+  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (o.fullscreen ? ' modal-fullscreen' : '') + (o.sheet ? ' modal-sheet' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
     '<div class="modal-head"><div style="min-width:0"><h3 id="mTitle">' + esc(o.title || '') + '</h3>' +
     (o.sub ? '<div class="sub">' + esc(o.sub) + '</div>' : '') + '</div>' +
     '<button class="icon-btn" type="button" data-act="modal-close" aria-label="Закрыть окно">' + ic('x', 18) + '</button></div>' +
@@ -1052,6 +1052,7 @@ function openModal(o) {
     (o.footer ? '<div class="modal-foot">' + (o.guard === false ? '' : '<span class="dirty-note">' + ic('info', 14) + 'Есть несохранённые изменения</span>') + o.footer + '</div>' : '') + '</div>';
   ov.classList.toggle('fullscreen', !!o.fullscreen);
   ov.classList.toggle('is-fullscreen', !!o.fullscreen);
+  ov.classList.toggle('is-sheet', !!o.sheet);
   ov.classList.toggle('is-sheet', !!o.sheet);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
@@ -1393,7 +1394,7 @@ function filteredUpcoming() {
 }
 function openEventFilters() {
   openModal({
-    title: 'Фильтры расписания', sub: 'Применяются сразу к списку ближайших участий', guard: false, sheet: true,
+    title: 'Фильтры расписания', sub: 'Применяются сразу к списку ближайших событий', guard: false, sheet: true,
     body: '<div class="field"><span class="field-label">Тип события</span><div class="row" style="gap:6px">' +
       Object.keys(EV_TYPES).map(t => '<button class="chip' + (ui.evTypes.indexOf(t) >= 0 ? ' on' : '') + '" type="button" data-act="ev-type" data-v="' + t + '" data-no-dirty="1" aria-pressed="' + (ui.evTypes.indexOf(t) >= 0) + '">' + ic(EV_TYPES[t].ic, 14) + esc(EV_TYPES[t].label) + '</button>').join('') + '</div></div>' +
       '<div class="field"><span class="field-label">Показывать</span><div class="row" style="gap:6px">' +
@@ -1947,7 +1948,7 @@ function vSettings() {
     '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Вход в аккаунт</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div></section>';
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
     '' +
-    '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span><span class="badge b-muted">свайп-навигация</span></div>' +
+    '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span></div>' +
     '<hr class="divider"><span class="field-label">Горячие клавиши</span>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">Ctrl K</kbd></div>' +
     '<div class="row mt-s" style="gap:var(--s2)"><kbd class="badge b-muted mono">N</kbd><kbd class="badge b-muted mono">E</kbd><kbd class="badge b-muted mono">S</kbd></div>' +
