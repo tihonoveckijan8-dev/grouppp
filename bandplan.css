@@ -2636,3 +2636,49 @@ svg{flex:0 0 auto}
     font-size:19px!important;
   }
 }
+
+
+/* Settings cleanup: remove redundant empty spacing/surfaces and strengthen compact controls. */
+.settings-shell{margin-top:0}
+.settings-tab-content{margin-top:0;padding-top:0}
+.settings-tab-content:empty{display:none}
+.settings-tab-content > [data-settings-panel]{margin-top:0}
+.settings-option-row{display:grid;grid-template-columns:minmax(130px,.34fr) minmax(0,1fr);align-items:center;gap:14px;min-width:0;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-option-row:last-child{border-bottom:0}
+.settings-option-row>.field-label{margin:0;white-space:nowrap}
+.settings-inline-seg{min-width:0;width:100%;display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none}
+.settings-inline-seg::-webkit-scrollbar{display:none}
+.settings-inline-seg>button{flex:1 1 0;min-width:max-content;white-space:nowrap}
+.settings-accent-row{position:relative;z-index:20}
+.accent-dropdown{width:100%;max-width:460px}
+.accent-dropdown summary{min-height:44px}
+.settings-accent-menu{z-index:var(--z-drop,1000)}
+.profile-role-avatar{
+  width:42px;height:42px;flex-basis:42px;border-radius:14px;
+  background:var(--accent);color:var(--on-accent);
+  box-shadow:var(--shadow-2),0 0 0 3px var(--accent-soft);
+  font-size:16px;border:2px solid var(--surf-2);
+}
+.profile-role-identity strong{font-size:15px}
+.profile-role-identity span:not(.profile-role-avatar){font-size:12px}
+.profile-role-option-icon{color:var(--accent);opacity:.95}
+.side-profile .av,.avatar{
+  background:var(--accent-soft-2);
+  color:var(--accent);
+  border-color:var(--accent-ring);
+  box-shadow:0 0 0 2px var(--accent-soft);
+  font-weight:800;
+}
+.event-info-avatar,.event-part-avatar{
+  background:var(--accent-soft-2);
+  color:var(--accent);
+  border-color:var(--accent-ring);
+  box-shadow:0 0 0 2px var(--accent-soft);
+  font-weight:800;
+}
+@media(max-width:640px){
+  .settings-option-row{grid-template-columns:1fr;gap:7px;padding:9px 0}
+  .settings-option-row>.field-label{font-size:12px}
+  .settings-inline-seg>button{flex:0 0 auto}
+  .profile-role-avatar{width:44px;height:44px;flex-basis:44px}
+}
