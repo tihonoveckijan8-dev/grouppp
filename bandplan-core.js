@@ -1492,7 +1492,7 @@ function monthHTML(y, mo) {
     const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
     h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
-       + '</div>';
+      '</div>';
     if (list.length) {
       h += '<div class="cal-events">';
       list.slice(0, 3).forEach(o => {
