@@ -3636,3 +3636,267 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
   .data-action-buttons{grid-template-columns:minmax(0,1fr)}
   .data-action-buttons .btn{width:100%}
 }
+
+/* MOBILE CORE SURFACES — 2026-10-05
+   Final containment pass for Main / Calendar / Songs / Setlists.
+   No navigation, data or interaction logic changed. */
+@media(max-width:900px){
+  .content{
+    min-width:0;
+    width:100%;
+    overflow-x:clip;
+    padding-bottom:calc(var(--bn) + var(--s8) + env(safe-area-inset-bottom,0px));
+  }
+  .main{min-width:0;overflow-x:clip}
+  .bottom-nav{
+    min-height:calc(var(--bn) + env(safe-area-inset-bottom,0px));
+    padding-left:max(6px,env(safe-area-inset-left,0px));
+    padding-right:max(6px,env(safe-area-inset-right,0px));
+    padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
+    gap:2px;
+  }
+  .bottom-nav a{
+    min-width:0;
+    min-height:52px;
+    padding-inline:2px;
+    overflow:hidden;
+  }
+  .bottom-nav a>svg{width:20px;height:20px;flex:0 0 20px}
+  .bottom-nav a>span:not(.nb){
+    display:block;
+    max-width:100%;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .bottom-nav .nb{right:calc(50% - 23px)}
+}
+@media(max-width:640px){
+  .page-head,.content{min-width:0}
+  .page-head{
+    padding-left:0;
+    padding-right:0;
+  }
+  .page-head h1{
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .toolbar{
+    min-width:0;
+    width:100%;
+  }
+  .toolbar .tb-search{
+    min-width:0;
+    max-width:none;
+  }
+  .toolbar .bare-input{
+    min-width:0;
+    width:100%;
+  }
+  .active-chips{
+    min-width:0;
+    max-width:100%;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .active-chips::-webkit-scrollbar{display:none}
+  .active-chips .chip{flex:0 0 auto;max-width:78vw}
+  .cal-head{
+    min-width:0;
+    width:100%;
+  }
+  .cal-head .row-ns{
+    min-width:0;
+    width:100%;
+    flex-wrap:wrap;
+  }
+  .cal-head .cal-title{
+    min-width:0;
+    flex:1 1 140px;
+    text-align:center;
+    overflow-wrap:anywhere;
+  }
+  .cal-head .seg{
+    min-width:0;
+    max-width:100%;
+  }
+  .cal-head .seg button{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .cal-grid{
+    min-width:0;
+    width:100%;
+  }
+  .cal-cell{
+    min-width:0;
+    overflow:hidden;
+  }
+  .cal-num{
+    min-width:0;
+    overflow:hidden;
+  }
+  .cal-legend{
+    display:flex;
+    gap:7px 10px;
+    flex-wrap:wrap;
+    min-width:0;
+  }
+  .cal-legend span{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .ev-row{
+    min-width:0;
+    width:100%;
+  }
+  .ev-body,.ev-title,.ev-meta{min-width:0;max-width:100%}
+  .ev-acts{
+    min-width:0;
+    max-width:100%;
+    width:100%;
+  }
+  .song-card{
+    min-width:0;
+    width:100%;
+    overflow:hidden;
+  }
+  .song-meta{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .song-meta>*{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .setlists-list .song-card .song-acts{
+    width:100%;
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  .setlists-list .song-card .song-acts .btn{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    flex:initial!important;
+  }
+  .sl-item{
+    min-width:0;
+    width:100%;
+  }
+  .sl-info{
+    min-width:0;
+    max-width:100%;
+  }
+  .sl-name,.sl-sub{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+  }
+  .sl-row-actions{
+    width:100%;
+    margin-left:0;
+    justify-content:flex-start;
+  }
+  .sl-row-actions .mini-stepper{
+    margin-left:auto;
+  }
+}
+@media(max-width:430px){
+  .bottom-nav a{
+    font-size:9.5px;
+    gap:2px;
+    min-height:50px;
+  }
+  .bottom-nav a>svg{width:19px;height:19px;flex-basis:19px}
+  .bottom-nav .nb{
+    right:calc(50% - 21px);
+    min-width:16px;
+    height:16px;
+    font-size:9px;
+  }
+  .toolbar:has(#evQ){
+    grid-template-columns:minmax(0,1fr) 44px;
+  }
+  .toolbar:has(#evQ)> .btn{
+    width:44px;
+    min-width:44px;
+    max-width:44px;
+  }
+  .toolbar:not(:has(#evQ)){
+    grid-template-columns:minmax(0,1fr) 44px;
+  }
+  .toolbar:not(:has(#evQ))>.btn{
+    width:44px;
+    min-width:44px;
+    max-width:44px;
+    padding-inline:0;
+  }
+  .toolbar:not(:has(#evQ))>.btn .btn-lbl{
+    display:none;
+  }
+  .cal-head .row-ns .icon-btn.lg{
+    width:42px;
+    min-width:42px;
+    height:42px;
+  }
+  .cal-head .cal-title{font-size:15px}
+  .cal-cell{
+    min-height:58px;
+    padding:4px;
+  }
+  .cal-num{font-size:11px}
+  .cal-my-dot{width:6px;height:6px;margin-left:2px}
+  .song-card .song-open-top{
+    width:84px!important;
+    min-width:84px!important;
+    max-width:84px!important;
+    flex-basis:84px!important;
+  }
+  .setlists-list .song-card .song-acts{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:375px){
+  .content{padding-left:6px;padding-right:6px}
+  .bottom-nav{gap:0;padding-inline:4px}
+  .bottom-nav a{font-size:9px;padding-inline:1px}
+  .bottom-nav a>svg{width:18px;height:18px;flex-basis:18px}
+  .toolbar{gap:6px}
+  .toolbar .tb-search{height:46px}
+  .toolbar:has(#evQ)> .btn,
+  .toolbar:not(:has(#evQ))>.btn{
+    width:42px;
+    min-width:42px;
+    max-width:42px;
+  }
+  .cal-head .cal-title{font-size:14px}
+  .cal-head .seg button{font-size:11px;padding-inline:3px}
+  .song-card .song-open-top{
+    width:80px!important;
+    min-width:80px!important;
+    max-width:80px!important;
+    flex-basis:80px!important;
+    padding-inline:6px!important;
+  }
+  .setlists-list .song-card .song-acts{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media(max-width:360px){
+  .content{padding-left:4px;padding-right:4px}
+  .bottom-nav a>span:not(.nb){max-width:58px}
+  .page-head h1{font-size:21px}
+  .card{padding:11px}
+  .ev-row{padding:10px}
+  .ev-date{width:42px;min-width:42px}
+}
