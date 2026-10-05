@@ -1884,7 +1884,7 @@ function vSettings() {
     '</div>' +
     '<div class="profile-settings-side">' +
       '<div class="profile-role-box">' +
-        '<div class="profile-role-identity"><span class="profile-role-avatar">' + esc((p.name || '?').charAt(0).toUpperCase()) + '</span><div><strong>' + esc(p.name || 'Имя не указано') + '</strong><span>' + esc(window.BandPlanCloud?.user?.()?.email || '') + '</span></div></div>' +
+        '<div class="profile-role-identity"><span class="profile-role-avatar">' + esc((p.name || '?').charAt(0).toUpperCase()) + '</span><div><strong>' + esc(p.name || 'Имя не указано') + '</strong></div></div>' +
         '<span class="field-label">Роли и инструменты</span>' +
         '<details class="profile-roles-dropdown">' +
           '<summary><span class="profile-roles-selected">' + (myRoles().length ? myRoles().map(k => '<span class="profile-role-selected-chip">' + esc(roleLabel(k)) + '</span>').join('') : '<span class="profile-roles-placeholder">Выберите роли</span>') + '</span><span class="profile-roles-chevron" aria-hidden="true">' + ic('chevronDown', 16) + '</span></summary>' +
@@ -1893,7 +1893,7 @@ function vSettings() {
           '</div>' +
         '</details>' +
       '</div>' +
-      '<div class="profile-account-box"><div class="card-h"><div><h3>Аккаунт</h3><div class="sub">Управление входом и безопасностью</div></div></div>' +
+      '<div class="profile-account-box"><div class="card-h"><div><h3>Аккаунт</h3></div></div>' +
         '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Электронная почта</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div>' +
         '<div class="profile-account-danger"><span>Удаление аккаунта необратимо.</span><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX',16) + 'Удалить аккаунт</button></div>' +
       '</div>' +
