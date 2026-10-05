@@ -2899,9 +2899,11 @@ document.addEventListener('click', function (e) {
         ui.month = new Date(data.date + 'T00:00:00');
         modalDirty = false;
 
-        // save() persists locally and schedules the existing Supabase sync.
-        save();
-
+        /*
+          Close and redraw first. localStorage/queue serialization can be
+          expensive on large workspaces, so it must never keep the Save button
+          or modal visibly stuck.
+        */
         hardClose(modalRoot);
         try {
           render();
@@ -2916,8 +2918,19 @@ document.addEventListener('click', function (e) {
           );
           document.body.style.overflow = '';
         }
-
         toast(id ? 'Изменения события сохранены' : 'Событие сохранено', 'ok');
+
+        // Persist after the UI is already responsive. The cloud scheduler
+        // stores the durable snapshot and sends the event to Supabase.
+        setTimeout(() => {
+          try { save(); }
+          catch (saveError) {
+            console.error('BandPlan deferred event save failed:', saveError);
+            window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
+              detail: saveError?.message || 'Не удалось поставить событие в очередь синхронизации.'
+            }));
+          }
+        }, 0);
       } catch (error) {
         console.error('BandPlan event save failed:', error);
         if (id && previous) {
