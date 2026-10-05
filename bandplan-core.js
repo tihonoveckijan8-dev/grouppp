@@ -1550,7 +1550,7 @@ function evRow(o, withPart) {
     (withPart ? '<div data-event-switch="' + esc(String(e.id)) + '">' + renderParticipationSwitch(e, {size:'sm', variant:'row'}) + '</div>' : '') +
     '</div>' +
     '<div class="ev-acts">' +
-    (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
+    (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сцену" title="Сцена" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
     '<button class="icon-btn" type="button" data-act="event-edit" data-id="' + e.id + '" aria-label="Изменить событие">' + ic('edit', 16) + '<span class="ia-t">Изменить</span></button>' +
     (done ? '<button class="icon-btn" type="button" data-act="event-undone" data-id="' + e.id + '" aria-label="Вернуть в план">' + ic('repeat', 16) + '<span class="ia-t">В план</span></button>'
       : '<button class="icon-btn" type="button" data-act="event-done" data-id="' + e.id + '" aria-label="Отметить проведённым">' + ic('check', 16) + '<span class="ia-t">Готово</span></button>') +
@@ -1615,10 +1615,10 @@ function vSongs() {
       (s.tags || []).slice(0, 2).map(t => '<span class="badge b-muted">' + esc(t) + '</span>').join('') +
       (used ? '<span class="badge b-ok">' + ic('list', 11) + used + '</span>' : '') + '</div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
       
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
   });
   return h + '</div>';
 }
@@ -1693,7 +1693,7 @@ function vSong(id) {
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="font-size:var(--fs-h3);overflow-wrap:anywhere">' + esc(s.title) + '</h2>' +
     '<div class="sub">' + esc(s.artist || 'Исполнитель не указан') + '</div></div>' +
     '<div class="row"><button class="icon-btn" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное" style="' + (s.fav ? 'color:var(--warn);border-color:var(--warn)' : '') + '">' + ic('star', 17) + '</button>' +
-    '<button class="icon-btn" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни">' + ic('print', 17) + '</button></div></div>' +
+    '<button class="icon-btn" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать" aria-label="Печать песни">' + ic('print', 17) + '</button></div></div>' +
     '<div class="trans-box"><div><div class="cap" style="margin-bottom:6px">Транспонирование</div>' +
     '<div class="row" style="gap:var(--s2)"><button class="icon-btn" type="button" data-act="song-trans" data-id="' + s.id + '" data-d="-1" aria-label="Опустить на полутон">♭</button>' +
     '<div class="trans-val" aria-live="polite">' + (tr > 0 ? '+' : '') + tr + '</div>' +
@@ -1718,8 +1718,8 @@ function vSong(id) {
     infoRow('Темп', s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '—') +
     infoRow('Длительность', s.duration ? '<span class="num">' + fmtDur(s.duration) + '</span>' : '—') +
     infoRow('Теги', (s.tags || []).length ? (s.tags || []).map(t => '<span class="badge b-muted" style="margin-left:4px">' + esc(t) + '</span>').join('') : '—') +
-    '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
+    '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
+    '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
     '<div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="song-del" data-id="' + s.id + '">' + ic('trash', 16) + 'Удалить песню</button></div></section>';
   if (chords.length) h += '<section class="card rise" style="animation-delay:.13s"><div class="card-h"><div><h2>Используемые аккорды</h2><div class="sub">' + chords.length + ' уникальных</div></div></div>' +
     '<div class="row" style="gap:6px">' + chords.map(c => '<span class="badge b-muted num" style="font-size:var(--fs-body-s);padding:6px 12px">' + esc(c) + '</span>').join('') + '</div></section>';
@@ -1743,10 +1743,10 @@ function vSetlists() {
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
       '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-setlist" data-id="' + sl.id + '"><span class="btn-txt">Открыть</span></button></div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
-      '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 15) + '<span class="btn-txt">Удалить</span></button>' +
-      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article>';
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сетлиста" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Создать копию сетлиста" title="Копия">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
+      '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сетлист" title="Удалить">' + ic('trash', 15) + '<span class="btn-txt">Удалить</span></button>' +
+      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сцену" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article>';
   });
   return h + '</div>';
 }
@@ -1759,7 +1759,7 @@ function vSetlist(id) {
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="overflow-wrap:anywhere">' + esc(sl.name) + '</h2>' +
     '<div class="sub">Перетащите песни из библиотеки или нажмите «+» рядом с песней</div>' + (linkedEvent ? '<div class="setlist-my-position">' + renderMyPositionBadge(linkedEvent, {compact:false}) + '</div>' : '') + '</div>' +
     '<div class="row"><button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки">' + ic('edit', 16) + '</button>' +
-    '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа">' + ic('print', 16) + '</button></div></div>' +
+    '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сетлиста" title="Печать" aria-label="Печать сет-листа">' + ic('print', 16) + '</button></div></div>' +
     '<div class="dropzone" id="dropZone">';
   if (!(sl.items || []).length) h += stateHTML('empty', 'Программа пуста', 'Перетащите сюда песни из библиотеки или добавьте их кнопкой «+».', '<button class="btn btn-primary btn-sm" type="button" data-act="sl-rename" data-id="' + sl.id + '">Настроить сет-лист</button>');
   else (sl.items || []).forEach(function (it, i) {
