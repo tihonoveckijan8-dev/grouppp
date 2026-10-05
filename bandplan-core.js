@@ -1607,7 +1607,8 @@ function vSongs() {
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
       '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + esc(s.key || '—') + '</div>' +
-      '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div></div>' +
+      '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div>' +
+      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button></div>' +
       '<div class="song-meta">' +
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
       (s.duration ? '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(s.duration) + '</span>' : '') +
@@ -1616,7 +1617,7 @@ function vSongs() {
       '<div class="song-acts">' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
-      '<button class="btn btn-primary btn-sm song-open" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button>' +
+      
       '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
   });
   return h + '</div>';
@@ -1739,7 +1740,8 @@ function vSetlists() {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
-      '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div></div>' +
+      '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
+      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-setlist" data-id="' + sl.id + '"><span class="btn-txt">Открыть</span></button></div>' +
       '<div class="song-acts">' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
