@@ -335,17 +335,39 @@
         mode = 'login';
         passwordRecoveryMode = false;
         renderGate();
-        // After logout the login form must be completely clean. Do this only
-        // in the SIGNED_OUT path so normal validation/error rerenders do not
-        // erase text the user is currently entering.
-        try {
-          const loginForm = document.getElementById('bpAuthForm');
-          if (loginForm) {
+
+        // A logout must produce a genuinely fresh, empty login form. Mobile
+        // browsers and password managers can restore autocomplete/autofill
+        // values asynchronously after the DOM is rebuilt, so one immediate
+        // reset is not sufficient. Clear both the live value and the default
+        // value, then repeat the cleanup on the next frames/ticks. This is
+        // scoped only to SIGNED_OUT and never interferes with normal typing,
+        // validation rerenders, or password recovery.
+        const clearSignedOutForm = () => {
+          try {
+            const loginForm = document.getElementById('bpAuthForm');
+            if (!loginForm) return;
             loginForm.reset();
-            loginForm.querySelectorAll('input').forEach(input => { input.value = ''; });
-            loginForm.querySelectorAll('textarea').forEach(input => { input.value = ''; });
-          }
+            loginForm.querySelectorAll('input, textarea, select').forEach(input => {
+              input.value = '';
+              input.defaultValue = '';
+              input.removeAttribute('value');
+            });
+            loginForm.setAttribute('autocomplete', 'off');
+            loginForm.querySelectorAll('input').forEach(input => {
+              input.setAttribute('autocomplete', 'off');
+            });
+          } catch (_) {}
+        };
+        clearSignedOutForm();
+        try {
+          requestAnimationFrame(() => {
+            clearSignedOutForm();
+            requestAnimationFrame(clearSignedOutForm);
+          });
         } catch (_) {}
+        setTimeout(clearSignedOutForm, 50);
+        setTimeout(clearSignedOutForm, 250);
         return;
       }
       if (authEvent === 'PASSWORD_RECOVERY') {
