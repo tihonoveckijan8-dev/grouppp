@@ -4358,17 +4358,36 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
 body[data-route="songs"] .songs-search-row .tb-search,
 body[data-route="setlists"] .setlists-search-row .tb-search{
   position:relative;
-  height:52px;
-  min-height:52px;
-  padding:0 12px 0 16px;
-  gap:11px;
-  border:1px solid color-mix(in srgb,var(--border) 88%,var(--accent) 12%);
-  border-radius:var(--r-16);
+  display:flex;
+  align-items:center;
+  height:50px;
+  min-height:50px;
+  padding:0 10px 0 15px;
+  gap:10px;
+  border:1px solid var(--border);
+  border-radius:14px;
   background:var(--surf-2);
   box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
     -3px -3px 7px var(--clay-light),
     4px 5px 10px var(--clay-dark);
+  overflow:hidden;
   transition:border-color var(--t-btn),box-shadow var(--t-btn),background-color var(--t-btn),transform var(--t-btn);
+}
+body[data-route="songs"] .songs-search-row .tb-search::after,
+body[data-route="setlists"] .setlists-search-row .tb-search::after{
+  content:"";
+  position:absolute;
+  left:15px;
+  right:15px;
+  bottom:0;
+  height:2px;
+  border-radius:2px 2px 0 0;
+  background:var(--accent);
+  opacity:0;
+  transform:scaleX(.45);
+  transform-origin:center;
+  transition:opacity var(--t-btn),transform var(--t-btn);
 }
 body[data-route="songs"] .songs-search-row .tb-search:hover,
 body[data-route="setlists"] .setlists-search-row .tb-search:hover{
@@ -4380,47 +4399,61 @@ body[data-route="setlists"] .setlists-search-row .tb-search:focus-within{
   border-color:var(--accent);
   background:var(--surf-2);
   box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
     -3px -3px 7px var(--clay-light),
     4px 5px 10px var(--clay-dark),
     0 0 0 3px var(--accent-soft);
   transform:translateY(-1px);
 }
+body[data-route="songs"] .songs-search-row .tb-search:focus-within::after,
+body[data-route="setlists"] .setlists-search-row .tb-search:focus-within::after{
+  opacity:1;
+  transform:scaleX(1);
+}
 body[data-route="songs"] .songs-search-row .tb-search .tb-search-ic,
 body[data-route="setlists"] .setlists-search-row .tb-search .tb-search-ic{
-  color:var(--muted);
   width:20px;
   height:20px;
+  display:flex;
   align-items:center;
   justify-content:center;
+  flex:none;
+  color:var(--muted);
   transition:color var(--t-btn),transform var(--t-btn);
 }
 body[data-route="songs"] .songs-search-row .tb-search:focus-within .tb-search-ic,
 body[data-route="setlists"] .setlists-search-row .tb-search:focus-within .tb-search-ic{
   color:var(--accent);
-  transform:scale(1.05);
+  transform:scale(1.08);
 }
 body[data-route="songs"] .songs-search-row .tb-search input,
 body[data-route="setlists"] .setlists-search-row .tb-search input{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
   height:100%;
-  font-size:var(--fs-body-s);
+  font-size:14px;
+  line-height:1;
   color:var(--text);
   font-weight:var(--fw-med);
 }
 body[data-route="songs"] .songs-search-row .tb-search input::placeholder,
 body[data-route="setlists"] .setlists-search-row .tb-search input::placeholder{
   color:var(--muted);
+  opacity:.9;
   font-weight:var(--fw-reg);
 }
 body[data-route="songs"] .songs-search-row .tb-search .tb-clear,
 body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear{
-  width:32px;
-  height:32px;
+  width:34px!important;
+  height:34px!important;
+  min-width:34px;
+  padding:0!important;
   display:none;
   place-items:center;
-  margin:0;
-  padding:0;
+  flex:none;
   border:1px solid transparent;
-  border-radius:var(--r-10);
+  border-radius:10px;
   background:transparent;
 }
 body[data-route="songs"] .songs-search-row .tb-search.has-q .tb-clear,
@@ -4434,7 +4467,10 @@ body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear:hover{
   background:var(--accent-soft);
 }
 
-/* Setlist search: align to the card grid with a modest rightward extension. */
+/* Search geometry: songs uses the space beside Filters; setlists gets a small right extension. */
+body[data-route="songs"] .songs-search-row .tb-search{
+  width:100%;
+}
 body[data-route="setlists"] .setlists-search-row{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
@@ -4456,7 +4492,7 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
   body[data-route="setlists"] .setlists-search-row .tb-search{
     height:50px;
     min-height:50px;
-    padding-left:14px;
+    padding-left:13px;
   }
   body[data-route="setlists"] .setlists-search-row{
     grid-template-columns:minmax(0,1fr);
