@@ -2324,3 +2324,133 @@ svg{flex:0 0 auto}
     background:var(--surf-4);
   }
 }
+\n
+/* ═══ 23. THEME COHERENCE / ACCENT SYSTEM v2 ═════════════════════════════
+   One semantic color pipeline for Light / Dark / AMOLED / Liquid Glass.
+   Accent is intentionally limited to actions, selection, focus and status.
+*/
+@layer tokens{
+  :root{
+    --accent-surface:rgba(37,71,208,.04);
+    --accent-surface-strong:rgba(37,71,208,.09);
+    --accent-border:rgba(37,71,208,.24);
+    --accent-selection:rgba(37,71,208,.12);
+    --focus-ring:0 0 0 3px rgba(37,71,208,.16);
+  }
+  [data-theme="dark"],[data-theme="amoled"]{
+    --surface-highlight:rgba(255,255,255,.06);
+    --surface-highlight-strong:rgba(255,255,255,.10);
+  }
+}
+@layer components{
+  /* Accent states: use the runtime accent, never a fixed brand blue. */
+  :where(button,a,[role="button"],input,select,textarea):focus-visible{
+    outline:2px solid var(--accent-ring);
+    outline-offset:2px;
+    box-shadow:var(--focus-ring);
+  }
+  :where(.nav-item.is-active,.nav-item.active,.settings-tab.on,.seg button.on,.chip.on,
+         .sw.on,[aria-current="page"]){
+    color:var(--accent);
+    border-color:var(--accent-border);
+    background:var(--accent-surface);
+  }
+  :where(.nav-item.is-active,.nav-item.active,.settings-tab.on,.seg button.on){
+    font-weight:650;
+  }
+  :where(.btn-primary){
+    background:var(--accent);
+    color:var(--on-accent);
+    border-color:var(--accent);
+    box-shadow:var(--shadow-accent);
+  }
+  :where(.btn-primary:hover){
+    background:var(--accent-hover);
+    border-color:var(--accent-hover);
+    box-shadow:var(--shadow-accent-hover);
+  }
+  :where(.btn-primary:active){background:var(--accent-press)}
+  :where(.btn-secondary:hover,.icon-btn:hover,.chip:hover){
+    border-color:var(--accent-border);
+  }
+  :where(.input:focus,.select:focus,textarea:focus){
+    border-color:var(--accent);
+    box-shadow:var(--focus-ring);
+  }
+  :where(.card.is-selected,.song-card.is-selected,.ev-row.is-selected,.set-item.is-selected){
+    border-color:var(--accent-border);
+    background:linear-gradient(var(--accent-surface),var(--accent-surface)),var(--surf-2);
+  }
+  :where(.cal-cell.is-today){
+    box-shadow:inset 0 0 0 1px var(--accent-border);
+  }
+  :where(.cal-date.is-today,.cal-cell.is-today .cal-day){
+    color:var(--accent);
+  }
+  :where(.progress-fill,.range::-webkit-slider-thumb,.range::-moz-range-thumb){
+    accent-color:var(--accent);
+  }
+  :where(::selection){background:var(--accent-selection);color:var(--text)}
+}
+@layer screens{
+  [data-theme="dark"] .card,
+  [data-theme="amoled"] .card{
+    box-shadow:var(--shadow-1);
+  }
+  [data-theme="dark"] .card:hover,
+  [data-theme="amoled"] .card:hover{
+    box-shadow:var(--shadow-2);
+  }
+  [data-theme="amoled"] .sidebar,
+  [data-theme="amoled"] .modal-card{
+    border-color:rgba(255,255,255,.14);
+  }
+
+  /* Glass = depth only on floating chrome; content remains readable and solid. */
+  [data-theme="glass"] .global-searchbar .tb-inner,
+  [data-theme="glass"] .sidebar,
+  [data-theme="glass"] .bottom-nav{
+    background:rgba(255,255,255,.54);
+    border-color:rgba(255,255,255,.68);
+    box-shadow:0 12px 34px rgba(31,45,61,.10),inset 0 1px 0 rgba(255,255,255,.72);
+    -webkit-backdrop-filter:blur(18px) saturate(145%);
+    backdrop-filter:blur(18px) saturate(145%);
+  }
+  [data-theme="glass"] .card,
+  [data-theme="glass"] .song-card,
+  [data-theme="glass"] .ev-row,
+  [data-theme="glass"] .set-item,
+  [data-theme="glass"] .member-row{
+    background:rgba(255,255,255,.76);
+    border-color:rgba(255,255,255,.68);
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
+  [data-theme="glass"] .card:hover,
+  [data-theme="glass"] .song-card:hover,
+  [data-theme="glass"] .ev-row:hover{
+    border-color:var(--accent-border);
+    box-shadow:var(--shadow-1);
+  }
+  [data-theme="glass"] .global-searchbar .tb-search:focus-within{
+    border-color:var(--accent-border);
+    box-shadow:var(--focus-ring);
+  }
+  @media(max-width:640px){
+    [data-theme="glass"] .global-searchbar .tb-inner,
+    [data-theme="glass"] .sidebar,
+    [data-theme="glass"] .bottom-nav{
+      -webkit-backdrop-filter:blur(10px) saturate(125%);
+      backdrop-filter:blur(10px) saturate(125%);
+    }
+  }
+}
+@media(prefers-reduced-transparency:reduce){
+  [data-theme="glass"] .global-searchbar .tb-inner,
+  [data-theme="glass"] .sidebar,
+  [data-theme="glass"] .bottom-nav{
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    background:var(--surf-2);
+  }
+}
