@@ -4293,7 +4293,7 @@ body[data-route="songs"] .songs-search-row > .btn{
   }
 }
 
-/* Setlists: header, search and cards share one exact width container. */
+/* Setlists: search and cards share exactly the same content width. */
 body[data-route="setlists"] .setlists-shell{
   width:100%;
   max-width:var(--maxw);
@@ -4301,21 +4301,12 @@ body[data-route="setlists"] .setlists-shell{
   margin-right:auto;
   min-width:0;
 }
-body[data-route="setlists"] .setlists-head-row,
-body[data-route="setlists"] .setlists-search-row,
-body[data-route="setlists"] .setlists-list{
-  width:100%;
-  max-width:none;
-  margin-left:0;
-  margin-right:0;
-}
 body[data-route="setlists"] .setlists-head-row{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   column-gap:var(--s2);
-  margin-top:0;
-  margin-bottom:var(--s2);
+  margin:0 0 var(--s2);
 }
 body[data-route="setlists"] .setlists-head-row h1{
   min-width:0;
@@ -4327,33 +4318,31 @@ body[data-route="setlists"] .setlists-head-row .btn{
   justify-self:end;
   white-space:nowrap;
 }
-body[data-route="setlists"] .setlists-search-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  column-gap:var(--s2);
-  flex-wrap:nowrap;
+body[data-route="setlists"] .setlists-search-row,
+body[data-route="setlists"] .setlists-list{
   width:100%;
-  max-width:var(--maxw);
+  max-width:none;
+  margin-left:0;
+  margin-right:0;
+}
+body[data-route="setlists"] .setlists-search-row{
+  display:block;
+  padding:0;
+  margin-bottom:var(--s4);
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
-  min-width:0;
+  display:flex;
   width:100%;
+  max-width:none;
+  min-width:0;
+  box-sizing:border-box;
+  margin:0;
 }
-@media(max-width:640px){
-  body[data-route="setlists"] .setlists-head-row,
-  body[data-route="setlists"] .setlists-search-row{
-    max-width:none;
-  }
-  body[data-route="setlists"] .setlists-search-row{
-    width:100%;
-    transform:none;
-  }
-  body[data-route="setlists"] .setlists-head-row{
-    grid-template-columns:minmax(0,1fr) auto;
-  }
+body[data-route="setlists"] .setlists-list > article.song-card{
+  width:100%;
+  max-width:none;
+  box-sizing:border-box;
 }
-
 /* PREMIUM COLLECTION SEARCH — Songs + Setlists */
 body[data-route="songs"] .songs-search-row .tb-search,
 body[data-route="setlists"] .setlists-search-row .tb-search{
@@ -4470,35 +4459,6 @@ body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear:hover{
 /* Search geometry: songs uses the space beside Filters; setlists gets a small right extension. */
 body[data-route="songs"] .songs-search-row .tb-search{
   width:100%;
-}
-/* Setlist search must match the setlist card width exactly. */
-body[data-route="setlists"] .setlists-search-row{
-  display:block;
-  width:100%;
-  max-width:100%;
-  margin:0;
-  padding:0;
-}
-/* The search field and every setlist card use the same horizontal box. */
-body[data-route="setlists"] .setlists-search-row .tb-search{
-  display:flex;
-  width:100% !important;
-  max-width:none !important;
-  min-width:0;
-  box-sizing:border-box;
-  margin:0;
-  align-self:stretch;
-}
-body[data-route="setlists"] .setlists-list{
-  width:100%;
-  max-width:100%;
-  margin-left:0;
-  margin-right:0;
-}
-body[data-route="setlists"] .setlists-list > article.song-card{
-  width:100%;
-  max-width:none;
-  box-sizing:border-box;
 }
 @media(max-width:640px){
   body[data-route="songs"] .songs-search-row .tb-search,
