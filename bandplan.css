@@ -49,7 +49,7 @@ table{border-collapse:separate;border-spacing:0}
 --r-8:8px;--r-12:12px;--r-16:16px;--s8:32px;--s10:40px;--s12:48px;--s16:64px;--r-10:10px;--r-14:14px;--r-18:18px;--r-24:24px;--r-pill:999px;
 --shadow-1:0 1px 4px rgba(16,24,40,.06);--shadow-2:0 8px 24px rgba(16,24,40,.08);--shadow-3:0 18px 48px rgba(16,24,40,.14);
 --scene-bg:#000000;--scene-fg:#FFFFFF;--scene-muted:rgba(255,255,255,.55);--scene-panel:rgba(255,255,255,.06);--scene-border:rgba(255,255,255,.12);--scene-hover:rgba(255,255,255,.12);--scene-inline:rgba(169,188,251,.16);--scene-progress:rgba(255,255,255,.12);--overlay-bg:rgba(20,24,32,.36);--surface-highlight:rgba(255,255,255,.10);--surface-highlight-strong:rgba(255,255,255,.14);--shadow-soft:0 2px 8px rgba(15,23,42,.08);
---sb:264px;--bn:66px;--maxw:1320px;--lsize:15px;
+--sb:248px;--bn:66px;--maxw:1320px;--lsize:15px;
 --z-1:1;--z-2:2;--z-3:3;--z-4:4;--z-5:5;--z-6:6;--z-8:8;
 --z-sidebar:20;--z-sticky:30;--z-nav:30;--z-action:120;--z-drop:1000;--z-modal:1200;--z-toast:1300;--z-scene:1400;--z-onb:1500;--ease:cubic-bezier(.2,.8,.2,1);--t-btn:180ms var(--ease);--t-card:220ms var(--ease);--t-pop:200ms var(--ease);--t-overlay:280ms var(--ease)}
 [data-theme="dark"]{
@@ -747,7 +747,7 @@ html[data-reduced="true"] .skel::after{display:none}
 
 @layer screens{
 /* ─── 21. RESPONSIVE ─────────────────────────────────────────────────── */
-@media(min-width:1440px){html{--maxw:1400px;--sb:280px}}
+@media(min-width:1440px){html{--maxw:1400px}}
 @media(max-width:900px){.app{grid-template-columns:minmax(0,1fr)}.split,.split2{grid-template-columns:minmax(0,1fr)}.sidebar{display:none}.bottom-nav{display:flex}.content{padding:0 var(--s4) calc(var(--bn) + var(--s6))}.topbar{padding:var(--s3) var(--s4) var(--s2)}.tb-inner{gap:var(--s2)}.tb-search{min-width:0;flex:1}.tb-kbd{display:none}.page-head{padding:var(--s4) var(--s4) var(--s3)}.page-head h1{font-size:28px}.split2{grid-template-columns:minmax(0,1fr)}.f3{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-visual{display:none}.hero{padding:var(--s6) var(--s5)}.cal-cell{min-height:78px}.toast-stack{bottom:calc(var(--bn) + 14px)}.actionbar{display:flex;position:fixed;left:0;right:0;bottom:calc(var(--bn) + env(safe-area-inset-bottom,0px));z-index:var(--z-nav);gap:var(--s2);padding:var(--s3) var(--s4);background:var(--surf-1);border-top:1px solid var(--border);align-items:center}.actionbar .btn{flex:1}.actionbar .icon-btn{flex:none}}
 @media(max-width:640px){
   body{font-size:15px}
@@ -2124,51 +2124,10 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
 
 
 
-/* BandPlan UI optimization — topbar removed; essential global search/status live in a compact command surface. */
-.global-searchbar{
-  position:relative;
-  z-index:var(--z-8);
-  padding:10px 24px 0;
-}
-.global-searchbar .tb-inner{
-  max-width:1180px;
-  margin:0 auto;
-}
-.global-searchbar .netbar{
-  max-width:1180px;
-  margin:6px auto 0;
-}
-.account-settings{display:grid;gap:12px}
-.account-settings-row{
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
-  min-width:0;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--surf-3);
-}
-.account-settings-row>div{min-width:0;display:grid;gap:4px}
-.account-settings-row strong{min-width:0;overflow-wrap:anywhere;font-size:var(--fs-body)}
-@media(max-width:900px){
-  .global-searchbar{padding:8px 18px 0}
-}
-@media(max-width:640px){
-  .global-searchbar{padding:7px 12px 0}
-  .account-settings-row{align-items:stretch;flex-direction:column}
-  .account-settings-row .btn{width:100%}
-}
-@media(max-width:390px){
-  .global-searchbar{padding-left:9px;padding-right:9px}
-}
-
-
 /* ──────────────────────────────────────────────────────────────────────
    BandPlan responsive hardening — visual layer only.
    Keeps existing selectors/contracts; prevents clipping and action overflow.
    ────────────────────────────────────────────────────────────────────── */
-.global-searchbar,
-.global-searchbar .tb-inner,
-.global-searchbar .tb-search,
-.global-searchbar .tb-tools{min-width:0}
-.global-searchbar .tb-inner{width:min(100%,1180px)}
-.global-searchbar .tb-search{overflow:hidden}
-.global-searchbar .tb-search input{min-width:0;width:100%}
 
 .btn,
 .icon-btn,
@@ -2199,9 +2158,6 @@ svg{flex:0 0 auto}
   .cal-grid{min-width:0}
 }
 @media(max-width:640px){
-  .global-searchbar .tb-inner{width:100%}
-  .global-searchbar .tb-search{width:100%}
-  .global-searchbar .tb-inner{padding-left:0;padding-right:0}
   .page-head{display:flex;flex-direction:column}
   .page-head h1{max-width:100%;font-size:26px}
   .ph-acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -2222,7 +2178,6 @@ svg{flex:0 0 auto}
 }
 @media(max-width:430px){
   .content{padding-left:10px;padding-right:10px}
-  .global-searchbar{padding-left:10px;padding-right:10px}
   .ph-acts{grid-template-columns:minmax(0,1fr)}
   .page-head h1{font-size:24px}
   .hero h1{font-size:23px}
@@ -2232,7 +2187,6 @@ svg{flex:0 0 auto}
 }
 @media(max-width:375px){
   .content{padding-left:8px;padding-right:8px}
-  .global-searchbar{padding-left:8px;padding-right:8px}
   .page-head h1{font-size:22px}
   .hero h1{font-size:22px}
   .btn{font-size:13px}
