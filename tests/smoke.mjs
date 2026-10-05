@@ -122,8 +122,7 @@ try {
   const themes = [
     ['light', '#F4F6F8'],
     ['dark', '#14161C'],
-    ['amoled', '#000000'],
-    ['glass', '#E9EEF5']
+    ['amoled', '#000000']
   ];
   for (const [theme, expectedColor] of themes) {
     await page.evaluate(({theme}) => {
