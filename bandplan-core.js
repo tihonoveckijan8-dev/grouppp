@@ -1509,14 +1509,6 @@ function monthHTML(y, mo) {
     h += '</div>';
   }
   h += '</div>';
-  const selected = ui.selDate && byDay[ui.selDate] ? byDay[ui.selDate] : [];
-  if (ui.selDate && new Date(ui.selDate + 'T00:00:00').getMonth() === mo) {
-    h += '<section class="cal-selected-day card" aria-labelledby="calSelectedTitle"><div class="card-h"><div><h2 id="calSelectedTitle">Выбранный день</h2><div class="sub">' + esc(pdateFull(ui.selDate)) + ' · ' + selected.length + ' ' + plural(selected.length, 'событие', 'события', 'событий') + '</div></div>' +
-      '<button class="btn btn-primary btn-sm" type="button" data-act="new-event" data-date="' + esc(ui.selDate) + '">' + ic('plus', 15) + '<span class="btn-lbl">Добавить</span></button></div>';
-    if (selected.length) selected.forEach(o => { h += evRow(o, true); });
-    else h += stateHTML('empty', 'Нет событий', 'На выбранную дату пока ничего не запланировано.', '<button class="btn btn-primary" type="button" data-act="new-event" data-date="' + esc(ui.selDate) + '">Создать событие</button>');
-    h += '</section>';
-  }
   h += '<div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>
     '<span><i style="background:' + EV_TYPES[t].color + '" aria-hidden="true"></i>' + EV_TYPES[t].label + '</span>').join('') + '</div>';
   return h;
