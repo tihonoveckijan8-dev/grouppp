@@ -180,7 +180,9 @@ const ICONS = {
   target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-1.8 0-1.4-1.2-1.7-1.2-2.9 0-.8.7-1.3 1.6-1.3H16a5 5 0 0 0 5-5c0-3.9-4-7-9-7z"/><circle cx="7.8" cy="11" r="1.1" fill="currentColor"/><circle cx="11" cy="7.5" r="1.1" fill="currentColor"/><circle cx="15.6" cy="8.4" r="1.1" fill="currentColor"/>',
   sparkles: '<path d="M12 2.8l1.4 4.8L18.2 9l-4.8 1.4L12 15.2l-1.4-4.8L5.8 9l4.8-1.4z"/><path d="M19 14.8l.7 2.5 2.5.7-2.5.7-.7 2.5-.7-2.5-2.5-.7 2.5-.7z"/><path d="M5 16.2l.5 1.8 1.8.5-1.8.5L5 20.8l-.5-1.8-1.8-.5 1.8-.5z"/>',
-      inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>'
+      inbox: '<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5 5h14l2 8v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>',
+  chevronDown: '<path d="m6 9 6 6 6-6"/>',
+  userX: '<circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="m16 9 5 5M21 9l-5 5"/>'
 };
 function ic(n, s) { s = s || 18; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[n] || '') + '</svg>'; }
 
