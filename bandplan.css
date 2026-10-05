@@ -4248,6 +4248,22 @@ body[data-route="songs"] .songs-head-row h1{
 body[data-route="songs"] .songs-head-row .btn{
   justify-self:end;
   white-space:nowrap;
+  transform:translateX(-72px);
+}
+body[data-route="songs"] .songs-head-row .btn:hover{
+  transform:translate(-72px,-1px);
+}
+body[data-route="songs"] .songs-head-row .btn:active{
+  transform:translate(-72px,0);
+}
+@media(max-width:640px){
+  body[data-route="songs"] .songs-head-row .btn{
+    transform:none;
+  }
+  body[data-route="songs"] .songs-head-row .btn:hover,
+  body[data-route="songs"] .songs-head-row .btn:active{
+    transform:none;
+  }
 }
 body[data-route="songs"] .songs-search-row{
   flex-wrap:nowrap;
