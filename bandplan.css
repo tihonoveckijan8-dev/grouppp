@@ -4292,3 +4292,50 @@ body[data-route="songs"] .songs-search-row > .btn{
     max-width:none;
   }
 }
+
+/* Setlists: mirror the songs page header/search geometry. */
+body[data-route="setlists"] .setlists-head-row,
+body[data-route="setlists"] .setlists-search-row{
+  width:100%;
+  max-width:var(--maxw);
+  margin-left:auto;
+  margin-right:auto;
+}
+body[data-route="setlists"] .setlists-head-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  column-gap:var(--s2);
+  margin-top:0;
+  margin-bottom:var(--s2);
+}
+body[data-route="setlists"] .setlists-head-row h1{
+  min-width:0;
+  margin:0;
+  font-size:var(--fs-h2);
+  line-height:1.2;
+}
+body[data-route="setlists"] .setlists-head-row .btn{
+  justify-self:end;
+  white-space:nowrap;
+}
+body[data-route="setlists"] .setlists-search-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  column-gap:var(--s2);
+  flex-wrap:nowrap;
+}
+body[data-route="setlists"] .setlists-search-row .tb-search{
+  min-width:0;
+  width:100%;
+}
+@media(max-width:640px){
+  body[data-route="setlists"] .setlists-head-row,
+  body[data-route="setlists"] .setlists-search-row{
+    max-width:none;
+  }
+  body[data-route="setlists"] .setlists-head-row{
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+}
