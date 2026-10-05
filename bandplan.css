@@ -2798,3 +2798,13 @@ svg{flex:0 0 auto}
 @media(max-width:640px){
   .part-avatar::after{width:7px;height:7px;right:-2px;bottom:-1px;}
 }
+
+/* Mobile profile: hide the group-name field to keep the profile compact. */
+@media (max-width:760px){
+  .settings-shell .settings-card[data-settings-panel="profile"] #setBand{
+    display:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] #setBand + *{
+    display:none!important;
+  }
+}
