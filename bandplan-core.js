@@ -2523,6 +2523,11 @@ function applyAccentVars() {
   r.setProperty('--accent-soft', hex + '14');
   r.setProperty('--accent-soft-2', hex + '24');
   r.setProperty('--accent-ring', hex + '66');
+  r.setProperty('--accent-surface', hex + '0B');
+  r.setProperty('--accent-surface-strong', hex + '18');
+  r.setProperty('--accent-border', hex + '3D');
+  r.setProperty('--accent-selection', hex + '20');
+  r.setProperty('--focus-ring', '0 0 0 3px ' + hex + '26');
   r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
   r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
   persistBootPrefs();
