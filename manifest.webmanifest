@@ -17,8 +17,8 @@
     { "name": "Песни", "short_name": "Песни", "url": "./#/songs", "icons": [{ "src": "icon-splash.svg", "sizes": "512x512" }] }
   ],
   "icons": [
-    { "src": "icon-splash.svg", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-splash.svg", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-maskable-splash.svg", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-splash.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-splash.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable-splash.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }
