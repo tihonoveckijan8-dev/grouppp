@@ -2820,3 +2820,54 @@ svg{flex:0 0 auto}
     display:none!important;
   }
 }
+
+/* ═══ MOBILE PROFILE — balanced spacing after compacting fields ═══ */
+@media (max-width:760px){
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-grid{
+    display:grid!important;
+    gap:18px!important;
+    margin:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main{
+    display:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+    display:grid!important;
+    grid-template-rows:auto auto!important;
+    gap:18px!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+    width:100%!important;
+    margin:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-identity{
+    margin-bottom:14px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-roles-dropdown{
+    margin-top:10px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+    margin-top:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .account-settings-row{
+    gap:12px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-danger{
+    margin-top:14px!important;
+    padding-top:14px!important;
+    gap:12px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-danger .btn{
+    margin:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-options{
+    margin-top:9px!important;
+    gap:5px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-option{
+    margin:0!important;
+  }
+}
