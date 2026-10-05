@@ -4354,9 +4354,87 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
   }
 }
 
-/* SETLIST SEARCH WIDTH — use the exact same responsive grid as the cards.
-   The search occupies the first grid cell, so its width is always exactly
-   the width of one setlist card at the current viewport width. */
+/* PREMIUM COLLECTION SEARCH — Songs + Setlists */
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="setlists"] .setlists-search-row .tb-search{
+  position:relative;
+  height:52px;
+  min-height:52px;
+  padding:0 12px 0 16px;
+  gap:11px;
+  border:1px solid color-mix(in srgb,var(--border) 88%,var(--accent) 12%);
+  border-radius:var(--r-16);
+  background:var(--surf-2);
+  box-shadow:
+    -3px -3px 7px var(--clay-light),
+    4px 5px 10px var(--clay-dark);
+  transition:border-color var(--t-btn),box-shadow var(--t-btn),background-color var(--t-btn),transform var(--t-btn);
+}
+body[data-route="songs"] .songs-search-row .tb-search:hover,
+body[data-route="setlists"] .setlists-search-row .tb-search:hover{
+  border-color:var(--accent-ring);
+  background:var(--surf-3);
+}
+body[data-route="songs"] .songs-search-row .tb-search:focus-within,
+body[data-route="setlists"] .setlists-search-row .tb-search:focus-within{
+  border-color:var(--accent);
+  background:var(--surf-2);
+  box-shadow:
+    -3px -3px 7px var(--clay-light),
+    4px 5px 10px var(--clay-dark),
+    0 0 0 3px var(--accent-soft);
+  transform:translateY(-1px);
+}
+body[data-route="songs"] .songs-search-row .tb-search .tb-search-ic,
+body[data-route="setlists"] .setlists-search-row .tb-search .tb-search-ic{
+  color:var(--muted);
+  width:20px;
+  height:20px;
+  align-items:center;
+  justify-content:center;
+  transition:color var(--t-btn),transform var(--t-btn);
+}
+body[data-route="songs"] .songs-search-row .tb-search:focus-within .tb-search-ic,
+body[data-route="setlists"] .setlists-search-row .tb-search:focus-within .tb-search-ic{
+  color:var(--accent);
+  transform:scale(1.05);
+}
+body[data-route="songs"] .songs-search-row .tb-search input,
+body[data-route="setlists"] .setlists-search-row .tb-search input{
+  height:100%;
+  font-size:var(--fs-body-s);
+  color:var(--text);
+  font-weight:var(--fw-med);
+}
+body[data-route="songs"] .songs-search-row .tb-search input::placeholder,
+body[data-route="setlists"] .setlists-search-row .tb-search input::placeholder{
+  color:var(--muted);
+  font-weight:var(--fw-reg);
+}
+body[data-route="songs"] .songs-search-row .tb-search .tb-clear,
+body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear{
+  width:32px;
+  height:32px;
+  display:none;
+  place-items:center;
+  margin:0;
+  padding:0;
+  border:1px solid transparent;
+  border-radius:var(--r-10);
+  background:transparent;
+}
+body[data-route="songs"] .songs-search-row .tb-search.has-q .tb-clear,
+body[data-route="setlists"] .setlists-search-row .tb-search.has-q .tb-clear{
+  display:grid;
+}
+body[data-route="songs"] .songs-search-row .tb-search .tb-clear:hover,
+body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear:hover{
+  color:var(--accent);
+  border-color:var(--accent-ring);
+  background:var(--accent-soft);
+}
+
+/* Setlist search: align to the card grid with a modest rightward extension. */
 body[data-route="setlists"] .setlists-search-row{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
@@ -4369,16 +4447,23 @@ body[data-route="setlists"] .setlists-search-row{
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
   grid-column:1;
-  width:100%;
+  width:calc(100% + 40px);
   max-width:none;
   min-width:0;
 }
 @media(max-width:640px){
+  body[data-route="songs"] .songs-search-row .tb-search,
+  body[data-route="setlists"] .setlists-search-row .tb-search{
+    height:50px;
+    min-height:50px;
+    padding-left:14px;
+  }
   body[data-route="setlists"] .setlists-search-row{
     grid-template-columns:minmax(0,1fr);
     gap:0;
   }
   body[data-route="setlists"] .setlists-search-row .tb-search{
     grid-column:1;
+    width:100%;
   }
 }
