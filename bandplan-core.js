@@ -1255,7 +1255,7 @@ function render() {
   let acts = '', crumb = '';
   actionBarHTML = '';
   if (r.name === 'calendar') acts = '<button class="btn btn-secondary" type="button" data-act="cal-today">' + ic('target', 17) + 'Сегодня</button><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Новое событие</button>';
-  else if (r.name === 'songs') acts = '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить песню</button>';
+  else if (r.name === 'songs') acts = '';
   else if (r.name === 'setlists') acts = '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>';
   else if (r.name === 'song') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/songs">Репертуар</a>' + ic('right', 12) + '<span class="nowrap">' + esc((songById(r.id) || {}).title || '') + '</span></nav>';
@@ -1617,11 +1617,16 @@ function filteredSongs() {
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
 function vSongs() {
   const list = filteredSongs(), tags = allTags();
-  let h = '<div class="toolbar">' +
-    '<div class="tb-search grow">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
-    '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
-    (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
-    '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button></div>';
+  let h = '<div class="toolbar songs-toolbar">' +
+    '<div class="songs-toolbar-title"><h1>Песни</h1></div>' +
+    '<div class="songs-toolbar-search">' +
+      '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
+      '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
+      (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
+      '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button>' +
+    '</div>' +
+    '<button class="btn btn-primary songs-toolbar-add" type="button" data-act="new-song">' + ic('plus', 17) + '<span>Добавить песню</span></button>' +
+  '</div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
       (ui.songQuery ? '<button class="chip" type="button" data-act="song-clear">' + ic('search', 13) + '«' + esc(ui.songQuery) + '»<span class="rm">×</span></button>' : '') +
