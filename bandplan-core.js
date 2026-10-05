@@ -1795,7 +1795,7 @@ function vSetlists() {
     '</div></div>';
   const list = filteredSetlists();
   if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div></div>';
-  h += '<div class="collection-grid collection-list setlists-list">
+  h += '<div class="collection-grid collection-list setlists-list">';
   list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
