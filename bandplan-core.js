@@ -342,9 +342,9 @@ const EV_TYPES = {
   meeting: { label: 'Встреча', cls: 'b-warn', ic: 'users', color: 'var(--warn)' }
 };
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
-const PALETTE = ['#1E46E8', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
-const ACCENTS = ['#1E46E8', '#1B3A6B', '#1F7A5A', '#6E4483', '#8F6311', '#A93B32', '#2C6E80', '#4C525F', '#7A5230'];
-const ACCENT_LABELS = Object.freeze({'#1E46E8':'Синий','#1B3A6B':'Индиго','#1F7A5A':'Зелёно-бирюзовый','#6E4483':'Фиолетовый','#8F6311':'Янтарный','#A93B32':'Розовый','#2C6E80':'Океанский','#4C525F':'Графитовый','#7A5230':'Умбровый'});
+const PALETTE = ['#2457FF', '#00B87A', '#9B4DFF', '#FFB000', '#FF3B30', '#00B8D9', '#687080', '#B56A2B'];
+const ACCENTS = ['#2457FF', '#5C7CFF', '#00B87A', '#9B4DFF', '#FFB000', '#FF3B30', '#00B8D9', '#687080', '#B56A2B'];
+const ACCENT_LABELS = Object.freeze({'#2457FF':'Синий','#5C7CFF':'Индиго','#00B87A':'Зелёно-бирюзовый','#9B4DFF':'Фиолетовый','#FFB000':'Янтарный','#FF3B30':'Красный','#00B8D9':'Океанский','#687080':'Графитовый','#B56A2B':'Умбровый'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
@@ -353,7 +353,7 @@ function defaults() {
     ? document.documentElement.dataset.theme : 'light';
   const bootAccent = /^#[0-9a-fA-F]{6}$/.test(
     document.documentElement.style.getPropertyValue('--accent').trim()
-  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#1E46E8';
+  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#2457FF';
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
