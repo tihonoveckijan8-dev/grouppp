@@ -759,7 +759,7 @@ html[data-reduced="true"] .skel::after{display:none}
   .modal-card{max-height:93dvh;border-radius:var(--r-24) var(--r-24) 0 0;padding:var(--s5) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0px));width:100%;max-width:none;overscroll-behavior:contain}
   .modal-card:not(.modal-fullscreen)::before{content:"";position:absolute;top:7px;left:50%;width:36px;height:4px;transform:translateX(-50%);border-radius:var(--r-pill);background:var(--border-2)}
   .modal-head h3{font-size:var(--fs-body-l)}
-  .modal-body{min-width:0;overflow-x:hidden}
+  .modal-body{min-width:0;}
   .modal-foot{position:sticky;bottom:calc(-1 * var(--s5));background:var(--surf-4);padding:var(--s3) 0 0;margin-top:var(--s5);flex-direction:column-reverse}
   .modal-foot .btn{width:100%;min-width:0}
   .cal-selected-day{margin-top:var(--s4);padding:var(--s4)}.cal-selected-day .ev-row{margin-top:var(--s2)}
@@ -1469,7 +1469,7 @@ svg { flex:0 0 auto; max-width:100%; }
 .collection-grid.collection-list > .song-card .song-artist,
 .collection-grid.collection-list > .song-card .badge { min-width:0; overflow-wrap:anywhere; }
 
-html,body{width:100%;max-width:100%;overflow-x:clip}
+html,body{width:100%;max-width:100%;}
 .app,.main,.content,#app{min-width:0;max-width:100%}
 .content{overscroll-behavior-x:none}
 .content>*{min-width:0}
@@ -1523,7 +1523,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 .member-participation{display:inline-flex;align-items:center;gap:0}
 .member-participation .participation-dot{display:none}
 
-html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text);font-family:var(--font);background-image:none}
+html,body{min-width:0;}body{background:var(--bg);color:var(--text);font-family:var(--font);background-image:none}
 .topbar,.sidebar,.bottom-nav,.actionbar{background:var(--surf-1);border-color:var(--border)}
 .card,.hero,.song-card,.sl-item,.stat-mini,.cal-cell,.ev-row,.lib-item,.modal-card,.search-drop,.filter-pop,.toast,.onb-card,.hv-card{background:var(--surf-2);border:1px solid var(--border);border-radius:var(--r-18);box-shadow:var(--shadow-1)}
 .btn,.icon-btn,.avatar-btn,.input,.select,.textarea,.chip,.part-btn,.seg,.settings-tab{border-radius:var(--r-14)}.btn,.icon-btn,.avatar-btn,.input,.select,.textarea{min-height:var(--ui-control-h)}.btn{box-shadow:none}.btn-primary{background:var(--accent);color:var(--on-accent);border:1px solid var(--accent);box-shadow:var(--shadow-2)}.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}.btn-primary:active{background:var(--accent-press)}
@@ -2314,7 +2314,7 @@ svg{flex:0 0 auto}
 .overlay.is-sheet{align-items:flex-end;justify-content:stretch;padding:0}
 .overlay.is-sheet .modal-card.modal-sheet{width:100%;max-width:none;max-height:52dvh;margin:0;border-radius:22px 22px 0 0;border-left:0;border-right:0;border-bottom:0;padding:max(18px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;overflow:hidden;animation:sheetIn 180ms var(--ease) both}
 .overlay.is-sheet .modal-sheet .modal-head{flex:0 0 auto;margin-bottom:14px}
-.overlay.is-sheet .modal-sheet .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.overlay.is-sheet .modal-sheet .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .overlay.is-sheet .modal-sheet .modal-foot{flex:0 0 auto;margin-top:12px;padding-bottom:0}
 @keyframes sheetIn{from{transform:translateY(14px);opacity:.96}to{transform:none;opacity:1}}
 .main-netbar{width:min(var(--maxw),calc(100% - 48px));margin:12px auto 0}
@@ -2340,7 +2340,7 @@ svg{flex:0 0 auto}
 .overlay.is-sheet{align-items:flex-end;justify-content:stretch;padding:0}
 .overlay.is-sheet .modal-card{width:100%;max-width:none;height:min(52dvh,560px);max-height:52dvh;min-height:0;margin:0;border-left:0;border-right:0;border-bottom:0;border-radius:var(--r-24) var(--r-24) 0 0;padding:max(18px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;overflow:hidden}
 .overlay.is-sheet .modal-head{flex:0 0 auto;margin-bottom:var(--s4)}
-.overlay.is-sheet .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.overlay.is-sheet .modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .overlay.is-sheet .modal-foot{flex:0 0 auto;margin-top:var(--s4);padding-bottom:0}
 .song-card{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s3);align-content:start;min-width:0}
 .song-top{display:grid;grid-template-columns:56px minmax(0,1fr) 56px;align-items:center;min-width:0;gap:var(--s3);width:100%}
@@ -3594,10 +3594,10 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
   .content{
     min-width:0;
     width:100%;
-    overflow-x:clip;
+    
     padding-bottom:calc(var(--bn) + var(--s8) + env(safe-area-inset-bottom,0px));
   }
-  .main{min-width:0;overflow-x:clip}
+  .main{min-width:0;}
   .bottom-nav{
     min-height:calc(var(--bn) + env(safe-area-inset-bottom,0px));
     padding-left:max(6px,env(safe-area-inset-left,0px));
@@ -3882,7 +3882,7 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
   min-width:0;
   width:100%;
   overflow-y:auto;
-  overflow-x:hidden;
+  
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
   padding:var(--s5) max(16px,env(safe-area-inset-right,0px)) calc(var(--s6) + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
@@ -3944,7 +3944,7 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
     flex:1 1 auto;
     min-height:0;
     overflow-y:auto;
-    overflow-x:hidden;
+    
     -webkit-overflow-scrolling:touch;
   }
   .overlay.is-sheet .modal-sheet .modal-foot{
@@ -3954,7 +3954,7 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
   .filter-pop{
     min-width:0;
     max-width:calc(100vw - 16px);
-    overflow-x:hidden;
+    
   }
 }
 @media(max-width:375px){
