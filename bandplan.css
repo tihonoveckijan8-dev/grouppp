@@ -4227,33 +4227,41 @@ a:not(.btn):not(.bottom-nav a):hover{
 }
 
 
-/* Songs: header is rendered directly above the search/filter row. */
-.songs-head-row{
+/* Songs: header and search use the exact same two-column grid. */
+body[data-route="songs"] .songs-head-row,
+body[data-route="songs"] .songs-search-row{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
-  align-items:end;
-  gap:var(--s2);
-  margin:0 0 var(--s2);
+  align-items:center;
+  column-gap:var(--s2);
   width:100%;
 }
-.songs-head-row h1{
+body[data-route="songs"] .songs-head-row{
+  margin:0 0 var(--s2);
+}
+body[data-route="songs"] .songs-head-row h1{
   min-width:0;
   margin:0;
   font-size:var(--fs-h2);
   line-height:1.2;
 }
-.songs-head-row .btn{
+body[data-route="songs"] .songs-head-row .btn{
   justify-self:end;
   white-space:nowrap;
 }
-.songs-search-row{
+body[data-route="songs"] .songs-search-row{
+  flex-wrap:nowrap;
+}
+body[data-route="songs"] .songs-search-row .tb-search{
+  min-width:0;
   width:100%;
 }
+body[data-route="songs"] .songs-search-row > .btn{
+  flex:none;
+}
 @media(max-width:640px){
-  .songs-head-row{
+  body[data-route="songs"] .songs-head-row,
+  body[data-route="songs"] .songs-search-row{
     grid-template-columns:minmax(0,1fr) auto;
-  }
-  .songs-head-row h1{
-    font-size:var(--fs-h2);
   }
 }
