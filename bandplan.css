@@ -4325,9 +4325,8 @@ body[data-route="setlists"] .setlists-search-row{
   align-items:center;
   column-gap:var(--s2);
   flex-wrap:nowrap;
-  width:calc(100% + 24px);
-  max-width:calc(var(--maxw) + 24px);
-  transform:translateX(12px);
+  width:100%;
+  max-width:var(--maxw);
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
   min-width:0;
