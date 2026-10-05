@@ -2261,6 +2261,8 @@ svg{flex:0 0 auto}
 
 
 
+}
+
 /* 12UI targeted polish — safe overlay on the known-good design system */
 .toolbar{min-width:0}
 .toolbar .tb-search{flex:1 1 520px;min-width:0;max-width:none}
