@@ -853,7 +853,7 @@
         p_personal_settings:snapshot.settings||{},
         p_delete_songs:songDelta.deleted,
         p_delete_events:eventDelta.deleted,
-        p_delete_setlists:setlistDelta.deletedd
+        p_delete_setlists:setlistDelta.deleted
       });
       if(sync.error){pending=snapshot;throw sync.error;}
       assertSessionOwner(uid);
