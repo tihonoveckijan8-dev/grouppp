@@ -1027,7 +1027,11 @@ function hardClose(node, opts) {
   const keepHistory = !!(opts && opts.keepHistory);
   const ov = $('#modalOverlay');
   if (node && node.parentNode === ov) node.remove();
-  if (!ov.children.length) { ov.classList.remove('on', 'is-fullscreen'); ov.innerHTML = ''; }
+  if (!ov.children.length) {
+    ov.classList.remove('on', 'is-fullscreen', 'fullscreen', 'is-sheet');
+    ov.innerHTML = '';
+    ov.removeAttribute('style');
+  }
   modalRoot = ov.querySelector('.modal-card') || null;
   confirmCb = null; modalDirty = false;
   if (trapHandler) { document.removeEventListener('keydown', trapHandler); trapHandler = null; }
@@ -3690,7 +3694,9 @@ function showUpdateBoot() {
 function resetForLogout() {
   window.__bandplanCloudSyncGeneration = (window.__bandplanCloudSyncGeneration || 0) + 1;
   try { stop(); } catch (_) {}
-  try { closeModal(); } catch (_) {}
+  try { closeModal(true); } catch (_) {
+    try { hardClose(modalRoot); } catch (__) {}
+  }
   try { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); } catch (_) {}
   state = defaults();
   ui.skeleton = false;
