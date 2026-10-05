@@ -16,7 +16,7 @@ const Boot = (() => {
   const t0 = performance.now();
   const nav = performance.getEntriesByType('navigation')[0] || {};
   const warm = nav.type === 'reload' || nav.type === 'back_forward';
-  const MIN = warm ? 0 : 350;
+  const MIN = 0;
   let lastAnnounce = 0, slowT = 0, finished = false, slowShown = false;
 
   function stage(text, pct) {
@@ -63,7 +63,7 @@ const Boot = (() => {
       el.classList.add('is-leaving');
       const rm = () => { if (el.isConnected) el.remove(); };
       el.addEventListener('transitionend', rm, {once:true});
-      setTimeout(rm, 600);
+      setTimeout(rm, 240);
       if (app) { app.removeAttribute('inert'); app.setAttribute('aria-busy', 'false'); }
       const main = document.querySelector('main') || document.getElementById('view');
       if (main) { main.setAttribute('tabindex', '-1'); try { main.focus({preventScroll:true}); } catch(e) { try { main.focus(); } catch(_) {} } }
