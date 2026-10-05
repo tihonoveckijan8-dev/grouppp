@@ -4104,3 +4104,126 @@ a:not(.btn):not(.bottom-nav a):hover{
 .participation-label.status-yes,.member-participation.status-yes{color:var(--ok)!important}
 .participation-label.status-maybe,.member-participation.status-maybe{color:var(--warn)!important}
 .participation-label.status-no,.member-participation.status-no{color:var(--danger)!important}
+
+
+/* DESKTOP / TABLET RESPONSIVE + OVERFLOW PASS — 2026-10-05
+   The 901–1099px range is a narrow desktop/tablet transition: keep the
+   desktop shell, but collapse dense two-column surfaces before they become
+   cramped. Wide desktop remains intentionally capped for readable density. */
+@media (min-width:901px) and (max-width:1099px){
+  .split,
+  .split2{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .profile-settings-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .profile-settings-main{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .data-stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .hero-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .settings-card,
+  .card,
+  .song-card{
+    min-width:0;
+  }
+
+  .page-head,
+  .toolbar,
+  .settings-shell,
+  .content>*{
+    max-width:100%;
+  }
+}
+
+@media (min-width:1100px){
+  .profile-settings-grid,
+  .split,
+  .split2,
+  .data-stats-grid,
+  .hero-metrics{
+    min-width:0;
+  }
+}
+
+@media (min-width:1440px){
+  .content{
+    padding-left:max(var(--s8),24px);
+    padding-right:max(var(--s8),24px);
+  }
+
+  .page-head{
+    max-width:var(--maxw);
+  }
+}
+
+/* Prevent long desktop/tablet labels, emails and metadata from creating
+   intrinsic-width overflow inside flex/grid children. */
+.account-settings-row,
+.data-action-danger,
+.data-action-group,
+.profile-role-box,
+.profile-account-box,
+.settings-card .card-h,
+.card-h,
+.toolbar,
+.toolbar .tb-search,
+.toolbar .tb-search .bare-input,
+.ph-acts,
+.hero-actions,
+.profile-actions,
+.data-action-buttons{
+  min-width:0;
+  max-width:100%;
+}
+
+.account-settings-row>div,
+.data-action-danger>div,
+.data-action-group>*,
+.profile-role-box>*,
+.profile-account-box>*,
+.settings-card .card-h>*,
+.card-h>*{
+  min-width:0;
+  max-width:100%;
+}
+
+.account-settings-row strong,
+.data-meta,
+.data-action-danger span,
+.settings-card .sub,
+.card-h .sub,
+.field-label,
+.member-status-wrap,
+.ev-meta,
+.song-meta{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+.data-action-danger .data-action-buttons{
+  min-width:0;
+  max-width:100%;
+}
+
+@media (min-width:901px){
+  .data-action-danger .data-action-buttons{
+    flex:0 1 auto;
+  }
+}
+
+@media (min-width:1440px){
+  .sidebar{
+    min-width:var(--sb);
+  }
+}
