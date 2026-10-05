@@ -825,7 +825,6 @@ html[data-reduced="true"] .skel::after{display:none}
 .member-event-context{font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .member-actions{display:flex;gap:var(--s2);flex:none}
 .member-actions .icon-btn{width:var(--tap);height:var(--tap);flex:none}
-#setBandDesc{width:100%;min-height:96px;grid-column:1/-1}
 .data-stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 .data-action-buttons .btn{min-width:0}
 .ev-category{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
