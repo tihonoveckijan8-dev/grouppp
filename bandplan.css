@@ -74,63 +74,6 @@ table{border-collapse:separate;border-spacing:0}
   --shadow-xs:0 1px 3px rgba(0,0,0,.72);--shadow-sm:0 5px 16px rgba(0,0,0,.8);--shadow-md:0 12px 30px rgba(0,0,0,.9);--shadow-lg:0 20px 52px rgba(0,0,0,.95);--shadow-accent:0 6px 18px rgba(0,0,0,.72);
   --skel-hi:rgba(255,255,255,.04);
 }
-[data-theme="glass"]{
-  --bg:#E9EEF5;--bg-deep:#DDE5EF;--surf-1:rgba(255,255,255,.56);--surf-2:rgba(255,255,255,.68);
-  --surf-3:rgba(255,255,255,.42);--surf-4:rgba(255,255,255,.78);
-  --border:rgba(255,255,255,.62);--border-2:rgba(255,255,255,.78);--border-3:rgba(255,255,255,.9);
-  --text:#172033;--text-2:#3C4658;--muted:#667085;--inverse:#F8FAFC;
-  --accent:#2547D0;--accent-hover:#1D3BB4;--accent-press:#16308F;--accent-soft:rgba(37,71,208,.10);--accent-soft-2:rgba(37,71,208,.16);--accent-ring:rgba(37,71,208,.32);--on-accent:#FFFFFF;
-  --ok:#16845D;--ok-bg:rgba(22,132,93,.11);--warn:#A36B08;--warn-bg:rgba(163,107,8,.12);--danger:#C24136;--danger-bg:rgba(194,65,54,.10);
-  --info:#2547D0;--info-bg:rgba(37,71,208,.08);--plum:#6E4483;--plum-bg:rgba(110,68,131,.10);--disabled:#98A2B3;
-  --shadow-1:0 1px 4px rgba(31,45,61,.06);--shadow-2:0 8px 24px rgba(31,45,61,.08);--shadow-3:0 18px 48px rgba(31,45,61,.14);
-  --shadow-xs:0 1px 4px rgba(31,45,61,.06);--shadow-sm:0 8px 24px rgba(31,45,61,.08);
-  --shadow-md:0 14px 34px rgba(31,45,61,.11);--shadow-lg:0 24px 64px rgba(31,45,61,.16);
-}
-[data-theme="glass"] body,
-body[data-theme="glass"]{background:
-  radial-gradient(circle at 8% 4%,rgba(124,151,245,.16),transparent 30%),
-  radial-gradient(circle at 92% 8%,rgba(255,255,255,.72),transparent 34%),
-  var(--bg);
-}
-[data-theme="glass"] .sidebar,
-[data-theme="glass"] .modal-card,
-[data-theme="glass"] .card{
-  background:var(--surf-4);
-  border-color:var(--border);
-  -webkit-backdrop-filter:none;
-  backdrop-filter:none;
-}
-[data-theme="glass"] .topbar,
-[data-theme="glass"] .bottom-nav{
-  background:var(--surf-1);
-  border-color:var(--border);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  backdrop-filter:blur(18px) saturate(140%);
-}
-[data-theme="glass"] .modal-card{
-  background:var(--surf-2);
-  border-color:var(--border);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  backdrop-filter:blur(18px) saturate(140%);
-}
-[data-theme="glass"] .topbar{box-shadow:var(--shadow-2)}
-[data-theme="glass"] .nav-item:hover,
-[data-theme="glass"] .btn-secondary:hover,
-[data-theme="glass"] .chip:hover{background:var(--surf-3)}
-[data-theme="glass"] .overlay.is-fullscreen{background:rgba(233,238,245,.94)}
-[data-theme="glass"] .overlay.is-fullscreen .modal-card{
-  background:var(--surf-4);
-  -webkit-backdrop-filter:none;
-  backdrop-filter:none;
-}
-@supports not ((backdrop-filter:blur(1px))){
-  [data-theme="glass"] .topbar,[data-theme="glass"] .bottom-nav,[data-theme="glass"] .modal-card{
-    -webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surf-4);
-  }
-}
-@media(prefers-reduced-transparency:reduce){
-  [data-theme="glass"] .sidebar,[data-theme="glass"] .modal-card,[data-theme="glass"] .card{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surf-4)}
-  [data-theme="glass"] .topbar,[data-theme="glass"] .bottom-nav{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--surf-4)}
 }
 
 
@@ -1654,11 +1597,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     --shadow-card:0 1px 2px rgba(0,0,0,.20),0 10px 28px rgba(0,0,0,.22);
     --shadow-float:0 16px 40px rgba(0,0,0,.38);
   }
-  [data-theme="glass"]{
-    --shadow-control:0 1px 2px rgba(31,45,61,.04);
-    --shadow-card:0 1px 2px rgba(31,45,61,.035),0 10px 28px rgba(31,45,61,.055);
-    --shadow-float:0 16px 40px rgba(31,45,61,.12);
-  }
 }
 
 @layer components{
@@ -1730,27 +1668,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     border-radius:var(--r-18);
   }
 
-  /* Glass remains a contextual surface, never a content-wide effect. */
-  [data-theme="glass"] .topbar,
-  [data-theme="glass"] .topbar.stuck,
-  [data-theme="glass"] .bottom-nav,
-  [data-theme="glass"] .actionbar,
-  [data-theme="glass"] .search-drop,
-  [data-theme="glass"] .filter-pop,
-  [data-theme="glass"] .toast{
-    background:color-mix(in srgb,var(--surf-1) 82%,transparent);
-    border-color:var(--border);
-    -webkit-backdrop-filter:blur(16px) saturate(135%);
-    backdrop-filter:blur(16px) saturate(135%);
-  }
-  [data-theme="glass"] .card,
-  [data-theme="glass"] .song-card,
-  [data-theme="glass"] .ev-row,
-  [data-theme="glass"] .sl-item,
-  [data-theme="glass"] .memb-row,
-  [data-theme="glass"] .hero{
-    -webkit-backdrop-filter:none;
-    backdrop-filter:none;
   }
 
   .bottom-nav{
@@ -1780,16 +1697,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     .card,.song-card,.ev-row,.sl-item,.memb-row,.modal-card{border-color:var(--border-2)}
   }
   @media(prefers-reduced-transparency:reduce){
-    [data-theme="glass"] .topbar,
-    [data-theme="glass"] .topbar.stuck,
-    [data-theme="glass"] .bottom-nav,
-    [data-theme="glass"] .actionbar,
-    [data-theme="glass"] .search-drop,
-    [data-theme="glass"] .filter-pop,
-    [data-theme="glass"] .toast{
-      -webkit-backdrop-filter:none;
-      backdrop-filter:none;
-      background:var(--surf-4);
     }
   }
 }
@@ -1826,12 +1733,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     --bp-line-strong:var(--border-2);
     --bp-shadow:0 1px 2px rgba(0,0,0,.22),0 14px 34px rgba(0,0,0,.22);
     --bp-shadow-lg:0 24px 70px rgba(0,0,0,.42);
-  }
-  [data-theme="glass"]{
-    --bp-canvas:var(--bg);
-    --bp-panel:rgba(255,255,255,.62);
-    --bp-panel-solid:var(--surf-4);
-    --bp-shadow:0 1px 2px rgba(31,45,61,.04),0 14px 36px rgba(31,45,61,.08);
   }
 }
 
@@ -2104,27 +2005,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     box-shadow:var(--bp-shadow-lg);
   }
 
-  /* 10. Glass: clearly visible only in floating surfaces */
-  [data-theme="glass"] .sidebar{
-    background:rgba(255,255,255,.48);
-    -webkit-backdrop-filter:blur(20px) saturate(145%);
-    backdrop-filter:blur(20px) saturate(145%);
-  }
-  [data-theme="glass"] .tb-inner,
-  [data-theme="glass"] .modal-card,
-  [data-theme="glass"] .bottom-nav,
-  [data-theme="glass"] .actionbar{
-    background:rgba(255,255,255,.58);
-    border-color:rgba(255,255,255,.72);
-    -webkit-backdrop-filter:blur(20px) saturate(145%);
-    backdrop-filter:blur(20px) saturate(145%);
-  }
-  [data-theme="glass"] .card,
-  [data-theme="glass"] .song-card,
-  [data-theme="glass"] .ev-row,
-  [data-theme="glass"] .hero{
-    background:rgba(255,255,255,.82);
-  }
 
   /* 11. Mobile is an intentional layout */
   @media(max-width:900px){
@@ -2176,15 +2056,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     .song-card:hover,.ev-row:hover,.memb-row:hover,.btn-primary:hover{transform:none}
   }
   @media(prefers-reduced-transparency:reduce){
-    [data-theme="glass"] .sidebar,
-    [data-theme="glass"] .tb-inner,
-    [data-theme="glass"] .modal-card,
-    [data-theme="glass"] .bottom-nav,
-    [data-theme="glass"] .actionbar{
-      backdrop-filter:none;
-      -webkit-backdrop-filter:none;
-      background:var(--surf-4);
-    }
   }
 }
 
@@ -2256,13 +2127,6 @@ input,textarea,select{max-width:100%;min-width:0}
 textarea{overflow:auto}
 svg{flex:0 0 auto}
 .table-wrap,.data-table-wrap,.song-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-[data-theme="glass"] .global-searchbar .tb-inner,
-[data-theme="glass"] .global-searchbar .netbar{
-  background:var(--surf-1);
-  border-color:var(--border);
-  -webkit-backdrop-filter:blur(18px) saturate(140%);
-  backdrop-filter:blur(18px) saturate(140%);
-}
 @media(max-width:900px){
   .content{overflow-x:hidden}
   .page-head{padding-left:0;padding-right:0}
@@ -2317,16 +2181,10 @@ svg{flex:0 0 auto}
   .rise,.search-drop.open{animation:none!important}
 }
 @media(prefers-reduced-transparency:reduce){
-  [data-theme="glass"] .global-searchbar .tb-inner,
-  [data-theme="glass"] .global-searchbar .netbar{
-    -webkit-backdrop-filter:none;
-    backdrop-filter:none;
-    background:var(--surf-4);
-  }
 }
 \n
 /* ═══ 23. THEME COHERENCE / ACCENT SYSTEM v2 ═════════════════════════════
-   One semantic color pipeline for Light / Dark / AMOLED / Liquid Glass.
+   One semantic color pipeline for Light / Dark / AMOLED.
    Accent is intentionally limited to actions, selection, focus and status.
 */
 @layer tokens{
@@ -2406,54 +2264,7 @@ svg{flex:0 0 auto}
     border-color:rgba(255,255,255,.14);
   }
 
-  /* Glass = depth only on floating chrome; content remains readable and solid. */
-  [data-theme="glass"] .global-searchbar .tb-inner,
-  [data-theme="glass"] .sidebar,
-  [data-theme="glass"] .bottom-nav{
-    background:rgba(255,255,255,.54);
-    border-color:rgba(255,255,255,.68);
-    box-shadow:0 12px 34px rgba(31,45,61,.10),inset 0 1px 0 rgba(255,255,255,.72);
-    -webkit-backdrop-filter:blur(18px) saturate(145%);
-    backdrop-filter:blur(18px) saturate(145%);
-  }
-  [data-theme="glass"] .card,
-  [data-theme="glass"] .song-card,
-  [data-theme="glass"] .ev-row,
-  [data-theme="glass"] .set-item,
-  [data-theme="glass"] .member-row{
-    background:rgba(255,255,255,.76);
-    border-color:rgba(255,255,255,.68);
-    -webkit-backdrop-filter:none;
-    backdrop-filter:none;
-  }
-  [data-theme="glass"] .card:hover,
-  [data-theme="glass"] .song-card:hover,
-  [data-theme="glass"] .ev-row:hover{
-    border-color:var(--accent-border);
-    box-shadow:var(--shadow-1);
-  }
-  [data-theme="glass"] .global-searchbar .tb-search:focus-within{
-    border-color:var(--accent-border);
-    box-shadow:var(--focus-ring);
-  }
-  @media(max-width:640px){
-    [data-theme="glass"] .global-searchbar .tb-inner,
-    [data-theme="glass"] .sidebar,
-    [data-theme="glass"] .bottom-nav{
-      -webkit-backdrop-filter:blur(10px) saturate(125%);
-      backdrop-filter:blur(10px) saturate(125%);
-    }
-  }
-}
-@media(prefers-reduced-transparency:reduce){
-  [data-theme="glass"] .global-searchbar .tb-inner,
-  [data-theme="glass"] .sidebar,
-  [data-theme="glass"] .bottom-nav{
-    -webkit-backdrop-filter:none;
-    backdrop-filter:none;
-    background:var(--surf-2);
-  }
-}
+
 
 /* 12UI targeted polish — safe overlay on the known-good design system */
 .toolbar{min-width:0}
