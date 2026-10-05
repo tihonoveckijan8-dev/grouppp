@@ -2563,3 +2563,76 @@ svg{flex:0 0 auto}
     flex-basis:42px !important;
   }
 }
+
+
+/* Final settings cleanup: remove genuinely empty shells and strengthen profile icon visibility. */
+.settings-shell .settings-tab-content > :empty,
+.settings-shell .settings-tab-content > .settings-card:empty,
+.settings-shell .profile-settings-grid > :empty,
+.settings-shell .profile-settings-main > :empty,
+.settings-shell .profile-settings-side > :empty{
+  display:none!important;
+}
+.settings-shell .settings-card .card-h:empty,
+.settings-shell .settings-card .card-h > :empty{
+  display:none!important;
+}
+.settings-shell .settings-one-line{
+  align-items:center;
+  min-width:0;
+}
+.settings-shell .settings-one-line>button{
+  flex:1 1 0;
+  min-width:max-content;
+  justify-content:center;
+}
+.settings-shell .settings-theme-row>button{
+  min-width:0;
+}
+.settings-shell .settings-notation-row>button,
+.settings-shell .settings-notify-row>button{
+  min-width:0;
+}
+.profile-role-identity{
+  min-height:48px;
+}
+.profile-role-avatar{
+  width:44px!important;
+  height:44px!important;
+  flex-basis:44px!important;
+  border-radius:14px!important;
+  font-size:18px!important;
+  font-weight:850!important;
+  color:var(--on-accent)!important;
+  background:var(--accent)!important;
+  border:1px solid var(--accent)!important;
+  box-shadow:var(--shadow-accent),0 0 0 3px var(--accent-soft)!important;
+}
+.profile-role-identity strong{
+  font-size:14px!important;
+  font-weight:800!important;
+}
+.profile-role-identity span:not(.profile-role-avatar){
+  font-size:11.5px!important;
+}
+.profile-role-option-icon{
+  color:var(--accent)!important;
+  background:var(--accent-soft-2)!important;
+  border-color:var(--accent-border)!important;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+@media(max-width:640px){
+  .settings-shell .settings-one-line>button{
+    flex:1 0 auto;
+    min-height:44px;
+  }
+  .settings-shell .settings-theme-row{
+    overflow-x:auto;
+  }
+  .profile-role-avatar{
+    width:46px!important;
+    height:46px!important;
+    flex-basis:46px!important;
+    font-size:19px!important;
+  }
+}
