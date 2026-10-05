@@ -327,9 +327,14 @@
         mode = 'login';
         if(typeof window.__bandplanHandleSignedOut==='function') {
           window.__bandplanHandleSignedOut();
-        } else {
-          renderGate();
         }
+        // Always rebuild the authentication gate after sign-out. This makes
+        // logout deterministic: the authenticated shell is closed and the
+        // user is immediately returned to the normal "Вход в аккаунт" screen,
+        // including when the previous screen was onboarding/settings or a modal.
+        mode = 'login';
+        passwordRecoveryMode = false;
+        renderGate();
         return;
       }
       if (authEvent === 'PASSWORD_RECOVERY') {
