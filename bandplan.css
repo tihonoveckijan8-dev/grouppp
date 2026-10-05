@@ -2412,13 +2412,13 @@ svg{flex:0 0 auto}
 .song-card .song-acts .btn.btn-primary,
 .song-card .song-acts .btn.btn-danger,
 .song-card .song-acts .setlist-scene{
-  width:44px !important;
-  min-width:44px !important;
-  max-width:44px !important;
-  height:44px !important;
-  min-height:44px !important;
-  max-height:44px !important;
-  flex:0 0 44px !important;
+  width:46px !important;
+  min-width:46px !important;
+  max-width:46px !important;
+  height:46px !important;
+  min-height:46px !important;
+  max-height:46px !important;
+  flex:0 0 46px !important;
   padding:0 !important;
   display:inline-flex !important;
   align-items:center !important;
@@ -2459,13 +2459,13 @@ svg{flex:0 0 auto}
   .song-card .song-acts .btn.btn-primary,
   .song-card .song-acts .btn.btn-danger,
   .song-card .song-acts .setlist-scene{
-    width:42px !important;
-    min-width:42px !important;
-    max-width:42px !important;
-    height:42px !important;
-    min-height:42px !important;
-    max-height:42px !important;
-    flex-basis:42px !important;
+    width:44px !important;
+    min-width:44px !important;
+    max-width:44px !important;
+    height:44px !important;
+    min-height:44px !important;
+    max-height:44px !important;
+    flex-basis:44px !important;
   }
 }
 @media(max-width:390px){
@@ -2483,12 +2483,12 @@ svg{flex:0 0 auto}
   .song-card .song-acts .btn.btn-primary,
   .song-card .song-acts .btn.btn-danger,
   .song-card .song-acts .setlist-scene{
-    width:40px !important;
-    min-width:40px !important;
-    max-width:40px !important;
-    height:40px !important;
-    min-height:40px !important;
-    max-height:40px !important;
-    flex-basis:40px !important;
+    width:42px !important;
+    min-width:42px !important;
+    max-width:42px !important;
+    height:42px !important;
+    min-height:42px !important;
+    max-height:42px !important;
+    flex-basis:42px !important;
   }
 }
