@@ -504,7 +504,9 @@ html[data-reduced="true"] .skel::after{display:none}
 .song-meta{display:flex;gap:5px;flex-wrap:wrap}
 .song-acts{display:flex;gap:6px;margin-top:auto;padding-top:var(--s4);border-top:1px solid var(--border)}
 .song-acts .btn{flex:1;min-width:0;padding:0 var(--s2)}
-.fav{position:absolute;top:var(--s4);right:var(--s4);color:var(--muted);padding:6px;border-radius:var(--r-10);
+.song-open-wrap{display:flex;align-items:center;justify-content:flex-end;gap:var(--s2);flex:none;margin-left:auto}
+.fav{position:static;width:var(--tap);height:var(--tap);padding:0;border-radius:var(--r-10);display:grid;place-items:center;
+  color:var(--muted);flex:none;
   transition:transform var(--t-btn),opacity var(--t-btn),background-color var(--t-btn),border-color var(--t-btn),color var(--t-btn),box-shadow var(--t-btn);z-index:var(--z-2)}
 .fav:hover{color:var(--warn);background:var(--warn-bg)}
 .fav.on{color:var(--warn)}
