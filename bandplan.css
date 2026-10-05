@@ -598,6 +598,19 @@ html[data-reduced="true"] .skel::after{display:none}
   border:1px solid var(--border);border-radius:var(--r-24);box-shadow:var(--shadow-3);padding:var(--s8);
   animation:pop var(--t-overlay) both}
 .modal-card.lg{max-width:860px}
+/* Fullscreen editors: event/song/setlist editors always occupy the viewport. */
+.overlay.is-fullscreen .modal-card.modal-fullscreen{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  max-width:none !important;
+  height:100dvh !important;
+  max-height:none !important;
+  min-height:100dvh !important;
+  margin:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+}
 .overlay.is-fullscreen{
   padding:0;
   align-items:stretch;
