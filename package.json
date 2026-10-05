@@ -3,9 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
     "build": "node scripts/build.mjs"
   },
   "devDependencies": {
     "esbuild": "0.25.9"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
   }
 }

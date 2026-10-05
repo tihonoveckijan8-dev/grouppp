@@ -1,0 +1,8 @@
+{
+  "name": "BandPlan — Music Group OS",
+  "description": "BandPlan — операционная система музыкального коллектива: расписание, репертуар с аккордами и динамикой партий, сет-листы и сценический режим. Работает офлайн.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
