@@ -2353,3 +2353,24 @@ svg{flex:0 0 auto}
 @media(max-width:640px){.toolbar{margin-bottom:var(--s4);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center}.toolbar .tb-search{flex:1 1 auto;width:100%;height:48px}.toolbar>.btn{min-width:104px}.song-acts{grid-template-columns:repeat(2,minmax(0,1fr))}.swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.overlay.is-sheet .modal-card{height:min(56dvh,560px);max-height:56dvh;border-radius:20px 20px 0 0}}
 @media(max-width:430px){.toolbar{grid-template-columns:minmax(0,1fr)}.toolbar>.btn{width:100%}.song-top{grid-template-columns:48px minmax(0,1fr) 48px}.song-top::after{width:48px}.song-acts{grid-template-columns:minmax(0,1fr)}.swatches{grid-template-columns:minmax(0,1fr)}.data-stats-grid{grid-template-columns:minmax(0,1fr)}.overlay.is-sheet .modal-card{height:min(60dvh,560px);max-height:60dvh}}
 @media(max-width:375px){.toolbar .tb-search{height:46px}.song-top{grid-template-columns:44px minmax(0,1fr) 44px}.song-top::after{width:44px}.sw-dot{width:22px;height:22px;flex-basis:22px}.sw-name{font-size:11.5px}}
+
+
+/* Card action hierarchy — keep primary Open action with the key/title row;
+   secondary actions remain in a separate lower action rail. */
+.song-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:var(--s3);min-width:0}
+.song-top .song-title-wrap{min-width:0;min-height:46px;display:flex;align-items:center;justify-content:center}
+.song-top .song-open-top{min-width:88px;min-height:44px;flex:0 0 auto;justify-content:center}
+.song-acts{width:100%;margin-top:var(--s2);padding-top:var(--s3);border-top:1px solid var(--border);display:flex;gap:6px;align-items:center;justify-content:stretch;flex-wrap:wrap}
+.song-acts .btn{flex:1 1 120px;min-width:0;min-height:44px}
+.setlists-list .song-acts .btn-primary,.setlists-list .song-acts .setlist-scene{min-width:112px}
+@media (max-width:640px){
+  .song-top{grid-template-columns:auto minmax(0,1fr) auto;gap:8px}
+  .song-top .song-open-top{min-width:76px;padding-inline:10px}
+  .song-acts{margin-top:10px;padding-top:12px;gap:8px}
+  .song-acts .btn{flex:1 1 calc(50% - 4px)}
+}
+@media (max-width:390px){
+  .song-top{gap:6px}
+  .song-top .song-open-top{min-width:70px;padding-inline:8px}
+  .song-acts .btn{flex-basis:100%}
+}
