@@ -2863,7 +2863,6 @@ document.addEventListener('click', function (e) {
       stop();
       const button = el;
       if (button) button.disabled = true;
-      btnLoading(button);
       const data = readEventForm(id);
       if (!data) {
         if (button) button.disabled = false;
