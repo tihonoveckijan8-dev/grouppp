@@ -1089,6 +1089,7 @@ body[data-route="setlist"] .page-head{background:var(--bg);backdrop-filter:none;
 .settings-shell[data-settings-tab="group"] [data-settings-panel]:not([data-settings-panel="group"]),
 .settings-shell[data-settings-tab="interface"] [data-settings-panel]:not([data-settings-panel="interface"]),
 .settings-shell[data-settings-tab="data"] [data-settings-panel]:not([data-settings-panel="data"]),
+.settings-shell[data-settings-tab="account"] [data-settings-panel]:not([data-settings-panel="account"]),
 .settings-shell[data-settings-tab="app"] [data-settings-panel]:not([data-settings-panel="app"]){display:none}
 
 .settings-tabs{
@@ -2187,3 +2188,37 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
   }
 }
 
+
+
+/* BandPlan UI optimization — topbar removed; essential global search/status live in a compact command surface. */
+.global-searchbar{
+  position:relative;
+  z-index:var(--z-8);
+  padding:10px 24px 0;
+}
+.global-searchbar .tb-inner{
+  max-width:1180px;
+  margin:0 auto;
+}
+.global-searchbar .netbar{
+  max-width:1180px;
+  margin:6px auto 0;
+}
+.account-settings{display:grid;gap:12px}
+.account-settings-row{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  min-width:0;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--surf-3);
+}
+.account-settings-row>div{min-width:0;display:grid;gap:4px}
+.account-settings-row strong{min-width:0;overflow-wrap:anywhere;font-size:var(--fs-body)}
+@media(max-width:900px){
+  .global-searchbar{padding:8px 18px 0}
+}
+@media(max-width:640px){
+  .global-searchbar{padding:7px 12px 0}
+  .account-settings-row{align-items:stretch;flex-direction:column}
+  .account-settings-row .btn{width:100%}
+}
+@media(max-width:390px){
+  .global-searchbar{padding-left:9px;padding-right:9px}
+}
