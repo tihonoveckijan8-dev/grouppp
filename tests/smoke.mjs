@@ -146,8 +146,16 @@ try {
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
   }
 
+  const removedUi = await page.evaluate(() => ({
+    globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
+    glassTheme: !!document.querySelector('[data-theme="glass"]'),
+    liquidGlassText: document.body.innerText.includes('Liquid Glass')
+  }));
+  assert.equal(removedUi.globalSearch, false, 'Obsolete global top search is still mounted');
+  assert.equal(removedUi.glassTheme, false, 'Removed Liquid Glass theme is still mounted');
+  assert.equal(removedUi.liquidGlassText, false, 'Liquid Glass text is still visible');
   const responsive = [];
-  for (const width of [360, 390, 430, 768, 1024, 1280]) {
+  for (const width of [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920, 2560]) {
     await page.setViewportSize({width, height: 900});
     const metrics = await page.evaluate(() => ({
       width: innerWidth,
