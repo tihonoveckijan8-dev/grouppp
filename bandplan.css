@@ -4475,3 +4475,12 @@ body[data-route="songs"] .songs-search-row .tb-search{
     max-width:100%;
   }
 }
+
+/* SETTINGS SUBTAB ROUNDED BUTTONS — 2026-10-05 */
+.settings-tabs .settings-tab{
+  border-radius:14px !important;
+  overflow:hidden;
+}
+.settings-tabs .settings-tab.on{
+  border-radius:14px !important;
+}
