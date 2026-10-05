@@ -21,3 +21,4 @@ jobs:
           node --check supabase.js
           node --check bandplan.js
           node --check sw.js
+          node --check bandplan-core.js
