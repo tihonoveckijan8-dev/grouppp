@@ -1,6 +1,6 @@
 /* BandPlan offline app shell — resilient cache install and safe updates */
-const V = 'bandplan-20261005-3';
-const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-splash.svg', 'icon-maskable-splash.svg', 'apple-touch-icon.png', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
+const V = 'bandplan-20261005-4';
+const SHELL = ['./', 'index.html', 'bandplan.css','bandplan.css?v=20261005-4', 'bandplan.js','bandplan.js?v=20261005-4', 'bandplan-core.js','bandplan-core.js?v=20261005-4', 'manifest.webmanifest', 'icon-splash.svg', 'icon-maskable-splash.svg', 'apple-touch-icon.png', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
