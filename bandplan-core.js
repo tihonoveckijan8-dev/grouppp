@@ -1902,7 +1902,7 @@ function vSettings() {
     '<div class="split2"><div>' +
     '<div class="field"><span class="field-label">Тема</span><div class="seg">' +
     THEMES.map(t => '<button type="button" data-act="theme-set" data-v="' + t.id + '" class="' + (s.theme === t.id ? 'on' : '') + '" aria-pressed="' + (s.theme === t.id) + '" data-accent="1">' + ic(t.icon, 14) + esc(t.label) + '</button>').join('') + '</div></div>' +
-    '<div class="field"><span class="field-label">Акцентный цвет</span><div class="swatches">' +
+    '<div class="field"><span class="field-label">Акцентный цвет</span><div class="accent-picker">' +
     ACCENTS.map(a => '<button class="accent-swatch' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"><span class="accent-dot" style="--swatch:' + a + '" aria-hidden="true"></span><span class="accent-swatch-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (s.accent.toLowerCase() === a.toLowerCase() ? ic('check', 14) : '') + '</button>').join('') +
     '<label class="accent-custom"><span class="accent-dot accent-dot-custom" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label></div>' +
     '</div>' +
