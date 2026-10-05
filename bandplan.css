@@ -4325,6 +4325,9 @@ body[data-route="setlists"] .setlists-search-row{
   align-items:center;
   column-gap:var(--s2);
   flex-wrap:nowrap;
+  width:calc(100% + 24px);
+  max-width:calc(var(--maxw) + 24px);
+  transform:translateX(12px);
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
   min-width:0;
@@ -4334,6 +4337,10 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
   body[data-route="setlists"] .setlists-head-row,
   body[data-route="setlists"] .setlists-search-row{
     max-width:none;
+  }
+  body[data-route="setlists"] .setlists-search-row{
+    width:100%;
+    transform:none;
   }
   body[data-route="setlists"] .setlists-head-row{
     grid-template-columns:minmax(0,1fr) auto;
