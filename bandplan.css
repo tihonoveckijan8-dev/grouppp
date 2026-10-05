@@ -3120,3 +3120,138 @@ svg{flex:0 0 auto}
     grid-template-columns:minmax(0,1fr) 44px;
   }
 }
+
+/* ═══ UI CLEANUP: toolbar, event rows and filter chips — 2026-10-05 ═══ */
+
+/* Toolbars are normal page content: no sticky strip, gradient or artificial separator. */
+.toolbar{
+  position:relative;
+  top:auto;
+  padding:0;
+  margin:0 0 var(--s5);
+  background:none;
+  z-index:auto;
+}
+.toolbar .tb-search{
+  min-width:0;
+  width:100%;
+  max-width:none;
+}
+
+/* Event rows: reserve space for the date, keep title/category/meta inside their own column. */
+.ev-row{
+  display:grid;
+  grid-template-columns:60px minmax(0,1fr) auto;
+  align-items:start;
+  gap:var(--s4);
+  min-width:0;
+}
+.ev-row .ev-body{
+  min-width:0;
+  max-width:100%;
+}
+.ev-row .ev-title{
+  min-width:0;
+  max-width:100%;
+  line-height:1.35;
+  align-items:flex-start;
+}
+.ev-row .ev-name,
+.ev-row .ev-category{
+  min-width:0;
+  max-width:100%;
+}
+.ev-row .ev-name{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.ev-row .ev-category{
+  flex:0 1 auto;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.ev-row .ev-meta{
+  min-width:0;
+  max-width:100%;
+}
+.ev-row .ev-meta span{
+  max-width:100%;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+.ev-row .ev-acts{
+  min-width:var(--tap);
+  max-width:100%;
+}
+
+/* Filter chips must wrap instead of forcing horizontal overflow on narrow screens. */
+.filter-pop,
+.overlay.is-sheet .modal-sheet{
+  min-width:0;
+}
+.overlay.is-sheet .modal-sheet .modal-body{
+  min-width:0;
+}
+.overlay.is-sheet .modal-sheet .row,
+.overlay.is-sheet .modal-sheet .chip,
+.overlay.is-sheet .modal-sheet .seg{
+  max-width:100%;
+}
+.overlay.is-sheet .modal-sheet .row{
+  align-items:stretch;
+}
+.overlay.is-sheet .modal-sheet .chip{
+  white-space:normal;
+  overflow-wrap:anywhere;
+  min-width:0;
+  max-width:100%;
+  flex:0 1 auto;
+}
+
+/* Full-width mobile search without focus expansion/jump. */
+.toolbar .tb-search,
+.toolbar .tb-search:focus-within{
+  transform:none;
+  transition:border-color var(--t-btn),box-shadow var(--t-btn),background-color var(--t-btn);
+}
+@media(max-width:640px){
+  .ev-row{
+    grid-template-columns:48px minmax(0,1fr);
+    gap:10px;
+  }
+  .ev-row .ev-acts{
+    grid-column:2;
+    justify-content:flex-start;
+    width:100%;
+  }
+  .ev-row .ev-date{
+    width:48px;
+    min-width:48px;
+  }
+  .toolbar{
+    margin-bottom:var(--s4);
+  }
+  .toolbar .tb-search{
+    height:48px;
+  }
+  .filter-pop{
+    position:fixed;
+    left:12px;
+    right:12px;
+    top:max(12px,env(safe-area-inset-top,12px));
+    width:auto;
+    max-width:none;
+    max-height:calc(100dvh - 24px);
+    overflow-y:auto;
+    border-radius:20px;
+  }
+}
+@media(max-width:380px){
+  .ev-row{
+    grid-template-columns:44px minmax(0,1fr);
+  }
+  .ev-row .ev-date{
+    width:44px;
+    min-width:44px;
+  }
+}
