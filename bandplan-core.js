@@ -2869,6 +2869,7 @@ document.addEventListener('click', function (e) {
         if (button) button.disabled = false;
         break;
       }
+      const previous = id ? state.events.find(x => x.id === id) : null;
       /*
         Event creation/editing must be durable immediately. Local save() still
         keeps the workspace usable offline, but when Supabase is available we
@@ -2879,7 +2880,6 @@ document.addEventListener('click', function (e) {
       (async () => {
         const personalStatus = data.personalStatus || '';
         delete data.personalStatus;
-        const previous = id ? state.events.find(x => x.id === id) : null;
         if (id) {
           const index = state.events.findIndex(x => x.id === id);
           if (index >= 0) state.events[index] = data;
