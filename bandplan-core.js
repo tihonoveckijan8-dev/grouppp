@@ -1181,16 +1181,13 @@ function buildChrome() {
   $('#brandBand').textContent = p.bandName || 'Моя группа';
   $('#sideProfile').innerHTML = '<div class="av" aria-hidden="true">' + esc(((p.name || 'B').charAt(0)).toUpperCase()) + '</div>' +
     '<div style="min-width:0"><div class="nm">' + esc(p.name || 'Профиль не заполнен') + '</div><div class="rl">' + esc(rolesLabel(myRoles())) + '</div></div>';
-  $('#tbAvatar').textContent = ((p.name || 'B').charAt(0)).toUpperCase();
 
   const nextTheme = nextThemeMeta(state.settings.theme);
   const thIco = ic(nextTheme.icon, 18);
   const thLbl = nextTheme.label;
   $('#themeQuick').innerHTML = thIco + '<span>' + esc(thLbl) + '</span>';
   $('#themeQuick').setAttribute('aria-label', 'Переключить тему: ' + esc(thLbl));
-  $('#tbTheme').innerHTML = thIco; $('#tbTheme').setAttribute('aria-label', 'Переключить тему: ' + esc(thLbl));
   $('#sceneQuick').innerHTML = ic('monitor', 18) + '<span>Сценический режим</span>';
-  $('#tbCust').innerHTML = ic('palette', 19);
   $('#searchIco').innerHTML = ic('search', 19);
   $('#searchClear').innerHTML = ic('x', 16);
   $('[data-act="scene-prev"]').innerHTML = ic('left', 20);
@@ -1870,7 +1867,7 @@ function moveItem(slId, itemId, at) {
 function vSettings() {
   const s = state.settings, p = state.profile;
   const settingsTab = ui.settingsTab || 'profile';
-  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль'],['group','Группа'],['interface','Интерфейс'],['data','Данные'],['app','Приложение']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div><div class="settings-tab-content">';
+  let h = '<div class="settings-shell" data-settings-tab="' + esc(settingsTab) + '">' + '<div class="settings-tabs" role="tablist" aria-label="Разделы настроек">' + [['profile','Профиль'],['group','Группа'],['interface','Интерфейс'],['data','Данные'],['account','Аккаунт'],['app','Приложение']].map(t => '<button type="button" class="settings-tab' + (settingsTab === t[0] ? ' on' : '') + '" data-act="settings-tab" data-v="' + t[0] + '" role="tab" aria-selected="' + (settingsTab === t[0]) + '">' + t[1] + '</button>').join('') + '</div><div class="settings-tab-content">';
   h += '<section class="card rise settings-card" data-settings-panel="profile"><div class="card-h"><div><h2>Профиль и роль</h2></div></div>' +
     '<div class="profile-settings-grid">' +
     '<div class="profile-settings-main">' +
@@ -1953,6 +1950,8 @@ function vSettings() {
       '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX', 16) + 'Удалить аккаунт</button></div></div>' +
     '</div></section>';
 
+  h += '<section class="card rise settings-card" data-settings-panel="account" style="animation-delay:.12s"><div class="card-h"><div><h2>Аккаунт и безопасность</h2><div class="sub">Управление текущей сессией</div></div></div>' +
+    '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Вход в аккаунт</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div></section>';
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
     '' +
     '<div class="row mt" style="gap:6px;flex-wrap:wrap"><span class="badge b-muted">offline-first</span><span class="badge b-muted">localStorage</span><span class="badge b-muted">печать / PDF</span><span class="badge b-muted">wake lock</span><span class="badge b-muted">свайп-навигация</span></div>' +
