@@ -4177,3 +4177,51 @@ a:not(.btn):not(.bottom-nav a):hover{
     min-width:var(--sb);
   }
 }
+
+
+/* COMPONENT HARDENING — desktop/tablet + stable toolbar search
+   Toolbar search is an in-page control; the legacy global-search focus
+   expansion must never move it out of normal layout flow. */
+@media(max-width:640px){
+  .toolbar .tb-search,
+  .toolbar .tb-search:focus-within{
+    position:relative;
+    left:auto;
+    right:auto;
+    width:100%;
+    flex:1 1 auto;
+    z-index:auto;
+    overflow:visible;
+    background:var(--surf-2);
+  }
+
+  .toolbar .tb-search input,
+  .toolbar .tb-search:focus-within input{
+    position:static;
+    inset:auto;
+    opacity:1;
+    width:100%;
+    min-width:0;
+    flex:1 1 auto;
+  }
+
+  .settings-card{
+    overflow:visible;
+  }
+}
+
+@media(min-width:901px){
+  .settings-card{
+    overflow:visible;
+  }
+
+  .toolbar .tb-search{
+    min-width:0;
+    max-width:100%;
+  }
+
+  .toolbar .tb-search input{
+    min-width:0;
+    max-width:100%;
+  }
+}
