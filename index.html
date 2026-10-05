@@ -14,9 +14,9 @@
 try{
   var bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpDoc=document.documentElement;
   if(!bpBoot){try{for(var k=0;k<localStorage.length;k++){var key=localStorage.key(k)||'';if(key.indexOf('bandplan.premium.v6:')===0){var raw=JSON.parse(localStorage.getItem(key)||'null');if(raw&&raw.settings){bpBoot={theme:raw.settings.theme,accent:raw.settings.accent,accentApplied:raw.settings.accentApplied,onAccent:raw.settings.onAccent};break;}}}}catch(_e){}}
-  var bpThemeIds=['light','dark','amoled','glass'];
+  var bpThemeIds=['light','dark','amoled'];
   var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
-  var bpThemeColor={light:'#F4F6F8',dark:'#14161C',amoled:'#000000',glass:'#E9EEF5'}[bpTheme]||'#F4F6F8';
+  var bpThemeColor={light:'#F4F6F8',dark:'#14161C',amoled:'#000000'}[bpTheme]||'#F4F6F8';
   var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accentApplied||'')?(bpBoot.accentApplied):(bpBoot&&/^#[0-9a-fA-F]{6}$/.test(bpBoot.accent||'')?bpBoot.accent:'#2547D0');
   function bpLum(hex){
     var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});
@@ -124,25 +124,7 @@ try{
 
   <!-- ══ MAIN ══ -->
   <main class="main">
-    <div class="global-searchbar" id="globalSearchbar">
-      <div class="tb-inner">
-        <div class="tb-search" id="searchWrap">
-          <span class="tb-search-ic" id="searchIco" aria-hidden="true"></span>
-          <label class="sr-only" for="globalSearch">Глобальный поиск по песням, событиям, сет-листам и участникам</label>
-          <input id="globalSearch" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"
-                 role="combobox" aria-expanded="false" aria-controls="searchDrop" aria-autocomplete="list"
-                 placeholder="Поиск: песни, события, сет-листы, участники">
-          <kbd class="tb-kbd">Ctrl K</kbd>
-          <button class="tb-clear" type="button" id="searchClear" data-act="search-clear" aria-label="Очистить поиск"></button>
-          <div class="search-drop" id="searchDrop" role="listbox" aria-label="Результаты поиска"></div>
-        </div>
-
-        <div class="tb-tools">
-          <div class="sync-status" id="syncStatus" role="status" aria-live="polite" hidden></div>
-        </div>
-      </div>
-      <div class="netbar" id="netBar" role="status" hidden></div>
-    </div>
+    <div class="netbar" id="netBar" role="status" hidden></div>
 
     <div class="page-head" id="pageHead"></div>
     <div class="content" id="view" tabindex="-1"></div>
