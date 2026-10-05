@@ -4226,33 +4226,14 @@ a:not(.btn):not(.bottom-nav a):hover{
   }
 }
 
-/* Songs toolbar: title and primary action flank the search field. */
-body[data-route="songs"] .page-head{display:none}
-.songs-toolbar{
-  display:grid;
-  grid-template-columns:minmax(110px,.7fr) minmax(300px,2fr) auto;
-  align-items:center;
-  gap:var(--s3);
-}
-.songs-toolbar-title{min-width:0}
-.songs-toolbar-title h1{margin:0;font-size:var(--fs-h2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.songs-toolbar-search{min-width:0;display:flex;align-items:center;gap:var(--s2)}
-.songs-toolbar-search .tb-search{min-width:0;flex:1 1 auto;width:auto}
-.songs-toolbar-search>.btn{flex:none}
-.songs-toolbar-add{justify-self:end;white-space:nowrap}
-@media(max-width:1100px) and (min-width:641px){
-  .songs-toolbar{grid-template-columns:auto minmax(0,1fr) auto;gap:var(--s2)}
-  .songs-toolbar-search{gap:6px}
-  .songs-toolbar-search .btn-lbl{display:none}
-  .songs-toolbar-add span{white-space:nowrap}
+
+/* Songs: keep the original page header, with title/action above the search. */
+@media(min-width:641px){
+  body[data-route="songs"] .page-head{display:flex;}
+  body[data-route="songs"] .page-head h1{margin:0;}
+  body[data-route="songs"] .page-head .ph-acts{margin-left:auto;}
 }
 @media(max-width:640px){
-  .songs-toolbar{grid-template-columns:minmax(0,1fr) auto;gap:var(--s2)}
-  .songs-toolbar-title h1{font-size:var(--fs-h3,var(--fs-h2))}
-  .songs-toolbar-search{grid-column:1/-1;grid-row:2}
-  .songs-toolbar-add{grid-column:2;grid-row:1}
-  .songs-toolbar-search .tb-search{width:100%;flex:1 1 auto}
-  .songs-toolbar-search>.btn{height:var(--tap);width:var(--tap);padding:0}
-  .songs-toolbar-search>.btn .btn-lbl{display:none}
-  .songs-toolbar-add{padding-inline:var(--s3)}
+  body[data-route="songs"] .page-head{display:flex;align-items:center;}
+  body[data-route="songs"] .page-head .ph-acts{margin-left:auto;}
 }
