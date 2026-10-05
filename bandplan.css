@@ -1039,12 +1039,12 @@ body[data-route="setlist"] .page-head{background:var(--bg);backdrop-filter:none;
 .settings-shell{display:block}
 .settings-tabs{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;gap:0;width:100%;padding:0;margin:0 0 var(--s6);overflow:visible;background:transparent;border:0;border-bottom:1px solid var(--border);box-shadow:none}
 .settings-tabs::-webkit-scrollbar{display:none}
-.settings-tab{position:relative;appearance:none;border:0;background:transparent;color:var(--muted);min-width:0;min-height:48px;height:48px;padding:0 10px;border-radius:0;display:flex;align-items:center;justify-content:center;gap:0;font:inherit;font-size:12px;font-weight:var(--fw-semi);line-height:1;white-space:nowrap;cursor:pointer;transition:color var(--t-btn),background var(--t-btn)}
+.settings-tab{position:relative;appearance:none;border:1px solid var(--border);background:var(--surf-2);color:var(--muted);min-width:0;min-height:42px;height:42px;padding:0 16px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;gap:0;font:inherit;font-size:12px;font-weight:var(--fw-semi);line-height:1;white-space:nowrap;cursor:pointer;box-shadow:-2px -2px 5px var(--clay-light),3px 3px 7px var(--clay-dark);transition:color var(--t-btn),background var(--t-btn),border-color var(--t-btn),box-shadow var(--t-btn),transform var(--t-btn)}
 .settings-tab::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:2px;border-radius:2px;background:transparent;transition:background var(--t-btn),transform var(--t-btn)}
-.settings-tab:hover{color:var(--text);background:var(--accent-soft)}
-.settings-tab.on{color:var(--accent);background:transparent;box-shadow:none}
+.settings-tab:hover{color:var(--text);background:var(--surf-3);border-color:var(--accent-ring);transform:translateY(-1px)}
+.settings-tab.on{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-ring);box-shadow:-2px -2px 5px var(--clay-light),3px 3px 7px var(--clay-dark),0 0 0 2px var(--accent-soft)}
 .settings-tab.on::after{background:var(--accent)}
-.settings-tab:active{transform:none}
+.settings-tab:active{transform:translateY(0)}
 .settings-tab svg{display:none!important}
 .settings-tab-content{min-width:0}
 .settings-shell[data-settings-tab="profile"] [data-settings-panel]:not([data-settings-panel="profile"]),
