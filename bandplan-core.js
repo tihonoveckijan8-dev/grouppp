@@ -2165,7 +2165,7 @@ function readEventForm(id) {
     setlistId: $('#f_sl', w).value, personalStatus: my ? my.getAttribute('data-v') : '',
     participation: cloneValue(old && old.participation || {}),
     participationUpdatedAt: cloneValue(old && old.participationUpdatedAt || {}),
-    memberIds: $('#f_members .chip.on', w).map(b => b.getAttribute('data-m')), except: (old && old.except) || []  };
+    memberIds: Array.prototype.map.call($('#f_members .chip.on', w), b => b.getAttribute('data-m')), except: (old && old.except) || []  };
 }
 let dynDraft = null;
 function songModal(id) {
