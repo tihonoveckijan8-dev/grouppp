@@ -2092,7 +2092,7 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     background:var(--bp-blue);
     color:var(--on-accent);
     border-color:var(--bp-blue);
-    box-shadow:0 3px 10px rgba(49,85,217,.18);
+    box-shadow:var(--shadow-accent);
   }
   .bp-auth-gate{
     background:var(--bp-canvas);
