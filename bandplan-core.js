@@ -1057,6 +1057,11 @@ function openModal(o) {
   ov.classList.toggle('is-sheet', !!o.sheet);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
+  if (isFullscreen && modalRoot) {
+    // Editor dialogs are true full-screen surfaces, independent of theme/mobile modal rules.
+    ov.style.cssText += ';position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;padding:0!important;margin:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;';
+    modalRoot.style.cssText += ';position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;';
+  }
   document.body.style.overflow = 'hidden';
   if (!modalHistoryPushed) {
     try { history.pushState({__bandplanModal:true}, '', location.href); modalHistoryPushed = true; } catch (_) {}
