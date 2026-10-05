@@ -3015,6 +3015,107 @@ svg{flex:0 0 auto}
 }
 
 
+/* ═══ PREMIUM CLAY / CONTROL SAFETY — 2026-10-05 ═══
+   Keep the interface tactile without glass/neon effects. Every interactive
+   control owns its text/icon bounds and uses the same semantic accent. */
+:root{
+  --clay-light:rgba(255,255,255,.72);
+  --clay-dark:rgba(15,23,42,.12);
+}
+[data-theme="dark"],[data-theme="amoled"]{
+  --clay-light:rgba(255,255,255,.045);
+  --clay-dark:rgba(0,0,0,.42);
+}
+
+/* Tactile surfaces: restrained claymorphism, never translucent/glassy. */
+.card,.song-card,.event-card,.settings-card,.member-card,.setlist-card{
+  background:var(--surf-2);
+  border-color:var(--border);
+  box-shadow:
+    -5px -5px 12px var(--clay-light),
+    6px 7px 16px var(--clay-dark),
+    var(--shadow-1);
+}
+[data-theme="dark"] .card,[data-theme="dark"] .song-card,[data-theme="dark"] .event-card,
+[data-theme="dark"] .settings-card,[data-theme="dark"] .member-card,[data-theme="dark"] .setlist-card,
+[data-theme="amoled"] .card,[data-theme="amoled"] .song-card,[data-theme="amoled"] .event-card,
+[data-theme="amoled"] .settings-card,[data-theme="amoled"] .member-card,[data-theme="amoled"] .setlist-card{
+  box-shadow:
+    -4px -4px 10px var(--clay-light),
+    7px 8px 18px var(--clay-dark),
+    var(--shadow-1);
+}
+
+/* Icons and labels can never push outside a control on narrow screens. */
+.btn,.btn-icon,.settings-tab,.toolbar>.btn,.song-acts .btn,.profile-actions .btn{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.btn>svg,.btn>img,.btn-icon>svg,.settings-tab>svg{
+  flex:0 0 auto;
+  width:auto;
+  max-width:20px;
+  max-height:20px;
+}
+.btn>span,.btn .btn-lbl,.btn .btn-txt{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.btn-icon{
+  flex:0 0 var(--tap);
+}
+.btn-icon>svg{margin:auto}
+
+/* Form controls keep readable contrast in every theme. */
+input,select,textarea,.select,.field-control,.bare-input{
+  color:var(--text);
+  background:var(--surf-2);
+  border-color:var(--control-border,var(--border-2));
+}
+input::placeholder,textarea::placeholder,.bare-input::placeholder{
+  color:var(--muted);
+  opacity:1;
+}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea,
+[data-theme="amoled"] input,[data-theme="amoled"] select,[data-theme="amoled"] textarea{
+  background:var(--surf-2);
+  color:var(--text);
+}
+
+/* Compact phones: controls remain usable instead of colliding with adjacent text. */
+@media(max-width:430px){
+  .btn{padding-inline:12px;gap:7px}
+  .btn-icon{padding:0}
+  .btn>svg{max-width:18px;max-height:18px}
+  .ph-acts,.event-actions,.profile-actions,.account-settings-row{
+    min-width:0;
+    max-width:100%;
+  }
+  .ph-acts>.btn,.event-actions>.btn,.profile-actions>.btn,.account-settings-row .btn{
+    min-width:0;
+    max-width:100%;
+  }
+}
+@media(max-width:360px){
+  .btn{font-size:12px;padding-inline:10px}
+  .settings-tab{font-size:10.5px}
+}
+
+/* Prevent accidental horizontal overflow from long names, codes or metadata. */
+.page-head,.page-head>*,.card-h,.card-h>*,.event-card>*,
+.member-card>*,.setlist-card>*,.song-card>*{
+  min-width:0;
+  max-width:100%;
+}
+.page-head h1,.card-h h2,.card-h h3,.event-card .ev-name,.event-card .ev-title,
+.member-card .member-name,.setlist-card .setlist-name{
+  overflow-wrap:anywhere;
+}
+
 /* ═══ UI SAFETY PASS — contrast, wrapping and viewport containment ═══ */
 .song-top>*,.song-meta>*,.song-artist,.song-name,.modal-head>*,.modal-foot>*,.bottom-nav a{min-width:0}
 .song-artist,.song-name,.modal-head h3,.modal-head .sub{overflow-wrap:anywhere;word-break:normal}
