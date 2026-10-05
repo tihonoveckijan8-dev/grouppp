@@ -2860,25 +2860,92 @@ document.addEventListener('click', function (e) {
     case 'event-info': stop(); eventInfoModal(id, el.getAttribute('data-date') || ''); break;
     case 'event-edit': stop(); eventModal(id); break;
     case 'event-save': {
-      stop(); btnLoading(el);
-      const data = readEventForm(id); if (!data) break;
-      const personalStatus = data.personalStatus || '';
-      delete data.personalStatus;
-      if (id) { const i = state.events.findIndex(x => x.id === id); if (i >= 0) state.events[i] = data; } else state.events.push(data);
-      try { setMyParticipation(data, personalStatus, new Date().toISOString()); }
-      catch (participationError) { console.warn('BandPlan event participation write deferred:', participationError); }
-      ui.selDate = data.date; ui.month = new Date(data.date + 'T00:00:00');
-      modalDirty = false;
-      hardClose(modalRoot);
-      save();
-      try { render(); }
-      catch (renderError) {
-        console.error('BandPlan event saved; view refresh failed:', renderError);
-        const view = $('#view');
-        if (view) view.innerHTML = stateHTML('err', 'Событие сохранено', 'Не удалось обновить экран. Откройте расписание повторно — данные уже сохранены.', '<button class="btn btn-primary" type="button" data-act="cal-today">Открыть расписание</button>');
-        document.body.style.overflow = '';
+      stop();
+      const button = el;
+      if (button) button.disabled = true;
+      btnLoading(button);
+      const data = readEventForm(id);
+      if (!data) {
+        if (button) button.disabled = false;
+        break;
       }
-      toast(id ? 'Изменения события сохранены' : 'Событие добавлено в расписание', 'ok');
+      /*
+        Event creation/editing must be durable immediately. Local save() still
+        keeps the workspace usable offline, but when Supabase is available we
+        wait for saveNow() before reporting success. This prevents the old
+        behaviour where the modal closed and showed "saved" while the event
+        was only in localStorage or the delayed queue.
+      */
+      (async () => {
+        const personalStatus = data.personalStatus || '';
+        delete data.personalStatus;
+        const previous = id ? state.events.find(x => x.id === id) : null;
+        if (id) {
+          const index = state.events.findIndex(x => x.id === id);
+          if (index >= 0) state.events[index] = data;
+        } else {
+          state.events.push(data);
+        }
+        try {
+          setMyParticipation(data, personalStatus, new Date().toISOString());
+        } catch (participationError) {
+          console.warn('BandPlan event participation write deferred:', participationError);
+        }
+
+        ui.selDate = data.date;
+        ui.month = new Date(data.date + 'T00:00:00');
+        modalDirty = false;
+        save();
+
+        let cloudSaved = false;
+        try {
+          if (window.BandPlanCloud?.saveNow && window.BandPlanCloud?.user?.() && navigator.onLine !== false) {
+            await window.BandPlanCloud.saveNow(state);
+            cloudSaved = true;
+          }
+        } catch (cloudError) {
+          console.error('BandPlan event cloud save failed:', cloudError);
+          window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
+            detail: cloudError?.message || 'Не удалось сохранить событие в базе данных.'
+          }));
+        }
+
+        hardClose(modalRoot);
+        try {
+          render();
+        } catch (renderError) {
+          console.error('BandPlan event saved; view refresh failed:', renderError);
+          const view = $('#view');
+          if (view) view.innerHTML = stateHTML(
+            'err',
+            cloudSaved ? 'Событие сохранено' : 'Событие сохранено локально',
+            cloudSaved
+              ? 'Данные сохранены в базе данных.'
+              : 'Данные сохранены на устройстве и будут отправлены в базу данных при восстановлении соединения.',
+            '<button class="btn btn-primary" type="button" data-act="cal-today">Открыть расписание</button>'
+          );
+          document.body.style.overflow = '';
+        }
+        if (cloudSaved) {
+          toast(id ? 'Изменения события сохранены' : 'Событие сохранено', 'ok');
+        } else {
+          toast(id ? 'Изменения сохранены на устройстве' : 'Событие сохранено на устройстве; синхронизация ожидает сеть', 'warn', 4200);
+        }
+        if (button) button.disabled = false;
+      })().catch(error => {
+        console.error('BandPlan event save failed:', error);
+        if (id && previous) {
+          const index = state.events.findIndex(x => x.id === id);
+          if (index >= 0) state.events[index] = previous;
+        } else if (!id) {
+          state.events = state.events.filter(x => x.id !== data.id);
+        }
+        save();
+        hardClose(modalRoot);
+        render();
+        toast('Не удалось сохранить событие: ' + (error?.message || 'неизвестная ошибка'), 'err', 5000);
+        if (button) button.disabled = false;
+      });
       break;
     }
     case 'event-del': {
