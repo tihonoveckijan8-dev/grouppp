@@ -1695,7 +1695,6 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
     .sidebar{border-right:1px solid var(--border)}
     .card,.song-card,.ev-row,.sl-item,.memb-row,.modal-card{border-color:var(--border-2)}
   }
-  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
