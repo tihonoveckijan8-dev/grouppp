@@ -3020,3 +3020,103 @@ svg{flex:0 0 auto}
   :focus-visible{outline:2px solid Highlight;outline-offset:3px}
   .btn,.tb-search,.avatar-btn,.modal-card,.song-card,.bottom-nav{forced-color-adjust:auto}
 }
+/* ═══ EVENT SEARCH / FILTER UX POLISH — 2026-10-05 ═══ */
+
+/* Keep the old global top-bar implementation inert: navigation/search now live in-page. */
+.topbar,
+#topbar,
+#searchWrap,
+#searchDrop{
+  display:none!important;
+}
+
+/* Event search: give the query the dominant width and keep the filter action stable. */
+.toolbar:has(#evQ){
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:stretch;
+  gap:10px;
+  width:100%;
+}
+.toolbar:has(#evQ) .tb-search{
+  width:100%;
+  min-width:0;
+  max-width:none;
+  flex:1 1 auto;
+}
+.toolbar:has(#evQ) .tb-search .bare-input{
+  min-width:0;
+  width:100%;
+  padding-inline:4px;
+}
+.toolbar:has(#evQ)> .btn{
+  min-width:132px;
+  flex:0 0 auto;
+}
+
+/* Filters should feel like a real full-width working surface, not a clipped half-sheet. */
+.overlay.is-sheet:has(.modal-sheet) .modal-sheet{
+  width:100%;
+  max-width:none;
+  height:min(78dvh,760px);
+  max-height:78dvh;
+  min-height:0;
+}
+.overlay.is-sheet .modal-sheet .modal-body{
+  padding-bottom:4px;
+}
+.overlay.is-sheet .modal-sheet .modal-body .row{
+  min-width:0;
+  flex-wrap:wrap;
+}
+.overlay.is-sheet .modal-sheet .modal-body .chip{
+  max-width:100%;
+  min-width:0;
+  white-space:normal;
+  text-align:left;
+}
+.overlay.is-sheet .modal-sheet .modal-foot{
+  padding-top:12px;
+}
+@media(min-width:900px){
+  .overlay.is-sheet .modal-sheet{
+    width:min(920px,calc(100vw - 32px));
+    max-width:920px;
+    height:min(78dvh,720px);
+    max-height:78dvh;
+    border:1px solid var(--border);
+    border-radius:var(--r-24);
+    margin:0 auto;
+  }
+  .overlay.is-sheet{
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+}
+@media(max-width:640px){
+  .toolbar:has(#evQ){
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+  }
+  .toolbar:has(#evQ)> .btn{
+    min-width:44px;
+    width:44px;
+    padding-inline:0;
+  }
+  .toolbar:has(#evQ)> .btn .btn-lbl{
+    display:none;
+  }
+  .overlay.is-sheet .modal-sheet{
+    width:100%;
+    max-width:none;
+    height:min(82dvh,760px);
+    max-height:82dvh;
+    border-radius:22px 22px 0 0;
+  }
+}
+@media(max-width:380px){
+  .toolbar:has(#evQ){
+    grid-template-columns:minmax(0,1fr) 44px;
+  }
+}
