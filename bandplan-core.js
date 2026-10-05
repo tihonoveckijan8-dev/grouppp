@@ -1649,10 +1649,12 @@ function vSongs() {
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
-      '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + esc(s.key || '—') + '</div>' +
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div>' +
-      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button></div>' +
+      '<div class="song-open-wrap">' +
+      '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
+      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button>' +
+      '</div></div>' +
       '<div class="song-meta">' +
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
       (s.duration ? '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(s.duration) + '</span>' : '') +
