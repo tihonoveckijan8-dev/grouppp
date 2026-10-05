@@ -1787,14 +1787,14 @@ function vSetlists() {
   if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
     'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
     '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
-  let h = '<div class="setlists-head-row"><h1>Сет-листы</h1><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button></div>' +
+  let h = '<div class="setlists-shell"><div class="setlists-head-row"><h1>Сет-листы</h1><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button></div>' +
     '<div class="toolbar setlists-search-row"><div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
     (ui.setlistQuery ? '<button class="icon-btn" type="button" data-act="setlist-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') +
     '</div></div>';
   const list = filteredSetlists();
-  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div>';
+  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div></div>';
   h += '<div class="collection-grid collection-list setlists-list">';
   list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
