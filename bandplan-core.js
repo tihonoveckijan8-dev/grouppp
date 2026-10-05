@@ -1989,7 +1989,6 @@ function bindSettings() {
   const on = (id, ev, fn) => { const e = $('#' + id); if (e) e.addEventListener(ev, fn); };
   on('setName', 'input', debounce(e => { state.profile.name = e.target.value; save(); buildChrome(); }));
   on('setBand', 'input', debounce(e => { state.profile.bandName = e.target.value || 'Моя группа'; save(); buildChrome(); }));
-  on('setBandDesc', 'input', debounce(e => { state.profile.bandDesc = e.target.value; save(); }));
   on('lsRange', 'input', e => { state.settings.lyricsSize = +e.target.value; $('#lsVal').textContent = e.target.value + 'px'; document.documentElement.style.setProperty('--lsize', e.target.value + 'px'); save(); });
   on('scRange', 'input', e => { state.settings.sceneSize = +e.target.value; $('#scValS').textContent = e.target.value + 'px'; save(); });
   on('spRange', 'input', e => { state.settings.sceneSpeed = +e.target.value; $('#spValS').textContent = e.target.value + ' px/с'; scene.speed = +e.target.value; save(); });
