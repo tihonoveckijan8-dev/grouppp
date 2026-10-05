@@ -24,7 +24,7 @@ try{
   var bpThemeIds=['light','dark','amoled'];
   var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
   var bpThemeColor={light:'#F4F6F8',dark:'#14161C',amoled:'#000000'}[bpTheme]||'#F4F6F8';
-  var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accentApplied||'')?(bpBoot.accentApplied):(bpBoot&&/^#[0-9a-fA-F]{6}$/.test(bpBoot.accent||'')?bpBoot.accent:'#2547D0');
+  var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accentApplied||'')?(bpBoot.accentApplied):(bpBoot&&/^#[0-9a-fA-F]{6}$/.test(bpBoot.accent||'')?bpBoot.accent:'#1E46E8');
   function bpLum(hex){
     var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});
     return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
