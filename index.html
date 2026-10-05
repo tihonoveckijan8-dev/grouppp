@@ -10,6 +10,13 @@
   window.__bandplanSupabaseFallback = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js';
 </script>
 <meta name="theme-color" content="#14161C">
+<script id="bandplan-early-sw">
+try{
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function(){});
+  }
+}catch(e){}
+</script>
 <script id="bandplan-boot-init">
 try{
   var bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpDoc=document.documentElement;
