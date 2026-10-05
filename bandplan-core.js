@@ -1250,7 +1250,7 @@ function render() {
     actionBarHTML = '';
   } else if (r.name === 'setlist') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/setlists">Сет-листы</a>' + ic('right', 12) + '<span class="nowrap">' + esc((slById(r.id) || {}).name || '') + '</span></nav>';
-    acts = '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + esc(r.id) + '">' + ic('print', 17) + 'Печать</button><button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
+    acts = '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
     actionBarHTML = '';
   } else if (r.name === 'settings') acts = '<button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 17) + 'Скачать копию</button>';
   $('#pageHead').innerHTML = '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
@@ -1743,7 +1743,7 @@ function vSetlists() {
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
       '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 15) + '<span class="btn-txt">Удалить</span></button>' +
-      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article';
+      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article>';
   });
   return h + '</div>';
 }
