@@ -4471,21 +4471,22 @@ body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear:hover{
 body[data-route="songs"] .songs-search-row .tb-search{
   width:100%;
 }
+/* Setlist search must match the setlist card width exactly. */
 body[data-route="setlists"] .setlists-search-row{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
-  gap:var(--s4);
-  align-items:center;
+  display:block;
   width:100%;
   max-width:100%;
   margin-left:0;
   margin-right:0;
+  padding:0;
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
-  grid-column:1;
-  width:calc(100% + 40px);
-  max-width:none;
+  display:flex;
+  width:100%;
+  max-width:100%;
   min-width:0;
+  box-sizing:border-box;
+  margin:0;
 }
 @media(max-width:640px){
   body[data-route="songs"] .songs-search-row .tb-search,
@@ -4495,11 +4496,10 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
     padding-left:13px;
   }
   body[data-route="setlists"] .setlists-search-row{
-    grid-template-columns:minmax(0,1fr);
-    gap:0;
+    width:100%;
   }
   body[data-route="setlists"] .setlists-search-row .tb-search{
-    grid-column:1;
     width:100%;
+    max-width:100%;
   }
 }
