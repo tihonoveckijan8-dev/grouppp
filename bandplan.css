@@ -2222,3 +2222,105 @@ html,body{min-width:0;overflow-x:clip}body{background:var(--bg);color:var(--text
 @media(max-width:390px){
   .global-searchbar{padding-left:9px;padding-right:9px}
 }
+
+
+/* ──────────────────────────────────────────────────────────────────────
+   BandPlan responsive hardening — visual layer only.
+   Keeps existing selectors/contracts; prevents clipping and action overflow.
+   ────────────────────────────────────────────────────────────────────── */
+.global-searchbar,
+.global-searchbar .tb-inner,
+.global-searchbar .tb-search,
+.global-searchbar .tb-tools{min-width:0}
+.global-searchbar .tb-inner{width:min(100%,1180px)}
+.global-searchbar .tb-search{overflow:hidden}
+.global-searchbar .tb-search input{min-width:0;width:100%}
+
+.btn,
+.icon-btn,
+.chip,
+.settings-tab,
+.seg button{min-width:0}
+.btn{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.btn>svg,.btn>i,.btn .icon,.chip>svg,.chip>i{flex:0 0 auto}
+.btn span,.chip span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{overflow:hidden}
+.card,.card-h,.page-head,.ph-acts,.hero,.hero-actions,.row,.grid,.split,.split2,
+.profile-actions,.data-actions,.data-action-buttons,.data-action-group,.member-actions,
+.memb-row,.song-card,.ev-row,.setlist-item,.settings-card,.field,.field-row{min-width:0}
+.page-head h1,.card h2,.card h3,.hero h1,.song-title,.ev-title,.setlist-title,
+.memb-row .grow,.member-status-wrap{min-width:0;overflow-wrap:anywhere}
+.ph-acts,.hero-actions,.profile-actions,.data-action-buttons{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.ph-acts .btn,.hero-actions .btn,.profile-actions .btn,.data-action-buttons .btn{min-width:0}
+input,textarea,select{max-width:100%;min-width:0}
+textarea{overflow:auto}
+svg{flex:0 0 auto}
+.table-wrap,.data-table-wrap,.song-table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+[data-theme="glass"] .global-searchbar .tb-inner,
+[data-theme="glass"] .global-searchbar .netbar{
+  background:var(--surf-1);
+  border-color:var(--border);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+}
+@media(max-width:900px){
+  .content{overflow-x:hidden}
+  .page-head{padding-left:0;padding-right:0}
+  .ph-acts,.hero-actions,.profile-actions,.data-action-buttons{width:100%}
+  .ph-acts .btn,.hero-actions .btn,.profile-actions .btn,.data-action-buttons .btn{flex:1 1 160px}
+  .card{padding:var(--s5)}
+  .cal-grid{min-width:0}
+}
+@media(max-width:640px){
+  .global-searchbar .tb-inner{width:100%}
+  .global-searchbar .tb-search{width:100%}
+  .global-searchbar .tb-inner{padding-left:0;padding-right:0}
+  .page-head{display:flex;flex-direction:column}
+  .page-head h1{max-width:100%;font-size:26px}
+  .ph-acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ph-acts .btn,.hero-actions .btn,.profile-actions .btn,.data-action-buttons .btn{
+    width:100%;flex:1 1 auto;
+  }
+  .hero-actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  .profile-actions,.data-action-buttons{display:grid;grid-template-columns:minmax(0,1fr)}
+  .card{border-radius:18px;padding:16px}
+  .card-h{gap:10px}
+  .card-h>*{min-width:0}
+  .settings-tabs{margin-left:0;margin-right:0}
+  .settings-tab{padding-left:13px;padding-right:13px}
+  .cal-head{align-items:stretch}
+  .cal-cell{min-height:58px}
+  .cal-cell .cal-event{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .btn,.icon-btn{touch-action:manipulation}
+}
+@media(max-width:430px){
+  .content{padding-left:10px;padding-right:10px}
+  .global-searchbar{padding-left:10px;padding-right:10px}
+  .ph-acts{grid-template-columns:minmax(0,1fr)}
+  .page-head h1{font-size:24px}
+  .hero h1{font-size:23px}
+  .btn{padding-left:14px;padding-right:14px}
+  .card{padding:14px}
+  .settings-tab{padding-left:12px;padding-right:12px}
+}
+@media(max-width:375px){
+  .content{padding-left:8px;padding-right:8px}
+  .global-searchbar{padding-left:8px;padding-right:8px}
+  .page-head h1{font-size:22px}
+  .hero h1{font-size:22px}
+  .btn{font-size:13px}
+  .settings-tab{font-size:12px;padding-left:10px;padding-right:10px}
+  .card{padding:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .btn,.icon-btn,.chip,.card-interactive,.cal-cell{transition:none!important}
+  .rise,.search-drop.open{animation:none!important}
+}
+@media(prefers-reduced-transparency:reduce){
+  [data-theme="glass"] .global-searchbar .tb-inner,
+  [data-theme="glass"] .global-searchbar .netbar{
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+    background:var(--surf-4);
+  }
+}
