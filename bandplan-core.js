@@ -3516,6 +3516,10 @@ function wireStickyHeader() {
 }
 /* ═══ 26. INIT ═══ */
 function normalizeCloudState(d) {
+  // Cloud hydration/realtime can replace the event collection without going
+  // through save(). Invalidate the recurrence cache first, otherwise the
+  // calendar may keep rendering deleted events from a previous calculation.
+  if (typeof expandCache !== 'undefined' && expandCache && typeof expandCache.clear === 'function') expandCache.clear();
   const base = defaults(), x = d && typeof d === 'object' ? d : {};
   // Display mode is a local UI preference. Preserve it when shared cloud
   // state refreshes, while still accepting it from cloud if no local choice exists.
