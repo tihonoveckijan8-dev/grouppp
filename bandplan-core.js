@@ -1266,7 +1266,8 @@ function render() {
     acts = '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
     actionBarHTML = '';
   } else if (r.name === 'settings') acts = '<button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 17) + 'Скачать копию</button>';
-  $('#pageHead').innerHTML = '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
+  $('#pageHead').innerHTML = r.name === 'songs' ? '' :
+    '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
     (acts ? '<div class="ph-acts">' + acts + '</div>' : '');
   document.body.setAttribute('data-actionbar', actionBarHTML ? '1' : '0');
 
