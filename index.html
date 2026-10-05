@@ -124,7 +124,7 @@ try{
 
   <!-- ══ MAIN ══ -->
   <main class="main">
-    <header class="topbar" id="topbar">
+    <div class="global-searchbar" id="globalSearchbar">
       <div class="tb-inner">
         <div class="tb-search" id="searchWrap">
           <span class="tb-search-ic" id="searchIco" aria-hidden="true"></span>
@@ -139,14 +139,10 @@ try{
 
         <div class="tb-tools">
           <div class="sync-status" id="syncStatus" role="status" aria-live="polite" hidden></div>
-          <button class="icon-btn" type="button" data-act="theme-toggle" id="tbTheme" aria-label="Переключить тему"></button>
-          <button class="icon-btn" type="button" data-act="nav" data-to="settings" id="tbCust" aria-label="Оформление и настройки"></button>
-          <button class="avatar-btn" type="button" id="tbAvatar" data-act="nav" data-to="settings" aria-label="Профиль и состав группы"></button>
-          <button class="icon-btn" type="button" data-act="account-logout" aria-label="Выйти из аккаунта" title="Выйти из аккаунта">↪</button>
         </div>
       </div>
       <div class="netbar" id="netBar" role="status" hidden></div>
-    </header>
+    </div>
 
     <div class="page-head" id="pageHead"></div>
     <div class="content" id="view" tabindex="-1"></div>
