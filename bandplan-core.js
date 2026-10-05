@@ -1617,7 +1617,7 @@ function vSongs() {
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
       '<button class="btn btn-primary btn-sm song-open" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article';
+      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
   });
   return h + '</div>';
 }
@@ -3331,7 +3331,8 @@ document.addEventListener('keydown', function (e) {
   }
   if (e.key === 'Escape') {
     if (modalOn) { e.preventDefault(); closeModal(); return; }
-    if ($('#searchDrop').classList.contains('open')) { closeSearch(); return; }
+    const searchDrop = $('#searchDrop');
+    if (searchDrop && searchDrop.classList.contains('open')) { closeSearch(); return; }
   }
   if (typing || modalOn) return;
   const r = parseHash();
