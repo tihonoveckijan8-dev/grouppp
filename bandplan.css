@@ -3900,3 +3900,120 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
   .ev-row{padding:10px}
   .ev-date{width:42px;min-width:42px}
 }
+
+/* MODAL / SEARCH MOBILE FINAL PASS — 2026-10-05 */
+.overlay.is-fullscreen .modal-card.modal-fullscreen{
+  display:flex!important;
+  flex-direction:column!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  padding:0!important;
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-head{
+  flex:0 0 auto;
+  min-width:0;
+  margin:0;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));
+  border-bottom:1px solid var(--border);
+  background:var(--surf-4);
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-head>div{
+  min-width:0;
+  overflow:hidden;
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-head h3{
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-body{
+  flex:1 1 auto;
+  min-height:0;
+  min-width:0;
+  width:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:var(--s5) max(16px,env(safe-area-inset-right,0px)) calc(var(--s6) + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-foot{
+  flex:0 0 auto;
+  min-width:0;
+  margin:0;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:var(--surf-4);
+  border-top:1px solid var(--border);
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .modal-foot .btn{
+  min-width:0;
+  min-height:44px;
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen .row,
+.overlay.is-fullscreen .modal-card.modal-fullscreen .split,
+.overlay.is-fullscreen .modal-card.modal-fullscreen .split2,
+.overlay.is-fullscreen .modal-card.modal-fullscreen .f2,
+.overlay.is-fullscreen .modal-card.modal-fullscreen .f3{
+  min-width:0;
+  max-width:100%;
+}
+.overlay.is-fullscreen .modal-card.modal-fullscreen input,
+.overlay.is-fullscreen .modal-card.modal-fullscreen select,
+.overlay.is-fullscreen .modal-card.modal-fullscreen textarea{
+  min-width:0;
+  max-width:100%;
+}
+@media(max-width:640px){
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-head{
+    padding-top:calc(10px + env(safe-area-inset-top,0px));
+    padding-bottom:10px;
+  }
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-body{
+    padding-top:var(--s4);
+    padding-left:max(12px,env(safe-area-inset-left,0px));
+    padding-right:max(12px,env(safe-area-inset-right,0px));
+  }
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-foot{
+    padding-left:max(12px,env(safe-area-inset-left,0px));
+    padding-right:max(12px,env(safe-area-inset-right,0px));
+  }
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-foot .btn{
+    width:100%;
+  }
+  .overlay.is-sheet .modal-sheet{
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .overlay.is-sheet .modal-sheet .modal-head{
+    flex:0 0 auto;
+    margin-bottom:0;
+  }
+  .overlay.is-sheet .modal-sheet .modal-body{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+  }
+  .overlay.is-sheet .modal-sheet .modal-foot{
+    flex:0 0 auto;
+    margin-top:0;
+  }
+  .filter-pop{
+    min-width:0;
+    max-width:calc(100vw - 16px);
+    overflow-x:hidden;
+  }
+}
+@media(max-width:375px){
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-body{
+    padding-left:10px;
+    padding-right:10px;
+  }
+  .overlay.is-fullscreen .modal-card.modal-fullscreen .modal-foot{
+    padding-left:10px;
+    padding-right:10px;
+  }
+}
