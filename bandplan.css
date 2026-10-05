@@ -2720,3 +2720,47 @@ svg{flex:0 0 auto}
   .settings-shell .settings-one-line>button{font-size:9.5px!important;padding-left:2px!important;padding-right:2px!important;gap:3px!important}
   .settings-shell .settings-one-line>button svg{width:12px;height:12px;flex-basis:12px}
 }
+
+
+/* PROFILE — remove decorative/background layers behind active controls */
+.settings-shell .settings-card[data-settings-panel="profile"]{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.settings-shell .settings-card[data-settings-panel="profile"]>.card-h{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding-left:0!important;
+  padding-right:0!important;
+}
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-grid,
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main,
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding-left:0!important;
+  padding-right:0!important;
+}
+.settings-shell .settings-card[data-settings-panel="profile"] .profile-role-identity{
+  background:transparent!important;
+}
+@media(max-width:760px){
+  .settings-shell .settings-card[data-settings-panel="profile"]{
+    padding:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+}
