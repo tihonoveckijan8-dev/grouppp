@@ -4293,13 +4293,21 @@ body[data-route="songs"] .songs-search-row > .btn{
   }
 }
 
-/* Setlists: mirror the songs page header/search geometry. */
-body[data-route="setlists"] .setlists-head-row,
-body[data-route="setlists"] .setlists-search-row{
+/* Setlists: header, search and cards share one exact width container. */
+body[data-route="setlists"] .setlists-shell{
   width:100%;
   max-width:var(--maxw);
   margin-left:auto;
   margin-right:auto;
+  min-width:0;
+}
+body[data-route="setlists"] .setlists-head-row,
+body[data-route="setlists"] .setlists-search-row,
+body[data-route="setlists"] .setlists-list{
+  width:100%;
+  max-width:none;
+  margin-left:0;
+  margin-right:0;
 }
 body[data-route="setlists"] .setlists-head-row{
   display:grid;
