@@ -1617,7 +1617,11 @@ function filteredSongs() {
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
 function vSongs() {
   const list = filteredSongs(), tags = allTags();
-  let h = '<div class="toolbar">' +
+  let h = '<div class="songs-head-row">' +
+    '<h1>Репертуар</h1>' +
+    '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить песню</button>' +
+  '</div>' +
+  '<div class="toolbar songs-search-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
