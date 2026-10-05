@@ -2682,3 +2682,47 @@ svg{flex:0 0 auto}
   .settings-inline-seg>button{flex:0 0 auto}
   .profile-role-avatar{width:44px;height:44px;flex-basis:44px}
 }
+
+
+/* ═══ FINAL SETTINGS POLISH — compact, no empty surfaces ═══ */
+.settings-shell{margin-top:0!important}
+.settings-tab-content{margin-top:0!important;padding-top:0!important}
+.settings-shell .settings-card{margin-top:0!important}
+.settings-shell .settings-card .card-h:empty,
+.settings-shell .settings-card .card-h> :empty,
+.settings-shell .settings-card .card-h>div:empty,
+.settings-shell .settings-card> :empty{display:none!important}
+
+/* Profile: do not stretch the role/account column into a blank card. */
+.profile-settings-side{grid-template-rows:auto auto!important;align-content:start!important;align-self:start!important}
+.profile-role-box{align-self:start!important;height:auto!important}
+.profile-role-identity{min-height:48px!important}
+.profile-role-avatar{width:44px!important;height:44px!important;flex-basis:44px!important;border-radius:14px!important;font-size:18px!important;font-weight:850!important;box-shadow:0 2px 8px var(--accent-soft-2)!important}
+.profile-role-option-icon{width:30px!important;height:30px!important;border-radius:9px!important;background:var(--accent-soft)!important;color:var(--accent)!important;display:grid!important;place-items:center!important}
+.profile-role-option-icon svg{width:17px!important;height:17px!important;stroke-width:2!important}
+.profile-role-option-check svg{width:16px!important;height:16px!important;stroke-width:2.2!important}
+.profile-roles-chevron svg{width:18px!important;height:18px!important;stroke-width:2.1!important}
+
+/* Theme / chord notation / notifications: always one compact row. */
+.settings-shell .settings-one-line{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;flex-wrap:nowrap!important;overflow:hidden!important;gap:4px!important;padding:3px!important;min-width:0!important;width:100%!important}
+.settings-shell .settings-one-line>button{min-width:0!important;width:100%!important;flex:1 1 0!important;padding:7px 5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;justify-content:center!important;font-size:clamp(10px,1.2vw,12px)!important}
+.settings-shell .settings-one-line>button svg{width:14px;height:14px;flex:0 0 14px}
+
+/* Accent color is a single dropdown instead of a grid of swatches. */
+.settings-shell .accent-dropdown{width:100%!important;max-width:none!important;z-index:20}
+.settings-shell .accent-dropdown summary{min-height:46px!important}
+.settings-shell .accent-dropdown-menu{z-index:50!important}
+
+/* Remove residual top spacing before settings content on every settings tab. */
+.settings-shell>.settings-tab-content{margin-top:0!important}
+
+@media(max-width:640px){
+  .settings-shell .settings-one-line{grid-template-columns:repeat(3,minmax(0,1fr))!important;overflow:hidden!important}
+  .settings-shell .settings-one-line>button{font-size:10.5px!important;padding-left:3px!important;padding-right:3px!important;gap:4px!important}
+  .settings-shell .settings-one-line>button svg{width:13px;height:13px;flex-basis:13px}
+  .profile-role-avatar{width:46px!important;height:46px!important;flex-basis:46px!important;font-size:19px!important}
+}
+@media(max-width:360px){
+  .settings-shell .settings-one-line>button{font-size:9.5px!important;padding-left:2px!important;padding-right:2px!important;gap:3px!important}
+  .settings-shell .settings-one-line>button svg{width:12px;height:12px;flex-basis:12px}
+}
