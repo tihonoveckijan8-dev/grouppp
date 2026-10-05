@@ -155,7 +155,7 @@ try {
   assert.equal(removedUi.glassTheme, false, 'Removed Liquid Glass theme is still mounted');
   assert.equal(removedUi.liquidGlassText, false, 'Liquid Glass text is still visible');
   const responsive = [];
-  for (const width of [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920, 2560]) {
+  for (const width of [320, 375, 390, 430, 768, 820, 900, 1024, 1100, 1200, 1280, 1366, 1440, 1536, 1600, 1920, 2560, 3440]) {
     await page.setViewportSize({width, height: 900});
     const metrics = await page.evaluate(() => ({
       width: innerWidth,

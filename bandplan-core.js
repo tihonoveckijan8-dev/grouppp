@@ -1305,6 +1305,32 @@ function render() {
   afterRender(r);
   scheduleOfflineSongSync(1400);
 }
+function renderViewOnly() {
+  expandCache.clear();
+  searchCorpus = null;
+  const r = parseHash(), v = $('#view');
+  if (!v) return;
+  try {
+    let html = '';
+    if (r.name === 'calendar') html = vCalendar();
+    else if (r.name === 'songs') html = vSongs();
+    else if (r.name === 'song') html = vSong(r.id);
+    else if (r.name === 'setlists') html = vSetlists();
+    else if (r.name === 'setlist') html = vSetlist(r.id);
+    else if (r.name === 'settings') html = vSettings();
+    else return;
+    v.innerHTML = html + (actionBarHTML || '');
+    v.setAttribute('aria-busy', 'false');
+    // Search/filter changes do not need to rebuild the global chrome or
+    // scroll the calendar time-grid back to "now".
+    if (r.name === 'setlist' && r.id) bindDnD(r.id);
+    if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
+    scheduleOfflineSongSync(1400);
+  } catch (err) {
+    console.warn('BandPlan partial view render failed:', err);
+    render();
+  }
+}
 function afterRender(r) {
   if (r.name === 'setlist' && r.id) bindDnD(r.id);
   if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
@@ -3285,7 +3311,7 @@ document.addEventListener('input', function (e) {
   const refocus = sel => { const n = $(sel); if (n) { n.focus(); try { n.setSelectionRange(n.value.length, n.value.length); } catch (err) { } } };
   const soft = (sel, fn) => {
     clearTimeout(t._d);
-    t._d = setTimeout(function () { const sc = $('#view').scrollTop; fn(); render(); refocus(sel); $('#view').scrollTop = sc; }, 220);
+    t._d = setTimeout(function () { const sc = $('#view').scrollTop; fn(); renderViewOnly(); refocus(sel); $('#view').scrollTop = sc; }, 220);
   };
   if (t.id === 'evQ') { ui.evQuery = t.value; soft('#evQ', () => { }); }
   if (t.id === 'songQ') { ui.songQuery = t.value; soft('#songQ', () => { }); }
