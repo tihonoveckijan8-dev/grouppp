@@ -4227,13 +4227,29 @@ a:not(.btn):not(.bottom-nav a):hover{
 }
 
 
-/* Songs: keep the original page header, with title/action above the search. */
-@media(min-width:641px){
-  body[data-route="songs"] .page-head{display:flex;}
-  body[data-route="songs"] .page-head h1{margin:0;}
-  body[data-route="songs"] .page-head .ph-acts{margin-left:auto;}
+/* Songs: align the header exactly with the search/filter row below:
+   title over the search start, add action over the filter end. */
+body[data-route="songs"] .page-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  gap:var(--s2);
+}
+body[data-route="songs"] .page-head > div:first-child{
+  min-width:0;
+}
+body[data-route="songs"] .page-head h1{
+  margin:0;
+}
+body[data-route="songs"] .page-head .ph-acts{
+  margin:0;
+  justify-self:end;
 }
 @media(max-width:640px){
-  body[data-route="songs"] .page-head{display:flex;align-items:center;}
-  body[data-route="songs"] .page-head .ph-acts{margin-left:auto;}
+  body[data-route="songs"] .page-head{
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+  body[data-route="songs"] .page-head .ph-acts{
+    justify-self:end;
+  }
 }
