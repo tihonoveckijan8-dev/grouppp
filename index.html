@@ -78,8 +78,9 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 .boot{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:hidden;background:var(--bb);color:var(--bt);padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));font:14px system-ui,sans-serif}
 .boot.is-leaving{opacity:0;transform:scale(1.02);pointer-events:none}
 .boot-core{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,3vmin,24px);text-align:center}
-.boot-mark{position:relative;width:clamp(72px,18vmin,128px);aspect-ratio:1;display:grid;place-items:center;border-radius:24px;background:#F8F9FB;color:#101828;font-weight:800;font-size:clamp(22px,5.5vmin,38px)}
-.boot-ring{position:absolute;inset:-13%;width:126%;height:126%;pointer-events:none}
+.boot-mark{position:relative;width:clamp(72px,18vmin,128px);aspect-ratio:1;display:grid;place-items:center;border-radius:24px;background:#F8F9FB;color:#101828;font-weight:800;font-size:clamp(22px,5.5vmin,38px);z-index:1}
+.boot-mark > span{position:relative;z-index:3}
+.boot-ring{position:absolute;inset:-13%;width:126%;height:126%;pointer-events:none;z-index:2;overflow:visible}
 .boot-ring circle{fill:none;stroke:#F1F2F6;stroke-width:2.5;stroke-linecap:round}
 .boot-ring .r0{opacity:.22}
 .boot-ring .r1{stroke-dasharray:72 220;animation:boot-spin 1.5s linear infinite;transform-origin:50% 50%}
