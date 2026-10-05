@@ -2869,23 +2869,26 @@ document.addEventListener('click', function (e) {
         if (button) button.disabled = false;
         break;
       }
-      const previous = id ? state.events.find(x => x.id === id) : null;
+
       /*
-        Event creation/editing must be durable immediately. Local save() still
-        keeps the workspace usable offline, but when Supabase is available we
-        wait for saveNow() before reporting success. This prevents the old
-        behaviour where the modal closed and showed "saved" while the event
-        was only in localStorage or the delayed queue.
+        Save the event immediately to the local account snapshot and let the
+        existing cloud queue send the same snapshot to Supabase in the
+        background. Do not await the network here: a slow/hanging Supabase
+        request must never leave the editor stuck in a loading state.
       */
-      (async () => {
-        const personalStatus = data.personalStatus || '';
-        delete data.personalStatus;
+      const previous = id ? state.events.find(x => x.id === id) : null;
+      const personalStatus = data.personalStatus || '';
+      delete data.personalStatus;
+
+      try {
         if (id) {
           const index = state.events.findIndex(x => x.id === id);
           if (index >= 0) state.events[index] = data;
+          else state.events.push(data);
         } else {
           state.events.push(data);
         }
+
         try {
           setMyParticipation(data, personalStatus, new Date().toISOString());
         } catch (participationError) {
@@ -2895,20 +2898,9 @@ document.addEventListener('click', function (e) {
         ui.selDate = data.date;
         ui.month = new Date(data.date + 'T00:00:00');
         modalDirty = false;
-        save();
 
-        let cloudSaved = false;
-        try {
-          if (window.BandPlanCloud?.saveNow && window.BandPlanCloud?.user?.() && navigator.onLine !== false) {
-            await window.BandPlanCloud.saveNow(state);
-            cloudSaved = true;
-          }
-        } catch (cloudError) {
-          console.error('BandPlan event cloud save failed:', cloudError);
-          window.dispatchEvent(new CustomEvent('bandplan:sync-error', {
-            detail: cloudError?.message || 'Не удалось сохранить событие в базе данных.'
-          }));
-        }
+        // save() persists locally and schedules the existing Supabase sync.
+        save();
 
         hardClose(modalRoot);
         try {
@@ -2918,21 +2910,15 @@ document.addEventListener('click', function (e) {
           const view = $('#view');
           if (view) view.innerHTML = stateHTML(
             'err',
-            cloudSaved ? 'Событие сохранено' : 'Событие сохранено локально',
-            cloudSaved
-              ? 'Данные сохранены в базе данных.'
-              : 'Данные сохранены на устройстве и будут отправлены в базу данных при восстановлении соединения.',
+            'Событие сохранено',
+            'Данные сохранены. Откройте расписание повторно.',
             '<button class="btn btn-primary" type="button" data-act="cal-today">Открыть расписание</button>'
           );
           document.body.style.overflow = '';
         }
-        if (cloudSaved) {
-          toast(id ? 'Изменения события сохранены' : 'Событие сохранено', 'ok');
-        } else {
-          toast(id ? 'Изменения сохранены на устройстве' : 'Событие сохранено на устройстве; синхронизация ожидает сеть', 'warn', 4200);
-        }
-        if (button) button.disabled = false;
-      })().catch(error => {
+
+        toast(id ? 'Изменения события сохранены' : 'Событие сохранено', 'ok');
+      } catch (error) {
         console.error('BandPlan event save failed:', error);
         if (id && previous) {
           const index = state.events.findIndex(x => x.id === id);
@@ -2941,11 +2927,11 @@ document.addEventListener('click', function (e) {
           state.events = state.events.filter(x => x.id !== data.id);
         }
         save();
-        hardClose(modalRoot);
-        render();
+        try { render(); } catch (e) {}
         toast('Не удалось сохранить событие: ' + (error?.message || 'неизвестная ошибка'), 'err', 5000);
+      } finally {
         if (button) button.disabled = false;
-      });
+      }
       break;
     }
     case 'event-del': {
