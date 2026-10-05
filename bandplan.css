@@ -2764,3 +2764,37 @@ svg{flex:0 0 auto}
     padding-right:0!important;
   }
 }
+
+/* ═══ TOP NETWORK BAR REMOVED — keep layout free of the old empty strip ═══ */
+.netbar,
+.main-netbar{display:none!important;}
+
+/* Participation must stay visible on every event surface. */
+.part-avatar{position:relative;}
+.part-avatar::after{
+  content:"";
+  position:absolute;
+  right:-2px;
+  bottom:-1px;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  border:2px solid var(--surf-1);
+  background:var(--muted);
+  box-sizing:content-box;
+}
+.part-avatar.part-yes::after{background:var(--ok);}
+.part-avatar.part-maybe::after{background:var(--warn);}
+.part-avatar.part-no::after{background:var(--danger);}
+.part-avatar.part-unset::after{background:var(--muted);}
+.event-info-person .participation-label.status-yes,
+.member-participation.status-yes{color:var(--ok);}
+.event-info-person .participation-label.status-maybe,
+.member-participation.status-maybe{color:var(--warn);}
+.event-info-person .participation-label.status-no,
+.member-participation.status-no{color:var(--danger);}
+.event-info-person .participation-label.status-unset,
+.member-participation.status-unset{color:var(--muted);}
+@media(max-width:640px){
+  .part-avatar::after{width:7px;height:7px;right:-2px;bottom:-1px;}
+}
