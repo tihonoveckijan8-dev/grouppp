@@ -80,8 +80,7 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 .boot-name{font-size:clamp(20px,5vmin,28px);font-weight:800}
 .boot-stage{color:var(--bm);min-height:20px;transition:opacity .16s}
 @keyframes boot-spin{to{transform:rotate(360deg)}}
-@keyframes boot-eq{0%,100%{transform:scaleY(.72);opacity:.82}50%{transform:scaleY(1);opacity:1}}
-@media(max-height:500px) and (orientation:landscape){.boot-core{flex-direction:row;gap:20px}.boot-eq,.boot-bar{display:none}.boot-mark{width:clamp(64px,20vmin,88px)}.boot-name{font-size:22px}.boot-stage{display:none}}
+@media(max-height:500px) and (orientation:landscape){.boot-core{flex-direction:row;gap:20px}.boot-eq,.boot-bar{display:none!important}.boot-mark{width:clamp(64px,20vmin,88px)}.boot-name{font-size:22px}.boot-stage{display:none}}
 @media(max-height:360px){.boot-stage{display:none}.boot-name{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.boot-ring .r1{animation:none}.boot-stage{transition:none}}
 @media(forced-colors:active){.boot-mark{border:2px solid CanvasText;background:Canvas;color:CanvasText;box-shadow:none}}
@@ -92,9 +91,6 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>BandPlan — Music Group OS</title>
 <link rel="preload" href="fonts/manrope-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="vendor/supabase.min.js?v=20261005-4" as="script">
-<link rel="preload" href="supabase.js?v=20261005-4" as="script">
-<link rel="preload" href="bandplan-core.js?v=20261005-4" as="script">
 <link rel="manifest" href="manifest.webmanifest?v=20261005">
 <link rel="icon" type="image/svg+xml" href="icon-splash.svg?v=2">
 <link rel="apple-touch-icon" href="icon-splash.svg?v=2">
@@ -182,8 +178,8 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 <input type="file" id="fileIn" accept="application/json,.json" hidden>
 <noscript><div class="noscript" role="alert"><strong>BandPlan</strong><p>Для работы приложения необходим JavaScript.</p></div></noscript>
 
-<script defer src="vendor/supabase.min.js?v=20261005-4" onerror="this.onerror=null;this.src=window.__bandplanSupabaseFallback"></script>
-<script defer src="supabase.js?v=20261005-4"></script>
-<script defer src="bandplan.js?v=20261005-4"></script>
+<script defer src="vendor/supabase.min.js" onerror="this.onerror=null;this.src=window.__bandplanSupabaseFallback"></script>
+<script defer src="supabase.js"></script>
+<script defer src="bandplan.js?v=20261005-3"></script>
 </body>
 </html>
