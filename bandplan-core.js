@@ -1794,7 +1794,7 @@ function vSetlists() {
     (ui.setlistQuery ? '<button class="icon-btn" type="button" data-act="setlist-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') +
     '</div></div>';
   const list = filteredSetlists();
-  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div>';
+  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div></div>';
   h += '<div class="collection-grid collection-list setlists-list">
   list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
