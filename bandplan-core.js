@@ -2863,7 +2863,15 @@ document.addEventListener('click', function (e) {
       stop();
       const button = el;
       if (button) button.disabled = true;
-      const data = readEventForm(id);
+      let data;
+      try {
+        data = readEventForm(id);
+      } catch (formError) {
+        console.error('BandPlan event form read failed:', formError);
+        if (button) button.disabled = false;
+        toast('Не удалось прочитать данные события. Проверьте поля и попробуйте ещё раз.', 'err', 5000);
+        break;
+      }
       if (!data) {
         if (button) button.disabled = false;
         break;
