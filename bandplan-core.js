@@ -371,7 +371,7 @@ let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
-  songQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
+  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
@@ -1256,7 +1256,7 @@ function render() {
   actionBarHTML = '';
   if (r.name === 'calendar') acts = '<button class="btn btn-secondary" type="button" data-act="cal-today">' + ic('target', 17) + 'Сегодня</button><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Новое событие</button>';
   else if (r.name === 'songs') acts = '';
-  else if (r.name === 'setlists') acts = '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>';
+  else if (r.name === 'setlists') acts = '';
   else if (r.name === 'song') {
     crumb = '<nav class="crumb" aria-label="Хлебные крошки"><a href="#/songs">Репертуар</a>' + ic('right', 12) + '<span class="nowrap">' + esc((songById(r.id) || {}).title || '') + '</span></nav>';
     acts = '<button class="btn btn-primary" type="button" data-act="edit-song" data-id="' + esc(r.id) + '">' + ic('edit', 17) + 'Изменить песню</button>';
@@ -1777,12 +1777,26 @@ function vSong(id) {
 const infoRow = (l, v) => '<div class="info-row"><span class="l">' + esc(l) + '</span><span class="v">' + (v || '—') + '</span></div>';
 
 /* ═══ 13. SETLISTS ═══ */
+function filteredSetlists() {
+  const q = String(ui.setlistQuery || '').toLowerCase().trim();
+  let list = state.setlists.slice();
+  if (q) list = list.filter(sl => String(sl.name || '').toLowerCase().indexOf(q) >= 0);
+  return list.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+}
 function vSetlists() {
   if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
     'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
     '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
-  let h = '<div class="collection-grid collection-list setlists-list">';
-  state.setlists.slice().sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))).forEach(function (sl, i) {
+  let h = '<div class="setlists-head-row"><h1>Сет-листы</h1><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button></div>' +
+    '<div class="toolbar setlists-search-row"><div class="tb-search">' + ic('search', 18) +
+    '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
+    '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
+    (ui.setlistQuery ? '<button class="icon-btn" type="button" data-act="setlist-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') +
+    '</div></div>';
+  const list = filteredSetlists();
+  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div>';
+  h += '<div class="collection-grid collection-list setlists-list">';
+  list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
@@ -2999,6 +3013,7 @@ document.addEventListener('click', function (e) {
     case 'tag': stop(); ui.songTag = el.getAttribute('data-v'); render(); if ($('#modalOverlay').classList.contains('on')) $$('#modalOverlay [data-act="tag"]').forEach(b => b.classList.toggle('on', b.getAttribute('data-v') === ui.songTag)); break;
     case 'song-filter-open': stop(); openSongFilters(); break;
     case 'song-clear': stop(); ui.songQuery = ''; render(); break;
+    case 'setlist-clear': stop(); ui.setlistQuery = ''; render(); break;
     case 'song-key-clear': stop(); ui.songKey = ''; render(); break;
     case 'song-sort-reset': stop(); ui.songSort = 'title'; render(); break;
     case 'song-reset': stop(); ui.songQuery = ''; ui.songKey = ''; ui.songTag = ''; ui.songFav = false; ui.songSort = 'title'; render(); if ($('#modalOverlay').classList.contains('on')) hardClose(modalRoot); break;
@@ -3323,6 +3338,7 @@ document.addEventListener('input', function (e) {
   };
   if (t.id === 'evQ') { ui.evQuery = t.value; soft('#evQ', () => { }); }
   if (t.id === 'songQ') { ui.songQuery = t.value; soft('#songQ', () => { }); }
+  if (t.id === 'setlistQ') { ui.setlistQuery = t.value; soft('#setlistQ', () => { }); }
   if (t.id === 'libQ') { ui.libQuery = t.value; soft('#libQ', () => { }); }
 });
 document.addEventListener('keydown', function (e) {
