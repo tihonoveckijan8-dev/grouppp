@@ -1568,10 +1568,10 @@ function evRow(o, withPart) {
   return '<article class="ev-row' + (done ? ' ev-done' : '') + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" style="--ev-c:' + esc(t.color || 'var(--accent)') + '">' +
     '<div class="ev-date" aria-hidden="true"><div class="d">' + d.getDate() + '</div><div class="m">' + MON[d.getMonth()] + '</div></div>' +
     '<div class="ev-body">' +
-    '<h3 class="ev-title"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
+    '<h3 class="ev-title"><span class="ev-title-main"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
     (e.repeat && e.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[e.repeat]) + '</span>' : '') +
     (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') +
-    renderMyPositionBadge(e) + '</h3>' +
+    '</span><span class="ev-title-state">' + renderMyPositionBadge(e) + '</span></h3>' +
     '<div class="ev-meta">' +
     (e.time ? '<span>' + ic('clock', 12) + esc(e.time) + (e.end ? '–' + esc(e.end) : '') + '</span>' : '') +
     (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
