@@ -5813,3 +5813,20 @@ body[data-route="setlists"] .setlists-list > article.song-card .song-open-top{
     width:100%;
   }
 }
+
+/* REPERTOIRE — equal-width add-song actions */
+body[data-route="songs"] .songs-head-row > [data-act="new-song"],
+body[data-route="songs"] .card .state .acts > [data-act="new-song"]{
+  width:196px;
+  max-width:100%;
+  min-width:0;
+  justify-content:center;
+  box-sizing:border-box;
+}
+@media(max-width:480px){
+  body[data-route="songs"] .songs-head-row > [data-act="new-song"],
+  body[data-route="songs"] .card .state .acts > [data-act="new-song"]{
+    width:196px;
+    max-width:100%;
+  }
+}
