@@ -5640,3 +5640,169 @@ body[data-route="setlists"] .setlists-list > article.song-card .song-open-top{
     font-size:12px;
   }
 }
+
+/* ─── EVENT ARTICLE REBUILD — 2026-10-06 ─────────────────────────────
+   Scoped only to the "Ближайшие участия" event articles.
+   Fixes the oversized/vertically-spread card without changing event logic.
+*/
+.participation-collection.collection-blocks{
+  display:flex;
+  flex-direction:column;
+  gap:var(--s3);
+  min-width:0;
+}
+.participation-collection.collection-blocks > .ev-row{
+  display:grid !important;
+  grid-template-columns:56px minmax(0,1fr) auto !important;
+  grid-template-rows:auto !important;
+  align-items:start !important;
+  align-self:start !important;
+  height:max-content !important;
+  min-height:0 !important;
+  width:100%;
+  box-sizing:border-box;
+  gap:var(--s3) !important;
+  padding:var(--s4) !important;
+  margin:0 !important;
+}
+.participation-collection.collection-blocks > .ev-row .ev-date{
+  grid-column:1;
+  grid-row:1;
+  width:56px !important;
+  min-width:56px !important;
+  height:56px !important;
+}
+.participation-collection.collection-blocks > .ev-row .ev-body{
+  grid-column:2;
+  grid-row:1;
+  min-width:0;
+  width:100%;
+  height:max-content;
+  align-self:start;
+}
+.participation-collection.collection-blocks > .ev-row .ev-title{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:wrap !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:100%;
+  min-width:0;
+  height:max-content !important;
+  gap:var(--s2) !important;
+  margin:0;
+  line-height:1.35;
+}
+.participation-collection.collection-blocks > .ev-row .ev-title .ev-name{
+  display:block;
+  flex:1 1 auto !important;
+  width:auto !important;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.participation-collection.collection-blocks > .ev-row .ev-title .ev-category,
+.participation-collection.collection-blocks > .ev-row .ev-title > .badge:not(.ev-category){
+  flex:0 1 auto !important;
+  align-self:center !important;
+  width:auto !important;
+  max-width:100%;
+}
+.participation-collection.collection-blocks > .ev-row .ev-title .event-my-state{
+  flex:0 1 auto !important;
+  margin-left:auto !important;
+  align-self:center !important;
+}
+.participation-collection.collection-blocks > .ev-row .ev-meta{
+  display:flex !important;
+  align-items:center;
+  flex-wrap:wrap;
+  width:100%;
+  height:max-content;
+  margin-top:var(--s2) !important;
+  gap:var(--s2) !important;
+}
+.participation-collection.collection-blocks > .ev-row .avatars{
+  margin-top:var(--s2);
+}
+.participation-collection.collection-blocks > .ev-row [data-event-switch]{
+  display:block;
+  width:max-content;
+  max-width:100%;
+  margin-top:var(--s3);
+}
+.participation-collection.collection-blocks > .ev-row .part-switch{
+  margin-top:0 !important;
+  max-width:100%;
+}
+.participation-collection.collection-blocks > .ev-row .ev-acts{
+  grid-column:3;
+  grid-row:1;
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-end;
+  align-self:start !important;
+  flex-wrap:nowrap;
+  width:max-content;
+  max-width:none;
+  min-width:0;
+  margin:0;
+  padding:0;
+  gap:var(--s2);
+}
+.participation-collection.collection-blocks > .ev-row .ev-acts .icon-btn{
+  width:var(--tap);
+  min-width:var(--tap);
+  height:var(--tap);
+  flex:0 0 var(--tap);
+}
+@media(max-width:760px){
+  .participation-collection.collection-blocks > .ev-row{
+    grid-template-columns:52px minmax(0,1fr) !important;
+    gap:var(--s3) !important;
+  }
+  .participation-collection.collection-blocks > .ev-row .ev-date{
+    width:52px !important;
+    min-width:52px !important;
+    height:52px !important;
+  }
+  .participation-collection.collection-blocks > .ev-row .ev-acts{
+    grid-column:2;
+    grid-row:2;
+    width:100%;
+    justify-content:flex-start;
+    margin-top:var(--s2);
+  }
+}
+@media(max-width:480px){
+  .participation-collection.collection-blocks > .ev-row{
+    grid-template-columns:46px minmax(0,1fr) !important;
+    padding:var(--s3) !important;
+  }
+  .participation-collection.collection-blocks > .ev-row .ev-date{
+    width:46px !important;
+    min-width:46px !important;
+    height:46px !important;
+  }
+  .participation-collection.collection-blocks > .ev-row .ev-title .ev-name{
+    flex-basis:100% !important;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .participation-collection.collection-blocks > .ev-row .ev-title .event-my-state{
+    margin-left:0 !important;
+  }
+  .participation-collection.collection-blocks > .ev-row [data-event-switch]{
+    width:100%;
+  }
+  .participation-collection.collection-blocks > .ev-row .part-switch{
+    width:100%;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .participation-collection.collection-blocks > .ev-row .part-switch::-webkit-scrollbar{
+    display:none;
+  }
+}
