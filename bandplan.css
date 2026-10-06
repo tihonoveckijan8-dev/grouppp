@@ -5831,12 +5831,11 @@ body[data-route="songs"] .card .state .acts > [data-act="new-song"]{
   }
 }
 
-/* CALENDAR HERO — contained, compact, aligned */
+/* CALENDAR HERO — align with calendar panel and keep clear separation */
 body[data-route="calendar"] .hero{
   width:100%;
   max-width:100%;
-  margin-left:0;
-  margin-right:0;
+  margin:0 0 var(--s8) 0;
   box-sizing:border-box;
   padding:var(--s6);
   overflow:hidden;
@@ -5844,69 +5843,23 @@ body[data-route="calendar"] .hero{
 body[data-route="calendar"] .hero-in{
   width:100%;
   max-width:100%;
-  grid-template-columns:minmax(0,1fr);
-  gap:var(--s5);
-}
-body[data-route="calendar"] .hero h1{
-  max-width:24ch;
-  font-size:clamp(26px,2.6vw,36px);
-  line-height:1.18;
-  margin-top:var(--s3);
-}
-body[data-route="calendar"] .hero-sub{
-  max-width:70ch;
-  margin-top:var(--s3);
-}
-body[data-route="calendar"] .hero-cta{
-  margin-top:var(--s4);
-  gap:var(--s2);
-}
-body[data-route="calendar"] .hero-cta .btn{
-  min-height:44px;
-  max-width:100%;
-}
-body[data-route="calendar"] .hero-position{
-  max-width:100%;
-  margin-top:var(--s3);
-  overflow:hidden;
-}
-body[data-route="calendar"] .hero-metrics{
-  width:100%;
-  max-width:760px;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:var(--s2);
-  margin-top:var(--s5);
-  padding-top:var(--s4);
-}
-body[data-route="calendar"] .hero-metric{
   min-width:0;
-  padding:10px 12px;
-  overflow:hidden;
 }
-body[data-route="calendar"] .hero-metric .l{
-  overflow-wrap:anywhere;
+body[data-route="calendar"] .hero-cta,
+body[data-route="calendar"] .hero-position,
+body[data-route="calendar"] .hero-metrics{
+  max-width:100%;
+  min-width:0;
 }
 @media(max-width:760px){
   body[data-route="calendar"] .hero{
+    margin-bottom:var(--s6);
     padding:var(--s5);
-  }
-  body[data-route="calendar"] .hero-metrics{
-    max-width:none;
-    grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
 @media(max-width:430px){
   body[data-route="calendar"] .hero{
+    margin-bottom:var(--s5);
     padding:var(--s4);
-  }
-  body[data-route="calendar"] .hero h1{
-    font-size:26px;
-  }
-  body[data-route="calendar"] .hero-cta{
-    display:grid;
-    grid-template-columns:minmax(0,1fr);
-  }
-  body[data-route="calendar"] .hero-cta .btn{
-    width:100%;
   }
 }
