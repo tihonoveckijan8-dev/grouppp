@@ -5470,3 +5470,173 @@ h1, h2, h3, h4 {
   font-weight: 600 !important;
 }
 
+
+/* ─── ARTICLE / CARD COMPONENT — SCOPED REDESIGN 2026-10-06 ─── */
+/* Only collection song/setlist articles are changed here. Event articles remain untouched. */
+.collection-grid.collection-list > article.song-card{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:var(--s3);
+  min-width:0;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  padding:var(--s4);
+  overflow:hidden;
+  isolation:isolate;
+}
+.collection-grid.collection-list > article.song-card .song-top{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) auto;
+  align-items:center;
+  gap:var(--s3);
+  min-width:0;
+  width:100%;
+}
+.collection-grid.collection-list > article.song-card .key-badge{
+  width:44px;
+  min-width:44px;
+  height:44px;
+  box-sizing:border-box;
+}
+.collection-grid.collection-list > article.song-card .song-title-wrap{
+  min-width:0;
+  overflow:hidden;
+}
+.collection-grid.collection-list > article.song-card .song-name{
+  min-width:0;
+  margin:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.collection-grid.collection-list > article.song-card .song-open-wrap{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:var(--s2);
+  width:auto;
+  min-width:0;
+  margin:0;
+}
+.collection-grid.collection-list > article.song-card .fav{
+  width:var(--tap);
+  min-width:var(--tap);
+  height:var(--tap);
+  flex:0 0 var(--tap);
+  border:1px solid transparent;
+}
+.collection-grid.collection-list > article.song-card .song-open{
+  min-width:104px;
+  height:var(--tap);
+  flex:0 0 auto;
+  box-sizing:border-box;
+}
+.collection-grid.collection-list > article.song-card > .song-meta{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  width:100%;
+  margin:0;
+  overflow:hidden;
+}
+.collection-grid.collection-list > article.song-card > .song-meta .badge{
+  max-width:100%;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.collection-grid.collection-list > article.song-card > .song-acts{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:var(--s2);
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  overflow:hidden;
+}
+.collection-grid.collection-list > article.song-card > .song-acts .btn{
+  flex:0 0 auto;
+  min-width:var(--tap);
+  box-sizing:border-box;
+}
+.collection-grid.collection-list > article.song-card > .song-acts .btn .btn-txt{
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.collection-grid.collection-list > article.song-card:focus-visible{
+  outline:3px solid var(--accent-ring);
+  outline-offset:2px;
+}
+.collection-grid.collection-list > article.song-card:hover{
+  transform:translateY(-1px);
+}
+.collection-grid.collection-list > article.song-card:active{
+  transform:translateY(0);
+}
+
+/* Set-list cards use the same structure without a favorite control. */
+body[data-route="setlists"] .setlists-list > article.song-card .song-top{
+  grid-template-columns:44px minmax(0,1fr) auto;
+}
+body[data-route="setlists"] .setlists-list > article.song-card .song-open-top{
+  justify-self:end;
+}
+
+/* Narrow screens: title remains flexible, controls never escape the card. */
+@media(max-width:640px){
+  .collection-grid.collection-list > article.song-card{
+    padding:var(--s3);
+    gap:var(--s2);
+  }
+  .collection-grid.collection-list > article.song-card .song-top{
+    grid-template-columns:40px minmax(0,1fr) auto;
+    gap:var(--s2);
+  }
+  .collection-grid.collection-list > article.song-card .key-badge{
+    width:40px;
+    min-width:40px;
+    height:40px;
+  }
+  .collection-grid.collection-list > article.song-card .song-name{
+    font-size:14px;
+  }
+  .collection-grid.collection-list > article.song-card .song-open{
+    min-width:88px;
+    padding-left:var(--s3);
+    padding-right:var(--s3);
+  }
+  .collection-grid.collection-list > article.song-card > .song-meta{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:1px;
+  }
+  .collection-grid.collection-list > article.song-card > .song-meta::-webkit-scrollbar{
+    display:none;
+  }
+  .collection-grid.collection-list > article.song-card > .song-acts{
+    justify-content:stretch;
+  }
+  .collection-grid.collection-list > article.song-card > .song-acts .btn{
+    flex:1 1 0;
+    min-width:0;
+  }
+}
+@media(max-width:380px){
+  .collection-grid.collection-list > article.song-card .song-open{
+    min-width:76px;
+    padding-left:var(--s2);
+    padding-right:var(--s2);
+  }
+  .collection-grid.collection-list > article.song-card .song-open .btn-txt{
+    font-size:12px;
+  }
+}
