@@ -1364,8 +1364,7 @@ function heroHTML() {
     heroMetric(state.songs.length, 'песен в репертуаре') +
     heroMetric(state.setlists.length, plural(state.setlists.length, 'сет-лист', 'сет-листа', 'сет-листов')) +
     heroMetric(state.members.length, 'участников в составе') +
-    '</div></div>' +
-    '</div></section>';
+    '</div></div></section>';
 }
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
