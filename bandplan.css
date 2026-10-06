@@ -5830,3 +5830,33 @@ body[data-route="songs"] .card .state .acts > [data-act="new-song"]{
     max-width:100%;
   }
 }
+
+/* CALENDAR HERO — match the full-width calendar surface below */
+body[data-route="calendar"] .hero{
+  width:calc(100% + (2 * var(--s8)));
+  max-width:none;
+  margin-left:calc(-1 * var(--s8));
+  margin-right:calc(-1 * var(--s8));
+  box-sizing:border-box;
+}
+@media(max-width:900px){
+  body[data-route="calendar"] .hero{
+    width:calc(100% + (2 * var(--s4)));
+    margin-left:calc(-1 * var(--s4));
+    margin-right:calc(-1 * var(--s4));
+  }
+}
+@media(max-width:430px){
+  body[data-route="calendar"] .hero{
+    width:calc(100% + 20px);
+    margin-left:-10px;
+    margin-right:-10px;
+  }
+}
+@media(max-width:375px){
+  body[data-route="calendar"] .hero{
+    width:calc(100% + 16px);
+    margin-left:-8px;
+    margin-right:-8px;
+  }
+}
