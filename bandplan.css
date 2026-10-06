@@ -472,7 +472,7 @@ html[data-reduced="true"] .skel::after{display:none}
 .tg-nowline{position:absolute;left:0;right:0;height:2px;background:var(--danger);z-index:var(--z-4);pointer-events:none}
 .tg-nowline::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--danger)}
 
-.ev-row{display:flex;gap:var(--s4);align-items:flex-start;padding:var(--s4);border-radius:var(--r-18);background:var(--surf-2);
+.ev-row{display:grid;grid-template-columns:60px minmax(0,1fr) auto;grid-template-rows:auto;gap:var(--s4);align-items:start;padding:var(--s4);border-radius:var(--r-18);background:var(--surf-2);
   border:1px solid var(--border);margin-bottom:var(--s3);transition:transform var(--t-card),box-shadow var(--t-card),border-color var(--t-card);min-width:0;
   box-shadow:var(--shadow-1)}
 .ev-row:hover{box-shadow:var(--shadow-2);border-color:var(--accent-ring);transform:translateY(-1px)}
