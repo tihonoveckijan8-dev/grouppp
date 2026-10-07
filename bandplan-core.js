@@ -1014,7 +1014,7 @@ document.addEventListener('focusin', event => {
     window.visualViewport.addEventListener('resize', once, {once:true});
   }
 });
-let modalRoot = null, confirmCb = null, lastFocus = null, modalDirty = false, trapHandler = null;
+let modalRoot = null, confirmCb = null, lastFocus = null, modalDirty = false, trapHandler = null, modalScrollY = 0;
 let modalHistoryPushed = false;
 function closeModal(force) {
   if (!modalRoot) return;
@@ -1037,7 +1037,7 @@ function hardClose(node, opts) {
   modalRoot = ov.querySelector('.modal-card') || null;
   confirmCb = null; modalDirty = false;
   if (trapHandler) { document.removeEventListener('keydown', trapHandler); trapHandler = null; }
-  if (!modalRoot && !$('#scene').classList.contains('on')) document.body.style.overflow = '';
+  if (!modalRoot && !$('#scene').classList.contains('on')) { document.body.style.overflow = ''; document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = ''; if (modalScrollY) { const y = modalScrollY; modalScrollY = 0; requestAnimationFrame(() => window.scrollTo(0, y)); } }
   if (lastFocus && lastFocus.focus && !modalRoot) { try { lastFocus.focus(); } catch (e) { } lastFocus = null; }
   updateDirtyNote();
   if (!modalRoot && modalHistoryPushed && !keepHistory) {
@@ -1068,7 +1068,13 @@ function openModal(o) {
     ov.style.cssText += ';position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;padding:0!important;margin:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;';
     modalRoot.style.cssText += ';position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;';
   }
+  modalScrollY = window.scrollY || window.pageYOffset || 0;
   document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.top = '-' + modalScrollY + 'px';
+  document.body.style.left = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
   if (!modalHistoryPushed) {
     try { history.pushState({__bandplanModal:true}, '', location.href); modalHistoryPushed = true; } catch (_) {}
   }
@@ -1573,7 +1579,7 @@ function evRow(o, withPart) {
     '</span><span class="ev-title-state">' + renderMyPositionBadge(e) + '</span></h3>' +
     '<div class="ev-meta">' +
     (e.time ? '<span>' + ic('clock', 12) + esc(e.time) + (e.end ? '–' + esc(e.end) : '') + '</span>' : '') +
-    (e.location ? '<span>' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
+    (e.location ? '<span class="ev-location">' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
     (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
