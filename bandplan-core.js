@@ -3977,7 +3977,7 @@ function init() {
         checkForAppUpdate();
         // Keep long-lived PWAs current without polling the network aggressively.
         // Focus/visibility/online events still trigger an immediate check.
-        window.setInterval(checkForAppUpdate, 5 * 60 * 1000);
+        window.setInterval(checkForAppUpdate, 60 * 1000);
         window.addEventListener('online', checkForAppUpdate);
         window.addEventListener('focus', checkForAppUpdate);
         document.addEventListener('visibilitychange', () => {
