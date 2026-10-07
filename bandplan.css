@@ -429,7 +429,23 @@ html[data-reduced="true"] .skel::after{display:none}
 .cal-cell.today{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surf-2));box-shadow:0 0 0 1px var(--accent-ring)}
 .cal-grid>.cal-cell:nth-child(7n).today,
 .cal-grid>.cal-cell:nth-child(7n - 1).today{background:color-mix(in srgb,var(--accent) 12%,var(--surf-2))}
-.cal-cell.sel{box-shadow:0 0 0 2px var(--accent-soft-2);border-color:var(--accent)}
+.cal-cell.sel{border-color:var(--border);box-shadow:none}
+.cal-cell.sel .cal-num{
+  width:28px;
+  height:28px;
+  min-width:28px;
+  padding:0;
+  margin:-2px 0 0 -2px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  background:var(--accent-soft);
+  color:var(--accent);
+  border:1px solid var(--accent-ring);
+  box-shadow:0 1px 3px rgba(15,23,42,.08);
+}
 .cal-num{font-size:13px;font-weight:var(--fw-semi);color:var(--text-2);display:flex;align-items:center;gap:6px;padding:0 2px;font-family:var(--mono)}
 .cal-cell.today .cal-num{color:var(--accent);font-weight:var(--fw-bold)}
 .cal-dot-today{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent-ring)}
