@@ -601,6 +601,11 @@
         gate().hidden=true;
         window.__bandplanAuthUserId = currentSession.user.id;
         window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
+        if (typeof window.__bandplanEnsureCore === 'function') {
+          await window.__bandplanEnsureCore();
+          if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
+          await window.__bandplanResumeAuthenticated(currentSession.user);
+        }
         return currentSession.user;
       }
 

@@ -32,5 +32,5 @@
     the "login succeeds but the app never opens" race.
   */
   window.__bandplanEnsureCore = loadCore;
-  loadCore();
+  // Core stays deferred until Supabase has resolved authentication.
 })();
