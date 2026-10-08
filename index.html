@@ -58,9 +58,6 @@ try{
   bpDoc.style.setProperty('--accent',bpAccent);
   bpDoc.style.setProperty('--accent-contrast',bpOnAccent);
   bpDoc.style.setProperty('--accent-on-bg',bpOnBg);
-  bpDoc.style.setProperty('--on-accent',bpOnAccent);
-  bpDoc.style.setProperty('--accent-fill',bpAccent);
-  bpDoc.style.setProperty('--accent-text',bpOnBg);
   if(bpBoot&&bpBoot.density)bpDoc.dataset.density=bpBoot.density;
   document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',bpThemeColor)});
 }catch(e){}
