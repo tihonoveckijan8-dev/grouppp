@@ -2008,7 +2008,7 @@ function vSettings() {
         '</details>' +
       '</div>' +
       '<div class="profile-account-box"><div class="card-h"><div><h3>Аккаунт</h3></div></div>' +
-        '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Электронная почта</span><strong>' + esc(window.BandPlanCloud?.user?.()?.email || 'Аккаунт BandPlan') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div>' +
+        '<div class="account-settings"><div class="account-settings-row"><div><span class="field-label">Электронная почта</span><strong>' + esc(String(window.BandPlanCloud?.user?.()?.email || '').trim() || 'Почта не указана') + '</strong></div><button class="btn btn-danger" type="button" data-act="account-logout">' + ic('x',16) + '<span>Выйти из аккаунта</span></button></div></div>' +
         '<div class="profile-account-danger"><span>Удаление аккаунта необратимо.</span><button class="btn btn-danger-solid" type="button" data-act="account-delete">' + ic('userX',16) + 'Удалить аккаунт</button></div>' +
       '</div>' +
     '</div></div>' +
