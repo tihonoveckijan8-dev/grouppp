@@ -345,17 +345,18 @@ const EV_TYPES = {
 };
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
 const PALETTE = ['#2457FF', '#00B87A', '#9B4DFF', '#FFB000', '#FF3B30', '#00B8D9', '#687080', '#B56A2B'];
-const ACCENTS = ['#2457FF', '#5C7CFF', '#00B87A', '#9B4DFF', '#FFB000', '#FF3B30', '#00B8D9', '#687080', '#B56A2B'];
-const ACCENT_LABELS = Object.freeze({'#2457FF':'Синий','#5C7CFF':'Индиго','#00B87A':'Зелёно-бирюзовый','#9B4DFF':'Фиолетовый','#FFB000':'Янтарный','#FF3B30':'Красный','#00B8D9':'Океанский','#687080':'Графитовый','#B56A2B':'Умбровый'});
+const ACCENTS = ['#1554FF', '#E63946', '#2A9D8F', '#7C3AED', '#F59E0B', '#06B6D4', '#64748B', '#B56A2B'];
+const ACCENT_LABELS = Object.freeze({'#1554FF':'Синий','#E63946':'Красный','#2A9D8F':'Бирюзовый','#7C3AED':'Фиолетовый','#F59E0B':'Янтарный','#06B6D4':'Океанский','#64748B':'Графитовый','#B56A2B':'Умбровый'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
 function defaults() {
   const bootTheme = ['light','dark','amoled'].includes(document.documentElement.dataset.theme)
     ? document.documentElement.dataset.theme : 'light';
-  const bootAccent = /^#[0-9a-fA-F]{6}$/.test(
-    document.documentElement.style.getPropertyValue('--accent').trim()
-  ) ? document.documentElement.style.getPropertyValue('--accent').trim() : '#2457FF';
+  const bootAccent = /^#[0-9a-fA-F]{6}$/.test(localStorage.getItem('accent') || '')
+    ? localStorage.getItem('accent').toUpperCase()
+    : (/^#[0-9a-fA-F]{6}$/.test(document.documentElement.style.getPropertyValue('--accent').trim())
+      ? document.documentElement.style.getPropertyValue('--accent').trim().toUpperCase() : '#1554FF');
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
@@ -2503,7 +2504,7 @@ function colorLuminance(hex) {
   const n = parseInt(String(hex).slice(1), 16);
   const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
     v /= 255;
-    return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+    return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
   });
   return .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
 }
@@ -2517,32 +2518,60 @@ function shadeColor(hex, amount) {
   return '#' + [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)].map(v => pad(v.toString(16))).join('');
 }
 function onAccentFor(hex) {
-  const white = colorContrast(hex, '#FFFFFF');
-  const ink = colorContrast(hex, '#111827');
-  return white >= ink ? '#FFFFFF' : '#111827';
+  return colorContrast(hex, '#FFFFFF') >= colorContrast(hex, '#000000') ? '#FFFFFF' : '#000000';
+}
+function rgbToOklch(hex) {
+  const n = parseInt(String(hex).slice(1), 16);
+  const srgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => v / 255);
+  const lin = srgb.map(v => v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4));
+  const l = .4122214708 * lin[0] + .5363325363 * lin[1] + .0514459929 * lin[2];
+  const m = .2119034982 * lin[0] + .6806995451 * lin[1] + .1073969566 * lin[2];
+  const s = .0883024619 * lin[0] + .2817188376 * lin[1] + .6299787005 * lin[2];
+  const l3 = Math.cbrt(l), m3 = Math.cbrt(m), s3 = Math.cbrt(s);
+  const L = .2104542553 * l3 + .793617785 * m3 - .0040720468 * s3;
+  const A = 1.9779984951 * l3 - 2.428592205 * m3 + .4505937099 * s3;
+  const B = .0259040371 * l3 + .7827717662 * m3 - .808675766 * s3;
+  return { L, C: Math.hypot(A, B), H: Math.atan2(B, A) };
+}
+function oklchToHex(L, C, H) {
+  const A = C * Math.cos(H), B = C * Math.sin(H);
+  const l3 = L + .3963377774 * A + .2158037573 * B;
+  const m3 = L - .1055613458 * A - .0638541728 * B;
+  const s3 = L - .0894841775 * A - 1.291485548 * B;
+  const l = l3 ** 3, m = m3 ** 3, s = s3 ** 3;
+  const lr = 4.0767416621 * l - 3.3077115913 * m + .2309699292 * s;
+  const lg = -1.2684380046 * l + 2.6097574011 * m - .3413193965 * s;
+  const lb = -.0041960863 * l - .7034186147 * m + 1.7076147010 * s;
+  const toSrgb = v => {
+    const x = Math.max(0, Math.min(1, v));
+    return Math.round(255 * (x <= .0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - .055));
+  };
+  return '#' + [toSrgb(lr), toSrgb(lg), toSrgb(lb)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+function accentOnBackground(hex, bg) {
+  const base = rgbToOklch(hex);
+  const bgLum = colorLuminance(bg);
+  const direction = bgLum > .179 ? -1 : 1;
+  const contrastAt = L => colorContrast(oklchToHex(L, base.C, base.H), bg);
+  if (contrastAt(base.L) >= 4.5) return oklchToHex(base.L, base.C, base.H);
+  let lo = direction < 0 ? 0 : base.L;
+  let hi = direction < 0 ? base.L : 1;
+  if (direction < 0) {
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      if (contrastAt(mid) >= 4.5) lo = mid; else hi = mid;
+    }
+    return oklchToHex(lo, base.C, base.H);
+  }
+  for (let i = 0; i < 40; i++) {
+    const mid = (lo + hi) / 2;
+    if (contrastAt(mid) >= 4.5) hi = mid; else lo = mid;
+  }
+  return oklchToHex(hi, base.C, base.H);
 }
 function accessibleAccent(input, themeId) {
   const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#1554FF';
-  const bg = themeMeta(themeId).themeColor;
-  const candidates = [base];
-  for (let i = 1; i <= 24; i++) {
-    const amount = i * .035;
-    candidates.push(shadeColor(base, amount), shadeColor(base, -amount));
-  }
-  const valid = candidates.filter(candidate => {
-    const onAccent = onAccentFor(candidate);
-    return colorContrast(candidate, onAccent) >= 4.5 && colorContrast(candidate, bg) >= 3;
-  });
-  const pool = valid.length ? valid : candidates;
-  let best = pool[0], bestScore = -Infinity;
-  pool.forEach((candidate, index) => {
-    const textRatio = colorContrast(candidate, onAccentFor(candidate));
-    const bgRatio = colorContrast(candidate, bg);
-    const distance = colorContrast(candidate, base);
-    const score = Math.min(textRatio / 4.5, bgRatio / 3) - Math.abs(distance - 1) * .015 - index * .0001;
-    if (score > bestScore) { bestScore = score; best = candidate; }
-  });
-  return best;
+  return accentOnBackground(base, themeMeta(themeId).themeColor);
 }
 function applyThemeMeta(themeId) {
   const meta = themeMeta(themeId);
@@ -2586,35 +2615,32 @@ function setTheme(t) {
 function applyAccent(hex) {
   if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
   state.settings.accent = hex.toUpperCase();
-  applyAccentVars(); save(); renderWithTransition(render);
+  try { localStorage.setItem('accent', state.settings.accent); } catch (e) {}
+  applyAccentVars();
+  save();
+  renderWithTransition(render);
 }
 function applyAccentVars() {
+  const hex = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent.toUpperCase() : '#1554FF';
   const themeId = THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light';
-  const hex = accessibleAccent(state.settings.accent || '#1554FF', themeId);
-  const r = document.documentElement.style;
-  const dark = shadeColor(hex, -.16), press = shadeColor(hex, -.3);
+  const bg = themeMeta(themeId).themeColor;
   const onAccent = onAccentFor(hex);
+  const onBg = accentOnBackground(hex, bg);
+  const r = document.documentElement.style;
   r.setProperty('--accent', hex);
-  r.setProperty('--accent-hover', shadeColor(hex, -.12));
-  r.setProperty('--accent-press', press);
+  r.setProperty('--accent-contrast', onAccent);
+  r.setProperty('--accent-on-bg', onBg);
   r.setProperty('--on-accent', onAccent);
-  r.setProperty('--accent-soft', hex + '14');
-  r.setProperty('--accent-soft-2', hex + '24');
-  r.setProperty('--accent-ring', hex + '66');
-  r.setProperty('--accent-surface', hex + '0B');
-  r.setProperty('--accent-surface-strong', hex + '18');
-  r.setProperty('--accent-border', hex + '3D');
-  r.setProperty('--accent-selection', hex + '20');
-  r.setProperty('--focus-ring', '0 0 0 3px ' + hex + '26');
-  r.setProperty('--shadow-accent', '0 6px 16px ' + hex + '38,0 1px 3px ' + hex + '24');
-  r.setProperty('--shadow-accent-hover', '0 10px 22px ' + hex + '42,0 2px 6px ' + hex + '2b');
-  persistBootPrefs();
+  r.setProperty('--accent-fill', hex);
+  r.setProperty('--accent-text', onBg);
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
   r.setProperty('--part-yes', hex);
   r.setProperty('--part-maybe', shadeColor(hex, .38));
   r.setProperty('--part-no', shadeColor(hex, -.28));
   r.setProperty('--part-unset', shadeColor(hex, -.12));
+  try { localStorage.setItem('accent', hex); } catch (e) {}
+  persistBootPrefs();
 }
 
 /* ═══ 20. ONBOARDING ═══ */
