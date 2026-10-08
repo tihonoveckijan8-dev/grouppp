@@ -93,25 +93,8 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
     inset -4px -4px 9px color-mix(in srgb,#fff 28%,transparent);
   will-change:transform;
 }
-.boot .box-mark{
-  display:grid;
-  place-items:center;
-  width:100%;
-  height:100%;
-  font-family:Manrope,system-ui,sans-serif;
-  font-size:34px;
-  font-weight:900;
-  letter-spacing:-2px;
-  color:color-mix(in srgb,var(--accent,#1554FF) 68%,#000);
-  text-shadow:
-    1.5px 1.5px 2px color-mix(in srgb,#000 34%,transparent),
-    -1.5px -1.5px 2px color-mix(in srgb,#fff 34%,transparent);
-  user-select:none;
-  pointer-events:none;
-}
 @media(max-width:480px){
   .boot .box{width:80px;height:80px;border-radius:18px}
-  .boot .box-mark{font-size:28px}
 }
 @media(prefers-reduced-motion:reduce){
   .boot .box{transform:none!important}
@@ -137,7 +120,7 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 </head>
 <body data-route="calendar">
 <div id="boot" class="boot" role="status" aria-live="polite" aria-label="Загрузка BandPlan">
-  <div class="box" aria-hidden="true"><span class="box-mark">BP</span></div>
+  <div class="box" aria-hidden="true"></div>
   <script type="module">
     import { animate } from "https://cdn.jsdelivr.net/npm/motion/+esm";
 
