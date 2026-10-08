@@ -338,10 +338,10 @@ const DYN_LEVELS = ['', 'pp', 'p', 'mp', 'mf', 'f', 'ff'];
 const DYN_LABEL = { '': 'не задано', pp: 'очень тихо', p: 'тихо', mp: 'умеренно тихо', mf: 'умеренно громко', f: 'громко', ff: 'очень громко' };
 const dynCls = v => ({ pp: 'd1', p: 'd2', mp: 'd3', mf: 'd4', f: 'd5', ff: 'd6' }[v] || 'd0');
 const EV_TYPES = {
-  gig: { label: 'Выступление', cls: 'b-info', ic: 'mic', color: 'var(--info)' },
-  rehearsal: { label: 'Репетиция', cls: 'b-ok', ic: 'music', color: 'var(--ok)' },
-  recording: { label: 'Запись', cls: 'b-brand', ic: 'monitor', color: 'var(--plum)' },
-  meeting: { label: 'Встреча', cls: 'b-warn', ic: 'users', color: 'var(--warn)' }
+  gig: { label: 'Выступление', cls: 'b-info', ic: 'mic' },
+  rehearsal: { label: 'Репетиция', cls: 'b-ok', ic: 'music' },
+  recording: { label: 'Запись', cls: 'b-brand', ic: 'monitor' },
+  meeting: { label: 'Встреча', cls: 'b-warn', ic: 'users' }
 };
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
 const PALETTE = Object.freeze(['--palette-1','--palette-2','--palette-3','--palette-4','--palette-5','--palette-6','--palette-7','--palette-8']);
@@ -1113,7 +1113,7 @@ function openModal(o) {
 function confirmBox(title, text, onYes, yesLabel, danger) {
   confirmCb = onYes;
   openModal({
-    title: title, body: '<p style="font-size:15px;line-height:1.65;color:var(--text-2)">' + esc(text) + '</p>', guard: false,
+    title: title, body: '<p class="confirm-copy">' + esc(text) + '</p>', guard: false,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn ' + (danger ? 'btn-danger-solid' : 'btn-primary') + '" type="button" data-act="confirm-yes">' + esc(yesLabel || 'Подтвердить') + '</button>'
   });
   modalDirty = false;
@@ -1479,11 +1479,10 @@ function monthHTML(y, mo) {
     if (d.getMonth() !== mo) cls.push('out');
     if (k === today()) cls.push('today');
     if (k === ui.selDate) cls.push('sel');
-    const calEventColor = list.length ? (evType(list[0].ev.type).color || 'var(--accent)') : 'var(--accent)';
-    if (list.length) cls.push('cal-has-events');
+    if (list.length) { cls.push('cal-has-events'); cls.push('cal-type-' + String(list[0].ev.type || 'other')); }
     const nearest = list.find(o => (o.ev.status || 'upcoming') === 'upcoming' && o.date >= today()) || list[0];
     const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
-    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '" style="--cal-event-color:' + esc(calEventColor) + '">' +
+    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
       '</div>';
     if (list.length) {
@@ -1491,7 +1490,7 @@ function monthHTML(y, mo) {
       list.slice(0, 3).forEach(o => {
         const type = evType(o.ev.type);
         const label = [o.ev.title, o.ev.time, type.label].filter(Boolean).join(', ');
-        h += '<div class="cal-ev ce-' + o.ev.type + '" style="--cal-dot-color:' + esc(type.color || 'var(--accent)') + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
+        h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
       });
       if (list.length > 3) {
         const remaining = list.length - 3;
@@ -1529,7 +1528,7 @@ function timeGrid(days) {
       const e = o.ev, t = evType(e.type);
       const sm = clamp(mins(e.time), H0 * 60, H1 * 60), em = clamp(mins(e.end) || sm + 90, sm + 30, H1 * 60);
       const eventTop = (sm - H0 * 60) / 60 * HPH, hh = Math.max(24, (em - sm) / 60 * HPH - 3);
-      h += '<div class="tg-ev" style="top:' + eventTop + 'px;height:' + hh + 'px;border-left-color:' + t.color + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
+      h += '<div class="tg-ev type-' + e.type + '" style="top:' + eventTop + 'px;height:' + hh + 'px" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" aria-label="' + esc(e.title + ', ' + (e.time || '') + '–' + (e.end || '')) + '">' +
         '<b>' + esc(e.title) + '</b><span>' + esc(e.time || '') + (e.end ? '–' + esc(e.end) : '') + '</span></div>';
     });
     if (k === todayK) {
@@ -1558,7 +1557,7 @@ function evRow(o, withPart) {
   const e = o.ev, t = evType(e.type), d = new Date(o.date + 'T00:00:00');
   const done = e.status === 'done', sl = e.setlistId ? slById(e.setlistId) : null;
   const mems = (e.memberIds || []).map(memById).filter(Boolean);
-  return '<article class="ev-row' + (done ? ' ev-done' : '') + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0" style="--ev-c:' + esc(t.color || 'var(--accent)') + '">' +
+  return '<article class="ev-row ev-type-' + String(e.type || 'other') + (done ? ' ev-done' : '') + '" data-act="event-info" data-id="' + e.id + '" data-date="' + o.date + '" role="button" tabindex="0">' +
     '<div class="ev-date" aria-hidden="true"><div class="d">' + d.getDate() + '</div><div class="m">' + MON[d.getMonth()] + '</div></div>' +
     '<div class="ev-body">' +
     '<h3 class="ev-title"><span class="ev-title-main"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
@@ -2238,7 +2237,7 @@ function setlistModal(id) {
   const body = '<div class="field"><label class="field-label" for="f_slname">Название *</label><input class="input" id="f_slname" maxlength="80" value="' + esc(sl ? sl.name : '') + '" placeholder="Например: Основной сет · 45 минут"><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_slnote">Заметки к программе</label><textarea class="input" id="f_slnote" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Динамика программы, переходы, финал">' + esc(sl ? sl.note || '' : '') + '</textarea></div>' +
     (!sl && state.songs.length ? '<div class="field"><span class="field-label">Добавить песни сразу</span><div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch">' +
-      state.songs.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru')).map(s => '<label class="check" style="padding:10px var(--s3);border:1px solid var(--border);border-radius:var(--r-10);background:var(--surf-1)"><input type="checkbox" class="f_slsong" value="' + s.id + '"><span class="grow nowrap">' + esc(s.title) + '</span><span class="badge b-muted mono">' + esc(s.key || '') + '</span></label>').join('') + '</div></div>'
+      state.songs.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru')).map(s => '<label class="check setlist-song-option"><input type="checkbox" class="f_slsong" value="' + s.id + '"><span class="grow nowrap">' + esc(s.title) + '</span><span class="badge b-muted mono">' + esc(s.key || '') + '</span></label>').join('') + '</div></div>'
       : (!state.songs.length ? '<p class="t-sm t-muted">В репертуаре пока нет песен — их можно добавить позже.</p>' : ''));
   openModal({
     title: sl ? 'Название и заметки' : 'Новый сет-лист', fullscreen: true, editor: true, body: body,
@@ -2534,7 +2533,7 @@ function drawOnb() {
       '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="err"></span></div>' +
       '<div class="field"><label class="field-label" for="ob_banddesc">О группе</label><textarea class="input" id="ob_banddesc" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(onbData.bandDesc) + '</textarea></div>' +
       '<div class="field"><span class="field-label">Акцентный цвет интерфейса</span><div class="swatches">' +
-      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '"><span class="sw-dot" style="background:' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (onbData.accent === a ? ic('check', 14) : '') + '</button>').join('') + '</div></div>';
+      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '"><span class="sw-dot" data-preset="' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (onbData.accent === a ? ic('check', 14) : '') + '</button>').join('') + '</div></div>';
   } else if (onbStep === 2) {
     h += '<div class="onb-hero">' + ic('wave', 28) + '</div><h2>Состав группы</h2>' +
       '<p class="lead">Группа создастся с вашим аккаунтом. Остальных участников не нужно вводить вручную: пригласите их кодом после запуска, и их имена и роли появятся у всех автоматически.</p>' +
@@ -2580,7 +2579,7 @@ function onbErr(el, id, msg) {
 }
 function memberRowHTML(m, i) {
   return '<div class="ob-member" data-ob-row="' + i + '">' +
-    '<div class="avatar" style="background:var(--accent)" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
+    '<div class="avatar" aria-hidden="true">' + esc((m.name || '?').charAt(0).toUpperCase()) + '</div>' +
     '<div class="grow"><label class="sr-only" for="ob_mn_' + i + '">Имя участника</label><input class="input mb-s" id="ob_mn_' + i + '" data-ob-name="' + i + '" maxlength="50" value="' + esc(m.name) + '" placeholder="Имя участника">' +
     '<div class="row" style="gap:6px" data-ob-role="' + i + '">' +
     ROLES.map(r => '<button type="button" class="chip' + (m.role === r.k ? ' on' : '') + '" data-r="' + r.k + '" style="padding:7px 11px;font-size:11.5px;min-height:var(--tap)" aria-pressed="' + (m.role === r.k) + '">' + esc(r.label) + '</button>').join('') + '</div></div>' +
