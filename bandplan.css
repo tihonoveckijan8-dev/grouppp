@@ -6032,109 +6032,44 @@ body[data-route="calendar"] .hero-metric .l{
 }
 
 
-/* ═══ BandPlan premium screen layer v11 ═══════════════════════════════ */
-@layer tokens{
-:root{
-  --accent-fill:var(--accent);
-  --accent-text:var(--accent);
-  --page-gutter:16px;
-  --content-max:1280px;
-  --sidebar-width:280px;
-  --radius-lg:8px;--radius-xl:12px;--radius-2xl:16px;--radius-3xl:24px;
-  --focus-ring:var(--accent-text);
-}
-[data-theme="light"]{
-  --bg:#F4F6F8;--surf-1:#FFFFFF;--surf-2:#FFFFFF;--surf-3:#F8FAFC;--surf-4:#FFFFFF;
-  --text:#111827;--text-2:#344054;--muted:#667085;--border:#E4E7EC;--border-2:#D0D5DD;--control-border:#D0D5DD;
-  --accent-fill:var(--accent);--accent-text:var(--accent);
-}
-[data-theme="dark"]{
-  --bg:#14161C;--surf-1:#191C23;--surf-2:#1D2028;--surf-3:#232730;--surf-4:#20242C;
-  --text:#ECEEF3;--text-2:#C8CDD8;--muted:#98A2B3;--border:rgba(255,255,255,.12);--border-2:rgba(255,255,255,.20);--control-border:rgba(255,255,255,.18);
-  --accent-fill:var(--accent);--accent-text:var(--accent);
-}
-[data-theme="amoled"]{
-  --bg:#000000;--surf-1:#090A0D;--surf-2:#101116;--surf-3:#17181D;--surf-4:#121318;
-  --text:#ECEEF3;--text-2:#C8CDD8;--muted:#98A2B3;--border:rgba(255,255,255,.16);--border-2:rgba(255,255,255,.25);--control-border:rgba(255,255,255,.22);
-  --accent-fill:var(--accent);--accent-text:var(--accent);
-}
-}
+/* Premium UI refinement — calendar intentionally excluded. */
 @layer components{
-.card,.song-card,.event-card,.setlist-card,.settings-card,.member-card{
-  border-radius:var(--radius-2xl);
-  min-width:0;
-}
-[data-theme="light"] .card,[data-theme="light"] .song-card,[data-theme="light"] .event-card,[data-theme="light"] .setlist-card,[data-theme="light"] .settings-card,[data-theme="light"] .member-card{
-  box-shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);
-}
-[data-theme="dark"] .card,[data-theme="dark"] .song-card,[data-theme="dark"] .event-card,[data-theme="dark"] .setlist-card,[data-theme="dark"] .settings-card,[data-theme="dark"] .member-card,
-[data-theme="amoled"] .card,[data-theme="amoled"] .song-card,[data-theme="amoled"] .event-card,[data-theme="amoled"] .setlist-card,[data-theme="amoled"] .settings-card,[data-theme="amoled"] .member-card{
-  box-shadow:none;border-color:var(--border);
-}
-.btn-primary{background:var(--accent-fill);color:var(--on-accent)}
-.btn-secondary{background:var(--surf-2);color:var(--text);border-color:var(--border)}
-.input,.select,.textarea{border-radius:var(--radius-xl)}
-.songs-head-row,.setlists-head-row{align-items:center;gap:12px}
-.songs-search-row,.setlists-search-row{gap:12px}
-.songs-search-row .input,.setlists-search-row .input{min-height:44px}
-.song-card,.setlist-card{transition:transform 180ms ease-out,border-color 180ms ease-out,box-shadow 180ms ease-out}
-.song-card:hover,.setlist-card:hover{transform:translateY(-1px);border-color:var(--border-2)}
-.song-card .song-title,.setlist-card .setlist-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.song-card .song-meta,.setlist-card .setlist-meta{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
-.song-card .chip,.setlist-card .chip{font-variant-numeric:tabular-nums}
-.event-card{overflow:hidden}
-.event-card>*{min-width:0}
-.event-card .event-title,.event-card h3{overflow-wrap:anywhere;min-width:0}
-.event-card .event-date,.event-card .date-block{flex:none}
-.event-card .event-actions{display:flex;flex-wrap:wrap;gap:8px}
-.event-participation-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.part-switch{display:flex;gap:6px;flex-wrap:wrap}
-.part-switch .part-btn{min-height:44px;border-radius:10px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.part-switch .part-btn.on{background:var(--accent-fill);color:var(--on-accent);border-color:transparent}
-.part-switch .part-btn:not(.on){background:var(--surf-3);color:var(--text-2);border:1px solid var(--border)}
-.part-reset{min-height:44px;border:1px solid var(--border);border-radius:10px;padding:0 10px;background:var(--surf-2);color:var(--muted)}
-.settings-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
-.settings-tabs::-webkit-scrollbar{display:none}
-.settings-tab{min-height:44px;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted);padding:0 12px;font-size:14px}
-.settings-tab.on{color:var(--accent-text);border-bottom-color:var(--accent-fill)!important}
-.bottom-nav a{min-width:44px;min-height:44px}
-#scene{background:#000;color:#fff}
-#scene .scene-ctrl{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+body:not([data-route="calendar"]) .card,body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card,body:not([data-route="calendar"]) .settings-card,body:not([data-route="calendar"]) .member-card{border-radius:var(--radius-2xl);min-width:0}
+body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{transition:transform 180ms ease-out,border-color 180ms ease-out,box-shadow 180ms ease-out}
+body:not([data-route="calendar"]) .song-card:hover,body:not([data-route="calendar"]) .setlist-card:hover{transform:translateY(-1px);border-color:var(--border-2)}
+body:not([data-route="calendar"]) .song-card .song-title-wrap,body:not([data-route="calendar"]) .setlist-card .setlist-title-wrap{min-width:0}
+body:not([data-route="calendar"]) .song-card .song-name,body:not([data-route="calendar"]) .setlist-card .setlist-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:not([data-route="calendar"]) .song-card .song-meta,body:not([data-route="calendar"]) .setlist-card .setlist-meta{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+body:not([data-route="calendar"]) .song-card .song-acts,body:not([data-route="calendar"]) .setlist-card .setlist-acts{display:flex;flex-wrap:wrap;gap:8px}
+body:not([data-route="calendar"]) .settings-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+body:not([data-route="calendar"]) .settings-tabs::-webkit-scrollbar{display:none}
+body:not([data-route="calendar"]) .settings-tab{min-height:44px;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:var(--muted);padding:0 12px;font-size:14px}
+body:not([data-route="calendar"]) .settings-tab.on{color:var(--accent-text);border-bottom-color:var(--accent-fill)!important}
+body:not([data-route="calendar"]) .part-switch{display:flex;gap:6px;flex-wrap:wrap}
+body:not([data-route="calendar"]) .part-switch .part-btn{min-height:44px;border-radius:10px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+body:not([data-route="calendar"]) .part-switch .part-btn.on{background:var(--accent-fill);color:var(--on-accent);border-color:transparent}
+body:not([data-route="calendar"]) .part-switch .part-btn:not(.on){background:var(--surf-3);color:var(--text-2);border:1px solid var(--border)}
+body:not([data-route="calendar"]) .part-reset{min-height:44px;border:1px solid var(--border);border-radius:10px;padding:0 10px;background:var(--surf-2);color:var(--muted)}
+body:not([data-route="calendar"]) .btn-primary{background:var(--accent-fill);color:var(--on-accent)}
+body:not([data-route="calendar"]) .input,body:not([data-route="calendar"]) .select,body:not([data-route="calendar"]) .textarea{border-radius:var(--radius-xl)}
 #scene .scene-ctrl .sbtn{width:56px;height:56px;border-radius:16px}
 #scene .scene-ctrl .sctl{min-height:56px}
 #scene .scene-ctrl .sctl button{width:48px;height:48px}
-#scene .scene-body{overscroll-behavior:contain}
 }
-@media(min-width:1024px){
-:root{--page-gutter:32px}
-.app{grid-template-columns:var(--sidebar-width) minmax(0,1fr)}
-.content{padding-left:32px;padding-right:32px}
-}
+@media(min-width:1024px){:root{--page-gutter:32px}.app{grid-template-columns:var(--sidebar-width) minmax(0,1fr)}body:not([data-route="calendar"]) .content{padding-left:32px;padding-right:32px}}
 @media(max-width:767px){
-.content{padding-left:16px;padding-right:16px;padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
-.page-head{padding-left:0;padding-right:0}
-.songs-head-row,.setlists-head-row{align-items:stretch}
-.songs-head-row .btn,.setlists-head-row .btn{min-width:44px}
-.songs-search-row,.setlists-search-row{display:flex;align-items:center}
-.songs-search-row .input,.setlists-search-row .input{flex:1;min-width:0}
-.song-card,.setlist-card,.event-card{padding:16px}
-.song-card .song-acts,.setlist-card .setlist-acts,.event-card .event-actions{width:100%;display:flex;flex-wrap:wrap;gap:8px}
-.song-card .song-acts .btn,.setlist-card .setlist-acts .btn,.event-card .event-actions .btn{flex:1 1 auto;min-width:44px}
-.part-switch{width:100%}
-.part-switch .part-btn{flex:1 1 0;min-width:0}
-.part-switch .part-btn span{white-space:normal}
-.settings-tabs{margin-inline:-2px}
-.settings-tab{flex:0 0 auto}
+body:not([data-route="calendar"]) .content{padding-left:16px;padding-right:16px;padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+body:not([data-route="calendar"]) .songs-head-row,body:not([data-route="calendar"]) .setlists-head-row{align-items:stretch}
+body:not([data-route="calendar"]) .songs-search-row,body:not([data-route="calendar"]) .setlists-search-row{display:flex;align-items:center;gap:12px}
+body:not([data-route="calendar"]) .songs-search-row .tb-search,body:not([data-route="calendar"]) .setlists-search-row .tb-search{flex:1;min-width:0}
+body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{padding:16px}
+body:not([data-route="calendar"]) .song-card .song-acts,body:not([data-route="calendar"]) .setlist-card .setlist-acts{width:100%}
+body:not([data-route="calendar"]) .song-card .song-acts .btn,body:not([data-route="calendar"]) .setlist-card .setlist-acts .btn{flex:1 1 auto;min-width:44px}
+body:not([data-route="calendar"]) .settings-tabs{margin-inline:-2px}
+body:not([data-route="calendar"]) .settings-tab{flex:0 0 auto}
+body:not([data-route="calendar"]) .part-switch{width:100%}
+body:not([data-route="calendar"]) .part-switch .part-btn{flex:1 1 0;min-width:0}
 }
-@media(max-width:380px){
-.content{padding-left:16px;padding-right:16px}
-.song-card,.setlist-card,.event-card{padding:14px}
-.part-switch{gap:4px}
-.part-switch .part-btn{padding-inline:8px;font-size:12px}
-}
-@media(prefers-reduced-motion:reduce){
-.song-card,.setlist-card,.event-card{transition:none!important}
-}
-@media(forced-colors:active){
-.card,.song-card,.setlist-card,.event-card,.settings-card,.member-card,.part-btn,.part-reset{forced-color-adjust:auto;border:1px solid CanvasText;box-shadow:none}
-}
+@media(max-width:380px){body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{padding:14px}body:not([data-route="calendar"]) .part-switch{gap:4px}body:not([data-route="calendar"]) .part-switch .part-btn{padding-inline:8px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{transition:none!important}}
+@media(forced-colors:active){body:not([data-route="calendar"]) .card,body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card,body:not([data-route="calendar"]) .settings-card,body:not([data-route="calendar"]) .member-card{forced-color-adjust:auto;border:1px solid CanvasText;box-shadow:none}}
