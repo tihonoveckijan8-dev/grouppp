@@ -7322,3 +7322,83 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .data-action-danger .data-action-buttons{width:100%}
   .data-action-danger .data-action-buttons .btn{width:100%;min-width:0}
 }
+
+@layer screens{
+  @media(max-width:640px){
+    .cal-grid{
+      width:100%!important;
+      max-width:100%!important;
+      min-width:0!important;
+      grid-template-columns:repeat(7,minmax(0,1fr))!important;
+      overflow:hidden!important;
+    }
+    .cal-cell{
+      width:auto!important;
+      max-width:100%!important;
+      min-width:0!important;
+    }
+    .cal-selected-day .card-h .btn{
+      min-width:0!important;
+      max-width:100%!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      padding-inline:10px!important;
+    }
+  }
+}
+
+@layer screens{
+  @media(max-width:390px){
+    .cal-cell.today .cal-num{
+      width:24px!important;height:24px!important;min-width:24px!important;
+      font-size:11px!important;
+    }
+    .cal-selected-day .card-h .btn{
+      gap:4px!important;
+      padding-inline:8px!important;
+      font-size:13px!important;
+    }
+  }
+}
+
+@layer screens{
+  @media(max-width:390px){
+    .cal-cell.today .cal-num{
+      width:20px!important;height:20px!important;min-width:20px!important;
+      font-size:10px!important;
+    }
+    .cal-selected-day .card-h .btn{
+      gap:3px!important;
+      padding-inline:7px!important;
+      font-size:12px!important;
+      line-height:1.1!important;
+    }
+    .cal-selected-day .card-h .btn svg{
+      width:13px!important;height:13px!important;
+    }
+  }
+}
+
+@layer screens{
+  @media(max-width:390px){
+    .cal-selected-day .card-h .btn{
+      gap:2px!important;
+      padding-inline:4px!important;
+      font-size:11px!important;
+      letter-spacing:-.01em!important;
+    }
+    .cal-selected-day .card-h .btn svg{width:12px!important;height:12px!important}
+  }
+}
+
+@layer screens{
+  @media(max-width:640px){
+    .ph-acts .btn{
+      padding-inline:8px!important;
+      gap:5px!important;
+      font-size:13px!important;
+      min-width:0!important;
+    }
+    .ph-acts .btn svg{width:14px!important;height:14px!important}
+  }
+}

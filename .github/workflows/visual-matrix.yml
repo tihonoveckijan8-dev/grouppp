@@ -1,0 +1,42 @@
+name: BandPlan Visual Matrix
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install build tool
+        run: npm install --no-package-lock
+      - name: Build production
+        run: npm run build
+      - name: Install Playwright
+        run: npm install --no-package-lock --no-save playwright@1.56.1
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start static server
+        run: python3 -m http.server 4174 --directory dist > /tmp/bandplan-visual.log 2>&1 &
+      - name: Run visual matrix
+        run: npx playwright test tests/visual-matrix.spec.mjs --reporter=line --workers=1
+      - name: Upload visual matrix artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandplan-visual-matrix
+          path: test-results/
+          if-no-files-found: ignore
