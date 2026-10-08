@@ -1720,7 +1720,7 @@ function vSong(id) {
   const myRole = myRoles()[0] || '';
   const mine = s.dynamics ? myRoles().filter(r => (s.dynamics.instruments || []).indexOf(r) >= 0) : [];
   const hasMy = mine.length > 0;
-  let h = '<div class="split"><div class="stack">';
+  let h = '<div class="split setlist-detail"><div class="stack">'
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="font-size:var(--fs-h3);overflow-wrap:anywhere">' + esc(s.title) + '</h2>' +
     '<div class="sub">' + esc(s.artist || 'Исполнитель не указан') + '</div></div>' +
     '<div class="row"><button class="icon-btn fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное">' + ic('star', 17) + '</button>' +
