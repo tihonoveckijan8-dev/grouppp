@@ -1837,6 +1837,8 @@ function vSetlist(id) {
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
     (linkedEvent ? '<span class="badge b-muted">' + ic('calendar', 11) + esc(linkedEvent.title) + '</span>' : '') +
     '</div>' +
+    '<div class="card-h mt" style="align-items:end"><div><h3>Состав программы</h3><div class="sub">Порядок песен, тональности и индивидуальные настройки партии</div></div>' +
+    '<span class="cap num">' + count + ' ' + plural(count, 'трек', 'трека', 'треков') + '</span></div>' +
 
     '<div class="dropzone mt" id="dropZone">';
 
@@ -1898,7 +1900,7 @@ function vSetlist(id) {
     '</div>' +
     '<div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 16) + 'Удалить сет-лист</button></div></section>';
 
-  h += '<section class="card rise" style="animation-delay:.08s"><div class="card-h"><div><h2>Библиотека песен</h2><div class="sub">' + state.songs.length + ' ' + plural(state.songs.length, 'песня', 'песни', 'песен') + ' в репертуаре</div></div></div>' +
+  h += '<section class="card rise" style="animation-delay:.08s"><div class="card-h"><div><h2>Добавить песни</h2><div class="sub">' + state.songs.length + ' ' + plural(state.songs.length, 'песня', 'песни', 'песен') + ' в репертуаре</div></div></div>' +
     '<div class="tb-search mb" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
     '<input id="libQ" class="bare-input" type="search" placeholder="Поиск песни…" value="' + esc(ui.libQuery) + '"></div>' +
     '<div class="lib-list" id="libList">';
