@@ -1890,7 +1890,13 @@ function vSetlist(id) {
     state.events.filter(e => e.status === 'done').slice(0, 10).map(e => '<option value="' + e.id + '"' + (linkedEventId === e.id ? ' selected' : '') + '>' + esc(pdate(e.date) + ' · ' + e.title + ' (проведено)') + '</option>').join('') +
     '</select></div>' +
     '<div class="field"><label class="field-label" for="slNoteInp">Заметки к сет-листу</label><textarea class="input" id="slNoteInp" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Переходы, вступления, динамика программы">' + esc(sl.note || '') + '</textarea></div>' +
-    '<button class="btn btn-primary btn-block" type="button" data-act="sl-meta-save" data-id="' + sl.id + '">' + ic('check', 16) + 'Сохранить изменения</button></section>';
+    '<button class="btn btn-primary btn-block" type="button" data-act="sl-meta-save" data-id="' + sl.id + '">' + ic('check', 16) + 'Сохранить изменения</button>' +
+    '<div class="row mt" style="gap:var(--s2);flex-wrap:wrap">' +
+    '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button>' +
+    '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 16) + 'Печать</button>' +
+    '<button class="btn btn-secondary" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 16) + 'Дублировать</button>' +
+    '</div>' +
+    '<div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 16) + 'Удалить сет-лист</button></div></section>';
 
   h += '<section class="card rise" style="animation-delay:.08s"><div class="card-h"><div><h2>Библиотека песен</h2><div class="sub">' + state.songs.length + ' ' + plural(state.songs.length, 'песня', 'песни', 'песен') + ' в репертуаре</div></div></div>' +
     '<div class="tb-search mb" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
@@ -1905,13 +1911,6 @@ function vSetlist(id) {
       '<button class="icon-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" style="width:var(--tap);height:var(--tap)">' + ic('plus', 15) + '</button></div>';
   });
   h += '</div></section>';
-
-  h += '<section class="card rise" style="animation-delay:.12s"><div class="card-h"><div><h2>Действия</h2><div class="sub">Быстрые действия для текущего сет-листа</div></div></div>' +
-    '<div class="row" style="gap:var(--s2);flex-wrap:wrap">' +
-    '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button>' +
-    '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 16) + 'Печать</button>' +
-    '<button class="btn btn-secondary" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 16) + 'Дублировать</button>' +
-    '</div><div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 16) + 'Удалить сет-лист</button></div></section>';
 
   return h + '</div></div>';
 }
