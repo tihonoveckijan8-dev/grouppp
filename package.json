@@ -5,12 +5,19 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "cap:sync": "npm run build && cap sync",
+    "cap:android": "npm run build && cap sync android && cap open android",
+    "cap:ios": "npm run build && cap sync ios && cap open ios"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
     "esbuild": "0.25.9"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
     "express": "^5.2.1"
   }
 }
