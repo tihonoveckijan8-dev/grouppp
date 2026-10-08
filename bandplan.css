@@ -7258,3 +7258,13 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     .master-detail-panel{display:none}
   }
 }
+
+@layer screens{
+  @media(min-width:1100px){
+    .master-detail-shell.is-desktop .master-list .song-card.is-selected{
+      border-color:var(--accent-border);
+      background:var(--accent-soft);
+      box-shadow:var(--shadow-1);
+    }
+  }
+}
