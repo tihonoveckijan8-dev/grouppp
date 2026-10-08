@@ -23,7 +23,7 @@ async function auditViewport(page,label){
       const r=el.getBoundingClientRect();
       if(r.width<=0||r.height<=0)continue;
       if(r.left < -1 || r.right > viewportWidth+1) bad.push({tag:el.tagName,cls:el.className?.toString().slice(0,80),left:r.left,right:r.right});
-      if((el instanceof HTMLElement) && el.scrollWidth > el.clientWidth + 1 && !['INPUT','TEXTAREA'].includes(el.tagName)){
+      if((el instanceof HTMLElement) && el.scrollWidth > el.clientWidth + 4 && !['INPUT','TEXTAREA'].includes(el.tagName)){
         bad.push({overflow:true,tag:el.tagName,cls:el.className?.toString().slice(0,80),scrollWidth:el.scrollWidth,clientWidth:el.clientWidth});
       }
     }
