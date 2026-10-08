@@ -7390,3 +7390,15 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     .cal-selected-day .card-h .btn svg{width:12px!important;height:12px!important}
   }
 }
+
+@layer screens{
+  @media(max-width:640px){
+    .ph-acts .btn{
+      padding-inline:8px!important;
+      gap:5px!important;
+      font-size:13px!important;
+      min-width:0!important;
+    }
+    .ph-acts .btn svg{width:14px!important;height:14px!important}
+  }
+}
