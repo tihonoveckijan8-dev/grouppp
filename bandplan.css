@@ -7200,9 +7200,24 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .cal-selected-day{display:none}
   .cal-cell.today{background:var(--surf-2)!important;border-color:var(--accent)!important;box-shadow:none!important}
   .cal-cell.today .cal-num{
-    width:28px!important;height:28px!important;min-width:28px!important;
+    width:24px!important;height:24px!important;min-width:24px!important;
     padding:0!important;display:grid!important;place-items:center!important;
     border-radius:50%!important;background:var(--accent)!important;color:var(--on-accent)!important;
+  }
+  .cal-head [data-act="event-new"]{
+    min-height:40px;
+    height:40px;
+    padding:0 14px;
+    gap:6px;
+    border-radius:12px;
+    white-space:nowrap;
+  }
+  @media(max-width:640px){
+    .cal-head [data-act="event-new"]{
+      min-height:40px;
+      height:40px;
+      padding:0 12px;
+    }
   }
   .cal-cell.sel:not(.today){box-shadow:inset 0 0 0 2px var(--accent-border)!important;border-color:var(--accent-border)!important}
   .cal-cell.sel:not(.today) .cal-num{border:2px solid var(--accent);border-radius:50%;padding:0 5px}
