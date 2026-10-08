@@ -305,6 +305,22 @@
       currentSession = session || null;
       if (authEvent === 'INITIAL_SESSION') {
         authState = 'ready';
+        // A persisted session emits INITIAL_SESSION, not SIGNED_IN. The lazy
+        // core loader must still be started for a normal page reload, otherwise
+        // the auth shell stays locked and the application appears completely blank.
+        if (currentSession?.user) {
+          window.__bandplanAuthUserId = currentSession.user.id;
+          setTimeout(() => {
+            Promise.resolve()
+              .then(async () => {
+                if (typeof window.__bandplanEnsureCore !== 'function') throw new Error('Не удалось запустить BandPlan.');
+                await window.__bandplanEnsureCore();
+                if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось восстановить рабочее пространство BandPlan.');
+                await window.__bandplanResumeAuthenticated(currentSession.user);
+              })
+              .catch(error => console.error('BandPlan persisted session resume failed:', error));
+          }, 0);
+        }
         return;
       }
       if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED' || authEvent === 'USER_UPDATED') {
