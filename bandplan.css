@@ -6970,3 +6970,9 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 @media(prefers-reduced-motion:reduce){
  .boot-brand i{animation:none!important;transform:none!important}
 }
+
+/* Remove dark boot overlay; keep the loading square animation. */
+@layer boot{
+ .boot{background:transparent!important}
+ .boot-sidebar,.boot-main{background:transparent!important;border-color:transparent!important}
+}
