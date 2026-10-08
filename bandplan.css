@@ -7472,3 +7472,14 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     align-content:flex-start;
   }
 }
+
+
+/* Calendar day header: reserve its full height so event content cannot compress it. */
+@layer screens{
+  .cal-cell .cal-num{
+    flex:0 0 auto;
+  }
+  .cal-cell .cal-more{
+    flex:0 0 auto;
+  }
+}
