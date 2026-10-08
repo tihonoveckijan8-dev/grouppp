@@ -6858,3 +6858,79 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
  body[data-route="settings"] [data-settings-panel="group"] .profile-actions{width:100%}
  body[data-route="settings"] [data-settings-panel="group"] .profile-actions .btn{width:100%;flex-basis:100%}
 }
+
+/* Settings interface panel — premium controls. Calendar intentionally untouched. */
+@layer components{
+ body[data-route="settings"] [data-settings-panel="interface"] .card-h{
+   margin-bottom:18px
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .card-h h2{
+   display:flex;align-items:center;gap:8px;min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .split2{
+   gap:24px;align-items:start
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-inline-field{
+   min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-inline-field>.field-label{
+   display:block;margin-bottom:8px
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-one-line{
+   width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-one-line button{
+   min-width:0;min-height:42px;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown{
+   position:relative;width:100%;min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown>summary{
+   min-height:44px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;border:1px solid var(--control-border);border-radius:var(--radius-xl);background:var(--surf-2);cursor:pointer;list-style:none
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown>summary::-webkit-details-marker{display:none}
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-current{
+   display:flex;align-items:center;gap:9px;min-width:0;overflow:hidden
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-current>span:last-child{
+   overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-menu{
+   position:absolute;z-index:20;left:0;right:0;top:calc(100% + 6px);padding:6px;border:1px solid var(--border);border-radius:var(--radius-xl);background:var(--surf-1);box-shadow:var(--shadow-card);max-height:280px;overflow:auto
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option{
+   width:100%;min-height:40px;display:flex;align-items:center;gap:9px;padding:7px 9px;border:0;border-radius:10px;background:transparent;color:var(--text);text-align:left;cursor:pointer
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option:hover,
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option.on{
+   background:var(--surf-3)
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-custom{
+   position:relative
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-custom input{
+   position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dot{
+   width:16px;height:16px;flex:0 0 16px;border-radius:50%;background:var(--swatch);border:1px solid var(--border-2);box-sizing:border-box
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .range{
+   width:100%;min-width:0
+ }
+}
+@media(max-width:900px){
+ body[data-route="settings"] [data-settings-panel="interface"] .split2{
+   grid-template-columns:1fr
+ }
+}
+@media(max-width:620px){
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-one-line{
+   grid-template-columns:1fr
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .settings-one-line button{
+   width:100%
+ }
+ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-menu{
+   max-height:240px
+ }
+}
