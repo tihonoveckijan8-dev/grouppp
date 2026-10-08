@@ -550,6 +550,12 @@
 
       if(!currentSession?.user) throw new Error('Сессия не создана. Попробуйте войти ещё раз.');
       if(actionMode==='login' && !isJustRegisteredForEmail(currentSession.user.email)) clearJustRegisteredFlag();
+
+      // Show the authenticated-entry loader immediately after a successful login,
+      // before revealing the application shell.
+      if (actionMode === 'login' && typeof window.__bandplanShowLoginLoader === 'function') {
+        window.__bandplanShowLoginLoader();
+      }
       setAuthShellLocked(false);
       gate().hidden=true;
 
