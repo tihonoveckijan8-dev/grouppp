@@ -1816,6 +1816,7 @@ function vSetlist(id) {
 
   const up = expand(today(), iso(new Date(Date.now() + 86400000 * 365)));
   const linkedEvent = sl.eventId ? evById(sl.eventId) : state.events.find(e => e.setlistId === sl.id && (e.status || 'upcoming') === 'upcoming');
+  const linkedEventId = linkedEvent ? linkedEvent.id : (sl.eventId || '');
   const count = (sl.items || []).length;
   const duration = setlistDur(sl);
 
@@ -1882,8 +1883,8 @@ function vSetlist(id) {
   /* Same secondary information/action rhythm as vSong(). */
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Информация о сет-листе</h2><div class="sub">Событие и заметки сохраняются вместе с программой</div></div></div>' +
     '<div class="field"><label class="field-label" for="slEventSel">Событие</label><select class="select" id="slEventSel"><option value="">— не привязан —</option>' +
-    up.map(o => '<option value="' + o.ev.id + '"' + (sl.eventId === o.ev.id ? ' selected' : '') + '>' + esc(pdate(o.date) + ' · ' + o.ev.title) + '</option>').join('') +
-    state.events.filter(e => e.status === 'done').slice(0, 10).map(e => '<option value="' + e.id + '"' + (sl.eventId === e.id ? ' selected' : '') + '>' + esc(pdate(e.date) + ' · ' + e.title + ' (проведено)') + '</option>').join('') +
+    up.map(o => '<option value="' + o.ev.id + '"' + (linkedEventId === o.ev.id ? ' selected' : '') + '>' + esc(pdate(o.date) + ' · ' + o.ev.title) + '</option>').join('') +
+    state.events.filter(e => e.status === 'done').slice(0, 10).map(e => '<option value="' + e.id + '"' + (linkedEventId === e.id ? ' selected' : '') + '>' + esc(pdate(e.date) + ' · ' + e.title + ' (проведено)') + '</option>').join('') +
     '</select></div>' +
     '<div class="field"><label class="field-label" for="slNoteInp">Заметки к сет-листу</label><textarea class="input" id="slNoteInp" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Переходы, вступления, динамика программы">' + esc(sl.note || '') + '</textarea></div>' +
     '<button class="btn btn-primary btn-block" type="button" data-act="sl-meta-save" data-id="' + sl.id + '">' + ic('check', 16) + 'Сохранить изменения</button></section>';
