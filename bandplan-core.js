@@ -1504,6 +1504,13 @@ function monthHTML(y, mo) {
   h += '</div>';
   h += '<div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>
     '<span><i class="event-type-dot type-' + t + '" aria-hidden="true"></i>' + EV_TYPES[t].label + '</span>').join('') + '</div>';
+  const selectedKey = ui.selDate || today();
+  const selectedItems = expand(selectedKey, selectedKey);
+  h += '<section class="cal-selected-day" aria-labelledby="calSelectedTitle">' +
+    '<div class="card-h"><div><h3 id="calSelectedTitle">' + esc(pdateFull(selectedKey)) + '</h3><div class="sub">' + selectedItems.length + ' ' + plural(selectedItems.length, 'событие', 'события', 'событий') + '</div></div>' +
+    '<button class="btn btn-primary btn-sm" type="button" data-act="new-event" data-date="' + esc(selectedKey) + '">' + ic('plus', 15) + 'Добавить</button></div>' +
+    (selectedItems.length ? selectedItems.map(o => evRow(o, true)).join('') : stateHTML('empty', 'На этот день ничего нет', 'Выберите другой день или добавьте событие.')) +
+    '</section>';
   return h;
 }
 const H0 = 7, H1 = 24, HPH = 48;
