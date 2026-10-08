@@ -6525,3 +6525,107 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     height:40px;
   }
 }
+
+
+/* Song editor — scoped to song routes. Calendar intentionally untouched. */
+@layer components{
+  body[data-route="songs"] #modalOverlay .modal.editor,
+  body[data-route="song"] #modalOverlay .modal.editor{
+    max-width:980px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .f2,
+  body[data-route="song"] #modalOverlay .modal.editor .f2{
+    gap:14px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .f3,
+  body[data-route="song"] #modalOverlay .modal.editor .f3{
+    gap:12px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .textarea,
+  body[data-route="song"] #modalOverlay .modal.editor .textarea{
+    min-height:240px;
+    line-height:1.55;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor #dynBlock,
+  body[data-route="song"] #modalOverlay .modal.editor #dynBlock{
+    min-width:0;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-editor,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-editor{
+    display:grid;
+    gap:12px;
+    padding:14px;
+    border:1px solid var(--border);
+    border-radius:var(--radius-xl);
+    background:var(--surf-3);
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-row,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-row{
+    min-width:0;
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:10px;
+    align-items:start;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:var(--surf-1);
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .cells,
+  body[data-route="song"] #modalOverlay .modal.editor .cells{
+    min-width:0;
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:3px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-cell,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-cell{
+    flex:0 0 170px;
+    min-width:170px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-cell select{
+    width:100%;
+    min-height:44px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-tools,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-tools{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    flex:0 0 auto;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-x{
+    margin-left:5px;
+    border:0;
+    background:none;
+    color:inherit;
+    cursor:pointer;
+  }
+}
+@media(max-width:700px){
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-row,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-row{
+    grid-template-columns:minmax(0,1fr) auto;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-row .cells,
+  body[data-route="song"] #modalOverlay .modal.editor .dyn-row .row-ns{
+    grid-column:1/-1;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-row>.icon-btn{
+    grid-column:2;
+    grid-row:1;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-cell{
+    flex-basis:156px;
+    min-width:156px;
+  }
+}
+@media(max-width:380px){
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-editor{
+    padding:10px;
+  }
+  body[data-route="songs"] #modalOverlay .modal.editor .dyn-row{
+    padding:9px;
+  }
+}
