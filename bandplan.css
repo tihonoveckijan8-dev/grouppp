@@ -4333,20 +4333,30 @@ body[data-route="songs"] .songs-search-row > .btn{
   }
 }
 
-/* Setlists: search and cards share exactly the same content width. */
-body[data-route="setlists"] .setlists-shell{
+/* Setlists: use the exact same desktop canvas and control geometry as Songs.
+   Only the card contents/style remain setlist-specific. */
+body[data-route="setlists"] .setlists-head-row,
+body[data-route="setlists"] .setlists-search-row,
+body[data-route="setlists"] > .t-sm,
+body[data-route="setlists"] .setlists-list{
   width:100%;
   max-width:var(--maxw);
   margin-left:auto;
   margin-right:auto;
   min-width:0;
 }
-body[data-route="setlists"] .setlists-head-row{
+
+body[data-route="setlists"] .setlists-head-row,
+body[data-route="setlists"] .setlists-search-row{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
   column-gap:var(--s2);
-  margin:0 0 var(--s2);
+}
+
+body[data-route="setlists"] .setlists-head-row{
+  margin-top:0;
+  margin-bottom:var(--s2);
 }
 body[data-route="setlists"] .setlists-head-row h1{
   min-width:0;
@@ -4357,32 +4367,49 @@ body[data-route="setlists"] .setlists-head-row h1{
 body[data-route="setlists"] .setlists-head-row .btn{
   justify-self:end;
   white-space:nowrap;
+  transform:none;
 }
-body[data-route="setlists"] .setlists-search-row,
-body[data-route="setlists"] .setlists-list{
-  width:100%;
-  max-width:none;
-  margin-left:0;
-  margin-right:0;
+body[data-route="setlists"] .setlists-head-row .btn:hover,
+body[data-route="setlists"] .setlists-head-row .btn:active{
+  transform:none;
 }
 body[data-route="setlists"] .setlists-search-row{
-  display:block;
-  padding:0;
+  flex-wrap:nowrap;
   margin-bottom:var(--s4);
 }
 body[data-route="setlists"] .setlists-search-row .tb-search{
-  display:flex;
-  width:100%;
-  max-width:none;
   min-width:0;
-  box-sizing:border-box;
-  margin:0;
+  width:100%;
+}
+body[data-route="setlists"] .setlists-search-row > .btn{
+  flex:none;
 }
 body[data-route="setlists"] .setlists-list > article.song-card{
   width:100%;
-  max-width:none;
+  max-width:100%;
   box-sizing:border-box;
 }
+
+/* Keep the desktop search field the same width as the Songs search field;
+   on mobile it returns to the full available width. */
+@media(min-width:641px){
+  body[data-route="setlists"] .setlists-search-row .tb-search{
+    width:calc(100% - var(--tap) - var(--s2));
+  }
+}
+@media(max-width:640px){
+  body[data-route="setlists"] .setlists-head-row,
+  body[data-route="setlists"] .setlists-search-row,
+  body[data-route="setlists"] > .t-sm,
+  body[data-route="setlists"] .setlists-list{
+    max-width:none;
+  }
+  body[data-route="setlists"] .setlists-search-row .tb-search{
+    width:100%;
+    max-width:100%;
+  }
+}
+
 /* PREMIUM COLLECTION SEARCH — Songs + Setlists */
 body[data-route="songs"] .songs-search-row .tb-search,
 body[data-route="setlists"] .setlists-search-row .tb-search{
@@ -5831,6 +5858,18 @@ body[data-route="setlists"] .setlists-list > article.song-card .song-open-top{
   .participation-collection.collection-blocks>.ev-row .part-switch{
     width:100%;
   }
+}
+
+/* REPERTOIRE / SETLISTS — identical desktop header button geometry */
+body[data-route="songs"] .songs-head-row > [data-act="new-song"],
+body[data-route="setlists"] .setlists-head-row > [data-act="new-setlist"],
+body[data-route="songs"] .card .state .acts > [data-act="new-song"],
+body[data-route="setlists"] .card .state .acts > [data-act="new-setlist"]{
+  width:196px;
+  max-width:100%;
+  min-width:0;
+  justify-content:center;
+  box-sizing:border-box;
 }
 
 /* REPERTOIRE — equal-width add-song actions */
