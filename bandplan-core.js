@@ -1348,30 +1348,17 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
-  const up = upcoming(), next = up[0], p = state.profile, song = state.songs[0];
-  const my = next ? (eventStatusFor(next.ev) || '') : '';
-  const participationStatus = my ? participantStatusLabel(my) : 'Не отмечено';
-  const statusCls = my ? 'b-ok' : 'b-muted';
-  const nextMeta = next ? [
-    pdateFull(next.date),
-    next.ev.time ? next.ev.time + (next.ev.end ? '–' + next.ev.end : '') : '',
-    next.ev.location || ''
-  ].filter(Boolean).join(' · ') : 'Добавьте первое событие в календарь';
-  return '<section class="hero rise" aria-labelledby="heroH"><div class="hero-in"><div>' +
-    '<span class="hero-eyebrow">' + ic('bolt', 12) + esc(p.bandName || 'Моя группа') + (myRoles().length ? ' · ' + esc(rolesLabel(myRoles())) : '') + '</span>' +
-    '<h1 id="heroH">' + esc(next ? 'Ближайшее: ' + next.ev.title : 'Расписание группы под контролем') + '</h1>' +
-    '<p class="hero-sub">' + esc(next ? nextMeta + ' · ' + countdown(next.date) : 'Календарь, репертуар, сет-листы и сценический режим в одном рабочем пространстве.') + '</p>' +
-    '<div class="hero-cta">' +
-    (next ? '<button class="btn btn-primary btn-lg" type="button" data-act="event-info" data-id="' + esc(next.ev.id) + '" data-date="' + esc(next.date) + '">' + ic('calendar', 18) + 'Открыть событие</button>' :
-      '<button class="btn btn-primary btn-lg" type="button" data-act="new-event">' + ic('plus', 18) + 'Создать событие</button>') +
-    '<button class="btn btn-tertiary btn-lg" type="button" data-act="scene-quick">' + ic('monitor', 18) + 'Сценический режим</button></div>' +
-    (next ? '<div class="hero-position">' + renderMyPositionBadge(next.ev, {compact:false}) + '</div>' : '') +
-    '<div class="hero-metrics">' +
-    heroMetric(up.length, 'предстоящих ' + plural(up.length, 'событие', 'события', 'событий')) +
-    heroMetric(state.songs.length, 'песен в репертуаре') +
-    heroMetric(state.setlists.length, plural(state.setlists.length, 'сет-лист', 'сет-листа', 'сет-листов')) +
-    heroMetric(state.members.length, 'участников в составе') +
-    '</div></div></section>';
+  const next = upcoming()[0], p = state.profile, my = next ? (eventStatusFor(next.ev) || '') : '';
+  const meta = next ? [pdateFull(next.date), next.ev.time ? next.ev.time + (next.ev.end ? '–' + next.ev.end : '') : '', next.ev.location || ''].filter(Boolean).join(' · ') : '';
+  return '<section class="nearest-event rise" aria-labelledby="nearestEventTitle">' +
+    '<div class="nearest-event-main"><span class="eyebrow">Ближайшее событие</span>' +
+    '<h1 id="nearestEventTitle">' + esc(next ? next.ev.title : 'Событий пока нет') + '</h1>' +
+    (meta ? '<p class="nearest-event-meta">' + esc(meta) + '</p>' : '<p class="nearest-event-meta">Добавьте первое событие в календарь.</p>') +
+    (next ? '<div class="nearest-event-status">' + renderMyPositionBadge(next.ev, {compact:false}) + '</div>' : '') +
+    '</div><div class="nearest-event-actions">' +
+    (next ? '<button class="btn btn-primary" type="button" data-act="event-info" data-id="' + esc(next.ev.id) + '" data-date="' + esc(next.date) + '">' + ic('calendar', 17) + 'Открыть событие</button>' : '<button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Добавить событие</button>') +
+    '<button class="btn btn-tertiary" type="button" data-act="scene-quick">' + ic('monitor', 17) + 'Сцена</button>' +
+    '</div></section>';
 }
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
@@ -1814,12 +1801,12 @@ function vSetlists() {
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
-      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-setlist" data-id="' + sl.id + '"><span class="btn-txt">Открыть</span></button></div>' +
+      '<span class="card-chevron" aria-hidden="true">›</span></div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сетлиста" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Создать копию сетлиста" title="Копия">' + ic('copy', 15) + '<span class="btn-txt">Копия</span></button>' +
-      '<button class="btn btn-danger btn-sm" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сетлист" title="Удалить">' + ic('trash', 15) + '<span class="btn-txt">Удалить</span></button>' +
-      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сцену" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button></div></article>';
+      '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
+      '<button class="icon-btn" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
+      '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '</button>' +
+      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">Открыть на сцене</span></button></div></article>';
   });
   return h + '</div>';
 }
@@ -2003,10 +1990,10 @@ function vSettings() {
     '<div class="field"><label class="field-label" for="lsRange">Шрифт текста песни: <b class="num" id="lsVal">' + s.lyricsSize + 'px</b></label><input class="range" id="lsRange" type="range" min="12" max="26" step="1" value="' + s.lyricsSize + '"></div>' +
     '<div class="field"><label class="field-label" for="scRange">Шрифт на сцене: <b class="num" id="scValS">' + s.sceneSize + 'px</b></label><input class="range" id="scRange" type="range" min="16" max="52" step="1" value="' + s.sceneSize + '"></div>' +
     '<div class="field"><label class="field-label" for="spRange">Скорость автопрокрутки: <b class="num" id="spValS">' + s.sceneSpeed + ' px/с</b></label><input class="range" id="spRange" type="range" min="10" max="200" step="5" value="' + s.sceneSpeed + '"></div>' +
-    '<div class="field"><span class="field-label">Поведение</span><div class="row" style="gap:6px">' +
-    '<button class="chip' + (s.autoscroll ? ' on' : '') + '" type="button" data-act="toggle-auto" aria-pressed="' + !!s.autoscroll + '">' + ic('bolt', 14) + 'Автопрокрутка на сцене</button>' +
-    '<button class="chip' + (s.reduced ? ' on' : '') + '" type="button" data-act="toggle-reduced" aria-pressed="' + !!s.reduced + '">' + ic('wave', 14) + 'Меньше анимации</button>' +
-    '<button class="chip' + (s.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (s.showChords !== false) + '">' + ic('music', 14) + 'Показывать аккорды</button></div></div>' +
+    '<div class="field"><span class="field-label">Поведение</span><div class="settings-switches">' +
+    '<button class="switch-control" type="button" data-act="toggle-auto" role="switch" aria-checked="' + !!s.autoscroll + '"><span class="switch-track"><i></i></span><span>Автопрокрутка на сцене</span></button>' +
+    '<button class="switch-control" type="button" data-act="toggle-reduced" role="switch" aria-checked="' + !!s.reduced + '"><span class="switch-track"><i></i></span><span>Меньше анимации</span></button>' +
+    '<button class="switch-control" type="button" data-act="toggle-chords" role="switch" aria-checked="' + (s.showChords !== false) + '"><span class="switch-track"><i></i></span><span>Показывать аккорды</span></button></div></div>' +
     '<div class="field settings-inline-field"><span class="field-label">Уведомления о действиях</span><div class="seg settings-one-line">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
   if (!isStandalone()) h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на устройство</h2></div></div><button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install">' + ic('dl', 16) + 'Установить приложение</button></section>';
@@ -2662,6 +2649,11 @@ async function finishOnboarding() {
 }
 
 /* ═══ 21. ACTIONS ═══ */
+document.addEventListener('keydown', function (e) {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-act="open-song"],[data-act="open-setlist"]') && !e.target.closest('button,input,select,textarea,a')) {
+    e.preventDefault(); e.target.click();
+  }
+});
 document.addEventListener('click', function (e) {
   const el = e.target.closest('[data-act]');
   if (!el) { if (!e.target.closest('#searchWrap')) closeSearch(); return; }
