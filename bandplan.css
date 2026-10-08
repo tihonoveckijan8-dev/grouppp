@@ -7337,3 +7337,58 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .data-action-danger .data-action-buttons{width:100%}
   .data-action-danger .data-action-buttons .btn{width:100%;min-width:0}
 }
+
+
+/* ═══ Calendar header refinement · compact controls ═══ */
+@layer screens{
+  .cal-head > .row-ns{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .cal-head > .row-ns .cal-title{
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align:center;
+  }
+  .cal-head > [data-act="event-new"]{
+    flex:0 0 auto;
+    min-width:max-content;
+  }
+}
+@media(max-width:640px){
+  .cal-head{
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  .cal-head > .row-ns{
+    order:1;
+    flex:1 1 0;
+    min-width:0;
+  }
+  .cal-head > [data-act="event-new"]{
+    order:2;
+    flex:0 0 auto;
+  }
+  .cal-head > .seg{
+    order:3;
+    flex:0 0 100%;
+    width:100%;
+  }
+  .cal-head > .row-ns .cal-title{
+    font-size:var(--fs-body);
+  }
+}
+@media(max-width:390px){
+  .cal-head > [data-act="event-new"]{
+    padding-left:10px;
+    padding-right:10px;
+  }
+  .cal-head > .row-ns .icon-btn.lg{
+    width:38px;
+    min-width:38px;
+    height:38px;
+  }
+}
