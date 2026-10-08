@@ -7322,3 +7322,27 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .data-action-danger .data-action-buttons{width:100%}
   .data-action-danger .data-action-buttons .btn{width:100%;min-width:0}
 }
+
+@layer screens{
+  @media(max-width:640px){
+    .cal-grid{
+      width:100%!important;
+      max-width:100%!important;
+      min-width:0!important;
+      grid-template-columns:repeat(7,minmax(0,1fr))!important;
+      overflow:hidden!important;
+    }
+    .cal-cell{
+      width:auto!important;
+      max-width:100%!important;
+      min-width:0!important;
+    }
+    .cal-selected-day .card-h .btn{
+      min-width:0!important;
+      max-width:100%!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      padding-inline:10px!important;
+    }
+  }
+}
