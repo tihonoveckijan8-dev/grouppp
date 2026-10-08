@@ -1993,7 +1993,7 @@ function vSettings() {
     '<summary><span class="accent-dropdown-current"><span class="accent-dot" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[s.accent] || 'Акцентный цвет') + '</span></span><span class="accent-dropdown-chevron">' + ic('chevronDown', 15) + '</span></summary>' +
     '<div class="accent-dropdown-menu">' +
     ACCENTS.map(a => '<button class="accent-dropdown-option' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"><span class="accent-dot" style="--swatch:' + a + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[a] || a) + '</span>' + (s.accent.toLowerCase() === a.toLowerCase() ? ic('check', 14) : '') + '</button>').join('') +
-    '<label class="accent-dropdown-option accent-dropdown-custom"><span class="accent-dot accent-dot-custom" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label>' +
+    '<label class="accent-dropdown-option accent-dropdown-custom"><span class="accent-dot accent-dot-custom" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label><button class="accent-dropdown-reset" type="button" data-act="accent-reset">Сбросить</button>' +
     '</div></details></div>' +
     '<div class="field settings-inline-field"><span class="field-label">Запись аккордов</span><div class="seg settings-one-line">' +
     [['auto', 'Как в оригинале'], ['sharp', 'Диезы (C#)'], ['flat', 'Бемоли (Db)']].map(o => '<button type="button" data-act="notation-set" data-v="' + o[0] + '" class="' + (s.notation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -2866,6 +2866,7 @@ document.addEventListener('click', function (e) {
     }
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
+    case 'accent-reset': stop(); applyAccent('#1554FF'); break;
     case 'notation-set': stop(); state.settings.notation = el.getAttribute('data-v'); commit(); break;
     case 'weekstart-set': stop(); state.settings.weekStart = +el.getAttribute('data-v'); save(); render(); $$('#modalOverlay [data-act="weekstart-set"]').forEach(b => b.classList.toggle('on', +b.getAttribute('data-v') === state.settings.weekStart)); break;
     case 'toggle-auto': stop(); state.settings.autoscroll = !state.settings.autoscroll; commit(); break;
