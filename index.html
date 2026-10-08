@@ -23,7 +23,7 @@ try{
 var bpDoc=document.documentElement,bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpStoredAccent=localStorage.getItem('accent')||'',bpThemeIds=['light','dark','amoled'];
 var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');bpDoc.dataset.theme=bpTheme;
 var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim(),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
-var bpPreset=(bpBoot&&bpPresetIds.indexOf(bpBoot.accentPreset)>=0)?bpBoot.accentPreset:'',bpPresetColor=bpPreset?bpCss.getPropertyValue('--accent-preset-'+bpPreset+'-'+bpTheme).trim():'';
+var bpStoredPreset=bpPresetIds.indexOf(bpStoredAccent.toLowerCase())>=0?bpStoredAccent.toLowerCase():'',bpPreset=(bpBoot&&bpPresetIds.indexOf(bpBoot.accentPreset)>=0)?bpBoot.accentPreset:bpStoredPreset,bpPresetColor=bpPreset?bpCss.getPropertyValue('--accent-preset-'+bpPreset+'-'+bpTheme).trim():'';
 var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpStoredAccent)?bpStoredAccent.toUpperCase():(/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accent||'')?bpBoot.accent.toUpperCase():(bpPresetColor||bpCss.getPropertyValue('--accent-default').trim()));
 var bpWhite=bpCss.getPropertyValue('--token-white').trim(),bpBlack=bpCss.getPropertyValue('--token-black').trim();
 function bpLum(hex){var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}

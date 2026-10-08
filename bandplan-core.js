@@ -354,8 +354,9 @@ function defaults() {
   const bootTheme = ['light','dark','amoled'].includes(document.documentElement.dataset.theme)
     ? document.documentElement.dataset.theme : 'light';
   const boot = (() => { try { return JSON.parse(localStorage.getItem('bandplan.boot') || 'null') || {}; } catch (e) { return {}; } })();
-  const bootPreset = ACCENTS.includes(boot.accentPreset) ? boot.accentPreset : '';
   const storedAccent = localStorage.getItem('accent') || '';
+  const storedPreset = ACCENTS.includes(String(storedAccent).toLowerCase()) ? String(storedAccent).toLowerCase() : '';
+  const bootPreset = ACCENTS.includes(boot.accentPreset) ? boot.accentPreset : storedPreset;
   const bootAccent = /^#[0-9a-fA-F]{6}$/.test(storedAccent) ? storedAccent.toUpperCase() : (bootPreset ? presetAccentColor(bootPreset, bootTheme) : tokenColor('--accent-default'));
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
