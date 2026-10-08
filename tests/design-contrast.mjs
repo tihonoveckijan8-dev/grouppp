@@ -56,7 +56,7 @@ for(const theme of themes){
   }
 }
 assert.equal(value('--theme-color-amoled'),value('--token-black'),'AMOLED background must use the canonical black token');
-assert.ok(css.includes('[data-theme="amoled"]') && css.includes('--surf-1:#0B0B0E'),'AMOLED card token must be #0B0B0E');
+assert.ok(css.includes('--amoled-card:') && css.includes('[data-theme="amoled"]') && css.includes('--surf-1:var(--amoled-card)'),'AMOLED card must use the canonical card token');
 console.log('BandPlan design contrast audit: PASS');
 console.log('Matrix: 3 themes × 9 presets = 27 combinations');
 console.log('Hardcoded JS/index colors: 0');
