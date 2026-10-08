@@ -55,6 +55,12 @@ for(const theme of themes){
     assert.ok(Math.max(onWhite,onBlack)>=4.5-1e-6,theme+'/'+accent+' on-accent text cannot reach 4.5');
   }
 }
+assert.ok(value('--accent-default').startsWith('#'),'Canonical accent default token missing');
+for (const token of ['--accent-soft','--accent-border','--accent-ring','--on-accent','--accent-text']) {
+  assert.ok(css.includes(token+':'),'Missing unified accent token '+token);
+}
+assert.equal(value('--accent-glow'),'transparent','Accent glow must be disabled; elevation uses normal shadows only');
+assert.equal(value('--amoled-card'),'#0B0B0E','AMOLED cards must use #0B0B0E');
 assert.equal(value('--theme-color-amoled'),value('--token-black'),'AMOLED background must use the canonical black token');
 assert.ok(css.includes('--amoled-card:') && css.includes('[data-theme="amoled"]') && css.includes('--surf-1:var(--amoled-card)'),'AMOLED card must use the canonical card token');
 console.log('BandPlan design contrast audit: PASS');
