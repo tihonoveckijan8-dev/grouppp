@@ -1638,7 +1638,7 @@ function vSongs() {
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div>' +
       '<div class="song-open-wrap">' +
       '<button class="fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="' + (s.fav ? 'Убрать из избранного' : 'В избранное') + '">' + ic('star', 18) + '</button>' +
-      '<button class="btn btn-primary btn-sm song-open song-open-top" type="button" data-act="open-song" data-id="' + s.id + '"><span class="btn-txt">Открыть</span></button>' +
+      '<span class="card-chevron" aria-hidden="true">›</span>' +
       '</div></div>' +
       '<div class="song-meta">' +
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
