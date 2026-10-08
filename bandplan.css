@@ -7502,3 +7502,10 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     max-width:100%;
   }
 }
+
+/* Calendar mobile geometry: keep day cells square instead of inheriting desktop min-height. */
+@media(max-width:767px){
+  .cal-cell{
+    min-height:0!important;
+  }
+}
