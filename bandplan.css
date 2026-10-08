@@ -7378,3 +7378,15 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     }
   }
 }
+
+@layer screens{
+  @media(max-width:390px){
+    .cal-selected-day .card-h .btn{
+      gap:2px!important;
+      padding-inline:4px!important;
+      font-size:11px!important;
+      letter-spacing:-.01em!important;
+    }
+    .cal-selected-day .card-h .btn svg{width:12px!important;height:12px!important}
+  }
+}
