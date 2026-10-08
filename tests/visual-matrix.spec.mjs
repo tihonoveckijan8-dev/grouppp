@@ -70,7 +70,7 @@ test('BandPlan visual matrix: themes, accents, responsive screens', async ({brow
         // Forms and Scene are exercised once per combination too.
         await page.evaluate(()=>{location.hash='#/calendar'});
         await page.waitForTimeout(80);
-        const newEvent=page.locator('[data-act="new-event"]').first();
+        const newEvent=page.locator('[data-act="new-event"]:visible').first();
         if(await newEvent.count()) {
           await newEvent.click();
           await page.waitForTimeout(80);
@@ -80,7 +80,7 @@ test('BandPlan visual matrix: themes, accents, responsive screens', async ({brow
 
         await page.evaluate(()=>{location.hash='#/songs'});
         await page.waitForTimeout(80);
-        const newSong=page.locator('[data-act="new-song"]').first();
+        const newSong=page.locator('[data-act="new-song"]:visible').first();
         if(await newSong.count()) {
           await newSong.click();
           await page.waitForTimeout(80);
@@ -90,7 +90,7 @@ test('BandPlan visual matrix: themes, accents, responsive screens', async ({brow
 
         await page.evaluate(()=>{location.hash='#/setlists'});
         await page.waitForTimeout(80);
-        const newSetlist=page.locator('[data-act="new-setlist"]').first();
+        const newSetlist=page.locator('[data-act="new-setlist"]:visible').first();
         if(await newSetlist.count()) {
           await newSetlist.click();
           await page.waitForTimeout(80);
@@ -100,7 +100,7 @@ test('BandPlan visual matrix: themes, accents, responsive screens', async ({brow
 
         await page.evaluate(()=>{location.hash='#/calendar'});
         await page.waitForTimeout(80);
-        const scene=page.locator('[data-act="scene-quick"]').first();
+        const scene=page.locator('[data-act="scene-quick"]:visible').first();
         if(await scene.count()) {
           await scene.click();
           await page.waitForTimeout(80);
