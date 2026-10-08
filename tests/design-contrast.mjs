@@ -6,7 +6,7 @@ const tokenStart=css.indexOf('@layer tokens{');
 const baseStart=css.indexOf('@layer base{', tokenStart);
 assert.ok(tokenStart>=0 && baseStart>tokenStart,'Canonical token layer is missing or misplaced');
 const cssOutsideTokens=css.slice(baseStart);
-const cssColorLiterals=[...cssOutsideTokens.matchAll(/#[0-9A-Fa-f]{3,8}\\b|rgba?\\([^)]*\\)|hsla?\\([^)]*\\)/g)].map(m=>m[0]);
+const cssColorLiterals=[...cssOutsideTokens.matchAll(/#[0-9A-Fa-f]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g)].map(m=>m[0]);
 assert.equal(cssColorLiterals.length,0,'Hardcoded CSS colors outside the canonical token layer: '+cssColorLiterals.slice(0,20).join(', '));
 const sources=['bandplan-core.js','bandplan.js','supabase.js','index.html'];
 const files=Object.fromEntries(sources.map(p=>[p,fs.readFileSync(p,'utf8')]));
