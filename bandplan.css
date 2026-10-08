@@ -6807,3 +6807,54 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     padding-bottom:2px;
   }
 }
+
+/* Settings group panel — premium member layout. Calendar intentionally untouched. */
+@layer components{
+ body[data-route="settings"] [data-settings-panel="group"] .group-settings-controls{
+   display:flex;align-items:center;justify-content:flex-start;gap:10px;margin:0 0 14px;min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .profile-actions{
+   display:flex;flex-wrap:wrap;gap:8px;min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .memb-row{
+   display:grid;grid-template-columns:42px minmax(0,1fr) minmax(170px,auto) auto;
+   align-items:center;gap:12px;min-width:0;padding:12px 0;border-top:1px solid var(--border)
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .memb-row .grow{min-width:0}
+ body[data-route="settings"] [data-settings-panel="group"] .memb-row .grow>div:first-child{
+   overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-status-wrap{
+   min-width:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:3px
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-event-context{
+   max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--muted)
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-actions{
+   display:flex;gap:4px;flex-shrink:0
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .settings-member-footer{
+   display:flex;justify-content:flex-end;padding-top:14px;margin-top:4px;border-top:1px solid var(--border)
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .settings-leave{min-height:44px}
+}
+@media(max-width:700px){
+ body[data-route="settings"] [data-settings-panel="group"] .memb-row{
+   grid-template-columns:38px minmax(0,1fr) auto;gap:10px
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-status-wrap{
+   grid-column:2 / -1;grid-row:2;align-items:flex-start;text-align:left;padding-left:0
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-actions{
+   grid-column:3;grid-row:1
+ }
+ body[data-route="settings"] [data-settings-panel="group"] .member-event-context{max-width:100%}
+ body[data-route="settings"] [data-settings-panel="group"] .profile-actions .btn{
+   flex:1 1 180px
+ }
+}
+@media(max-width:420px){
+ body[data-route="settings"] [data-settings-panel="group"] .group-settings-controls,
+ body[data-route="settings"] [data-settings-panel="group"] .profile-actions{width:100%}
+ body[data-route="settings"] [data-settings-panel="group"] .profile-actions .btn{width:100%;flex-basis:100%}
+}
