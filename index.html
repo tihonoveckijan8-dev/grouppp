@@ -19,43 +19,48 @@ try{
 </script>
 <script id="bandplan-boot-init">
 try{
-  var bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpDoc=document.documentElement;
-  if(!bpBoot){try{for(var k=0;k<localStorage.length;k++){var key=localStorage.key(k)||'';if(key.indexOf('bandplan.premium.v6:')===0){var raw=JSON.parse(localStorage.getItem(key)||'null');if(raw&&raw.settings){bpBoot={theme:raw.settings.theme,accent:raw.settings.accent,accentApplied:raw.settings.accentApplied,onAccent:raw.settings.onAccent};break;}}}}catch(_e){}}
+  var bpDoc=document.documentElement;
+  var bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null');
+  var bpStoredAccent=localStorage.getItem('accent')||'';
   var bpThemeIds=['light','dark','amoled'];
   var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
   var bpThemeColor={light:'#F4F6F8',dark:'#14161C',amoled:'#000000'}[bpTheme]||'#F4F6F8';
-  var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accentApplied||'')?(bpBoot.accentApplied):(bpBoot&&/^#[0-9a-fA-F]{6}$/.test(bpBoot.accent||'')?bpBoot.accent:'#1554FF');
+  var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpStoredAccent)?bpStoredAccent.toUpperCase():
+    (/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accent||'')?bpBoot.accent.toUpperCase():'#1554FF');
   function bpLum(hex){
-    var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});
+    var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&255].map(function(v){v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});
     return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2];
   }
   function bpContrast(a,b){var x=bpLum(a),y=bpLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
-  function bpShade(hex,amount){
-    var n=parseInt(hex.slice(1),16),f=function(v){return Math.max(0,Math.min(255,Math.round(amount<0?v*(1+amount):v+(255-v)*amount)))};
-    return '#'+[f(n>>16&255),f(n>>8&255),f(n&255)].map(function(v){return v.toString(16).padStart(2,'0')}).join('');
+  function bpOn(hex){return bpContrast(hex,'#FFFFFF')>=bpContrast(hex,'#000000')?'#FFFFFF':'#000000'}
+  function bpOklch(hex){
+    var n=parseInt(hex.slice(1),16),v=[n>>16&255,n>>8&255,n&255].map(function(x){x/=255;return x<=.04045?x/12.92:Math.pow((x+.055)/1.055,2.4)});
+    var l=.4122214708*v[0]+.5363325363*v[1]+.0514459929*v[2],m=.2119034982*v[0]+.6806995451*v[1]+.1073969566*v[2],s=.0883024619*v[0]+.2817188376*v[1]+.6299787005*v[2];
+    var l3=Math.cbrt(l),m3=Math.cbrt(m),s3=Math.cbrt(s),L=.2104542553*l3+.793617785*m3-.0040720468*s3,A=1.9779984951*l3-2.428592205*m3+.4505937099*s3,B=.0259040371*l3+.7827717662*m3-.808675766*s3;
+    return {L:L,C:Math.hypot(A,B),H:Math.atan2(B,A)};
   }
-  function bpOn(hex){return bpContrast(hex,'#FFFFFF')>=bpContrast(hex,'#111827')?'#FFFFFF':'#111827'}
-  var bpCandidates=[bpAccent],bpBase=bpAccent,bpBg=bpThemeColor;
-  for(var bi=1;bi<=24;bi++){var ba=bi*.035;bpCandidates.push(bpShade(bpBase,ba),bpShade(bpBase,-ba))}
-  var bpBest=bpCandidates[0],bpBestScore=-Infinity;
-  bpCandidates.forEach(function(candidate,idx){
-    var on=bpOn(candidate),textRatio=bpContrast(candidate,on),bgRatio=bpContrast(candidate,bpBg);
-    if(textRatio>=4.5&&bgRatio>=3){
-      var score=Math.min(textRatio/4.5,bgRatio/3)-Math.abs(bpContrast(candidate,bpBase)-1)*.015-idx*.0001;
-      if(score>bpBestScore){bpBestScore=score;bpBest=candidate}
-    }
-  });
-  if(bpBestScore===-Infinity){
-    bpCandidates.forEach(function(candidate,idx){
-      var on=bpOn(candidate),score=bpContrast(candidate,on);
-      if(score>bpBestScore){bpBestScore=score;bpBest=candidate}
-    });
+  function bpOklchHex(L,C,H){
+    var A=C*Math.cos(H),B=C*Math.sin(H),l3=L+.3963377774*A+.2158037573*B,m3=L-.1055613458*A-.0638541728*B,s3=L-.0894841775*A-1.291485548*B,l=l3**3,m=m3**3,s=s3**3;
+    var rr=4.0767416621*l-3.3077115913*m+.2309699292*s,gg=-1.2684380046*l+2.6097574011*m-.3413193965*s,bb=-.0041960863*l-.7034186147*m+1.707614701*s;
+    function ch(x){x=Math.max(0,Math.min(1,x));return Math.round(255*(x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055)).toString(16).padStart(2,'0')}
+    return '#'+ch(rr)+ch(gg)+ch(bb);
   }
-  var bpOnAccent=bpOn(bpBest);
-  bpAccent=bpBest;
+  function bpAccentOnBg(hex,bg){
+    var o=bpOklch(hex),dir=bpLum(bg)>.179?-1:1;
+    function ratio(L){return bpContrast(bpOklchHex(L,o.C,o.H),bg)}
+    if(ratio(o.L)>=4.5)return bpOklchHex(o.L,o.C,o.H);
+    var lo=dir<0?0:o.L,hi=dir<0?o.L:1;
+    for(var i=0;i<40;i++){var mid=(lo+hi)/2;if(ratio(mid)>=4.5){if(dir<0)lo=mid;else hi=mid}else{if(dir<0)hi=mid;else lo=mid}}
+    return bpOklchHex(dir<0?lo:hi,o.C,o.H);
+  }
+  var bpOnAccent=bpOn(bpAccent),bpOnBg=bpAccentOnBg(bpAccent,bpThemeColor);
   bpDoc.dataset.theme=bpTheme;
   bpDoc.style.setProperty('--accent',bpAccent);
+  bpDoc.style.setProperty('--accent-contrast',bpOnAccent);
+  bpDoc.style.setProperty('--accent-on-bg',bpOnBg);
   bpDoc.style.setProperty('--on-accent',bpOnAccent);
+  bpDoc.style.setProperty('--accent-fill',bpAccent);
+  bpDoc.style.setProperty('--accent-text',bpOnBg);
   if(bpBoot&&bpBoot.density)bpDoc.dataset.density=bpBoot.density;
   document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',bpThemeColor)});
 }catch(e){}
