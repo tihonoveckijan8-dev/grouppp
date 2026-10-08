@@ -7346,3 +7346,17 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     }
   }
 }
+
+@layer screens{
+  @media(max-width:390px){
+    .cal-cell.today .cal-num{
+      width:24px!important;height:24px!important;min-width:24px!important;
+      font-size:11px!important;
+    }
+    .cal-selected-day .card-h .btn{
+      gap:4px!important;
+      padding-inline:8px!important;
+      font-size:13px!important;
+    }
+  }
+}
