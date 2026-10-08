@@ -6075,3 +6075,20 @@ body:not([data-route="calendar"]) .part-switch .part-btn{flex:1 1 0;min-width:0}
 @media(forced-colors:active){body:not([data-route="calendar"]) .card,body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card,body:not([data-route="calendar"]) .settings-card,body:not([data-route="calendar"]) .member-card{forced-color-adjust:auto;border:1px solid CanvasText;box-shadow:none}}
 
 /* next non-calendar polish pass */
+
+@layer components{
+body:not([data-route="calendar"]) .settings-shell .profile-role-box,
+body:not([data-route="calendar"]) .settings-shell .profile-account-box,
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="group"] .memb-row,
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="interface"] .field,
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="data"] .data-action-group{background:var(--surf-2);border:1px solid var(--border);border-radius:var(--radius-2xl)}
+body:not([data-route="calendar"]) .settings-shell .profile-role-box,
+body:not([data-route="calendar"]) .settings-shell .profile-account-box{padding:16px!important}
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="group"] .memb-row{padding:12px 14px}
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="interface"] .field{padding:14px}
+body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="data"] .data-action-group{padding:16px}
+body:not([data-route="calendar"]) .settings-shell .profile-account-danger{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+body:not([data-route="calendar"]) .settings-shell .settings-one-line{background:var(--surf-3);border:1px solid var(--border);border-radius:var(--radius-xl)}
+body:not([data-route="calendar"]) .settings-shell .settings-one-line>button.on{background:var(--accent-fill);color:var(--on-accent);border-color:transparent}
+}
+@media(max-width:640px){body:not([data-route="calendar"]) .settings-shell .profile-role-box,body:not([data-route="calendar"]) .settings-shell .profile-account-box,body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="interface"] .field,body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="data"] .data-action-group{padding:14px!important}}
