@@ -2584,7 +2584,7 @@ function persistBootPrefs() {
     const theme = THEME_IDS.includes(st.theme) ? st.theme : 'light';
     const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent.toUpperCase() : '#1554FF';
     const appliedAccent = document.documentElement.style.getPropertyValue('--accent') || accent;
-    const onAccent = document.documentElement.style.getPropertyValue('--on-accent') || '#FFFFFF';
+    const onAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-contrast').trim() || '#FFFFFF';
     localStorage.setItem('bandplan.boot', JSON.stringify({
       theme, accent, accentApplied: appliedAccent.trim(), onAccent: onAccent.trim(),
       density: st.density || 'comfortable'
@@ -2631,8 +2631,6 @@ function applyAccentVars() {
   r.setProperty('--accent-contrast', onAccent);
   r.setProperty('--accent-on-bg', onBg);
   r.setProperty('--on-accent', onAccent);
-  r.setProperty('--accent-fill', hex);
-  r.setProperty('--accent-text', onBg);
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
   r.setProperty('--part-yes', hex);
