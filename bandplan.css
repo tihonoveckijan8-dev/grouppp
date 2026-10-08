@@ -6934,3 +6934,39 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
    max-height:240px
  }
 }
+
+/* Settings data/app panels + corrected boot square rotation. */
+@layer components{
+ body[data-route="settings"] [data-settings-panel="data"],
+ body[data-route="settings"] [data-settings-panel="app"]{
+   min-width:0
+ }
+ body[data-route="settings"] [data-settings-panel="data"] .card-h,
+ body[data-route="settings"] [data-settings-panel="app"] .card-h{
+   margin-bottom:16px
+ }
+ body[data-route="settings"] [data-settings-panel="data"] .row,
+ body[data-route="settings"] [data-settings-panel="app"] .row{
+   min-width:0;flex-wrap:wrap
+ }
+ body[data-route="settings"] [data-settings-panel="data"] .btn,
+ body[data-route="settings"] [data-settings-panel="app"] .btn{
+   min-height:44px
+ }
+ body[data-route="settings"] [data-settings-panel="data"] .field,
+ body[data-route="settings"] [data-settings-panel="app"] .field{
+   min-width:0
+ }
+ .boot-brand i{
+   transform-origin:50% 50%;
+   animation:bandplan-boot-square 1.35s linear infinite!important;
+   will-change:transform
+ }
+ @keyframes bandplan-boot-square{
+   from{transform:rotate(0deg)}
+   to{transform:rotate(360deg)}
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .boot-brand i{animation:none!important;transform:none!important}
+}
