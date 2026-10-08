@@ -1781,18 +1781,33 @@ function filteredSetlists() {
   return list.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
 }
 function vSetlists() {
-  if (!state.setlists.length) return '<div class="card">' + stateHTML('empty', 'Сет-листов пока нет',
-    'Сет-лист — программа выступления: песни в нужном порядке, тональности, переходы и заметки для музыкантов.',
-    '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>') + '</div>';
-  let h = '<div class="setlists-shell"><div class="setlists-head-row"><h1>Сет-листы</h1><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button></div>' +
-    '<div class="toolbar setlists-search-row"><div class="tb-search">' + ic('search', 18) +
+  const list = filteredSetlists();
+  let h = '<div class="songs-head-row setlists-head-row">' +
+    '<h1>Сет-листы</h1>' +
+    '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>' +
+  '</div>' +
+  '<div class="toolbar songs-search-row setlists-search-row">' +
+    '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
     (ui.setlistQuery ? '<button class="icon-btn" type="button" data-act="setlist-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') +
-    '</div></div>';
-  const list = filteredSetlists();
-  if (!list.length) return h + '<div class="card">' + stateHTML('search', 'Ничего не найдено', 'Попробуйте изменить запрос.', '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button>') + '</div></div>';
-  h += '<div class="collection-grid collection-list setlists-list">';
+    '</div>' +
+  '</div>';
+
+  h += '<p class="t-sm t-muted mb">' + list.length + ' ' + plural(list.length, 'сет-лист', 'сет-листа', 'сет-листов') + ' из ' + state.setlists.length + '</p>';
+
+  if (!list.length) {
+    return h + '<div class="card">' + stateHTML(
+      state.setlists.length ? 'search' : 'empty',
+      state.setlists.length ? 'Ничего не найдено' : 'Сет-листов пока нет',
+      state.setlists.length ? 'Попробуйте изменить запрос или очистить поиск.' : 'Создайте первый сет-лист и соберите программу выступления из песен.',
+      state.setlists.length
+        ? '<button class="btn btn-secondary" type="button" data-act="setlist-clear">Очистить поиск</button><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>'
+        : '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать первый сет-лист</button>'
+    ) + '</div>';
+  }
+
+  h += '<div class="collection-grid collection-list songs-list setlists-list">';
   list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
