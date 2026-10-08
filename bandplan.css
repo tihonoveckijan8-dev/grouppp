@@ -7403,3 +7403,17 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     gap:0!important;
   }
 }
+
+
+/* Calendar event chips: keep long titles inside their day cell. */
+@layer screens{
+  .cal-events{min-width:0;max-width:100%;overflow:hidden}
+  .cal-ev{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    box-sizing:border-box;
+  }
+}
