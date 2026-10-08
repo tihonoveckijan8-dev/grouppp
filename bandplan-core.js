@@ -16,7 +16,7 @@ const Boot = (() => {
   const t0 = performance.now();
   const nav = performance.getEntriesByType('navigation')[0] || {};
   const warm = nav.type === 'reload' || nav.type === 'back_forward';
-  const MIN = 3000;
+  const MIN = 0;
   let lastAnnounce = 0, slowT = 0, finished = false, slowShown = false;
 
   function stage(text, pct) {
