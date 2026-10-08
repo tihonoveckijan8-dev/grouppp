@@ -7392,3 +7392,14 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     height:38px;
   }
 }
+
+
+/* Calendar today marker: the number circle is the only today indicator. */
+@layer screens{
+  .cal-cell.today .cal-dot-today{
+    display:none!important;
+  }
+  .cal-cell.today .cal-num{
+    gap:0!important;
+  }
+}
