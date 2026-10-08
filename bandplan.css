@@ -6757,3 +6757,53 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     letter-spacing:-.01em;
   }
 }
+
+/* Settings panels — compact premium finishing pass. Calendar intentionally untouched. */
+@layer components{
+  body[data-route="settings"] .settings-card{
+    background:var(--surf-1);
+    border:1px solid var(--border);
+  }
+  body[data-route="settings"] .settings-card .card-h h2{
+    margin:0;
+    font-size:18px;
+    line-height:1.25;
+  }
+  body[data-route="settings"] .profile-settings-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);
+    gap:18px;
+    align-items:start;
+  }
+  body[data-route="settings"] .profile-settings-main,
+  body[data-route="settings"] .profile-settings-side{
+    min-width:0;
+  }
+  body[data-route="settings"] .settings-card .field{
+    min-width:0;
+  }
+  body[data-route="settings"] .settings-card .field-label{
+    display:block;
+    margin-bottom:7px;
+    line-height:1.3;
+  }
+  body[data-route="settings"] .settings-card .input,
+  body[data-route="settings"] .settings-card .select,
+  body[data-route="settings"] .settings-card .textarea{
+    width:100%;
+    box-sizing:border-box;
+  }
+}
+@media(max-width:900px){
+  body[data-route="settings"] .profile-settings-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media(max-width:640px){
+  body[data-route="settings"] .settings-card{
+    padding:14px;
+  }
+  body[data-route="settings"] .settings-card .card-h{
+    padding-bottom:2px;
+  }
+}
