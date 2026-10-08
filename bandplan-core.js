@@ -1502,7 +1502,7 @@ function monthHTML(y, mo) {
   }
   h += '</div>';
   h += '<div class="cal-legend">' + Object.keys(EV_TYPES).map(t =>
-    '<span><i style="background:' + EV_TYPES[t].color + '" aria-hidden="true"></i>' + EV_TYPES[t].label + '</span>').join('') + '</div>';
+    '<span><i class="event-type-dot type-' + t + '" aria-hidden="true"></i>' + EV_TYPES[t].label + '</span>').join('') + '</div>';
   return h;
 }
 const H0 = 7, H1 = 24, HPH = 48;
@@ -1829,7 +1829,7 @@ function vSetlist(id) {
       '<div class="sl-num" aria-hidden="true">' + (i + 1) + '</div>' +
       '<div class="sl-info" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" style="cursor:pointer">' +
       '<div class="sl-name">' + esc(s.title) + '</div>' +
-      '<div class="sl-sub"><span class="num">' + esc(finalKey(s, it.shift)) + (it.shift ? ' <i style="color:var(--warn);font-style:normal">(' + (it.shift > 0 ? '+' : '') + it.shift + ')</i>' : '') + '</span>' +
+      '<div class="sl-sub"><span class="num">' + esc(finalKey(s, it.shift)) + (it.shift ? ' <i class="transpose-shift">(' + (it.shift > 0 ? '+' : '') + it.shift + ')</i>' : '') + '</span>' +
       (s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '') + (s.duration ? '<span class="num">' + fmtDur(s.duration) + '</span>' : '') +
       (it.note ? '<span>' + esc(it.note) + '</span>' : '') + '</div></div>' +
       '<div class="sl-row-actions" role="group" aria-label="Управление песней в сет-листе">' +
