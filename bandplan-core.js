@@ -2630,7 +2630,6 @@ function applyAccentVars() {
   r.setProperty('--accent', hex);
   r.setProperty('--accent-contrast', onAccent);
   r.setProperty('--accent-on-bg', onBg);
-  r.setProperty('--on-accent', onAccent);
   r.setProperty('--info', hex);
   r.setProperty('--info-bg', hex + '14');
   r.setProperty('--part-yes', hex);
