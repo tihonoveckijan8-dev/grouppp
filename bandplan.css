@@ -6253,3 +6253,155 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   #scene .sbtn,#scene .sctl{border:1px solid CanvasText;background:Canvas}
   #scene .scene-top,#scene .scene-ctrl{background:Canvas}
 }
+
+
+/* Setlist detail — scoped polish. Calendar intentionally untouched. */
+@layer components{
+  body[data-route="setlist"] .split{
+    align-items:start;
+    gap:16px;
+  }
+  body[data-route="setlist"] .split>.stack{
+    min-width:0;
+  }
+  body[data-route="setlist"] .settings-card,
+  body[data-route="setlist"] .card{
+    border-radius:var(--radius-2xl);
+  }
+  body[data-route="setlist"] .card-h{
+    gap:12px;
+    min-width:0;
+  }
+  body[data-route="setlist"] .card-h>div:first-child{
+    min-width:0;
+  }
+  body[data-route="setlist"] .card-h h2{
+    margin:0;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  body[data-route="setlist"] .dropzone{
+    min-width:0;
+    border-radius:var(--radius-xl);
+  }
+  body[data-route="setlist"] .sl-item{
+    min-width:0;
+    display:grid;
+    grid-template-columns:24px 32px minmax(0,1fr) auto;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:12px;
+    box-sizing:border-box;
+  }
+  body[data-route="setlist"] .sl-info{
+    min-width:0;
+  }
+  body[data-route="setlist"] .sl-name{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-weight:650;
+  }
+  body[data-route="setlist"] .sl-sub{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:3px;
+    overflow:hidden;
+  }
+  body[data-route="setlist"] .sl-sub>*{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  body[data-route="setlist"] .sl-row-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:4px;
+    min-width:0;
+  }
+  body[data-route="setlist"] .sl-row-actions .icon-btn,
+  body[data-route="setlist"] .mini-stepper{
+    flex:none;
+  }
+  body[data-route="setlist"] .mini-stepper{
+    display:flex;
+    align-items:center;
+    min-height:40px;
+    padding:2px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:var(--surf-3);
+  }
+  body[data-route="setlist"] .mini-stepper button{
+    width:36px;
+    height:36px;
+    border-radius:8px;
+  }
+  body[data-route="setlist"] .mini-stepper span{
+    min-width:30px;
+    text-align:center;
+    font:600 12px/1 var(--mono);
+  }
+  body[data-route="setlist"] .setlist-my-position{
+    margin-top:8px;
+  }
+  body[data-route="setlist"] .setlist-my-position .member-participation{
+    display:inline-flex;
+  }
+}
+@media(max-width:900px){
+  body[data-route="setlist"] .split{
+    grid-template-columns:1fr;
+  }
+  body[data-route="setlist"] .sl-item{
+    grid-template-columns:24px 32px minmax(0,1fr);
+  }
+  body[data-route="setlist"] .sl-row-actions{
+    grid-column:3;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+    padding-top:4px;
+  }
+}
+@media(max-width:640px){
+  body[data-route="setlist"] .card-h{
+    align-items:flex-start;
+  }
+  body[data-route="setlist"] .card-h>.row{
+    flex:none;
+  }
+  body[data-route="setlist"] .sl-item{
+    grid-template-columns:22px 30px minmax(0,1fr);
+    gap:8px;
+    padding:10px;
+  }
+  body[data-route="setlist"] .sl-row-actions{
+    gap:4px;
+  }
+  body[data-route="setlist"] .sl-row-actions .icon-btn{
+    width:40px;
+    height:40px;
+  }
+  body[data-route="setlist"] .mini-stepper button{
+    width:34px;
+    height:34px;
+  }
+}
+@media(max-width:380px){
+  body[data-route="setlist"] .sl-item{
+    grid-template-columns:20px 28px minmax(0,1fr);
+    gap:7px;
+    padding:9px 8px;
+  }
+  body[data-route="setlist"] .sl-row-actions .icon-btn{
+    width:38px;
+    height:38px;
+  }
+}
