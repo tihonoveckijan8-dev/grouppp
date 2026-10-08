@@ -2053,7 +2053,7 @@ function bindSettings() {
   on('lsRange', 'input', e => { state.settings.lyricsSize = +e.target.value; $('#lsVal').textContent = e.target.value + 'px'; document.documentElement.style.setProperty('--lsize', e.target.value + 'px'); save(); });
   on('scRange', 'input', e => { state.settings.sceneSize = +e.target.value; $('#scValS').textContent = e.target.value + 'px'; save(); });
   on('spRange', 'input', e => { state.settings.sceneSpeed = +e.target.value; $('#spValS').textContent = e.target.value + ' px/с'; scene.speed = +e.target.value; save(); });
-  on('accentCustom', 'input', debounce(e => applyAccent(e.target.value)));
+  on('accentCustom', 'input', e => applyAccent(e.target.value));
   on('setWeekStart', 'change', e => { state.settings.weekStart = +e.target.value; save(); render(); });
   on('setDefView', 'change', e => { state.settings.calView = e.target.value; ui.calView = e.target.value; save(); render(); });
   on('offlineSongAuto', 'change', e => { state.settings.offlineSongsAutoSave = !!e.target.checked; save(); render(); });
@@ -3660,6 +3660,10 @@ function normalizeCloudState(d) {
   state = Object.assign(base, x);
   state.profile = Object.assign(base.profile, x.profile || {});
   state.settings = Object.assign(base.settings, x.settings || {});
+  try {
+    const localAccent = localStorage.getItem('accent');
+    if (/^#[0-9a-fA-F]{6}$/.test(localAccent || '')) state.settings.accent = localAccent.toUpperCase();
+  } catch (e) {}
   state.members = Array.isArray(x.members) ? x.members : [];
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
