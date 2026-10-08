@@ -7509,3 +7509,10 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     min-height:0!important;
   }
 }
+
+/* Calendar date row: keep baseline geometry stable beside fixed 24px day markers. */
+@layer screens{
+  .cal-cell .cal-num{
+    line-height:1;
+  }
+}
