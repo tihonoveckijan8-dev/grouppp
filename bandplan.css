@@ -6670,3 +6670,90 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     padding:10px 12px!important;
   }
 }
+
+
+/* Settings / profile / group — final scoped polish. Calendar intentionally untouched. */
+@layer components{
+  body[data-route="settings"] .settings-shell{
+    min-width:0;
+    width:100%;
+  }
+  body[data-route="settings"] .settings-tabs{
+    min-width:0;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+  body[data-route="settings"] .settings-tab{
+    min-width:0;
+    min-height:46px;
+    padding:10px 12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  body[data-route="settings"] .settings-tab-content{
+    min-width:0;
+  }
+  body[data-route="settings"] .settings-card{
+    min-width:0;
+    overflow:hidden;
+  }
+  body[data-route="settings"] .settings-card .card-h,
+  body[data-route="settings"] .settings-card .row,
+  body[data-route="settings"] .settings-card .field,
+  body[data-route="settings"] .settings-card .profile-settings-grid{
+    min-width:0;
+  }
+  body[data-route="settings"] .settings-card input,
+  body[data-route="settings"] .settings-card select,
+  body[data-route="settings"] .settings-card textarea,
+  body[data-route="settings"] .settings-card button{
+    max-width:100%;
+  }
+  body[data-route="settings"] .settings-card .btn{
+    min-height:44px;
+  }
+  body[data-route="settings"] .settings-card .settings-actions,
+  body[data-route="settings"] .settings-card .danger-actions{
+    min-width:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+}
+@media(max-width:640px){
+  body[data-route="settings"] .settings-tabs{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    margin-bottom:16px;
+  }
+  body[data-route="settings"] .settings-tab{
+    min-height:44px;
+    padding:9px 6px;
+    font-size:12px;
+  }
+  body[data-route="settings"] .settings-card{
+    border-radius:16px;
+  }
+  body[data-route="settings"] .settings-card .card-h{
+    gap:10px;
+  }
+  body[data-route="settings"] .settings-card .settings-actions,
+  body[data-route="settings"] .settings-card .danger-actions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+  }
+  body[data-route="settings"] .settings-card .settings-actions .btn,
+  body[data-route="settings"] .settings-card .danger-actions .btn{
+    width:100%;
+  }
+}
+@media(max-width:380px){
+  body[data-route="settings"] .settings-tabs{
+    margin-left:-4px;
+    margin-right:-4px;
+  }
+  body[data-route="settings"] .settings-tab{
+    padding-inline:4px;
+    font-size:11px;
+    letter-spacing:-.01em;
+  }
+}
