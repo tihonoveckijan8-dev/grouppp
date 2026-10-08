@@ -344,24 +344,24 @@ const EV_TYPES = {
   meeting: { label: 'Встреча', cls: 'b-warn', ic: 'users', color: 'var(--warn)' }
 };
 const REPEATS = { none: 'Без повтора', weekly: 'Каждую неделю', biweekly: 'Каждые 2 недели', monthly: 'Каждый месяц' };
-const PALETTE = ['#2457FF', '#00B87A', '#9B4DFF', '#FFB000', '#FF3B30', '#00B8D9', '#687080', '#B56A2B'];
-const ACCENTS = ['#1554FF', '#E63946', '#2A9D8F', '#7C3AED', '#F59E0B', '#06B6D4', '#64748B', '#B56A2B'];
-const ACCENT_LABELS = Object.freeze({'#1554FF':'Синий','#E63946':'Красный','#2A9D8F':'Бирюзовый','#7C3AED':'Фиолетовый','#F59E0B':'Янтарный','#06B6D4':'Океанский','#64748B':'Графитовый','#B56A2B':'Умбровый'});
+const PALETTE = Object.freeze(['--palette-1','--palette-2','--palette-3','--palette-4','--palette-5','--palette-6','--palette-7','--palette-8']);
+const ACCENTS = Object.freeze(['red','orange','amber','green','teal','blue','indigo','purple','pink']);
+const ACCENT_LABELS = Object.freeze({red:'Красный',orange:'Оранжевый',amber:'Янтарный',green:'Зелёный',teal:'Бирюзовый',blue:'Синий',indigo:'Индиго',purple:'Фиолетовый',pink:'Розовый'});
 
 /* ═══ 5. STATE ═══ */
 let KEY = 'bandplan.premium.v6';
 function defaults() {
   const bootTheme = ['light','dark','amoled'].includes(document.documentElement.dataset.theme)
     ? document.documentElement.dataset.theme : 'light';
-  const bootAccent = /^#[0-9a-fA-F]{6}$/.test(localStorage.getItem('accent') || '')
-    ? localStorage.getItem('accent').toUpperCase()
-    : (/^#[0-9a-fA-F]{6}$/.test(document.documentElement.style.getPropertyValue('--accent').trim())
-      ? document.documentElement.style.getPropertyValue('--accent').trim().toUpperCase() : '#1554FF');
+  const boot = (() => { try { return JSON.parse(localStorage.getItem('bandplan.boot') || 'null') || {}; } catch (e) { return {}; } })();
+  const bootPreset = ACCENTS.includes(boot.accentPreset) ? boot.accentPreset : '';
+  const storedAccent = localStorage.getItem('accent') || '';
+  const bootAccent = /^#[0-9a-fA-F]{6}$/.test(storedAccent) ? storedAccent.toUpperCase() : (bootPreset ? presetAccentColor(bootPreset, bootTheme) : tokenColor('--accent-default'));
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
     settings: {
-      theme: bootTheme, accent: bootAccent, notation: 'auto', weekStart: 1,
+      theme: bootTheme, accent: bootAccent, accentPreset: bootPreset || null, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
       offlineSongsAutoSave: true, offlineSongsDays: 30, offlineSongsNearestCount: 3, offlineSongsSaveMaybe: false
     },
@@ -670,7 +670,7 @@ function load() {
     state = Object.assign(defaults(), d);
     state.profile = Object.assign(defaults().profile, d.profile || {});
     state.settings = Object.assign(defaults().settings, d.settings || {});
-    if (!state.settings.accent || ['#6c5ce7', '#2f55d4'].indexOf(state.settings.accent.toLowerCase()) >= 0) state.settings.accent = '#1554FF';
+    if (!state.settings.accent) { state.settings.accentPreset = state.settings.accentPreset || 'blue'; state.settings.accent = presetAccentColor(state.settings.accentPreset, state.settings.theme); }
     state.members = d.members || []; state.events = d.events || [];
     state.songs = d.songs || []; state.setlists = d.setlists || [];
     return true;
@@ -866,10 +866,10 @@ function seedDemo() {
   const d0 = new Date();
   const off = (n, h, m) => { const x = new Date(d0); x.setDate(x.getDate() + n); return { date: iso(x), time: pad(h) + ':' + pad(m || 0) }; };
   state.members = [
-    { id: uid('m'), name: 'Аня Соколова', role: 'vocal', color: PALETTE[0], note: 'Основной вокал' },
-    { id: uid('m'), name: 'Марк Гринёв', role: 'guitar', color: PALETTE[1], note: 'Соло и ритм' },
-    { id: uid('m'), name: 'Тимур Валеев', role: 'bass', color: PALETTE[2], note: '' },
-    { id: uid('m'), name: 'Лена Ким', role: 'drums', color: PALETTE[3], note: '' }
+    { id: uid('m'), name: 'Аня Соколова', role: 'vocal', color: tokenColor(PALETTE[0]), note: 'Основной вокал' },
+    { id: uid('m'), name: 'Марк Гринёв', role: 'guitar', color: tokenColor(PALETTE[1]), note: 'Соло и ритм' },
+    { id: uid('m'), name: 'Тимур Валеев', role: 'bass', color: tokenColor(PALETTE[2]), note: '' },
+    { id: uid('m'), name: 'Лена Ким', role: 'drums', color: tokenColor(PALETTE[3]), note: '' }
   ];
   if (!state.profile.name) state.profile.name = 'Аня Соколова';
   if (!state.profile.role) state.profile.role = 'vocal';
@@ -1990,10 +1990,10 @@ function vSettings() {
     '<div class="field settings-inline-field"><span class="field-label">Тема</span><div class="seg settings-one-line">' +
     THEMES.map(t => '<button type="button" data-act="theme-set" data-v="' + t.id + '" class="' + (s.theme === t.id ? 'on' : '') + '" aria-pressed="' + (s.theme === t.id) + '" data-accent="1">' + ic(t.icon, 14) + esc(t.label) + '</button>').join('') + '</div></div>' +
     '<div class="field settings-inline-field"><span class="field-label">Акцентный цвет</span><details class="accent-dropdown">' +
-    '<summary><span class="accent-dropdown-current"><span class="accent-dot" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[s.accent] || 'Акцентный цвет') + '</span></span><span class="accent-dropdown-chevron">' + ic('chevronDown', 15) + '</span></summary>' +
+    '<summary><span class="accent-dropdown-current"><span class="accent-dot" data-preset="' + esc(s.accentPreset || 'custom') + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[s.accentPreset] || 'Свой цвет') + '</span></span><span class="accent-dropdown-chevron">' + ic('chevronDown', 15) + '</span></summary>' +
     '<div class="accent-dropdown-menu">' +
-    ACCENTS.map(a => '<button class="accent-dropdown-option' + (s.accent.toLowerCase() === a.toLowerCase() ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-pressed="' + (s.accent.toLowerCase() === a.toLowerCase()) + '"><span class="accent-dot" style="--swatch:' + a + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[a] || a) + '</span>' + (s.accent.toLowerCase() === a.toLowerCase() ? ic('check', 14) : '') + '</button>').join('') +
-    '<label class="accent-dropdown-option accent-dropdown-custom"><span class="accent-dot accent-dot-custom" style="--swatch:' + esc(s.accent) + '" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label><button class="accent-dropdown-option accent-dropdown-reset" type="button" data-act="accent-reset">Сбросить</button>' +
+    ACCENTS.map(a => '<button class="accent-dropdown-option' + (s.accentPreset === a ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-pressed="' + (s.accentPreset === a) + '"><span class="accent-dot" data-preset="' + a + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[a]) + '</span>' + (s.accentPreset === a ? ic('check', 14) : '') + '</button>').join('') +
+    '<label class="accent-dropdown-option accent-dropdown-custom"><span class="accent-dot accent-dot-custom" data-preset="custom" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label><button class="accent-dropdown-option accent-dropdown-reset" type="button" data-act="accent-reset">Сбросить</button>' +
     '</div></details></div>' +
     '<div class="field settings-inline-field"><span class="field-label">Запись аккордов</span><div class="seg settings-one-line">' +
     [['auto', 'Как в оригинале'], ['sharp', 'Диезы (C#)'], ['flat', 'Бемоли (Db)']].map(o => '<button type="button" data-act="notation-set" data-v="' + o[0] + '" class="' + (s.notation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -2366,12 +2366,12 @@ function printSong(id, shift) {
   const s = songById(id); if (!s) return;
   let extra = ''; const d = s.dynamics;
   if (d && (d.instruments || []).length && (d.sections || []).length) {
-    extra = '<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:9.5pt"><tr><th style="border:1px solid #999;padding:5px;text-align:left">Инструмент</th>' +
-      d.sections.map(x => '<th style="border:1px solid #999;padding:5px">' + esc(x) + '</th>').join('') + '</tr>' +
+    extra = '<table class="print-dynamics-table"><tr><th>Инструмент</th>' +
+      d.sections.map(x => '<th>' + esc(x) + '</th>').join('') + '</tr>' +
       d.instruments.map(function (ins) {
         const lv = (d.levels && d.levels[ins]) || {};
-        return '<tr><td style="border:1px solid #999;padding:5px;font-weight:700">' + esc(roleLabel(ins)) + (myRoles().indexOf(ins) >= 0 ? ' (вы)' : '') + '</td>' +
-          d.sections.map(x => '<td style="border:1px solid #999;padding:5px;text-align:center">' + esc(lv[x] || '—') + '</td>').join('') + '</tr>';
+        return '<tr><td class="is-you">' + esc(roleLabel(ins)) + (myRoles().indexOf(ins) >= 0 ? ' (вы)' : '') + '</td>' +
+          d.sections.map(x => '<td class="is-center">' + esc(lv[x] || '—') + '</td>').join('') + '</tr>';
       }).join('') + '</table>';
   }
   doPrint('<div class="print-song"><h2>' + esc(s.title) + '</h2><div class="pk">' +
@@ -2488,158 +2488,33 @@ function quickScene() {
 }
 
 /* ═══ 19. THEME / ACCENT ═══ */
-const THEMES = Object.freeze([
-  {id:'light', label:'Светлая', icon:'sun', themeColor:'#F4F6F8'},
-  {id:'dark', label:'Тёмная', icon:'moon', themeColor:'#14161C'},
-  {id:'amoled', label:'AMOLED', icon:'bolt', themeColor:'#000000'}
-]);
-const THEME_IDS = Object.freeze(THEMES.map(t => t.id));
-const themeById = id => THEMES.find(t => t.id === id) || THEMES[0];
-function themeMeta(id) { return themeById(id); }
-function nextThemeMeta(id) {
-  const i = Math.max(0, THEME_IDS.indexOf(id));
-  return THEMES[(i + 1) % THEMES.length];
-}
-function colorLuminance(hex) {
-  const n = parseInt(String(hex).slice(1), 16);
-  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => {
-    v /= 255;
-    return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
-  });
-  return .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
-}
-function colorContrast(a, b) {
-  const la = colorLuminance(a), lb = colorLuminance(b);
-  return (Math.max(la, lb) + .05) / (Math.min(la, lb) + .05);
-}
-function shadeColor(hex, amount) {
-  const n = parseInt(String(hex).slice(1), 16);
-  const f = v => clamp(Math.round(amount < 0 ? v * (1 + amount) : v + (255 - v) * amount), 0, 255);
-  return '#' + [f((n >> 16) & 255), f((n >> 8) & 255), f(n & 255)].map(v => pad(v.toString(16))).join('');
-}
-function onAccentFor(hex) {
-  return colorContrast(hex, '#FFFFFF') >= colorContrast(hex, '#000000') ? '#FFFFFF' : '#000000';
-}
-function rgbToOklch(hex) {
-  const n = parseInt(String(hex).slice(1), 16);
-  const srgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => v / 255);
-  const lin = srgb.map(v => v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4));
-  const l = .4122214708 * lin[0] + .5363325363 * lin[1] + .0514459929 * lin[2];
-  const m = .2119034982 * lin[0] + .6806995451 * lin[1] + .1073969566 * lin[2];
-  const s = .0883024619 * lin[0] + .2817188376 * lin[1] + .6299787005 * lin[2];
-  const l3 = Math.cbrt(l), m3 = Math.cbrt(m), s3 = Math.cbrt(s);
-  const L = .2104542553 * l3 + .793617785 * m3 - .0040720468 * s3;
-  const A = 1.9779984951 * l3 - 2.428592205 * m3 + .4505937099 * s3;
-  const B = .0259040371 * l3 + .7827717662 * m3 - .808675766 * s3;
-  return { L, C: Math.hypot(A, B), H: Math.atan2(B, A) };
-}
-function oklchToHex(L, C, H) {
-  const A = C * Math.cos(H), B = C * Math.sin(H);
-  const l3 = L + .3963377774 * A + .2158037573 * B;
-  const m3 = L - .1055613458 * A - .0638541728 * B;
-  const s3 = L - .0894841775 * A - 1.291485548 * B;
-  const l = l3 ** 3, m = m3 ** 3, s = s3 ** 3;
-  const lr = 4.0767416621 * l - 3.3077115913 * m + .2309699292 * s;
-  const lg = -1.2684380046 * l + 2.6097574011 * m - .3413193965 * s;
-  const lb = -.0041960863 * l - .7034186147 * m + 1.7076147010 * s;
-  const toSrgb = v => {
-    const x = Math.max(0, Math.min(1, v));
-    return Math.round(255 * (x <= .0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - .055));
-  };
-  return '#' + [toSrgb(lr), toSrgb(lg), toSrgb(lb)].map(v => v.toString(16).padStart(2, '0')).join('');
-}
-function accentOnBackground(hex, bg) {
-  const base = rgbToOklch(hex);
-  const bgLum = colorLuminance(bg);
-  const direction = bgLum > .179 ? -1 : 1;
-  const contrastAt = L => colorContrast(oklchToHex(L, base.C, base.H), bg);
-  if (contrastAt(base.L) >= 4.5) return oklchToHex(base.L, base.C, base.H);
-  let lo = direction < 0 ? 0 : base.L;
-  let hi = direction < 0 ? base.L : 1;
-  if (direction < 0) {
-    for (let i = 0; i < 40; i++) {
-      const mid = (lo + hi) / 2;
-      if (contrastAt(mid) >= 4.5) lo = mid; else hi = mid;
-    }
-    return oklchToHex(lo, base.C, base.H);
-  }
-  for (let i = 0; i < 40; i++) {
-    const mid = (lo + hi) / 2;
-    if (contrastAt(mid) >= 4.5) hi = mid; else lo = mid;
-  }
-  return oklchToHex(hi, base.C, base.H);
-}
-function accessibleAccent(input, themeId) {
-  const base = /^#[0-9a-fA-F]{6}$/.test(input || '') ? input.toUpperCase() : '#1554FF';
-  return accentOnBackground(base, themeMeta(themeId).themeColor);
-}
-function applyThemeMeta(themeId) {
-  const meta = themeMeta(themeId);
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', meta.themeColor));
-  return meta;
-}
-function persistBootPrefs() {
-  try {
-    const st = state.settings || {};
-    const theme = THEME_IDS.includes(st.theme) ? st.theme : 'light';
-    const accent = /^#[0-9a-fA-F]{6}$/.test(st.accent || '') ? st.accent.toUpperCase() : '#1554FF';
-    const appliedAccent = document.documentElement.style.getPropertyValue('--accent') || accent;
-    const onAccent = getComputedStyle(document.documentElement).getPropertyValue('--accent-contrast').trim() || '#FFFFFF';
-    localStorage.setItem('bandplan.boot', JSON.stringify({
-      theme, accent, accentApplied: appliedAccent.trim(), onAccent: onAccent.trim(),
-      density: st.density || 'comfortable'
-    }));
-  } catch (e) {}
-}
-function applyTheme() {
-  const s = state.settings;
-  if (!THEME_IDS.includes(s.theme)) s.theme = 'light';
-  const meta = themeMeta(s.theme);
-  document.documentElement.setAttribute('data-theme', meta.id);
-  document.documentElement.setAttribute('data-reduced', s.reduced ? 'true' : 'false');
-  document.documentElement.style.setProperty('--lsize', (s.lyricsSize || 15) + 'px');
-  applyThemeMeta(meta.id);
-  applyAccentVars();
-  persistBootPrefs();
-}
-function cycleTheme() {
-  const next = nextThemeMeta(state.settings.theme);
-  setTheme(next.id);
-}
-function setTheme(t) {
-  const next = themeMeta(t);
-  state.settings.theme = next.id;
-  applyTheme(); save(); renderWithTransition(render);
-  toast('Тема: ' + next.label, 'info', 2000);
-}
-function applyAccent(hex) {
-  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
-  state.settings.accent = hex.toUpperCase();
-  try { localStorage.setItem('accent', state.settings.accent); } catch (e) {}
-  applyAccentVars();
-  save();
-  renderWithTransition(render);
-}
-function applyAccentVars() {
-  const hex = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent.toUpperCase() : '#1554FF';
-  const themeId = THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light';
-  const bg = themeMeta(themeId).themeColor;
-  const onAccent = onAccentFor(hex);
-  const onBg = accentOnBackground(hex, bg);
-  const r = document.documentElement.style;
-  r.setProperty('--accent', hex);
-  r.setProperty('--accent-contrast', onAccent);
-  r.setProperty('--accent-on-bg', onBg);
-  r.setProperty('--info', hex);
-  r.setProperty('--info-bg', hex + '14');
-  r.setProperty('--part-yes', hex);
-  r.setProperty('--part-maybe', shadeColor(hex, .38));
-  r.setProperty('--part-no', shadeColor(hex, -.28));
-  r.setProperty('--part-unset', shadeColor(hex, -.12));
-  try { localStorage.setItem('accent', hex); } catch (e) {}
-  persistBootPrefs();
-}
-
+const THEMES = Object.freeze([{id:'light',label:'Светлая',icon:'sun'},{id:'dark',label:'Тёмная',icon:'moon'},{id:'amoled',label:'AMOLED',icon:'bolt'}]);
+const THEME_IDS=Object.freeze(THEMES.map(t=>t.id));
+const themeById=id=>THEMES.find(t=>t.id===id)||THEMES[0];
+function tokenColor(name,fallback=''){try{return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||fallback}catch(e){return fallback}}
+function themeTokenColor(id){return tokenColor('--theme-color-'+id,tokenColor('--theme-color-light'))}
+function presetAccentColor(preset,themeId){return ACCENTS.includes(preset)?tokenColor('--accent-preset-'+preset+'-'+themeId,tokenColor('--accent-default')):tokenColor('--accent-default')}
+function themeMeta(id){const t=themeById(id);return Object.assign({},t,{themeColor:themeTokenColor(t.id)})}
+function nextThemeMeta(id){const i=Math.max(0,THEME_IDS.indexOf(id));return THEMES[(i+1)%THEMES.length]}
+function colorLuminance(hex){const n=parseInt(String(hex).slice(1),16),rgb=[(n>>16)&255,(n>>8)&255,n&255].map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]}
+function colorContrast(a,b){const la=colorLuminance(a),lb=colorLuminance(b);return (Math.max(la,lb)+.05)/(Math.min(la,lb)+.05)}
+function onAccentFor(hex){const white=tokenColor('--token-white'),black=tokenColor('--token-black');return colorContrast(hex,white)>=colorContrast(hex,black)?white:black}
+function rgbToOklch(hex){const n=parseInt(String(hex).slice(1),16),srgb=[(n>>16)&255,(n>>8)&255,n&255].map(v=>v/255),lin=srgb.map(v=>v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)),l=.4122214708*lin[0]+.5363325363*lin[1]+.0514459929*lin[2],m=.2119034982*lin[0]+.6806995451*lin[1]+.1073969566*lin[2],s=.0883024619*lin[0]+.2817188376*lin[1]+.6299787005*lin[2],l3=Math.cbrt(l),m3=Math.cbrt(m),s3=Math.cbrt(s),L=.2104542553*l3+.793617785*m3-.0040720468*s3,A=1.9779984951*l3-2.428592205*m3+.4505937099*s3,B=.0259040371*l3+.7827717662*m3-.8086757662*s3;return{L,C:Math.hypot(A,B),H:Math.atan2(B,A)}}
+function oklchToHex(L,C,H){const A=C*Math.cos(H),B=C*Math.sin(H),l3=L+.3963377774*A+.2158037573*B,m3=L-.1055613458*A-.0638541728*B,s3=L-.0894841775*A-1.291485548*B,l=l3**3,m=m3**3,s=s3**3,lr=4.0767416621*l-3.3077115913*m+.2309699292*s,lg=-1.2684380046*l+2.6097574011*m-.3413193965*s,lb=-.0041960863*l-.7034186147*m+1.707614701*s,toSrgb=v=>{const x=Math.max(0,Math.min(1,v));return Math.round(255*(x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055))};return'#'+[toSrgb(lr),toSrgb(lg),toSrgb(lb)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+function accentOnBackground(hex,bg){const base=rgbToOklch(hex),dir=colorLuminance(bg)>.179?-1:1,ratio=L=>colorContrast(oklchToHex(L,base.C,base.H),bg);if(ratio(base.L)>=4.5)return oklchToHex(base.L,base.C,base.H);let lo=dir<0?0:base.L,hi=dir<0?base.L:1;for(let i=0;i<40;i++){const mid=(lo+hi)/2;if(ratio(mid)>=4.5){if(dir<0)lo=mid;else hi=mid}else{if(dir<0)hi=mid;else lo=mid}}return oklchToHex(dir<0?lo:hi,base.C,base.H)}
+function accessibleAccent(input,themeId){const base=/^#[0-9a-fA-F]{6}$/.test(input||'')?input.toUpperCase():presetAccentColor('blue',themeId);return accentOnBackground(base,themeTokenColor(themeId))}
+function hueDistance(a,b){const d=Math.abs(a-b)%(Math.PI*2);return Math.min(d,Math.PI*2-d)}
+let semanticBase={};
+function captureSemanticBase(){semanticBase={ok:tokenColor('--ok'),warn:tokenColor('--warn'),danger:tokenColor('--danger'),info:tokenColor('--semantic-info-base'),plum:tokenColor('--plum')}}
+function shiftedSemantic(hex,accent){if(!/^#[0-9a-fA-F]{6}$/.test(hex)||!/^#[0-9a-fA-F]{6}$/.test(accent))return hex;const a=rgbToOklch(hex),b=rgbToOklch(accent);return hueDistance(a.H,b.H)>Math.PI/6?hex:oklchToHex(a.L,a.C,a.H+Math.PI*2/3)}
+function applySemanticSeparation(accent){const r=document.documentElement.style;for(const key of ['ok','warn','danger','info','plum']){const base=semanticBase[key]||'';if(base)r.setProperty('--'+key,shiftedSemantic(base,accent))}}
+function applyThemeMeta(id){const meta=themeMeta(id);document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content',meta.themeColor));return meta}
+function persistBootPrefs(){try{const st=state.settings||{},theme=THEME_IDS.includes(st.theme)?st.theme:'light',accent=/^#[0-9a-fA-F]{6}$/.test(st.accent||'')?st.accent.toUpperCase():presetAccentColor(st.accentPreset||'blue',theme),applied=document.documentElement.style.getPropertyValue('--accent')||accent,onAccent=tokenColor('--accent-contrast');localStorage.setItem('bandplan.boot',JSON.stringify({theme,accent,accentApplied:applied.trim(),onAccent:onAccent.trim(),accentPreset:ACCENTS.includes(st.accentPreset)?st.accentPreset:null,density:st.density||'comfortable'}))}catch(e){}}
+function applyTheme(){const s=state.settings;if(!THEME_IDS.includes(s.theme))s.theme='light';const meta=themeMeta(s.theme);document.documentElement.setAttribute('data-theme',meta.id);document.documentElement.setAttribute('data-reduced',s.reduced?'true':'false');document.documentElement.style.setProperty('--lsize',(s.lyricsSize||15)+'px');applyThemeMeta(meta.id);captureSemanticBase();applyAccentVars();persistBootPrefs()}
+function cycleTheme(){setTheme(nextThemeMeta(state.settings.theme).id)}
+function setTheme(t){const next=themeMeta(t);state.settings.theme=next.id;applyTheme();save();renderWithTransition(render);toast('Тема: '+next.label,'info',2000)}
+function applyAccent(value){const themeId=THEME_IDS.includes(state.settings.theme)?state.settings.theme:'light';if(ACCENTS.includes(value)){state.settings.accentPreset=value;state.settings.accent=accessibleAccent(presetAccentColor(value,themeId),themeId)}else if(/^#[0-9a-fA-F]{6}$/.test(value||'')){state.settings.accentPreset=null;state.settings.accent=accessibleAccent(value,themeId)}else return;try{localStorage.setItem('accent',state.settings.accent)}catch(e){}applyAccentVars();save();renderWithTransition(render)}
+function applyAccentVars(){const themeId=THEME_IDS.includes(state.settings.theme)?state.settings.theme:'light',base=ACCENTS.includes(state.settings.accentPreset)?presetAccentColor(state.settings.accentPreset,themeId):(/^#[0-9a-fA-F]{6}$/.test(state.settings.accent||'')?state.settings.accent.toUpperCase():presetAccentColor('blue',themeId)),hex=accessibleAccent(base,themeId),onAccent=onAccentFor(hex),onBg=accentOnBackground(hex,themeTokenColor(themeId)),r=document.documentElement.style;state.settings.accent=hex;r.setProperty('--accent',hex);r.setProperty('--accent-contrast',onAccent);r.setProperty('--accent-on-bg',onBg);r.setProperty('--accent-text',onBg);applySemanticSeparation(hex);r.setProperty('--info-bg','color-mix(in srgb,var(--info) 14%,transparent)');r.setProperty('--part-yes',tokenColor('--ok'));r.setProperty('--part-maybe',tokenColor('--warn'));r.setProperty('--part-no',tokenColor('--danger'));r.setProperty('--part-unset',tokenColor('--muted'));try{localStorage.setItem('accent',hex)}catch(e){}persistBootPrefs()}
 /* ═══ 20. ONBOARDING ═══ */
 let onbStep = 0, onbData = null;
 function openOnboarding() {
@@ -2648,7 +2523,7 @@ function openOnboarding() {
     name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes',
     members: [{ name: '', role: 'vocal' }],
     theme: THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light',
-    accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#1554FF',
+    accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : presetAccentColor(state.settings.accentPreset || 'blue', state.settings.theme),
     demo: false
   };
   drawOnb(); $('#onb').classList.add('on');
@@ -2748,7 +2623,7 @@ async function finishOnboarding() {
   state.profile.bandDesc = onbData.bandDesc;
   state.profile.defaultParticipation = onbData.participation;
   state.settings.theme = onbData.theme;
-  state.settings.accent = onbData.accent;
+  state.settings.accent = onbData.accent; state.settings.accentPreset = null;
   state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), note: 'это вы' }];
   state.onboardingDone = true;
 
@@ -2863,7 +2738,7 @@ document.addEventListener('click', function (e) {
     }
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
-    case 'accent-reset': stop(); applyAccent('#1554FF'); break;
+    case 'accent-reset': stop(); applyAccent('blue'); break;
     case 'notation-set': stop(); state.settings.notation = el.getAttribute('data-v'); commit(); break;
     case 'weekstart-set': stop(); state.settings.weekStart = +el.getAttribute('data-v'); save(); render(); $$('#modalOverlay [data-act="weekstart-set"]').forEach(b => b.classList.toggle('on', +b.getAttribute('data-v') === state.settings.weekStart)); break;
     case 'toggle-auto': stop(); state.settings.autoscroll = !state.settings.autoscroll; commit(); break;
