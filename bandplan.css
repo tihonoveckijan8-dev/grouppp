@@ -7462,3 +7462,13 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     box-sizing:border-box;
   }
 }
+
+
+/* Calendar event area: absorb remaining cell height without pushing content outside the cell. */
+@layer screens{
+  .cal-cell .cal-events{
+    flex:1 1 auto;
+    min-height:0;
+    align-content:flex-start;
+  }
+}
