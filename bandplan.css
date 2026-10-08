@@ -7452,3 +7452,13 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     box-sizing:border-box;
   }
 }
+
+
+/* Calendar cell children: keep every direct child constrained by the cell width. */
+@layer screens{
+  .cal-cell > *{
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+}
