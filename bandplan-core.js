@@ -4084,6 +4084,7 @@ window.__bandplanResumeAuthenticated = async function (user) {
   if (window.__bandplanAuthResumePromise) return window.__bandplanAuthResumePromise;
   window.__bandplanAuthResumePromise = (async () => {
     try {
+      showLoginLoader();
       await startBandPlan(false);
     } finally {
       window.__bandplanAuthResumePromise = null;
