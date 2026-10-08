@@ -1722,7 +1722,7 @@ function vSong(id) {
   let h = '<div class="split"><div class="stack">';
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="font-size:var(--fs-h3);overflow-wrap:anywhere">' + esc(s.title) + '</h2>' +
     '<div class="sub">' + esc(s.artist || 'Исполнитель не указан') + '</div></div>' +
-    '<div class="row"><button class="icon-btn" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное" style="' + (s.fav ? 'color:var(--warn);border-color:var(--warn)' : '') + '">' + ic('star', 17) + '</button>' +
+    '<div class="row"><button class="icon-btn fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное">' + ic('star', 17) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать" aria-label="Печать песни">' + ic('print', 17) + '</button></div></div>' +
     '<div class="trans-box"><div><div class="cap" style="margin-bottom:6px">Транспонирование</div>' +
     '<div class="row" style="gap:var(--s2)"><button class="icon-btn" type="button" data-act="song-trans" data-id="' + s.id + '" data-d="-1" aria-label="Опустить на полутон">♭</button>' +
