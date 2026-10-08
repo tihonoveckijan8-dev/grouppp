@@ -4009,6 +4009,66 @@ function init() {
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
   uiInitialized = true;
 }
+/* Login transition loader: one claymorphic BP square, one 360° turn in 3 seconds. */
+function showLoginLoader() {
+  const old = document.getElementById('bp-login-loader');
+  if (old) old.remove();
+
+  const wrap = document.createElement('div');
+  wrap.id = 'bp-login-loader';
+  wrap.className = 'bp-login-loader';
+  wrap.setAttribute('role', 'status');
+  wrap.setAttribute('aria-label', 'Загрузка BandPlan');
+
+  const square = document.createElement('div');
+  square.className = 'bp-login-loader-square';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const defs = document.createElementNS(ns, 'defs');
+  const mask = document.createElementNS(ns, 'mask');
+  const maskId = 'bp-login-cutout-' + Date.now().toString(36);
+  mask.id = maskId;
+
+  const maskBg = document.createElementNS(ns, 'rect');
+  maskBg.setAttribute('x', '0'); maskBg.setAttribute('y', '0');
+  maskBg.setAttribute('width', '100'); maskBg.setAttribute('height', '100');
+  maskBg.setAttribute('fill', 'white');
+
+  const cutout = document.createElementNS(ns, 'text');
+  cutout.setAttribute('x', '50'); cutout.setAttribute('y', '67');
+  cutout.setAttribute('text-anchor', 'middle');
+  cutout.setAttribute('font-family', 'Arial, Helvetica, sans-serif');
+  cutout.setAttribute('font-size', '43');
+  cutout.setAttribute('font-weight', '900');
+  cutout.setAttribute('letter-spacing', '-5');
+  cutout.setAttribute('fill', 'black');
+  cutout.textContent = 'BP';
+
+  mask.append(maskBg, cutout);
+  defs.appendChild(mask);
+  svg.appendChild(defs);
+
+  const face = document.createElementNS(ns, 'rect');
+  face.setAttribute('x', '8'); face.setAttribute('y', '8');
+  face.setAttribute('width', '84'); face.setAttribute('height', '84');
+  face.setAttribute('rx', '18');
+  face.setAttribute('fill', 'var(--accent)');
+  face.setAttribute('mask', 'url(#' + maskId + ')');
+  svg.appendChild(face);
+
+  square.appendChild(svg);
+  wrap.appendChild(square);
+  document.body.appendChild(wrap);
+
+  window.setTimeout(() => {
+    wrap.classList.add('is-leaving');
+    window.setTimeout(() => wrap.remove(), 220);
+  }, 3000);
+}
 /*
   Auth handoff: Supabase is the only auth source of truth. The auth module
   calls this resume hook after a successful login; the application boot itself
