@@ -75,24 +75,24 @@ try{
 :root{--bb:#14161C;--bt:#F1F2F6;--bm:#98A2B3;--ba:#FFFFFF;--bo:#FFFFFF;--boot-bg:#14161C;--boot-text:#F1F2F6;--boot-muted:#98A2B3;--boot-track:#24262D}
 html[data-theme=dark]{--bb:#14161C;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#14161C;--boot-text:#F1F2F6;--boot-muted:#98A2B3;--boot-track:#24262D}
 html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boot-text:#F1F2F6;--boot-muted:#98A2B3;--boot-track:#15161A}
-.boot{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:hidden;background:var(--bb);color:var(--bt);padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));font:14px system-ui,sans-serif}
+.boot{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:hidden;background:var(--bb);color:var(--bt);padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 .boot.is-leaving{opacity:0;transform:scale(1.02);pointer-events:none}
-.boot-core{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,3vmin,24px);text-align:center}
-.boot-mark{position:relative;width:clamp(72px,18vmin,128px);aspect-ratio:1;display:grid;place-items:center;border-radius:24px;background:#F8F9FB;color:#101828;font-weight:800;font-size:clamp(22px,5.5vmin,38px);z-index:1}
-.boot-mark > span{position:relative;z-index:3}
-.boot-ring{position:absolute;inset:-13%;width:126%;height:126%;pointer-events:none;z-index:2;overflow:visible}
-.boot-ring circle{fill:none;stroke:#F1F2F6;stroke-width:2.5;stroke-linecap:round}
-.boot-ring .r0{opacity:.22}
-.boot-ring .r1{stroke-dasharray:72 220;animation:boot-spin 1.5s linear infinite;transform-origin:50% 50%}
-.boot-eq,.boot-bar{display:none!important}
-.boot-name{font-size:clamp(20px,5vmin,28px);font-weight:800}
-.boot-stage{color:var(--bm);min-height:20px;transition:opacity .16s}
-@keyframes boot-spin{to{transform:rotate(360deg)}}
-@media(max-height:500px) and (orientation:landscape){.boot-core{flex-direction:row;gap:20px}.boot-eq,.boot-bar{display:none!important}.boot-mark{width:clamp(64px,20vmin,88px)}.boot-name{font-size:22px}.boot-stage{display:none}}
-@media(max-height:360px){.boot-stage{display:none}.boot-name{font-size:20px}}
-@media(prefers-reduced-motion:reduce){.boot-ring .r1{animation:none}.boot-stage{transition:none}}
-@media(forced-colors:active){.boot-mark{border:2px solid CanvasText;background:Canvas;color:CanvasText;box-shadow:none}}
-@media(prefers-contrast:more){.boot-stage{color:var(--bt)}}
+.boot .box{
+  width:100px;
+  height:100px;
+  flex:none;
+  background-color:var(--hue-1,var(--accent));
+  border-radius:10px;
+  will-change:transform;
+}
+@media(max-width:480px){
+  .boot .box{width:80px;height:80px}
+}
+@media(prefers-reduced-motion:reduce){
+  .boot .box{transform:none!important}
+}
+@media(forced-colors:active){
+  .boot .box{background:CanvasText;border:2px solid CanvasText}
 }</style>
 <meta name="description" content="BandPlan — операционная система музыкального коллектива: расписание, репертуар с аккордами и динамикой партий, сет-листы и сценический режим. Работает офлайн.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -112,12 +112,19 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 </head>
 <body data-route="calendar">
 <div id="boot" class="boot" role="status" aria-live="polite" aria-label="Загрузка BandPlan">
-  <div class="boot-core">
-    <div class="boot-mark" aria-hidden="true"><svg class="boot-ring" viewBox="0 0 100 100"><circle class="r0" cx="50" cy="50" r="46"/><circle class="r1" cx="50" cy="50" r="46"/></svg><span>BP</span></div>
-    <div class="boot-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="boot-name">BandPlan</div>
-    <div class="boot-stage" id="bootStage">Запускаем BandPlan</div>
-    <div class="boot-bar" aria-hidden="true"><b id="bootBar"></b></div>
+  <div class="box" aria-hidden="true"></div>
+  <script type="module">
+    import { animate } from "https://cdn.jsdelivr.net/npm/motion/+esm";
+
+    const box = document.querySelector(".box");
+    if (box && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      animate(
+        box,
+        { rotate: 90 },
+        { type: "spring", repeat: Infinity, repeatDelay: 0.2 }
+      );
+    }
+  </script>
     <div class="boot-slow" id="bootSlow" hidden><p>Подключение занимает дольше обычного</p><div class="boot-acts"><button type="button" id="bootOffline">Продолжить офлайн</button><button type="button" id="bootRetry">Повторить</button></div></div>
   </div>
   <div class="boot-foot">Music Group OS</div>
