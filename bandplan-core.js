@@ -2509,6 +2509,7 @@ function openOnboarding() {
     name: '', role: '', roles: [], bandName: '', bandDesc: '', participation: 'yes',
     members: [{ name: '', role: 'vocal' }],
     theme: THEME_IDS.includes(state.settings.theme) ? state.settings.theme : 'light',
+    accentPreset: ACCENTS.includes(state.settings.accentPreset) ? state.settings.accentPreset : 'blue',
     accent: /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : presetAccentColor(state.settings.accentPreset || 'blue', state.settings.theme),
     demo: false
   };
@@ -2533,7 +2534,7 @@ function drawOnb() {
       '<div class="field"><label class="field-label" for="ob_band">Название группы *</label><input class="input" id="ob_band" maxlength="50" value="' + esc(onbData.bandName) + '" placeholder="Neon Coast"><span class="err"></span></div>' +
       '<div class="field"><label class="field-label" for="ob_banddesc">О группе</label><textarea class="input" id="ob_banddesc" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Направление, состав, задачи">' + esc(onbData.bandDesc) + '</textarea></div>' +
       '<div class="field"><span class="field-label">Акцентный цвет интерфейса</span><div class="swatches">' +
-      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accent === a ? ' on' : '') + '" data-a="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '"><span class="sw-dot" data-preset="' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (onbData.accent === a ? ic('check', 14) : '') + '</button>').join('') + '</div></div>';
+      ACCENTS.map(a => '<button type="button" class="sw' + (onbData.accentPreset === a ? ' on' : '') + '" data-a="' + a + '" aria-label="Акцент ' + esc(ACCENT_LABELS[a] || a) + '"><span class="sw-dot" data-preset="' + a + '" aria-hidden="true"></span><span class="sw-name">' + esc(ACCENT_LABELS[a] || a) + '</span>' + (onbData.accentPreset === a ? ic('check', 14) : '') + '</button>').join('') + '</div></div>';
   } else if (onbStep === 2) {
     h += '<div class="onb-hero">' + ic('wave', 28) + '</div><h2>Состав группы</h2>' +
       '<p class="lead">Группа создастся с вашим аккаунтом. Остальных участников не нужно вводить вручную: пригласите их кодом после запуска, и их имена и роли появятся у всех автоматически.</p>' +
@@ -2555,7 +2556,7 @@ function drawOnb() {
   if (onbStep === 1) {
     bind('ob_band', 'input', e => { onbData.bandName = e.target.value; });
     bind('ob_banddesc', 'input', e => { onbData.bandDesc = e.target.value; });
-    $$('.sw', el).forEach(b => b.addEventListener('click', () => { onbData.accent = b.getAttribute('data-a'); $$('.sw', el).forEach(x => x.classList.toggle('on', x === b)); }));
+    $$('.sw', el).forEach(b => b.addEventListener('click', () => { onbData.accentPreset = b.getAttribute('data-a'); $$('.sw', el).forEach(x => x.classList.toggle('on', x === b)); }));
   }
   if (onbStep === 2) {
     // Membership is account-driven. No local roster editing is performed during onboarding.
@@ -2609,7 +2610,7 @@ async function finishOnboarding() {
   state.profile.bandDesc = onbData.bandDesc;
   state.profile.defaultParticipation = onbData.participation;
   state.settings.theme = onbData.theme;
-  state.settings.accent = onbData.accent; state.settings.accentPreset = null;
+  state.settings.accentPreset = onbData.accentPreset || 'blue'; state.settings.accent = presetAccentColor(state.settings.accentPreset, state.settings.theme);
   state.members = [{ id: uid('m'), accountId: window.BandPlanCloud?.user?.()?.id || '', name: state.profile.name, role: state.profile.role, roles: myRoles(), note: 'это вы' }];
   state.onboardingDone = true;
 
