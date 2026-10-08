@@ -7224,3 +7224,47 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .cal-selected-day .card-h{align-items:center}
   .cal-selected-day .ev-row{margin-top:8px}
 }
+
+/* ═══ Stage 3 · desktop master-detail ═══ */
+@layer screens{
+  .master-detail-shell,.master-list,.master-detail-panel{min-width:0}
+  @media(min-width:1100px){
+    .master-detail-shell.is-desktop{
+      display:grid;
+      grid-template-columns:minmax(300px,360px) minmax(0,1fr);
+      gap:24px;
+      align-items:start;
+    }
+    .master-detail-shell.is-desktop .master-list{
+      position:sticky;
+      top:16px;
+      max-height:calc(100dvh - 32px);
+      overflow:auto;
+      padding-right:4px;
+    }
+    .master-detail-shell.is-desktop .master-detail-panel{min-width:0}
+    .master-detail-shell.is-desktop .master-detail-panel > .split,
+    .master-detail-shell.is-desktop .master-detail-panel .setlist-detail{
+      grid-template-columns:minmax(0,1fr);
+    }
+    .master-detail-shell.is-desktop .master-detail-panel .card{min-width:0}
+    .master-detail-shell.is-desktop .master-detail-panel .sl-row-actions{justify-content:flex-start}
+    .master-detail-shell.is-desktop .master-list .song-card[data-act="open-song"],
+    .master-detail-shell.is-desktop .master-list .song-card[data-act="open-setlist"]{
+      outline-offset:-2px;
+    }
+  }
+  @media(max-width:1099px){
+    .master-detail-panel{display:none}
+  }
+}
+
+@layer screens{
+  @media(min-width:1100px){
+    .master-detail-shell.is-desktop .master-list .song-card.is-selected{
+      border-color:var(--accent-border);
+      background:var(--accent-soft);
+      box-shadow:var(--shadow-1);
+    }
+  }
+}

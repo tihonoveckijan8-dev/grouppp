@@ -373,7 +373,7 @@ let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
-  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false,
+  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '',
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
@@ -1637,7 +1637,10 @@ function vSongs() {
       state.songs.length ? '<button class="btn btn-secondary" type="button" data-act="song-reset">Сбросить фильтры</button><button class="btn btn-primary" type="button" data-act="new-song">Добавить песню</button>'
         : '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить первую песню</button>') + '</div>';
   }
-  h += '<div class="collection-grid collection-list songs-list">';
+  const desktopMaster = window.matchMedia && window.matchMedia('(min-width:1100px)').matches;
+  const selectedSong = desktopMaster && list.length ? (list.find(s => s.id === ui.songSelectedId) || list[0]) : null;
+  if (selectedSong) ui.songSelectedId = selectedSong.id;
+  h += '<div class="master-detail-shell' + (desktopMaster ? ' is-desktop' : '') + '"><div class="master-list"><div class="collection-grid collection-list songs-list">';
   list.forEach(function (s, i) {
     const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
@@ -1658,6 +1661,8 @@ function vSongs() {
       
       '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
   });
+  h += '</div></div>';
+  if (selectedSong) h += '<aside class="master-detail-panel" aria-label="Карточка выбранной песни">' + vSong(selectedSong.id) + '</aside>';
   return h + '</div>';
 }
 function openSongFilters() {
@@ -1802,7 +1807,10 @@ function vSetlists() {
     ) + '</div>';
   }
 
-  h += '<div class="collection-grid collection-list songs-list setlists-list">';
+  const desktopMaster = window.matchMedia && window.matchMedia('(min-width:1100px)').matches;
+  const selectedSetlist = desktopMaster && list.length ? (list.find(sl => sl.id === ui.setlistSelectedId) || list[0]) : null;
+  if (selectedSetlist) ui.setlistSelectedId = selectedSetlist.id;
+  h += '<div class="master-detail-shell' + (desktopMaster ? ' is-desktop' : '') + '"><div class="master-list"><div class="collection-grid collection-list songs-list setlists-list">';
   list.forEach(function (sl, i) {
     const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
@@ -1815,6 +1823,8 @@ function vSetlists() {
       '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '</button>' +
       '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">Открыть на сцене</span></button></div></article>';
   });
+  h += '</div></div>';
+  if (selectedSetlist) h += '<aside class="master-detail-panel" aria-label="Выбранный сет-лист">' + vSetlist(selectedSetlist.id) + '</aside>';
   return h + '</div>';
 }
 function vSetlist(id) {
@@ -3062,7 +3072,7 @@ document.addEventListener('click', function (e) {
       }, 'Удалить песню', true);
       break;
     }
-    case 'open-song': stop(); go('#/song/' + id); break;
+    case 'open-song': { stop(); if (parseHash().name === 'songs' && window.matchMedia && window.matchMedia('(min-width:1100px)').matches) { ui.songSelectedId = id; render(); } else go('#/song/' + id); break; }
     case 'fav': { stop(); const s = songById(id); if (!s) break; s.fav = !s.fav; save(); render(); toast(s.fav ? 'Песня в избранном' : 'Песня убрана из избранного', 'info', 2000); break; }
     case 'fav-filter': stop(); ui.songFav = !ui.songFav; render(); break;
     case 'tag': stop(); ui.songTag = el.getAttribute('data-v'); render(); if ($('#modalOverlay').classList.contains('on')) $$('#modalOverlay [data-act="tag"]').forEach(b => b.classList.toggle('on', b.getAttribute('data-v') === ui.songTag)); break;
@@ -3114,7 +3124,7 @@ document.addEventListener('click', function (e) {
     }
     case 'dyn-clear': { stop(); dynDraft = { instruments: [], sections: [], levels: {} }; renderDynBlock(); break; }
     case 'new-setlist': stop(); setlistModal(null); break;
-    case 'open-setlist': stop(); go('#/setlist/' + id); break;
+    case 'open-setlist': { stop(); if (parseHash().name === 'setlists' && window.matchMedia && window.matchMedia('(min-width:1100px)').matches) { ui.setlistSelectedId = id; render(); } else go('#/setlist/' + id); break; }
     case 'sl-rename': stop(); setlistModal(id); break;
     case 'sl-save': {
       stop(); btnLoading(el);
