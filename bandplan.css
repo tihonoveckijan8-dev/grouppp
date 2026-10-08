@@ -6969,13 +6969,13 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     --accent-active:color-mix(in oklab,var(--accent),var(--accent-contrast) 20%);
     --accent-soft:color-mix(in srgb,var(--accent) 12%,transparent);
     --accent-softer:color-mix(in srgb,var(--accent) 8%,transparent);
-    --accent-border:color-mix(in srgb,var(--accent) 45%,transparent);
-    --accent-glow:color-mix(in srgb,var(--accent) 35%,transparent);
+    --accent-border:var(--accent-text);
+    --accent-glow:transparent;
     --accent-on-bg:#1554FF;
     --accent-fill:var(--accent);
     --accent-text:var(--accent-on-bg);
-    --accent-soft-2:color-mix(in srgb,var(--accent) 24%,transparent);
-    --accent-ring:color-mix(in srgb,var(--accent) 66%,transparent);
+    --accent-soft-2:color-mix(in srgb,var(--accent) 18%,transparent);
+    --accent-ring:var(--accent-text);
     --accent-surface:var(--accent-softer);
     --accent-surface-strong:var(--accent-soft);
     --accent-selection:color-mix(in srgb,var(--accent) 20%,transparent);
@@ -6983,8 +6983,8 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     --focus-ring:0 0 0 3px var(--accent-soft);
     --shadow-accent:0 6px 18px var(--accent-glow);
     --shadow-accent-hover:0 10px 24px var(--accent-glow);
-    --info:var(--accent);
-    --info-bg:var(--accent-soft);
+    --info:var(--semantic-info-base);
+    --info-bg:color-mix(in srgb,var(--info) 14%,transparent);
   }
   :where(button,a,[role="button"],input,select,textarea):focus-visible{
     outline:2px solid var(--accent);outline-offset:2px;box-shadow:none!important;
