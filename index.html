@@ -78,15 +78,40 @@ html[data-theme=amoled]{--bb:#000;--bt:#F1F2F6;--bm:#98A2B3;--boot-bg:#000;--boo
 .boot{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;overflow:hidden;background:var(--bb);color:var(--bt);padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left))}
 .boot.is-leaving{opacity:0;transform:scale(1.02);pointer-events:none}
 .boot .box{
+  position:relative;
   width:100px;
   height:100px;
   flex:none;
-  background-color:var(--hue-1,var(--accent));
-  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:var(--accent,#1554FF);
+  border-radius:22px;
+  box-shadow:
+    12px 12px 24px color-mix(in srgb,#000 30%,transparent),
+    -8px -8px 18px color-mix(in srgb,#fff 20%,transparent),
+    inset 4px 4px 9px color-mix(in srgb,#000 20%,transparent),
+    inset -4px -4px 9px color-mix(in srgb,#fff 28%,transparent);
   will-change:transform;
 }
+.boot .box::before{
+  content:"BP";
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+  font-family:Manrope,system-ui,sans-serif;
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:-2px;
+  color:color-mix(in srgb,var(--accent,#1554FF) 68%,#000);
+  text-shadow:
+    1.5px 1.5px 2px color-mix(in srgb,#000 34%,transparent),
+    -1.5px -1.5px 2px color-mix(in srgb,#fff 34%,transparent);
+  user-select:none;
+}
 @media(max-width:480px){
-  .boot .box{width:80px;height:80px}
+  .boot .box{width:80px;height:80px;border-radius:18px}
+  .boot .box::before{font-size:28px}
 }
 @media(prefers-reduced-motion:reduce){
   .boot .box{transform:none!important}
