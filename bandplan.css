@@ -6937,3 +6937,8 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 
 
 
+
+/* Normal startup is invisible; keep the boot surface only for real startup errors. */
+@layer boot{
+  #boot:not(.is-error){display:none!important;visibility:hidden!important;pointer-events:none!important}
+}
