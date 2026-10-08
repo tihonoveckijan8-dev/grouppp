@@ -7428,3 +7428,16 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     white-space:nowrap;
   }
 }
+
+
+/* Calendar overflow guard: keep the "more events" label inside its day cell. */
+@layer screens{
+  .cal-more{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    box-sizing:border-box;
+  }
+}
