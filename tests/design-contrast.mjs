@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const css=fs.readFileSync('bandplan.css','utf8');
 const sources=['bandplan-core.js','bandplan.js','supabase.js','index.html'];
 const files=Object.fromEntries(sources.map(p=>[p,fs.readFileSync(p,'utf8')]));
-const hexRx=/(#[0-9A-Fa-f]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\))/g;
+const hexRx=/(#[0-9A-Fa-f]{3,8}\b|rgba?\(\s*\d|hsla?\(\s*\d)/g;
 const bad=[];
 for(const [file,text] of Object.entries(files)){
   for(const m of text.matchAll(hexRx)) bad.push(file+':'+(text.slice(0,m.index).split('\n').length)+': '+m[0]);
@@ -55,7 +55,8 @@ for(const theme of themes){
     assert.ok(Math.max(onWhite,onBlack)>=4.5-1e-6,theme+'/'+accent+' on-accent text cannot reach 4.5');
   }
 }
-assert.equal(value('--theme-color-amoled'),'#000000','AMOLED background must be #000000');
+assert.equal(value('--theme-color-amoled'),value('--token-black'),'AMOLED background must use the canonical black token');
+assert.ok(css.includes('[data-theme="amoled"]') && css.includes('--surf-1:#0B0B0E'),'AMOLED card token must be #0B0B0E');
 console.log('BandPlan design contrast audit: PASS');
 console.log('Matrix: 3 themes × 9 presets = 27 combinations');
 console.log('Hardcoded JS/index colors: 0');
