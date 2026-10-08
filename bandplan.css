@@ -6996,7 +6996,7 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     border:4px solid color-mix(in srgb,var(--accent) 20%,transparent);
     border-top-color:var(--accent);
     border-radius:8px;
-    animation:bandplan-square-spin 900ms linear infinite;
+    animation:bandplan-square-spin 3s linear 1;
     transform-origin:center;
   }
   @keyframes bandplan-square-spin{
