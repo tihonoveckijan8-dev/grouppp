@@ -6092,3 +6092,52 @@ body:not([data-route="calendar"]) .settings-shell .settings-one-line{background:
 body:not([data-route="calendar"]) .settings-shell .settings-one-line>button.on{background:var(--accent-fill);color:var(--on-accent);border-color:transparent}
 }
 @media(max-width:640px){body:not([data-route="calendar"]) .settings-shell .profile-role-box,body:not([data-route="calendar"]) .settings-shell .profile-account-box,body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="interface"] .field,body:not([data-route="calendar"]) .settings-shell .settings-card[data-settings-panel="data"] .data-action-group{padding:14px!important}}
+
+
+/* Songs / setlists final list pass — calendar untouched. */
+@layer components{
+body[data-route="songs"] .collection-grid.collection-list,
+body[data-route="setlists"] .collection-grid.collection-list{display:grid;grid-template-columns:1fr;gap:10px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:14px 16px;background:var(--surf-1);border:1px solid var(--border);border-radius:var(--radius-2xl);box-sizing:border-box;overflow:hidden}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-top,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-top{min-width:0;display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-title-wrap,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-title-wrap{min-width:0}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-name{font-size:16px;line-height:1.25;font-weight:700}
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-name{font-size:16px;line-height:1.25;font-weight:700}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-meta,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-meta{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding-left:52px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-acts,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-acts{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-acts .btn,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-acts .btn{min-height:40px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-open-wrap,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-open-wrap{display:flex;align-items:center;gap:6px;min-width:0}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-open,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-open{min-width:92px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .key-badge,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .key-badge{width:40px;height:40px;min-width:40px;display:grid;place-items:center}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .badge,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+@media(max-width:640px){
+body[data-route="songs"] .collection-grid.collection-list>article.song-card,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card{padding:12px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-meta,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-meta{padding-left:0}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-acts,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-acts{justify-content:stretch}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card>.song-acts .btn,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card>.song-acts .btn{flex:1 1 0;min-width:0}
+}
+@media(max-width:380px){
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-top,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-top{grid-template-columns:36px minmax(0,1fr) auto;gap:8px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .key-badge,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .key-badge{width:36px;height:36px;min-width:36px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .song-open,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .song-open{min-width:78px;padding-inline:9px}
+body[data-route="songs"] .collection-grid.collection-list>article.song-card .fav,
+body[data-route="setlists"] .collection-grid.collection-list>article.song-card .fav{width:40px;height:40px}
+}
