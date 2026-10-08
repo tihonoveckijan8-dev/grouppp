@@ -7483,3 +7483,13 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     flex:0 0 auto;
   }
 }
+
+
+/* Calendar grid: force the seven columns to use the available card width only. */
+@layer screens{
+  .cal-grid{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+  }
+}
