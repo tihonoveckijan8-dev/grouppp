@@ -4069,6 +4069,8 @@ function showLoginLoader() {
     window.setTimeout(() => wrap.remove(), 220);
   }, 3000);
 }
+window.__bandplanShowLoginLoader = showLoginLoader;
+
 /*
   Auth handoff: Supabase is the only auth source of truth. The auth module
   calls this resume hook after a successful login; the application boot itself
