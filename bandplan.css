@@ -7441,3 +7441,14 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     box-sizing:border-box;
   }
 }
+
+
+/* Calendar day number: prevent the number row from creating horizontal overflow. */
+@layer screens{
+  .cal-num{
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+}
