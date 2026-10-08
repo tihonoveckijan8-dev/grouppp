@@ -7417,3 +7417,14 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     box-sizing:border-box;
   }
 }
+
+
+/* Calendar weekday labels stay inside their seven-column cells. */
+@layer screens{
+  .cal-wd{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
