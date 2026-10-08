@@ -6629,3 +6629,44 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     padding:9px;
   }
 }
+
+
+/* Setlist editor + add-to-setlist modal — scoped. Calendar is strictly untouched. */
+@layer components{
+  body[data-route="setlists"] #modalOverlay .modal.editor,
+  body[data-route="setlist"] #modalOverlay .modal.editor{
+    max-width:720px;
+  }
+  body[data-route="setlists"] #modalOverlay .modal.editor .field,
+  body[data-route="setlist"] #modalOverlay .modal.editor .field{
+    min-width:0;
+  }
+  body[data-route="setlists"] #modalOverlay .modal.editor .f_slsong,
+  body[data-route="setlist"] #modalOverlay .modal.editor .check{
+    min-width:0;
+  }
+  body[data-route="setlists"] #modalOverlay .modal.editor .check{
+    display:grid;
+    grid-template-columns:22px minmax(0,1fr) auto;
+    align-items:center;
+    gap:10px;
+    box-sizing:border-box;
+  }
+  body[data-route="setlists"] #modalOverlay .modal.editor .check .grow{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  body[data-route="setlists"] #modalOverlay .modal.editor .check .badge{
+    flex:none;
+  }
+  body[data-route="setlist"] #modalOverlay .modal.editor .check{
+    min-height:44px;
+  }
+}
+@media(max-width:640px){
+  body[data-route="setlists"] #modalOverlay .modal.editor .check{
+    grid-template-columns:22px minmax(0,1fr) auto;
+    padding:10px 12px!important;
+  }
+}
