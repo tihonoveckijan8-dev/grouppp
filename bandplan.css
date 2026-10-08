@@ -6073,3 +6073,5 @@ body:not([data-route="calendar"]) .part-switch .part-btn{flex:1 1 0;min-width:0}
 @media(max-width:380px){body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{padding:14px}body:not([data-route="calendar"]) .part-switch{gap:4px}body:not([data-route="calendar"]) .part-switch .part-btn{padding-inline:8px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card{transition:none!important}}
 @media(forced-colors:active){body:not([data-route="calendar"]) .card,body:not([data-route="calendar"]) .song-card,body:not([data-route="calendar"]) .setlist-card,body:not([data-route="calendar"]) .settings-card,body:not([data-route="calendar"]) .member-card{forced-color-adjust:auto;border:1px solid CanvasText;box-shadow:none}}
+
+/* next non-calendar polish pass */
