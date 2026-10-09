@@ -7603,3 +7603,46 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
 .scene-dynamics-overview { padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2, var(--surface)); line-height: 1.45; overflow-wrap: anywhere; }
 .scene-dynamics-overview strong, .scene-dyn-note b { display: block; margin-bottom: 4px; color: var(--accent); font-size: .72em; letter-spacing: .08em; }
 .scene-dyn-note { display: block; white-space: normal; line-height: 1.35; padding: .35em .55em; margin: .12em 0 .32em; border-left: 3px solid var(--accent); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--surface-2, var(--surface)); overflow-wrap: anywhere; }
+
+
+/* Song section quick actions and instrument-specific dynamics */
+.song-section-quick { display:grid; gap:8px; margin-top:12px; padding:12px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface-2, var(--surface)); }
+.song-section-actions { display:flex; flex-wrap:wrap; gap:7px; }
+.song-section-chip { min-height:36px; border-radius:999px; padding:7px 12px; cursor:pointer; }
+.song-section-chip:hover { border-color:var(--accent); color:var(--accent); }
+.dyn-section-editor { padding:12px; border:1px solid var(--border); border-radius:var(--r-md); background:var(--surface-2, var(--surface)); }
+.dyn-section-heading { display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.dyn-section-heading .field-label { margin:0; }
+.dyn-section-index { display:inline-grid; place-items:center; flex:0 0 25px; width:25px; height:25px; border-radius:9px; color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); font-size:12px; font-weight:750; }
+.dyn-instrument-notes { display:grid; gap:9px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.dyn-instrument-field { display:grid; grid-template-columns:minmax(95px, .32fr) minmax(0, 1fr); gap:10px; align-items:start; }
+.dyn-instrument-label { padding-top:10px; color:var(--text-muted, var(--muted)); font-size:var(--fs-body-s); font-weight:650; overflow-wrap:anywhere; }
+.dyn-instrument-dropdown { margin-top:12px; border:1px solid var(--border); border-radius:var(--r-lg); background:var(--surface-2, var(--surface)); overflow:hidden; }
+.dyn-instrument-dropdown > summary { display:flex; align-items:center; gap:11px; padding:14px; cursor:pointer; list-style:none; }
+.dyn-instrument-dropdown > summary::-webkit-details-marker { display:none; }
+.dyn-instrument-summary-icon { display:grid; place-items:center; width:36px; height:36px; flex:0 0 36px; border-radius:12px; color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); }
+.dyn-instrument-dropdown > summary strong, .dyn-instrument-dropdown > summary small { display:block; }
+.dyn-instrument-dropdown > summary strong { font-size:var(--fs-body); }
+.dyn-instrument-dropdown > summary small { margin-top:3px; color:var(--muted); font-size:var(--fs-body-s); }
+.dyn-dropdown-chevron { margin-left:auto; font-size:20px; transition:transform .18s ease; }
+.dyn-instrument-dropdown[open] .dyn-dropdown-chevron { transform:rotate(180deg); }
+.dyn-instrument-picker { padding:0 14px 14px; }
+.dyn-instrument-add-row { display:flex; align-items:center; gap:8px; }
+.dyn-instrument-add-row .select { min-width:0; flex:1; }
+.dyn-instrument-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+.dyn-instrument-tag { display:inline-flex; align-items:center; gap:7px; padding:5px 8px 5px 11px; border:1px solid var(--border); border-radius:999px; background:var(--surface); font-size:var(--fs-body-s); }
+.dyn-instrument-tag button { display:grid; place-items:center; width:22px; height:22px; border:0; border-radius:50%; color:var(--muted); background:transparent; font-size:17px; cursor:pointer; }
+.dyn-instrument-tag button:hover { color:var(--accent); background:var(--surface-2); }
+.song-dynamics-instrument { display:grid; grid-template-columns:minmax(90px, .28fr) minmax(0, 1fr); gap:10px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+.song-dynamics-instrument > span { color:var(--muted); font-size:var(--fs-body-s); font-weight:700; }
+.song-dynamics-instrument p { margin:0; }
+.scene-instrument-note b { color:var(--accent); }
+@media (max-width:520px) {
+  .song-section-actions { gap:6px; }
+  .song-section-chip { padding:6px 10px; font-size:var(--fs-body-s); }
+  .dyn-instrument-field, .song-dynamics-instrument { grid-template-columns:1fr; gap:4px; }
+  .dyn-instrument-label { padding-top:0; }
+  .dyn-instrument-add-row { align-items:stretch; flex-direction:column; }
+  .dyn-instrument-add-row .btn { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .dyn-dropdown-chevron { transition:none; } }
