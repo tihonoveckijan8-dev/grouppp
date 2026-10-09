@@ -99,7 +99,7 @@ try {
     const renderLyrics = hooks?.renderSceneLyrics;
     if (typeof render !== 'function' || typeof renderLyrics !== 'function') return null;
     const song = {
-      lyrics: 'Куплет 1\\nПервая строка песни',
+      lyrics: 'Куплет 1\nПервая строка песни',
       dynamics: {
         instruments: ['guitar', 'drums'],
         sections: ['Куплет 1'],
