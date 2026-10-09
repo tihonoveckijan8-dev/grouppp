@@ -4110,16 +4110,22 @@ async function startBandPlanInternal(forceOffline) {
     if (window.__bandplanDurable?.state) {
       try { localStorage.setItem(KEY, JSON.stringify(window.__bandplanDurable.state)); } catch (e) {}
     } else if (legacyState) {
-      try {
-        localStorage.setItem(KEY, JSON.stringify(legacyState));
-        // WHY: once the account-scoped copy is durable locally, remove the unscoped legacy key to prevent cross-account reuse.
-        for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) localStorage.removeItem(legacyKey);
-      } catch (e) {}
+      try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (e) {}
+    }
+    // WHY: remove account-agnostic state only after a per-account snapshot exists, including when durable state was restored instead of migrated.
+    if (window.__bandplanDurable?.state || legacyState) {
+      for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) {
+        try { localStorage.removeItem(legacyKey); } catch (e) {}
+      }
     }
   } catch (e) {
     window.__bandplanDurable = null;
     if (legacyState) {
-      try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (storageError) {}
+      try {
+        localStorage.setItem(KEY, JSON.stringify(legacyState));
+        // WHY: cleanup follows successful account-scoped migration even when cloud hydration failed.
+        for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) localStorage.removeItem(legacyKey);
+      } catch (storageError) {}
     }
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
