@@ -220,8 +220,11 @@ function parseSectionHeading(line) {
   // Normalize common headings from pasted lyric sheets:
   // "# Куплет 1", "1. Куплет", "Куплет 1:", "(Bridge)", "CHORUS 2 (x2)".
   let plain = raw.replace(/^#{1,3}\s*/, '');
-  const leadingNumber = /^(\d{1,2})[.)]\s*(.+)$/.exec(plain);
+  const leadingNumber = /^(\d{1,2})(?:[.)]|[-:]|\s+)\s*(.+)$/.exec(plain);
   if (leadingNumber) plain = leadingNumber[2].trim();
+  // Accept common lyric-sheet variants such as "1 Куплет", "Куплет №1",
+  // "Куплет (1)" and unbracketed headings pasted from notes.
+  plain = plain.replace(/^(куплет|verse|стих)\s*(?:№|#)?\s*[([]?\s*(\d{1,2})\s*[)\]]?$/i, '$1 $2');
   plain = plain.replace(/^\((.*)\)$/, '$1').replace(/\s*\((?:x|х)\s*\d+\)$/i, '').replace(/[：:]\s*$/, '').trim();
   if (!plain || plain.length > 48) return null;
   const parsed = classifySongSection(plain);
@@ -1817,17 +1820,37 @@ function normalizeDynamics(dynamics) {
 }
 function syncDynamicsSections(draft, lyrics) {
   const names = extractSections(lyrics), previous = draft.sectionNotes || {};
-  draft.sections = names; draft.sectionNotes = {};
-  names.forEach(name => { draft.sectionNotes[name] = String(previous[name] || ''); });
+  const oldNames = Array.isArray(draft.sections) ? draft.sections : [];
+  const aliasFor = name => {
+    const match = /^(Куплет|Припев|Бридж|Вступление|Предприпев|Проигрыш|Соло|Финал)(?:\s+(\d+))?$/i.exec(String(name || '').trim());
+    if (!match) return [];
+    const type = match[1], number = match[2];
+    return number ? [type + ' ' + number, type, type.toLocaleLowerCase('ru') + ' ' + number, type.toLocaleLowerCase('ru')]
+      : [type, type.toLocaleLowerCase('ru')];
+  };
+  const findPrevious = (map, name, oldList) => {
+    if (map[name] != null) return map[name];
+    for (const alias of aliasFor(name)) if (map[alias] != null) return map[alias];
+    const sameType = oldList.find(old => {
+      const a = classifySongSection(String(old).replace(/\s+\d+$/, '')).type;
+      const b = classifySongSection(String(name).replace(/\s+\d+$/, '')).type;
+      return a === b && map[old] != null;
+    });
+    return sameType ? map[sameType] : '';
+  };
+  draft.sections = names;
+  draft.sectionNotes = {};
+  names.forEach(name => { draft.sectionNotes[name] = String(findPrevious(previous, name, oldNames) || ''); });
   draft.instruments = Array.isArray(draft.instruments) ? draft.instruments : [];
   draft.levels = draft.levels && typeof draft.levels === 'object' ? draft.levels : {};
   draft.instrumentNotes = draft.instrumentNotes && typeof draft.instrumentNotes === 'object' ? draft.instrumentNotes : {};
   draft.instruments.forEach(ins => {
     draft.levels[ins] = draft.levels[ins] || {};
-    draft.instrumentNotes[ins] = draft.instrumentNotes[ins] && typeof draft.instrumentNotes[ins] === 'object' ? draft.instrumentNotes[ins] : {};
+    const oldInstrumentNotes = draft.instrumentNotes[ins] || {};
+    draft.instrumentNotes[ins] = {};
     names.forEach(name => {
+      draft.instrumentNotes[ins][name] = String(findPrevious(oldInstrumentNotes, name, oldNames) || '');
       if (!(name in draft.levels[ins])) draft.levels[ins][name] = '';
-      if (!(name in draft.instrumentNotes[ins])) draft.instrumentNotes[ins][name] = '';
     });
   });
   return names;
