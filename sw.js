@@ -31,7 +31,7 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|supabase\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|supabase\.js|config\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (shell) {
