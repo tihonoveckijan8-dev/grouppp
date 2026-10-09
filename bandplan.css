@@ -7578,3 +7578,12 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 
 /* Stage 4 · ensure interactive calendar cells meet the control-border contrast token. */
 .cal-cell{border-color:var(--control-border)!important}
+
+
+/* Song detail: keep long lyrics compact until the reader asks to expand them. */
+body:not([data-route="calendar"]) .lyrics-expand-shell{min-width:0;max-width:100%;}
+body:not([data-route="calendar"]) .lyrics-expand-shell.is-collapsed .lyrics{position:relative;max-height:320px;overflow:hidden;}
+body:not([data-route="calendar"]) .lyrics-expand-shell.is-collapsed .lyrics::after{content:"";position:absolute;z-index:1;right:0;bottom:0;left:0;height:76px;background:linear-gradient(to bottom,transparent,var(--surf-1));pointer-events:none;}
+body:not([data-route="calendar"]) .lyrics-expand-btn{display:flex;justify-content:center;align-items:center;gap:6px;width:100%;min-height:44px;margin-top:8px;white-space:normal;}
+body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-height:none;overflow:visible;}
+@media (prefers-reduced-motion:no-preference){body:not([data-route="calendar"]) .lyrics-expand-shell .lyrics{transition:max-height .22s ease;}}
