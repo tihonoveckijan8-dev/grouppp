@@ -209,7 +209,22 @@ function transposeChord(c, n) {
   }).join('/');
 }
 const transposeKey = (k, n) => !k ? k : String(k).split(/\s+/).map(t => isChord(t) ? transposeChord(t, n) : t).join(' ');
-function isSection(l) { const m = /^\s*\[([^\]]+)\]\s*$/.exec(l); return !!(m && !isChord(m[1].trim())); }
+function parseSectionHeading(line) {
+  const raw = String(line || '').trim();
+  if (!raw) return null;
+  const bracketed = /^\[([^\]]+)\]$/.exec(raw);
+  if (bracketed) {
+    const source = bracketed[1].trim();
+    return source && !isChord(source) ? { source: source, bracketed: true } : null;
+  }
+  // Also recognize common standalone headings pasted without square brackets:
+  // "Припев", "Куплет 2:", "(Bridge)", "CHORUS 2".
+  const plain = raw.replace(/^\((.*)\)$/, '$1').replace(/[:：]\s*$/, '').trim();
+  if (!plain || plain.length > 48) return null;
+  const parsed = classifySongSection(plain);
+  return !parsed.custom ? { source: plain, bracketed: false } : null;
+}
+function isSection(l) { return !!parseSectionHeading(l); }
 function isChordLine(l) {
   const t = String(l || '').trim(); if (!t || t.charAt(0) === '[') return false;
   const a = t.split(/\s+/); for (let i = 0; i < a.length; i++) if (!isChord(a[i])) return false; return true;
@@ -227,7 +242,8 @@ function renderLyrics(text, n) {
   String(text || '').split('\n').forEach(function (line) {
     if (state.settings.showChords === false) line = line.replace(/\[([A-G][^\]\s]*)\]/g, (m, c) => isChord(c) ? '' : m);
     if (!line.trim()) { out.push('<span class="ln"> </span>'); return; }
-    if (isSection(line)) { out.push('<span class="ln sec">' + esc(line.trim().slice(1, -1)) + '</span>'); return; }
+    const sectionHeading = parseSectionHeading(line);
+    if (sectionHeading) { out.push('<span class="ln sec">' + esc(sectionHeading.source) + '</span>'); return; }
     if (isChordLine(line)) {
       if (state.settings.showChords === false) return;
       out.push('<span class="ln">' + line.split(/(\s+)/).map(function (p) {
@@ -276,9 +292,9 @@ function classifySongSection(value) {
 function extractSectionOccurrences(text) {
   const out = [], counts = Object.create(null), used = Object.create(null);
   String(text || '').split('\n').forEach(function (line) {
-    const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
-    if (!match || isChord(match[1].trim())) return;
-    const parsed = classifySongSection(match[1]);
+    const heading = parseSectionHeading(line);
+    if (!heading) return;
+    const parsed = classifySongSection(heading.source);
     if (!parsed.label) return;
     const count = (counts[parsed.type] || 0) + 1;
     counts[parsed.type] = count;
@@ -292,7 +308,7 @@ function extractSectionOccurrences(text) {
       label = parsed.type + ' ' + suffix;
     }
     used[label] = true;
-    out.push({ source: match[1].trim(), type: parsed.type, label: label });
+    out.push({ source: heading.source, type: parsed.type, label: label });
   });
   return out;
 }
@@ -1798,10 +1814,10 @@ function renderSceneLyrics(song, shift) {
   const occurrences = extractSectionOccurrences(song && song.lyrics || '');
   let sectionIndex = 0;
   return String(song && song.lyrics || '').split('\n').map(function(line) {
-    const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
-    if (match && !isChord(match[1].trim())) {
+    const heading = parseSectionHeading(line);
+    if (heading) {
       const occurrence = occurrences[sectionIndex++];
-      const name = match[1].trim();
+      const name = heading.source;
       const key = occurrence ? occurrence.label : name;
       const note = String(d.sectionNotes[key] || '').trim();
       const cues = d.instruments.map(ins => {
