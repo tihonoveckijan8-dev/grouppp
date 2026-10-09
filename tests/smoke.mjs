@@ -117,8 +117,8 @@ try {
   assert.doesNotMatch(dynamicsFiltering.guitar, /Ударные входят на второй такт/, 'Guitar player can see another instrument dynamics');
   assert.match(dynamicsFiltering.drums, /Ударные входят на второй такт/, 'Drummer did not receive drum dynamics');
   assert.doesNotMatch(dynamicsFiltering.drums, /Гитара вступает после первой строки/, 'Drummer can see another instrument dynamics');
-  assert.match(dynamicsFiltering.unassigned, /Гитара вступает после первой строки/, 'Unassigned role should retain all-instruments view');
-  assert.match(dynamicsFiltering.unassigned, /Ударные входят на второй такт/, 'Unassigned role should retain all-instruments view');
+  assert.doesNotMatch(dynamicsFiltering.unassigned, /Гитара вступает после первой строки/, 'User without a matching role must not see guitar dynamics');
+  assert.doesNotMatch(dynamicsFiltering.unassigned, /Ударные входят на второй такт/, 'User without a matching role must not see drum dynamics');
 
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
