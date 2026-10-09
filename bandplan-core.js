@@ -1859,13 +1859,13 @@ function dynamicsInstrumentLabel(key) {
   const role = ROLES.find(r => r.k === key);
   return role ? role.label : String(key || 'Инструмент');
 }
-function dynamicsVisibleInstruments(d) {
-  const roles = typeof myRoles === 'function' ? myRoles() : [];
+function dynamicsVisibleInstruments(d, userRoles) {
+  const roles = Array.isArray(userRoles) ? userRoles : (typeof myRoles === 'function' ? myRoles() : []);
   return roles && roles.length ? d.instruments.filter(ins => roles.includes(ins)) : d.instruments;
 }
-function dynamicsHTML(song) {
+function dynamicsHTML(song, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
-  const visibleInstruments = dynamicsVisibleInstruments(d);
+  const visibleInstruments = dynamicsVisibleInstruments(d, userRoles);
   const sections = d.sections.filter(name =>
     visibleInstruments.some(ins => String((d.instrumentNotes[ins] || {})[name] || '').trim())
   );
@@ -4099,7 +4099,8 @@ if (location.search.includes('bandplan-test=1')) {
   window.__bandplanTestHooks = {
     shouldCleanupOfflineEventSongRow,
     rebuildOfflineSongIndex,
-    offlineSongLookup: id => offlineSongIndex.get(String(id || '')) || null
+    offlineSongLookup: id => offlineSongIndex.get(String(id || '')) || null,
+    dynamicsHTML
   };
 }
 
