@@ -249,13 +249,55 @@ function extractChords(text) {
   });
   return out;
 }
-function extractSections(text) {
-  const out = [];
-  String(text || '').split('\n').forEach(function (l) {
-    const m = /^\s*\[([^\]]+)\]\s*$/.exec(l);
-    if (m && !isChord(m[1].trim()) && out.indexOf(m[1].trim()) < 0) out.push(m[1].trim());
+function classifySongSection(value) {
+  const raw = String(value || '').trim().replace(/\s+/g, ' ');
+  const lower = raw.toLocaleLowerCase('ru');
+  const patterns = [
+    { type: 'Вступление', re: /^(?:intro|интро|вступлени(?:е|я))(?:\s*\d+)?$/i },
+    { type: 'Куплет', re: /^(?:verse|куплет)(?:\s*\d+)?$/i },
+    { type: 'Предприпев', re: /^(?:pre[ -]?chorus|предприпев|предприпевная часть)(?:\s*\d+)?$/i },
+    { type: 'Припев', re: /^(?:chorus|refrain|припев|рефрен)(?:\s*\d+)?$/i },
+    { type: 'Бридж', re: /^(?:bridge|бридж|переход)(?:\s*\d+)?$/i },
+    { type: 'Проигрыш', re: /^(?:instrumental|проигрыш|инструментал)(?:\s*\d+)?$/i },
+    { type: 'Соло', re: /^(?:solo|соло)(?:\s*\d+)?$/i },
+    { type: 'Финал', re: /^(?:outro|финал|окончание|концовка)(?:\s*\d+)?$/i },
+    { type: 'Постприпев', re: /^(?:post[ -]?chorus|постприпев)(?:\s*\d+)?$/i },
+    { type: 'Брейк', re: /^(?:break|брейк|пауза)(?:\s*\d+)?$/i }
+  ];
+  for (const item of patterns) {
+    const match = item.re.exec(raw);
+    if (match) {
+      const number = /\d+/.exec(raw);
+      return { type: item.type, label: number ? item.type + ' ' + number[0] : item.type, numbered: !!number };
+    }
+  }
+  return { type: raw, label: raw, numbered: /\d+/.test(raw), custom: true };
+}
+function extractSectionOccurrences(text) {
+  const out = [], counts = Object.create(null), used = Object.create(null);
+  String(text || '').split('\n').forEach(function (line) {
+    const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (!match || isChord(match[1].trim())) return;
+    const parsed = classifySongSection(match[1]);
+    if (!parsed.label) return;
+    const count = (counts[parsed.type] || 0) + 1;
+    counts[parsed.type] = count;
+    let label = parsed.label;
+    // Repeated unnumbered section headings get independent dynamics entries.
+    if (!parsed.numbered && count > 1) label = parsed.type + ' ' + count;
+    // Keep every dynamics key unique, even if the lyrics already repeat a numbered heading.
+    if (used[label]) {
+      let suffix = Math.max(count, 2);
+      while (used[parsed.type + ' ' + suffix]) suffix++;
+      label = parsed.type + ' ' + suffix;
+    }
+    used[label] = true;
+    out.push({ source: match[1].trim(), type: parsed.type, label: label });
   });
   return out;
+}
+function extractSections(text) {
+  return extractSectionOccurrences(text).map(section => section.label);
 }
 
 /* ═══ 4. ROLES / DYNAMICS / TYPES ═══ */
@@ -1753,12 +1795,17 @@ function dynamicsHTML(song) {
 }
 function renderSceneLyrics(song, shift) {
   const d = normalizeDynamics(song && song.dynamics);
+  const occurrences = extractSectionOccurrences(song && song.lyrics || '');
+  let sectionIndex = 0;
   return String(song && song.lyrics || '').split('\n').map(function(line) {
     const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
     if (match && !isChord(match[1].trim())) {
-      const name = match[1].trim(), note = String(d.sectionNotes[name] || '').trim();
+      const occurrence = occurrences[sectionIndex++];
+      const name = match[1].trim();
+      const key = occurrence ? occurrence.label : name;
+      const note = String(d.sectionNotes[key] || '').trim();
       const cues = d.instruments.map(ins => {
-        const noteText = String((d.instrumentNotes[ins] || {})[name] || '').trim();
+        const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
         return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
       }).join('');
       return '<span class="ln sec">' + esc(name) + '</span>' +
