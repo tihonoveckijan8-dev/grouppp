@@ -2312,7 +2312,7 @@ function renderDynBlock() {
   const sections = dynDraft.sections || [];
   const available = ROLES.filter(r => !dynDraft.instruments.includes(r.k));
   const previousSelect = $('#dynInstrumentFocus');
-  const active = (previousSelect && previousSelect.value) || dynDraft.activeInstrument || dynDraft.instruments[0] || '';
+  const active = dynDraft.activeInstrument || (previousSelect && previousSelect.value) || dynDraft.instruments[0] || '';
   const selectedInstrument = dynDraft.instruments.includes(active) ? active : (dynDraft.instruments[0] || '');
   let html = '<div class="dyn-editor">';
   if (!sections.length) {
