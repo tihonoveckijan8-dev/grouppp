@@ -34,7 +34,7 @@ function parseColor(value, background = '#FFFFFF') {
   const foreground = [Number(rgba[1]),Number(rgba[2]),Number(rgba[3])];
   const alpha = rgba[4] === undefined ? 1 : Number(rgba[4]);
   if (alpha === 1) return foreground;
-  const bg = parseColor(background);
+  const bg = Array.isArray(background) ? background : parseColor(background);
   return foreground.map((channel,i) => Math.round(channel*alpha + bg[i]*(1-alpha)));
 }
 function luminance(rgb) {
