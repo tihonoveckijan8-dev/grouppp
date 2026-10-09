@@ -314,10 +314,7 @@
             .then(async () => {
               if (typeof window.__bandplanEnsureCore !== 'function') throw new Error('Не удалось запустить BandPlan.');
               await window.__bandplanEnsureCore();
-              if (currentSession?.user) {
-                if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось восстановить рабочее пространство BandPlan.');
-                await window.__bandplanResumeAuthenticated(currentSession.user);
-              }
+              // WHY: initialize() can run inside startBandPlan(); resuming here would await the same bootstrap mutex and deadlock.
             })
             .catch(error => console.error('BandPlan initial session startup failed:', error));
         }, 0);
@@ -619,8 +616,7 @@
         window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
         if (typeof window.__bandplanEnsureCore === 'function') {
           await window.__bandplanEnsureCore();
-          if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
-          await window.__bandplanResumeAuthenticated(currentSession.user);
+          // WHY: the active startBandPlan() call owns workspace startup; do not recursively await its mutex from initialize().
         }
         return currentSession.user;
       }
