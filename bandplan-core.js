@@ -2451,7 +2451,7 @@ function renderDynBlock() {
         '</section>';
     }).join('');
   }
-  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить динамику для инструмента</strong><small>Добавь инструмент и настрой его партию по каждой части песни</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+  html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить инструмент</strong><small>Выбери инструмент из выпадающего списка, чтобы расписать его динамику</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
     '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
     '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
     (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
