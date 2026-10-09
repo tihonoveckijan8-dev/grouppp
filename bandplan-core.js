@@ -1859,14 +1859,19 @@ function dynamicsInstrumentLabel(key) {
   const role = ROLES.find(r => r.k === key);
   return role ? role.label : String(key || 'Инструмент');
 }
+function dynamicsVisibleInstruments(d) {
+  const roles = typeof myRoles === 'function' ? myRoles() : [];
+  return roles && roles.length ? d.instruments.filter(ins => roles.includes(ins)) : d.instruments;
+}
 function dynamicsHTML(song) {
   const d = normalizeDynamics(song && song.dynamics);
+  const visibleInstruments = dynamicsVisibleInstruments(d);
   const sections = d.sections.filter(name =>
-    d.instruments.some(ins => String((d.instrumentNotes[ins] || {})[name] || '').trim())
+    visibleInstruments.some(ins => String((d.instrumentNotes[ins] || {})[name] || '').trim())
   );
   if (!sections.length) return '';
   return '<div class="song-dynamics-text">' + sections.map(name => {
-    const instruments = d.instruments.map(ins => {
+    const instruments = visibleInstruments.map(ins => {
       const note = String((d.instrumentNotes[ins] || {})[name] || '').trim();
       return note ? '<div class="song-dynamics-instrument"><span>' + esc(dynamicsInstrumentLabel(ins)) + '</span><p>' + esc(note).replace(/\n/g, '<br>') + '</p></div>' : '';
     }).join('');
@@ -1882,7 +1887,7 @@ function renderSceneLyrics(song, shift) {
   if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
   function renderNotes(key) {
-    const cues = d.instruments.map(ins => {
+    const cues = dynamicsVisibleInstruments(d).map(ins => {
       const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
       return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
     }).join('');
@@ -2439,6 +2444,16 @@ function renderDynBlock() {
   const active = dynDraft.activeInstrument || (previousSelect && previousSelect.value) || dynDraft.instruments[0] || '';
   const selectedInstrument = dynDraft.instruments.includes(active) ? active : (dynDraft.instruments[0] || '');
   let html = '<div class="dyn-editor">';
+  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить динамику для инструмента</strong><small>Добавь инструмент и настрой его партию по каждой части песни</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+    '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
+    '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
+    (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
+    '</select><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-instrument-remove-active"' + (selectedInstrument ? '' : ' disabled') + ' title="Убрать выбранный инструмент">' + ic('x', 14) + 'Убрать</button></div>' +
+    '<label class="field-label dyn-add-label" for="dynInstrumentSelect">Добавить ещё инструмент</label><div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentSelect">' +
+    available.map(r => '<option value="' + esc(r.k) + '">' + esc(r.label) + '</option>').join('') +
+    '</select><button class="btn btn-primary btn-sm" type="button" data-act="dyn-instrument-add"' + (available.length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить</button></div>' +
+    (!dynDraft.instruments.length ? '<p class="t-sm t-muted">Каждый инструмент хранит собственные указания по каждой части песни — переключение не перезаписывает другие партии.</p>' : '') +
+    '</div></details>';
   if (!sections.length) {
     html += '<div class="dyn-empty-state"><strong>Сначала добавь части песни</strong><span>Нажми «Куплет», «Припев» или другую кнопку над текстом песни — здесь появятся отдельные поля динамики.</span></div>';
   } else {
@@ -2451,16 +2466,7 @@ function renderDynBlock() {
         '</section>';
     }).join('');
   }
-  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить динамику для инструмента</strong><small>Добавь инструмент и настрой его партию по каждой части песни</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
-    '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
-    '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
-    (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
-    '</select><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-instrument-remove-active"' + (selectedInstrument ? '' : ' disabled') + ' title="Убрать выбранный инструмент">' + ic('x', 14) + 'Убрать</button></div>' +
-    '<label class="field-label dyn-add-label" for="dynInstrumentSelect">Добавить ещё инструмент</label><div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentSelect">' +
-    available.map(r => '<option value="' + esc(r.k) + '">' + esc(r.label) + '</option>').join('') +
-    '</select><button class="btn btn-primary btn-sm" type="button" data-act="dyn-instrument-add"' + (available.length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить</button></div>' +
-    (!dynDraft.instruments.length ? '<p class="t-sm t-muted">Каждый инструмент хранит собственные указания по каждой части песни — переключение не перезаписывает другие партии.</p>' : '') +
-    '</div></details>';
+
   box.innerHTML = html + '</div>';
 }
 function readSongForm(id) {
