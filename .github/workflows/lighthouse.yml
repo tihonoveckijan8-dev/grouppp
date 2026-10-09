@@ -40,11 +40,16 @@ jobs:
       - name: Build production
         run: npm run build
 
-      - name: Start local production server
+      - name: Start gzip-enabled production server
         run: |
-          python3 -m http.server 4173 --directory dist > /tmp/bandplan-http.log 2>&1 &
+          node scripts/lighthouse-server.mjs > /tmp/bandplan-http.log 2>&1 &
           echo $! > /tmp/bandplan-http.pid
-          sleep 2
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/bandplan-http.log
+          exit 1
 
       - name: Run Lighthouse
         run: |
