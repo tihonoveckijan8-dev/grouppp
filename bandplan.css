@@ -7704,3 +7704,12 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
   .dyn-instrument-add-row { align-items:stretch; }
   .dyn-instrument-add-row .btn { flex:none; }
 }
+
+
+/* Song editor: keep dynamics reachable while the lyrics are being edited. */
+@media (min-width:901px) {
+  .song-dynamics-pane { position:sticky; top:12px; align-self:start; }
+  .song-dynamics-panel { max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+}
+.song-lyrics-textarea { scroll-margin-block:16px; }
+.lyrics .sec { max-width:100%; width:max-content; white-space:normal; overflow-wrap:anywhere; vertical-align:baseline; }
