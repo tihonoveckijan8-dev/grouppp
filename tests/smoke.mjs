@@ -94,9 +94,12 @@ try {
   assert.equal(offlineCleanup.maybeDisabled, true, 'Maybe event should not be kept when maybe-save is disabled');
 
   const dynamicsFiltering = await page.evaluate(() => {
-    const render = window.__bandplanTestHooks?.dynamicsHTML;
-    if (typeof render !== 'function') return null;
+    const hooks = window.__bandplanTestHooks;
+    const render = hooks?.dynamicsHTML;
+    const renderLyrics = hooks?.renderSceneLyrics;
+    if (typeof render !== 'function' || typeof renderLyrics !== 'function') return null;
     const song = {
+      lyrics: 'Куплет 1\\nПервая строка песни',
       dynamics: {
         instruments: ['guitar', 'drums'],
         sections: ['Куплет 1'],
@@ -109,7 +112,11 @@ try {
     return {
       guitar: render(song, ['guitar']),
       drums: render(song, ['drums']),
-      unassigned: render(song, [])
+      unassigned: render(song, []),
+      guitarLyrics: renderLyrics(song, 0, ['guitar']),
+      drumsLyrics: renderLyrics(song, 0, ['drums']),
+      unassignedLyrics: renderLyrics(song, 0, []),
+      localizedRoleLyrics: renderLyrics(song, 0, ['Гитара'])
     };
   });
   assert.ok(dynamicsFiltering, 'Instrument dynamics test hook missing');
@@ -119,6 +126,12 @@ try {
   assert.doesNotMatch(dynamicsFiltering.drums, /Гитара вступает после первой строки/, 'Drummer can see another instrument dynamics');
   assert.doesNotMatch(dynamicsFiltering.unassigned, /Гитара вступает после первой строки/, 'User without a matching role must not see guitar dynamics');
   assert.doesNotMatch(dynamicsFiltering.unassigned, /Ударные входят на второй такт/, 'User without a matching role must not see drum dynamics');
+  assert.match(dynamicsFiltering.guitarLyrics, /Гитара вступает после первой строки/, 'Guitar dynamics missing from song lyrics');
+  assert.doesNotMatch(dynamicsFiltering.guitarLyrics, /Ударные входят на второй такт/, 'Foreign drum dynamics leaked into guitar song lyrics');
+  assert.match(dynamicsFiltering.drumsLyrics, /Ударные входят на второй такт/, 'Drum dynamics missing from song lyrics');
+  assert.doesNotMatch(dynamicsFiltering.drumsLyrics, /Гитара вступает после первой строки/, 'Foreign guitar dynamics leaked into drum song lyrics');
+  assert.doesNotMatch(dynamicsFiltering.unassignedLyrics, /Гитара вступает после первой строки|Ударные входят на второй такт/, 'Song lyrics exposed dynamics without a matching role');
+  assert.match(dynamicsFiltering.localizedRoleLyrics, /Гитара вступает после первой строки/, 'Localized profile role did not match the guitar instrument');
 
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
