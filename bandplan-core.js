@@ -1701,32 +1701,43 @@ function openSongFilters() {
     }
   });
 }
-function dynStrip(song, role) {
-  const d = song.dynamics; if (!d || !(d.sections || []).length) return '';
-  const lv = (d.levels && d.levels[role]) || {};
-  return '<div class="dyn-strip">' + d.sections.map(function (s) {
-    const v = lv[s] || '';
-    return '<div class="dyn-chip ' + dynCls(v) + '"><div class="s">' + esc(s) + '</div><div class="v">' + esc(v || '—') + '</div><div class="dmeter" aria-hidden="true"><i style="width:' + (Math.max(0, DYN_LEVELS.indexOf(v)) * 100 / 6) + '%"></i></div><div class="t-xs t-muted">' + esc(DYN_LABEL[v] || 'не задано') + '</div></div>';
-  }).join('') + '</div>';
+function normalizeDynamics(dynamics) {
+  const d = dynamics && typeof dynamics === 'object' ? cloneValue(dynamics) : {};
+  d.instruments = Array.isArray(d.instruments) ? d.instruments : [];
+  d.sections = Array.isArray(d.sections) ? d.sections : [];
+  d.levels = d.levels && typeof d.levels === 'object' ? d.levels : {};
+  d.notes = String(d.notes || d.overall || '');
+  d.sectionNotes = d.sectionNotes && typeof d.sectionNotes === 'object' ? d.sectionNotes : {};
+  return d;
 }
-function dynMatrix(song) {
-  const d = song.dynamics; if (!d || !(d.instruments || []).length || !(d.sections || []).length) return '';
-  let h = '<div class="dyn-scroll"><table class="dyn-table"><caption class="sr-only">Динамика партий по секциям песни</caption><thead><tr><th scope="col">Инструмент</th>' +
-    d.sections.map(s => '<th scope="col">' + esc(s) + '</th>').join('') + '</tr></thead><tbody>';
-  d.instruments.forEach(function (ins) {
-    const isMe = myRoles().indexOf(ins) >= 0;
-    h += '<tr><th scope="row">' + (isMe ? '<span class="badge b-brand" style="margin-right:6px">вы</span>' : '') + esc(roleLabel(ins)) + '</th>' +
-      d.sections.map(function (s) {
-        const v = (d.levels && d.levels[ins] && d.levels[ins][s]) || '';
-        return '<td><span class="lv ' + dynCls(v) + '" title="' + esc(DYN_LABEL[v] || 'не задано') + '">' + esc(v || '—') + '</span><div class="dmeter sm" aria-hidden="true"><i style="width:' + (Math.max(0, DYN_LEVELS.indexOf(v)) * 100 / 6) + '%"></i></div></td>';
-      }).join('') + '</tr>';
-  });
-  let tf = '<tfoot><tr><th scope="row">Общая громкость</th>' + d.sections.map(function (sc) {
-    let sum = 0, cnt = 0; d.instruments.forEach(i => { const k = DYN_LEVELS.indexOf((d.levels && d.levels[i] && d.levels[i][sc]) || ''); if (k > 0) { sum += k; cnt++; } });
-    const avg = cnt ? sum / cnt : 0, v = DYN_LEVELS[Math.round(avg)] || '';
-    return '<td><span class="lv ' + dynCls(v) + '">' + esc(v || '—') + '</span><div class="dmeter sm" aria-hidden="true"><i style="width:' + (avg * 100 / 6) + '%"></i></div></td>';
-  }).join('') + '</tr></tfoot>';
-  return h + '</tbody>' + tf + '</table></div>';
+function syncDynamicsSections(draft, lyrics) {
+  const names = extractSections(lyrics), previous = draft.sectionNotes || {};
+  draft.sections = names; draft.sectionNotes = {};
+  names.forEach(name => { draft.sectionNotes[name] = String(previous[name] || ''); });
+  draft.instruments = Array.isArray(draft.instruments) ? draft.instruments : [];
+  draft.levels = draft.levels && typeof draft.levels === 'object' ? draft.levels : {};
+  draft.instruments.forEach(ins => { draft.levels[ins] = draft.levels[ins] || {}; names.forEach(name => { if (!(name in draft.levels[ins])) draft.levels[ins][name] = ''; }); });
+  return names;
+}
+function dynamicsHTML(song) {
+  const d = normalizeDynamics(song && song.dynamics), overall = d.notes.trim();
+  const sections = d.sections.filter(name => String(d.sectionNotes[name] || '').trim());
+  if (!overall && !sections.length) return '';
+  return '<div class="song-dynamics-text">' +
+    (overall ? '<div class="song-dynamics-overall"><strong>Общая динамика</strong><p>' + esc(overall).replace(/\n/g, '<br>') + '</p></div>' : '') +
+    sections.map(name => '<div class="song-dynamics-section"><strong>' + esc(name) + '</strong><p>' + esc(d.sectionNotes[name]).replace(/\n/g, '<br>') + '</p></div>').join('') + '</div>';
+}
+function renderSceneLyrics(song, shift) {
+  const d = normalizeDynamics(song && song.dynamics);
+  return String(song && song.lyrics || '').split('\n').map(function(line) {
+    const match = /^\s*\[([^\]]+)\]\s*$/.exec(line);
+    if (match && !isChord(match[1].trim())) {
+      const name = match[1].trim(), note = String(d.sectionNotes[name] || '').trim();
+      return '<span class="ln sec">' + esc(name) + '</span>' +
+        (note ? '<span class="ln scene-dyn-note"><b>ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '');
+    }
+    return renderLyrics(line, shift);
+  }).join('');
 }
 function vSong(id) {
   const s = songById(id);
@@ -1759,12 +1770,9 @@ function vSong(id) {
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>' + ic('wave', 17) + ' Ваша динамика</h2>' +
     '<div class="sub">Роль в профиле: ' + esc(rolesLabel(myRoles())) + '</div></div>' +
     '<button class="icon-btn" type="button" data-act="edit-song" data-id="' + s.id + '" aria-label="Изменить песню">' + ic('edit', 16) + '</button></div>';
-  if (!myRole) h += stateHTML('empty', 'Роль не указана', 'Выберите вашу роль в настройках — и здесь появится динамика именно вашей партии.', '<button class="btn btn-primary btn-sm" type="button" data-act="nav" data-to="settings">Указать роль</button>');
-  else if (!hasMy) h += stateHTML('empty', 'Динамика не расписана', 'Для роли «' + rolesLabel(myRoles()) + '» в этой песне нет уровней громкости. Откройте «Изменить песню» → «Динамика по инструментам».', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Расписать динамику</button>');
-  else h += mine.map(r => (mine.length > 1 ? '<h3 class="mt-s">' + esc(roleLabel(r)) + '</h3>' : '') + dynStrip(s, r)).join('') + '<p class="t-xs t-muted mt-s">pp — очень тихо · p — тихо · mp — умеренно тихо · mf — умеренно громко · f — громко · ff — очень громко</p>';
+  const dynamicsView = dynamicsHTML(s);
+  h += dynamicsView || stateHTML('empty', 'Динамика ещё не расписана', 'Добавь общие указания и заметки к частям песни. В сценическом режиме они появятся рядом с соответствующими куплетами, припевами и бриджами.', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Заполнить динамику</button>');
   h += '</section>';
-  const m = dynMatrix(s);
-  if (m) h += '<section class="card rise" style="animation-delay:.07s"><div class="card-h"><div><h2>Динамика всех партий</h2><div class="sub">' + (s.dynamics.instruments || []).length + ' ' + plural((s.dynamics.instruments || []).length, 'инструмент', 'инструмента', 'инструментов') + ' · ' + (s.dynamics.sections || []).length + ' секц.</div></div></div>' + m + '</section>';
   h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Параметры песни</h2></div></div>' +
     infoRow('Тональность', '<span class="num">' + esc(transposeKey(s.key || '—', tr)) + '</span>') +
     infoRow('Темп', s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '—') +
@@ -2246,7 +2254,7 @@ let dynDraft = null;
 function songModal(id) {
   const s = id ? songById(id) : null;
   const d = s || { title: '', artist: '', key: 'Am', bpm: '', duration: '', tags: [], lyrics: '', fav: false };
-  dynDraft = s && s.dynamics ? cloneValue(s.dynamics) : { instruments: [], sections: [], levels: {} };
+  dynDraft = normalizeDynamics(s && s.dynamics);
   const tpl = '[Куплет 1]\nAm      F       C       G\nСтрока текста песни\nAm      F       G\nВторая строка\n\n[Припев]\nF       G       Em      Am\nТекст припева';
   const body =
     '<div class="f2"><div class="field"><label class="field-label" for="f_stitle">Название *</label><input class="input" id="f_stitle" maxlength="90" value="' + esc(d.title) + '" placeholder="Название песни"><span class="err"></span></div>' +
@@ -2258,41 +2266,25 @@ function songModal(id) {
     '<div class="field"><label class="field-label" for="f_stags">Теги через запятую</label><input class="input" id="f_stags" value="' + esc((d.tags || []).join(', ')) + '" placeholder="рок, баллада, сет"></div>' +
     '<div class="field"><label class="field-label" for="f_slyr">Текст и аккорды</label><textarea class="textarea" id="f_slyr" rows="11" spellcheck="false" placeholder="' + esc(tpl) + '">' + esc(d.lyrics || '') + '</textarea>' +
     '<span class="hint">Аккорды — отдельной строкой над текстом (<code class="mono">Am F C G</code>) или в скобках внутри строки (<code class="mono">[Am]текст</code>). Секции — <code class="mono">[Припев]</code>.</span></div>' +
-    '<div class="field"><span class="field-label">' + ic('wave', 14) + ' Динамика по инструментам</span>' +
-    '<span class="hint" style="margin-bottom:var(--s2)">Уровни pp–ff для каждой партии по секциям. Участник видит только свою партию — согласно роли из профиля.</span>' +
-    '<div id="dynBlock"></div></div>';
+    '<div class="field"><label class="field-label" for="dynOverall">' + ic('wave', 14) + ' Общая динамика песни</label>' +
+    '<textarea class="textarea" id="dynOverall" rows="4" placeholder="Например: начинаем спокойно, постепенно наращиваем мощность; перед финальным припевом делаем паузу.">' + esc(dynDraft.notes || '') + '</textarea>' +
+    '<span class="hint">Опиши развитие всей песни обычным текстом — без уровней громкости и таблиц.</span></div>' +
+    '<div class="field"><span class="field-label">Указания по частям песни</span><span class="hint">Структура автоматически определяется по заголовкам в тексте: [Куплет 1], [Припев], [Бридж].</span><div id="dynBlock"></div></div>';
   openModal({
     title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', fullscreen: true, editor: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="song-save" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : 'Добавить песню') + '</button>',
-    onMount: function () { renderDynBlock(); }
+    onMount: function () { syncDynamicsSections(dynDraft, $('#f_slyr', modalRoot)?.value || ''); renderDynBlock(); }
   });
 }
-function dynRowTools(k) { const b = (d, t) => '<button class="btn btn-tertiary btn-sm" type="button" data-act="' + d[0] + '" data-ins="' + k + '"' + (d[1] ? ' data-d="' + d[1] + '"' : '') + ' data-no-dirty="1">' + t + '</button>'; return '<div class="dyn-tools">' + b(['dyn-ramp', 'up'], 'Нарастание') + b(['dyn-ramp', 'down'], 'Затухание') + b(['dyn-copy'], 'На все инструменты') + '</div>'; }
 function renderDynBlock() {
   const box = $('#dynBlock'); if (!box || !dynDraft) return;
-  const secs = dynDraft.sections || [], ins = dynDraft.instruments || [];
-  let h = '<div class="dyn-editor">';
-  h += '<div class="row" style="gap:6px">' +
-    '<button class="btn btn-secondary btn-sm" type="button" data-act="dyn-from-lyrics" data-no-dirty="1">' + ic('bolt', 15) + 'Взять секции из текста</button>' +
-    '<button class="btn btn-secondary btn-sm" type="button" data-act="dyn-add-section" data-no-dirty="1">' + ic('plus', 15) + 'Добавить секцию</button></div>';
-  if (!secs.length) h += '<p class="t-sm t-muted">Секций пока нет — возьмите их из текста песни или добавьте вручную.</p>';
-  if (secs.length) h += '<div class="row" style="gap:6px">' + secs.map(x => '<span class="chip">' + esc(x) + '<button type="button" class="dyn-x" data-act="dyn-del-section" data-sec="' + esc(x) + '" data-no-dirty="1" aria-label="Удалить секцию ' + esc(x) + '">×</button></span>').join('') + '</div>';
-  h += '<div class="row" style="gap:6px"><label class="sr-only" for="dynInsPick">Инструмент</label><select class="select" id="dynInsPick" style="max-width:240px" data-no-dirty="1">' +
-    ROLES.filter(r => ins.indexOf(r.k) < 0).map(r => '<option value="' + r.k + '">' + esc(r.label) + '</option>').join('') + '</select>' +
-    '<button class="btn btn-primary btn-sm" type="button" data-act="dyn-add-ins" data-no-dirty="1"' + (ROLES.filter(r => ins.indexOf(r.k) < 0).length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить инструмент</button></div>';
-  ins.forEach(function (insKey) {
-    const lv = (dynDraft.levels && dynDraft.levels[insKey]) || {};
-    h += '<div class="dyn-row"><div class="row-ns" style="gap:var(--s2)"><span class="badge b-brand">' + esc(roleLabel(insKey)) + '</span>' +
-      (myRoles().indexOf(insKey) >= 0 ? '<span class="badge b-warn">вы</span>' : '') + '</div>' +
-      '<div class="cells">' + (secs.length ? dynRowTools(insKey) + secs.map(function (s) {
-        return '<div class="dyn-cell"><label for="dyn_' + insKey + '_' + esc(s) + '">' + esc(s) + '</label><select id="dyn_' + insKey + '_' + esc(s) + '" data-act="dyn-lv" data-ins="' + insKey + '" data-sec="' + esc(s) + '">' +
-          DYN_LEVELS.map(v => '<option value="' + v + '"' + (lv[s] === v ? ' selected' : '') + '>' + (v ? v + ' — ' + DYN_LABEL[v] : 'не задано') + '</option>').join('') + '</select></div>';
-      }).join('') : '<span class="t-sm t-muted">Сначала добавьте секции</span>') + '</div>' +
-      '<button class="icon-btn" type="button" data-act="dyn-del-ins" data-ins="' + insKey + '" data-no-dirty="1" aria-label="Убрать ' + esc(roleLabel(insKey)) + '">' + ic('trash', 15) + '</button></div>';
-  });
-  if (ins.length && secs.length) h += '<div class="row" style="gap:6px"><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-fill-all" data-no-dirty="1">' + ic('wave', 15) + 'Заполнить всё «mf»</button>' +
-    '<button class="btn btn-danger btn-sm" type="button" data-act="dyn-clear" data-no-dirty="1">' + ic('trash', 15) + 'Очистить динамику</button></div>';
-  box.innerHTML = h + '</div>';
+  const sections = dynDraft.sections || [];
+  let html = '<div class="dyn-editor">';
+  if (!sections.length) html += '<p class="t-sm t-muted">Добавь в текст заголовки в квадратных скобках, например [Куплет 1], [Припев] или [Бридж]. Структура появится здесь автоматически.</p>';
+  else html += sections.map(function(name, index) {
+    return '<div class="dyn-section-editor"><label class="field-label" for="dyn_note_' + index + '">' + esc(name) + '</label><textarea class="textarea dyn-section-text" id="dyn_note_' + index + '" rows="2" data-dyn-section="' + esc(name) + '" placeholder="Что делать в этой части: инструменты, вступления, паузы…">' + esc(dynDraft.sectionNotes[name] || '') + '</textarea></div>';
+  }).join('');
+  box.innerHTML = html + '</div>';
 }
 function readSongForm(id) {
   const w = modalRoot; if (!w) return null;
@@ -2305,7 +2297,7 @@ function readSongForm(id) {
     bpm: bpm, duration: durParse(fv('f_sdur')),
     tags: fv('f_stags').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).slice(0, 8),
     lyrics: $('#f_slyr', w).value, fav: old ? !!old.fav : false, addedAt: old ? old.addedAt : today(),
-    dynamics: dynDraft ? cloneValue(dynDraft) : (old ? old.dynamics : null)
+    dynamics: dynDraft ? Object.assign(cloneValue(dynDraft), { notes: fv('dynOverall') }) : (old ? old.dynamics : null)
   };
 }
 function setlistModal(id) {
@@ -2380,16 +2372,12 @@ function drawScene() {
   const sceneEvent = scene.eventId ? evById(scene.eventId) : null;
   const scenePos = $('#scPosition');
   if (scenePos) scenePos.innerHTML = sceneEvent ? renderMyPositionBadge(sceneEvent, {compact:false}) : '';
-  const d = s.dynamics;
-  let dyn = '';
-  if (d) myRoles().filter(r => (d.instruments || []).indexOf(r) >= 0).forEach(function (role) {
-    const lv = (d.levels && d.levels[role]) || {};
-    dyn += '<div class="dc"><em>' + esc(roleLabel(role)) + '</em></div>' + (d.sections || []).map(x => '<div class="dc"><em>' + esc(x) + '</em><b>' + esc(lv[x] || '—') + '</b></div>').join('');
-  });
-  $('#scDyn').innerHTML = dyn; $('#scDyn').style.display = dyn ? 'flex' : 'none';
+  const d = normalizeDynamics(s.dynamics), dyn = String(d.notes || '').trim();
+  $('#scDyn').innerHTML = dyn ? '<div class="scene-dynamics-overview"><strong>ДИНАМИКА ПЕСНИ</strong><div>' + esc(dyn).replace(/\n/g, '<br>') + '</div></div>' : '';
+  $('#scDyn').style.display = dyn ? 'block' : 'none';
   const body = $('#scBody');
   body.style.setProperty('--scsize', scene.size + 'px');
-  body.innerHTML = renderLyrics(s.lyrics, shift) + (it.note ? '<span class="ln sec">Заметка</span><span class="ln" style="font-family:var(--font);font-size:.5em;opacity:.75">' + esc(it.note) + '</span>' : '');
+  body.innerHTML = renderSceneLyrics(s, shift) + (it.note ? '<span class="ln sec">Заметка</span><span class="ln" style="font-family:var(--font);font-size:.5em;opacity:.75">' + esc(it.note) + '</span>' : '');
   body.scrollTop = 0;
   syncSceneChords();
   $('#scFont').textContent = scene.size; $('#scSpeed').textContent = scene.speed;
@@ -2426,16 +2414,7 @@ function relWake() { if (scene.wake) { try { scene.wake.release(); } catch (e) {
 function doPrint(html) { $('#printArea').innerHTML = '<div>' + html + '</div>'; setTimeout(() => window.print(), 80); }
 function printSong(id, shift) {
   const s = songById(id); if (!s) return;
-  let extra = ''; const d = s.dynamics;
-  if (d && (d.instruments || []).length && (d.sections || []).length) {
-    extra = '<table class="print-dynamics-table"><tr><th>Инструмент</th>' +
-      d.sections.map(x => '<th>' + esc(x) + '</th>').join('') + '</tr>' +
-      d.instruments.map(function (ins) {
-        const lv = (d.levels && d.levels[ins]) || {};
-        return '<tr><td class="is-you">' + esc(roleLabel(ins)) + (myRoles().indexOf(ins) >= 0 ? ' (вы)' : '') + '</td>' +
-          d.sections.map(x => '<td class="is-center">' + esc(lv[x] || '—') + '</td>').join('') + '</tr>';
-      }).join('') + '</table>';
-  }
+  const extra = dynamicsHTML(s);
   doPrint('<div class="print-song"><h2>' + esc(s.title) + '</h2><div class="pk">' +
     esc([transposeKey(s.key || '', shift || 0), s.bpm ? s.bpm + ' BPM' : '', s.duration ? fmtDur(s.duration) : '', s.artist || ''].filter(Boolean).join(' · ')) +
     '</div><pre>' + esc(transposeLyrics(s.lyrics, shift || 0)) + '</pre>' + extra + '</div>');
@@ -3108,42 +3087,12 @@ document.addEventListener('click', function (e) {
     case 'print-song': stop(); printSong(id, ui.detailTrans[id] || 0); break;
     case 'scene-song': stop(); openScene([{ songId: id, shift: ui.detailTrans[id] || 0, note: '' }], 0, 0); break;
     case 'to-setlist': stop(); addToSetlistModal(id); break;
-    case 'dyn-from-lyrics': {
-      stop();
-      const secs = extractSections($('#f_slyr', modalRoot).value);
-      if (!secs.length) { toast('В тексте нет секций вида [Припев]', 'warn'); break; }
-      dynDraft.sections = secs;
-      dynDraft.instruments.forEach(function (ins) { dynDraft.levels[ins] = dynDraft.levels[ins] || {}; secs.forEach(s => { if (!(s in dynDraft.levels[ins])) dynDraft.levels[ins][s] = ''; }); });
+    case 'dyn-clear': {
+      stop(); dynDraft.notes = ''; dynDraft.sectionNotes = {};
+      syncDynamicsSections(dynDraft, $('#f_slyr', modalRoot)?.value || '');
+      const overall = $('#dynOverall', modalRoot); if (overall) overall.value = '';
       renderDynBlock(); break;
     }
-    case 'dyn-add-section': {
-      stop();
-      const secs = dynDraft.sections || [];
-      let n = secs.length + 1, name = 'Секция ' + n;
-      while (secs.indexOf(name) >= 0) { n++; name = 'Секция ' + n; }
-      secs.push(name);
-      dynDraft.instruments.forEach(ins => { dynDraft.levels[ins] = dynDraft.levels[ins] || {}; dynDraft.levels[ins][name] = ''; });
-      renderDynBlock(); break;
-    }
-    case 'dyn-add-ins': {
-      stop();
-      const pick = $('#dynInsPick', modalRoot); if (!pick || !pick.value) break;
-      dynDraft.instruments.push(pick.value);
-      dynDraft.levels[pick.value] = {};
-      (dynDraft.sections || []).forEach(s => { dynDraft.levels[pick.value][s] = ''; });
-      if (!(dynDraft.sections || []).length) {
-        const secs = extractSections($('#f_slyr', modalRoot).value);
-        if (secs.length) { dynDraft.sections = secs; secs.forEach(s => { dynDraft.levels[pick.value][s] = ''; }); }
-      }
-      renderDynBlock(); break;
-    }
-    case 'dyn-del-ins': { stop(); const k = el.getAttribute('data-ins'); dynDraft.instruments = dynDraft.instruments.filter(x => x !== k); delete dynDraft.levels[k]; renderDynBlock(); break; }
-    case 'dyn-fill-all': {
-      stop();
-      dynDraft.instruments.forEach(function (ins) { dynDraft.levels[ins] = dynDraft.levels[ins] || {}; (dynDraft.sections || []).forEach(s => { if (!dynDraft.levels[ins][s]) dynDraft.levels[ins][s] = 'mf'; }); });
-      renderDynBlock(); break;
-    }
-    case 'dyn-clear': { stop(); dynDraft = { instruments: [], sections: [], levels: {} }; renderDynBlock(); break; }
     case 'new-setlist': stop(); setlistModal(null); break;
     case 'open-setlist': { stop(); if (parseHash().name === 'setlists' && window.matchMedia && window.matchMedia('(min-width:1100px)').matches) { ui.setlistSelectedId = id; render(); } else go('#/setlist/' + id); break; }
     case 'sl-rename': stop(); setlistModal(id); break;
@@ -3417,11 +3366,15 @@ document.addEventListener('change', function (e) {
 });
 document.addEventListener('input', function (e) {
   const t = e.target;
+  if (t.id === 'dynOverall' && dynDraft) { dynDraft.notes = t.value; return; }
+  if (t.hasAttribute('data-dyn-section') && dynDraft) { dynDraft.sectionNotes[t.getAttribute('data-dyn-section')] = t.value; return; }
+  if (t.id === 'f_slyr' && dynDraft) {
+    const before = JSON.stringify(dynDraft.sections || []);
+    syncDynamicsSections(dynDraft, t.value);
+    if (before !== JSON.stringify(dynDraft.sections || [])) renderDynBlock();
+  }
   const refocus = sel => { const n = $(sel); if (n) { n.focus(); try { n.setSelectionRange(n.value.length, n.value.length); } catch (err) { } } };
-  const soft = (sel, fn) => {
-    clearTimeout(t._d);
-    t._d = setTimeout(function () { const sc = $('#view').scrollTop; fn(); renderViewOnly(); refocus(sel); $('#view').scrollTop = sc; }, 220);
-  };
+  const soft = (sel, fn) => { clearTimeout(t._d); t._d = setTimeout(function () { const sc = $('#view').scrollTop; fn(); renderViewOnly(); refocus(sel); $('#view').scrollTop = sc; }, 220); };
   if (t.id === 'evQ') { ui.evQuery = t.value; soft('#evQ', () => { }); }
   if (t.id === 'songQ') { ui.songQuery = t.value; soft('#songQ', () => { }); }
   if (t.id === 'setlistQ') { ui.setlistQuery = t.value; soft('#setlistQ', () => { }); }
