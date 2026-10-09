@@ -1861,7 +1861,8 @@ function dynamicsInstrumentLabel(key) {
 }
 function dynamicsVisibleInstruments(d, userRoles) {
   const roles = Array.isArray(userRoles) ? userRoles : (typeof myRoles === 'function' ? myRoles() : []);
-  return roles && roles.length ? d.instruments.filter(ins => roles.includes(ins)) : d.instruments;
+  // Instrument dynamics are private to matching profile roles. No role means no instrument notes.
+  return d.instruments.filter(ins => roles.includes(ins));
 }
 function dynamicsHTML(song, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
