@@ -1860,23 +1860,18 @@ function dynamicsInstrumentLabel(key) {
   return role ? role.label : String(key || 'Инструмент');
 }
 function dynamicsHTML(song) {
-  const d = normalizeDynamics(song && song.dynamics), overall = d.notes.trim();
+  const d = normalizeDynamics(song && song.dynamics);
   const sections = d.sections.filter(name =>
-    String(d.sectionNotes[name] || '').trim() ||
     d.instruments.some(ins => String((d.instrumentNotes[ins] || {})[name] || '').trim())
   );
-  if (!overall && !sections.length) return '';
-  return '<div class="song-dynamics-text">' +
-    (overall ? '<div class="song-dynamics-overall"><strong>Общая динамика</strong><p>' + esc(overall).replace(/\n/g, '<br>') + '</p></div>' : '') +
-    sections.map(name => {
-      const general = String(d.sectionNotes[name] || '').trim();
-      const instruments = d.instruments.map(ins => {
-        const note = String((d.instrumentNotes[ins] || {})[name] || '').trim();
-        return note ? '<div class="song-dynamics-instrument"><span>' + esc(dynamicsInstrumentLabel(ins)) + '</span><p>' + esc(note).replace(/\n/g, '<br>') + '</p></div>' : '';
-      }).join('');
-      return '<div class="song-dynamics-section"><strong>' + esc(name) + '</strong>' +
-        (general ? '<p>' + esc(general).replace(/\n/g, '<br>') + '</p>' : '') + instruments + '</div>';
-    }).join('') + '</div>';
+  if (!sections.length) return '';
+  return '<div class="song-dynamics-text">' + sections.map(name => {
+    const instruments = d.instruments.map(ins => {
+      const note = String((d.instrumentNotes[ins] || {})[name] || '').trim();
+      return note ? '<div class="song-dynamics-instrument"><span>' + esc(dynamicsInstrumentLabel(ins)) + '</span><p>' + esc(note).replace(/\n/g, '<br>') + '</p></div>' : '';
+    }).join('');
+    return '<div class="song-dynamics-section"><strong>' + esc(name) + '</strong>' + instruments + '</div>';
+  }).join('') + '</div>';
 }
 function renderSceneLyrics(song, shift) {
   const d = normalizeDynamics(song && song.dynamics);
@@ -1887,12 +1882,11 @@ function renderSceneLyrics(song, shift) {
   if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
   function renderNotes(key) {
-    const note = String(d.sectionNotes[key] || '').trim();
     const cues = d.instruments.map(ins => {
       const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
       return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
     }).join('');
-    return (note ? '<span class="ln scene-dyn-note"><b>ОБЩАЯ ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '') + cues;
+    return cues;
   }
   return lines.map(function(line, lineIndex) {
     const heading = parseSectionHeading(line);
@@ -2428,9 +2422,7 @@ function songModal(id) {
     '<label class="field-label" for="f_slyr">Текст песни</label><textarea class="textarea song-lyrics-textarea" id="f_slyr" rows="18" spellcheck="false" placeholder="' + esc(tpl) + '">' + esc(d.lyrics || '') + '</textarea>' +
     '<span class="hint">Нажми кнопку выше — заголовок вставится в текст в позиции курсора и появится в панели динамики и сценическом режиме.</span></div></section>' +
     '<section class="song-dynamics-pane"><div class="song-dynamics-panel">' +
-    '<div class="song-dynamics-panel-head">' + ic('wave', 16) + '<div><h3>Динамика песни</h3><p>Общие указания и отдельные партии инструментов</p></div></div>' +
-    '<div class="field"><label class="field-label" for="dynOverall">Общая динамика</label>' +
-    '<textarea class="textarea" id="dynOverall" rows="4" placeholder="Например: начинаем спокойно, постепенно наращиваем мощность; перед финальным припевом делаем паузу.">' + esc(dynDraft.notes || '') + '</textarea></div>' +
+    '<div class="song-dynamics-panel-head">' + ic('wave', 16) + '<div><h3>Динамика инструментов</h3><p>Добавляй партии и задавай указания для каждого инструмента по частям песни</p></div></div>' +
     '<div class="song-dynamics-sections"><span class="field-label">Динамика по частям песни</span><div id="dynBlock"></div></div>' +
     '</div></section></div>';
   openModal({
@@ -2454,13 +2446,12 @@ function renderDynBlock() {
       const instrumentNote = selectedInstrument
         ? String((dynDraft.instrumentNotes[selectedInstrument] || {})[name] || '')
         : '';
-      return '<section class="dyn-section-editor"><div class="dyn-section-heading"><span class="dyn-section-index">' + (index + 1) + '</span><label class="field-label" for="dyn_note_' + index + '">' + esc(name) + '</label></div>' +
-        '<label class="dyn-sub-label" for="dyn_note_' + index + '">Для всей группы</label><textarea class="textarea dyn-section-text" id="dyn_note_' + index + '" rows="2" data-dyn-section="' + esc(name) + '" placeholder="Например: начать тихо, пауза перед припевом, постепенно нарастать…">' + esc(dynDraft.sectionNotes[name] || '') + '</textarea>' +
-        (selectedInstrument ? '<div class="dyn-instrument-section-field"><label class="dyn-sub-label" for="dyn_ins_' + index + '">' + esc(dynamicsInstrumentLabel(selectedInstrument)) + '</label><textarea class="textarea dyn-section-text" id="dyn_ins_' + index + '" rows="2" data-dyn-instrument="' + esc(selectedInstrument) + '" data-sec="' + esc(name) + '" placeholder="Отдельная партия: когда вступить, играть тише/громче, сделать акцент…">' + esc(instrumentNote) + '</textarea></div>' : '<p class="t-sm t-muted">Добавь инструмент ниже, чтобы прописать его партию отдельно.</p>') +
+      return '<section class="dyn-section-editor"><div class="dyn-section-heading"><span class="dyn-section-index">' + (index + 1) + '</span><label class="field-label" for="dyn_ins_' + index + '">' + esc(name) + '</label></div>' +
+        (selectedInstrument ? '<div class="dyn-instrument-section-field"><label class="dyn-sub-label" for="dyn_ins_' + index + '">' + esc(dynamicsInstrumentLabel(selectedInstrument)) + '</label><textarea class="textarea dyn-section-text" id="dyn_ins_' + index + '" rows="3" data-dyn-instrument="' + esc(selectedInstrument) + '" data-sec="' + esc(name) + '" placeholder="Когда вступить, играть тише или громче, где сделать акцент…">' + esc(instrumentNote) + '</textarea></div>' : '<p class="t-sm t-muted">Сначала добавь инструмент, чтобы указать динамику его партии.</p>') +
         '</section>';
     }).join('');
   }
-  html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить динамику для инструмента</strong><small>Добавь инструмент и настрой его партию по каждой части песни</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
     '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
     '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
     (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
@@ -2481,7 +2472,7 @@ function readSongForm(id) {
     bpm: old ? (old.bpm ?? null) : null, duration: old ? (old.duration ?? 0) : 0,
     tags: fv('f_stags').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).slice(0, 8),
     lyrics: $('#f_slyr', w).value, fav: old ? !!old.fav : false, addedAt: old ? old.addedAt : today(),
-    dynamics: dynDraft ? Object.assign(cloneValue(dynDraft), { notes: fv('dynOverall') }) : (old ? old.dynamics : null)
+    dynamics: dynDraft ? cloneValue(dynDraft) : (old ? old.dynamics : null)
   };
 }
 function setlistModal(id) {
