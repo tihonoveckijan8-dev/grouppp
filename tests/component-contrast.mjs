@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 const css = fs.readFileSync('bandplan.css', 'utf8');
 function token(name) {
-  const match = css.match(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':([^;]+)'));
+  const match = css.match(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ':([^;}]+)'));
   assert.ok(match, 'Missing design token ' + name);
   return match[1].trim();
 }
