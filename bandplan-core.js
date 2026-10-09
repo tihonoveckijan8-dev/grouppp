@@ -2344,12 +2344,9 @@ function songModal(id) {
   dynDraft = normalizeDynamics(s && s.dynamics);
   const tpl = '[Куплет 1]\nAm      F       C       G\nСтрока текста песни\nAm      F       G\nВторая строка\n\n[Припев]\nF       G       Em      Am\nТекст припева';
   const body =
-    '<div class="f2"><div class="field"><label class="field-label" for="f_stitle">Название *</label><input class="input" id="f_stitle" maxlength="90" value="' + esc(d.title) + '" placeholder="Название песни"><span class="err"></span></div>' +
-    '<div class="field"><label class="field-label" for="f_sartist">Исполнитель / автор</label><input class="input" id="f_sartist" maxlength="70" value="' + esc(d.artist || '') + '" placeholder="Группа или автор"></div></div>' +
-    '<div class="f3"><div class="field"><label class="field-label" for="f_skey">Тональность</label><select class="select" id="f_skey">' +
+    '<div class="field"><label class="field-label" for="f_stitle">Название *</label><input class="input" id="f_stitle" maxlength="90" value="' + esc(d.title) + '" placeholder="Название песни"><span class="err"></span></div>' +
+    '<div class="field"><label class="field-label" for="f_skey">Тональность</label><select class="select" id="f_skey">' +
     KEY_LIST.map(k => '<option value="' + k + '"' + (d.key === k ? ' selected' : '') + '>' + k + '</option>').join('') + '</select></div>' +
-    '<div class="field"><label class="field-label" for="f_sbpm">Темп (BPM)</label><input class="input" id="f_sbpm" type="number" min="20" max="400" inputmode="numeric" value="' + esc(d.bpm || '') + '" placeholder="100"><span class="err"></span></div>' +
-    '<div class="field"><label class="field-label" for="f_sdur">Длительность</label><input class="input" id="f_sdur" inputmode="numeric" value="' + (d.duration ? fmtDur(d.duration) : '') + '" placeholder="3:45"><span class="hint">мм:сс</span></div></div>' +
     '<div class="field"><label class="field-label" for="f_stags">Теги через запятую</label><input class="input" id="f_stags" value="' + esc((d.tags || []).join(', ')) + '" placeholder="рок, баллада, сет"></div>' +
     '<div class="song-editor-grid">' +
     '<section class="song-lyrics-pane"><div class="field song-lyrics-field">' +
@@ -2406,12 +2403,10 @@ function renderDynBlock() {
 function readSongForm(id) {
   const w = modalRoot; if (!w) return null;
   const title = fv('f_stitle'); if (!title) { fieldError('f_stitle', 'Введите название песни'); return null; }
-  const bpmRaw = fv('f_sbpm'), bpm = bpmRaw ? parseInt(bpmRaw, 10) : null;
-  if (bpm !== null && (isNaN(bpm) || bpm < 20 || bpm > 400)) { fieldError('f_sbpm', 'Темп должен быть в диапазоне 20–400 BPM'); return null; }
   const old = id ? songById(id) : null;
   return {
-    id: id || uid('s'), title: title, artist: fv('f_sartist'), key: $('#f_skey', w).value,
-    bpm: bpm, duration: durParse(fv('f_sdur')),
+    id: id || uid('s'), title: title, artist: old ? (old.artist || '') : '', key: $('#f_skey', w).value,
+    bpm: old ? (old.bpm ?? null) : null, duration: old ? (old.duration ?? 0) : 0,
     tags: fv('f_stags').split(',').map(x => x.trim().toLowerCase()).filter(Boolean).slice(0, 8),
     lyrics: $('#f_slyr', w).value, fav: old ? !!old.fav : false, addedAt: old ? old.addedAt : today(),
     dynamics: dynDraft ? Object.assign(cloneValue(dynDraft), { notes: fv('dynOverall') }) : (old ? old.dynamics : null)
