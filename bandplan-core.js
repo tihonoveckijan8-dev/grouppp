@@ -217,12 +217,13 @@ function parseSectionHeading(line) {
     const source = bracketed[1].trim();
     return source && !isChord(source) ? { source: source, bracketed: true } : null;
   }
-  // Also recognize common standalone headings pasted without square brackets:
-  // "Припев", "Куплет 2:", "(Bridge)", "CHORUS 2".
-  const plain = raw.replace(/^\((.*)\)$/, '$1').replace(/[:：]\s*$/, '').trim();
+  // Normalize common headings from pasted lyric sheets:
+  // "# Куплет 1", "1. Куплет", "Куплет 1:", "(Bridge)", "CHORUS 2 (x2)".
+  let plain = raw.replace(/^#{1,3}\s*/, '').replace(/^\d{1,2}[.)]\s*/, '');
+  plain = plain.replace(/^\((.*)\)$/, '$1').replace(/\s*\((?:x|х)\s*\d+\)$/i, '').replace(/[：:]\s*$/, '').trim();
   if (!plain || plain.length > 48) return null;
   const parsed = classifySongSection(plain);
-  return !parsed.custom ? { source: plain, bracketed: false } : null;
+  return !parsed.custom ? { source: parsed.label || plain, bracketed: false } : null;
 }
 function isSection(l) { return !!parseSectionHeading(l); }
 function isChordLine(l) {
@@ -269,16 +270,16 @@ function classifySongSection(value) {
   const raw = String(value || '').trim().replace(/\s+/g, ' ');
   const lower = raw.toLocaleLowerCase('ru');
   const patterns = [
-    { type: 'Вступление', re: /^(?:intro|интро|вступлени(?:е|я))(?:\s*\d+)?$/i },
-    { type: 'Куплет', re: /^(?:verse|куплет)(?:\s*\d+)?$/i },
-    { type: 'Предприпев', re: /^(?:pre[ -]?chorus|предприпев|предприпевная часть)(?:\s*\d+)?$/i },
-    { type: 'Припев', re: /^(?:chorus|refrain|припев|рефрен)(?:\s*\d+)?$/i },
-    { type: 'Бридж', re: /^(?:bridge|бридж|переход)(?:\s*\d+)?$/i },
-    { type: 'Проигрыш', re: /^(?:instrumental|проигрыш|инструментал)(?:\s*\d+)?$/i },
-    { type: 'Соло', re: /^(?:solo|соло)(?:\s*\d+)?$/i },
-    { type: 'Финал', re: /^(?:outro|финал|окончание|концовка)(?:\s*\d+)?$/i },
+    { type: 'Вступление', re: /^(?:intro|интро|вступлени(?:е|я)|opening)(?:\s*\d+)?$/i },
+    { type: 'Куплет', re: /^(?:verse|куплет|стих)(?:\s*\d+)?$/i },
+    { type: 'Предприпев', re: /^(?:pre[ -]?chorus|предприпев|предприпевная часть|подводка к припеву)(?:\s*\d+)?$/i },
+    { type: 'Припев', re: /^(?:chorus|refrain|hook|припев|рефрен|хук)(?:\s*\d+)?$/i },
+    { type: 'Бридж', re: /^(?:bridge|бридж|переход|связка)(?:\s*\d+)?$/i },
+    { type: 'Проигрыш', re: /^(?:instrumental|instrumental break|проигрыш|инструментал|инструментальная часть)(?:\s*\d+)?$/i },
+    { type: 'Соло', re: /^(?:solo|гитарное соло|соло)(?:\s*\d+)?$/i },
+    { type: 'Финал', re: /^(?:outro|финал|окончание|концовка|кода|coda)(?:\s*\d+)?$/i },
     { type: 'Постприпев', re: /^(?:post[ -]?chorus|постприпев)(?:\s*\d+)?$/i },
-    { type: 'Брейк', re: /^(?:break|брейк|пауза)(?:\s*\d+)?$/i }
+    { type: 'Брейк', re: /^(?:break|брейк|пауза|stop time)(?:\s*\d+)?$/i }
   ];
   for (const item of patterns) {
     const match = item.re.exec(raw);
@@ -1855,23 +1856,17 @@ function vSong(id) {
     (s.key && tr ? '<div class="t-xs t-muted">оригинал: ' + esc(s.key) + '</div>' : '') + '</div></div>' +
     '<div class="row mt"><button class="chip' + (state.settings.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (state.settings.showChords !== false) + '">' + ic('music', 14) + 'Аккорды в тексте</button></div>' +
     (String(s.lyrics || '').split(String.fromCharCode(10)).length > 10 || String(s.lyrics || '').length > 420
-      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-label="Показать весь текст" title="Показать весь текст" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '"><span class="lyrics-expand-chevron" aria-hidden="true"></span></button></div>'
-      : '<div class="lyrics mt" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div>') + '</section>';
+      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderSceneLyrics(s, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-label="Показать весь текст" title="Показать весь текст" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '"><span class="lyrics-expand-chevron" aria-hidden="true"></span></button></div>'
+      : '<div class="lyrics mt" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderSceneLyrics(s, tr) + '</div>') + '</section>';
   h += '</div><div class="stack">';
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>' + ic('wave', 17) + ' Ваша динамика</h2>' +
     '<div class="sub">Роль в профиле: ' + esc(rolesLabel(myRoles())) + '</div></div>' +
     '<button class="icon-btn" type="button" data-act="edit-song" data-id="' + s.id + '" aria-label="Изменить песню">' + ic('edit', 16) + '</button></div>';
   const dynamicsView = dynamicsHTML(s);
-  h += dynamicsView || stateHTML('empty', 'Динамика ещё не расписана', 'Добавь общие указания и заметки к частям песни. В сценическом режиме они появятся рядом с соответствующими куплетами, припевами и бриджами.', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Заполнить динамику</button>');
+  h += dynamicsView || stateHTML('empty', 'Динамика ещё не расписана', 'Алгоритм автоматически ищет названия частей песни в тексте. Добавь заголовки вроде «Куплет 1», «Припев», «Бридж» — они появятся здесь в том же порядке; указания по инструментам будут показаны рядом с соответствующими частями.', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Заполнить динамику</button>');
+  h += '<div class="row mt song-detail-work-actions"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button>' +
+    '<button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>';
   h += '</section>';
-  h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Параметры песни</h2></div></div>' +
-    infoRow('Тональность', '<span class="num">' + esc(transposeKey(s.key || '—', tr)) + '</span>') +
-    infoRow('Темп', s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '—') +
-    infoRow('Длительность', s.duration ? '<span class="num">' + fmtDur(s.duration) + '</span>' : '—') +
-    infoRow('Теги', (s.tags || []).length ? (s.tags || []).map(t => '<span class="badge b-muted" style="margin-left:4px">' + esc(t) + '</span>').join('') : '—') +
-    '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
-    '</section>';
 
   return h + '</div></div></div>';
 }
@@ -2388,7 +2383,7 @@ function renderDynBlock() {
         '</section>';
     }).join('');
   }
-  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+  html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
     '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
     '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
     (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
