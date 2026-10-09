@@ -7520,11 +7520,11 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 
 /* WHY: keep Boot.stage/Boot.fail targets visible and aligned; the error surface must work without changing the application layout. */
 @layer boot {
-  #boot.is-error { display:flex!important; visibility:visible!important; pointer-events:auto!important; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:24px; background:var(--bg,#F4F6FA); color:var(--text,#20232B); }
+  #boot.is-error { display:flex!important; visibility:visible!important; pointer-events:auto!important; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:24px; background:var(--bg); color:var(--text); }
   #boot .boot-core { width:min(100%,520px); max-height:100%; overflow:auto; }
   #boot .boot-stage { margin:0 auto 10px; text-align:center; font-size:14px; font-weight:600; }
-  #boot .boot-progress { height:4px; overflow:hidden; border-radius:999px; background:var(--border,#D9DDE6); margin:0 auto 18px; }
-  #boot .boot-bar { height:100%; width:100%; transform:scaleX(.08); transform-origin:left center; background:var(--accent,#5069E8); transition:transform .2s ease; }
+  #boot .boot-progress { height:4px; overflow:hidden; border-radius:999px; background:var(--border); margin:0 auto 18px; }
+  #boot .boot-bar { height:100%; width:100%; transform:scaleX(.08); transform-origin:left center; background:var(--accent); transition:transform .2s ease; }
   #boot.is-error .boot-stage,#boot.is-error .boot-progress,#boot.is-error .boot-shell,#boot.is-error .boot-slow { display:none!important; }
   #boot .boot-error-title { font-size:20px; line-height:1.3; font-weight:750; margin:0 0 10px; }
   #boot .boot-error-text { font-size:14px; line-height:1.55; overflow-wrap:anywhere; margin:0 0 18px; }
