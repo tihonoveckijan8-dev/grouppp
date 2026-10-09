@@ -48,6 +48,22 @@ jobs:
         run: |
           npx --yes lighthouse@latest http://127.0.0.1:4173/             --only-categories=performance,accessibility             --output=json             --output-path=/tmp/lighthouse.json             --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
 
+      - name: Print Lighthouse bottlenecks
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          if (!fs.existsSync('/tmp/lighthouse.json')) process.exit(0);
+          const report = JSON.parse(fs.readFileSync('/tmp/lighthouse.json','utf8'));
+          console.log('Lighthouse version:', report.lighthouseVersion);
+          console.log('Scores:', JSON.stringify(Object.fromEntries(Object.entries(report.categories).map(([k,v])=>[k,Math.round((v.score||0)*100)]))));
+          const audits = Object.values(report.audits)
+            .filter(a => a.scoreDisplayMode === 'numeric' && a.score !== null && a.score < 0.9)
+            .sort((a,b) => (a.score||0) - (b.score||0))
+            .slice(0,15);
+          for (const a of audits) console.log(JSON.stringify({id:a.id,score:a.score,displayValue:a.displayValue,title:a.title,description:a.description?.slice(0,240)}));
+          NODE
+
       - name: Enforce Lighthouse budgets
         run: |
           node --input-type=module <<'NODE'
