@@ -1,5 +1,5 @@
 import { build } from 'esbuild';
-import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -28,7 +28,18 @@ for (const dir of ['assets', 'fonts', 'vendor']) {
   if (existsSync(source)) await cp(source, path.join(out, dir), {recursive:true});
 }
 
-for (const file of ['bandplan.js','bandplan-core.js','supabase.js','sw.js','bandplan.css']) {
+for (const file of ['bandplan.js','bandplan-core.js','config.js','supabase.js','sw.js','bandplan.css']) {
+  // WHY: generate a fresh shell cache namespace on every build instead of relying on manual SW edits.
+  if (file === 'sw.js') {
+    const source = await readFile(path.join(root, file), 'utf8');
+    const version = `${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
+    await build({
+      stdin: { contents: source.replaceAll('__BANDPLAN_CACHE_VERSION__', version), resolveDir: root, sourcefile: file, loader: 'js' },
+      outfile: path.join(out, file), bundle: false, minify: true,
+      target: ['es2020', 'safari15'], legalComments: 'none', charset: 'utf8'
+    });
+    continue;
+  }
   await build({
     entryPoints:[path.join(root,file)],
     outfile:path.join(out,file),

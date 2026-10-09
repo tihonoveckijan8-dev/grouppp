@@ -9,7 +9,10 @@
       const boot = document.getElementById('boot');
       if (boot) {
         boot.classList.add('is-error');
-        const core = boot.querySelector('.boot-core');
+        let core = boot.querySelector('.boot-core');
+        // WHY: cached or older HTML must still expose a visible bootstrap error if the expected container is missing.
+        if (!core) { core = document.createElement('div'); core.className = 'boot-core'; boot.replaceChildren(core); }
+        boot.setAttribute('role', 'alert');
         if (core) {
           core.innerHTML =
             '<div class="boot-error-title">Не удалось загрузить BandPlan</div>' +
@@ -32,5 +35,7 @@
     the "login succeeds but the app never opens" race.
   */
   window.__bandplanEnsureCore = loadCore;
+  // WHY: INITIAL_SESSION may fire before this deferred script executes; notify Auth waiters instead of failing a valid startup.
+  window.dispatchEvent(new Event('bandplan:core-loader-ready'));
   // Core stays deferred until Supabase has resolved authentication.
 })();

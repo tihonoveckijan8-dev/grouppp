@@ -7,24 +7,34 @@ const app = express();
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-// Set cache-control headers to prevent stale browser caching
+// WHY: cache immutable static assets aggressively, but always revalidate HTML and the service worker.
 app.use((req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  const pathname = req.path || '/';
+  if (pathname === '/' || pathname.endsWith('.html') || pathname === '/sw.js') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  } else if (pathname.startsWith('/fonts/') || /^\/icon-/.test(pathname)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  } else {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
   next();
 });
 
-// Serve static files from root
+// WHY: static assets must return their own status; never turn a missing .js/.png into HTML.
 app.use(express.static(__dirname, {
   etag: false,
   maxAge: 0,
   index: 'index.html',
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  setHeaders: (res, filePath) => {
+    const pathname = filePath.replaceAll('\\\\', '/');
+    if (/\/fonts\//.test(pathname) || /\/icon-/.test(pathname)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    else if (/\.html$/.test(pathname) || /\/sw\.js$/.test(pathname)) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   }
 }));
 
-// Route fallback for client-side routing
-app.use((req, res) => {
+// WHY: SPA fallback applies only to GET navigation paths without a file extension.
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || path.extname(req.path)) return res.status(404).type('text').send('Not Found');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

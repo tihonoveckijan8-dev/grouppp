@@ -38,11 +38,16 @@ const Boot = (() => {
     const x = slowEl(); if (x) x.hidden = false;
   }
   function fail(opts) {
-    if (!el || finished) return;
+    if (!el) return;
+    // WHY: a late auth/network failure must remain visible even if startup already called done() and detached the boot surface.
+    if (!el.isConnected && document.body) document.body.prepend(el);
     clearTimeout(slowT);
     finished = false;
+    el.classList.remove('is-leaving');
     el.classList.add('is-error');
-    const core = el.querySelector('.boot-core');
+    let core = el.querySelector('.boot-core');
+    // WHY: keep failure rendering resilient if markup is stale in a cached PWA shell.
+    if (!core) { core = document.createElement('div'); core.className = 'boot-core'; el.replaceChildren(core); }
     const title = opts && opts.title || 'Не удалось запустить BandPlan';
     const body = opts && opts.text || 'Попробуйте ещё раз. Ваши локальные данные не удалены.';
     const actions = opts && opts.actions || '<button type="button" id="bootRetry">Повторить</button>';
@@ -3912,60 +3917,7 @@ function init() {
   window.addEventListener('online', () => scheduleOfflineSongSync(150));
   window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
   window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    // When a new app version takes control, reload once so installed clients
-    // load the updated HTML, CSS and JavaScript instead of keeping old code.
-    let reloadingForWorker = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (reloadingForWorker) return;
-      reloadingForWorker = true;
-      location.reload();
-    });
-    window.addEventListener('load', async () => {
-      try {
-        const registration = await navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
-        // Check immediately on launch; browsers otherwise throttle update checks.
-        const checkForAppUpdate = () => {
-          if (!navigator.onLine || document.hidden) return;
-          registration.update().catch(() => {});
-        };
-        const activateWaitingWorker = () => {
-          if (!registration.waiting || !navigator.serviceWorker.controller) return;
-          setSyncStatus('update', 'Доступна новая версия', 0);
-          const statusEl = $('#syncStatus');
-          if (statusEl) {
-            statusEl.innerHTML = ic('bolt', 15) + '<span class="sync-label">Новая версия</span><button type="button" aria-label="Обновить BandPlan">Обновить</button>';
-            statusEl.hidden = false;
-            const btn = statusEl.querySelector('button');
-            if (btn) btn.onclick = () => {
-              showUpdateBoot();
-              registration.waiting.postMessage({type:'SKIP_WAITING'});
-            };
-          }
-        };
-        registration.addEventListener('updatefound', () => {
-          const installing = registration.installing;
-          if (!installing) return;
-          installing.addEventListener('statechange', () => {
-            if (installing.state === 'installed' && navigator.serviceWorker.controller) activateWaitingWorker();
-          });
-        });
-        activateWaitingWorker();
-        checkForAppUpdate();
-        // Keep long-lived PWAs current without polling the network aggressively.
-        // Focus/visibility/online events still trigger an immediate check.
-        window.setInterval(checkForAppUpdate, 60 * 1000);
-        window.addEventListener('online', checkForAppUpdate);
-        window.addEventListener('focus', checkForAppUpdate);
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) checkForAppUpdate();
-        });
-      } catch (err) {
-        console.warn('BandPlan service worker registration failed:', err);
-        window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail: err?.message || 'Не удалось зарегистрировать Service Worker'}));
-      }
-    });
-  }
+  // WHY: service-worker lifecycle is owned by index.html only, preventing duplicate registrations/reload handlers.
   ui.skeleton = false;
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
@@ -3983,18 +3935,19 @@ window.__bandplanResumeAuthenticated = async function (user) {
     if (gate) gate.hidden = true;
     return;
   }
-  if (window.__bandplanAuthResumePromise) return window.__bandplanAuthResumePromise;
-  window.__bandplanAuthResumePromise = (async () => {
-    try {
-      await startBandPlan(false);
-    } finally {
-      window.__bandplanAuthResumePromise = null;
-    }
-  })();
-  return window.__bandplanAuthResumePromise;
+  // WHY: all startup paths share one mutex so DOM readiness and Auth callbacks cannot boot twice.
+  return startBandPlan(false);
 };
 
-async function startBandPlan(forceOffline) {
+function startBandPlan(forceOffline = false) {
+  if (window.__bandplanAuthResumePromise) return window.__bandplanAuthResumePromise;
+  window.__bandplanAuthResumePromise = startBandPlanInternal(forceOffline).finally(() => {
+    window.__bandplanAuthResumePromise = null;
+  });
+  return window.__bandplanAuthResumePromise;
+}
+
+async function startBandPlanInternal(forceOffline) {
   const attempt = (window.__bandplanBootAttempt || 0) + 1;
   window.__bandplanBootAttempt = attempt;
   if (!forceOffline && navigator.onLine !== false) Boot.stage('Запускаем BandPlan', 8);
@@ -4147,10 +4100,20 @@ async function startBandPlan(forceOffline) {
     } else if (legacyState) {
       try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (e) {}
     }
+    // WHY: remove account-agnostic state only after a per-account snapshot exists, including when durable state was restored instead of migrated.
+    if (window.__bandplanDurable?.state || legacyState) {
+      for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) {
+        try { localStorage.removeItem(legacyKey); } catch (e) {}
+      }
+    }
   } catch (e) {
     window.__bandplanDurable = null;
     if (legacyState) {
-      try { localStorage.setItem(KEY, JSON.stringify(legacyState)); } catch (storageError) {}
+      try {
+        localStorage.setItem(KEY, JSON.stringify(legacyState));
+        // WHY: cleanup follows successful account-scoped migration even when cloud hydration failed.
+        for (const legacyKey of ['bandplan.premium.v6', 'bandplan.premium.v5', 'bandplan.premium.v4']) localStorage.removeItem(legacyKey);
+      } catch (storageError) {}
     }
     console.warn('BandPlan durable offline hydration unavailable:', e);
   }
@@ -4182,7 +4145,19 @@ async function startBandPlan(forceOffline) {
   window.__bandplanActiveUserId = user.id;
   window.__bandplanAppReady = true;
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startBandPlan); else startBandPlan();
+// WHY: install the PWA error consumer before any auth-gated early return, so login screens also report service-worker failures.
+if (!window.__bandplanPwaErrorListener) {
+  window.__bandplanPwaErrorListener = true;
+  window.addEventListener('bandplan:pwa-error', event => {
+    const previousMode = state.settings.toastMode;
+    state.settings.toastMode = 'all';
+    toast(String(event.detail || 'Не удалось обновить офлайн-режим'), 'warn', 6000);
+    state.settings.toastMode = previousMode;
+  });
+  if (window.__bandplanPwaError) window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail:window.__bandplanPwaError}));
+}
+// WHY: passing the DOM Event as forceOffline accidentally bypassed the normal online startup path.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => startBandPlan(false), {once:true}); else startBandPlan(false);
 })();
 
 

@@ -1,13 +1,19 @@
 /* BandPlan — Supabase Auth + isolated per-account cloud state */
 (function () {
   'use strict';
+  if (!window.BANDPLAN_CONFIG || window.__bandplanConfigError) {
+    window.__bandplanSupabaseSdkError = true;
+    console.error('BandPlan: Supabase configuration is missing or invalid.');
+    return;
+  }
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
     window.__bandplanSupabaseSdkError = true;
     console.error('BandPlan: Supabase SDK не загрузился.');
     return;
   }
-  const SUPABASE_URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
+  // WHY: read the single validated public configuration instead of duplicating credentials in the auth module.
+  const SUPABASE_URL = window.BANDPLAN_CONFIG.supabaseUrl;
+  const SUPABASE_KEY = window.BANDPLAN_CONFIG.supabasePublishableKey;
   const TABLE = 'bandplan_user_state';
   /*
     Use Supabase's standard browser storage key. A previous repair introduced a
@@ -312,12 +318,17 @@
         setTimeout(() => {
           Promise.resolve()
             .then(async () => {
-              if (typeof window.__bandplanEnsureCore !== 'function') throw new Error('Не удалось запустить BandPlan.');
-              await window.__bandplanEnsureCore();
-              if (currentSession?.user) {
-                if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось восстановить рабочее пространство BandPlan.');
-                await window.__bandplanResumeAuthenticated(currentSession.user);
+              // WHY: deferred scripts can briefly race INITIAL_SESSION; wait for the loader rather than reporting a false startup failure.
+              if (typeof window.__bandplanEnsureCore !== 'function') {
+                await new Promise((resolve, reject) => {
+                  const timeout = setTimeout(() => { window.removeEventListener('bandplan:core-loader-ready', ready); reject(new Error('Не удалось загрузить загрузчик BandPlan.')); }, 10000);
+                  const ready = () => { clearTimeout(timeout); resolve(); };
+                  window.addEventListener('bandplan:core-loader-ready', ready, {once:true});
+                  if (typeof window.__bandplanEnsureCore === 'function') ready();
+                });
               }
+              await window.__bandplanEnsureCore();
+              // WHY: initialize() can run inside startBandPlan(); resuming here would await the same bootstrap mutex and deadlock.
             })
             .catch(error => console.error('BandPlan initial session startup failed:', error));
         }, 0);
@@ -619,8 +630,7 @@
         window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
         if (typeof window.__bandplanEnsureCore === 'function') {
           await window.__bandplanEnsureCore();
-          if (typeof window.__bandplanResumeAuthenticated !== 'function') throw new Error('Не удалось загрузить рабочее пространство BandPlan.');
-          await window.__bandplanResumeAuthenticated(currentSession.user);
+          // WHY: the active startBandPlan() call owns workspace startup; do not recursively await its mutex from initialize().
         }
         return currentSession.user;
       }

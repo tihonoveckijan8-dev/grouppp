@@ -9,12 +9,27 @@
   window.__bandplanSupabaseVersion = '2.117.2';
   window.__bandplanSupabaseFallback = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js';
 </script>
-<meta name="theme-color" content="">
+<meta name="theme-color" content="#F4F6FA">
+<meta name="theme-color" content="#14161C" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="bandplan.css?v=20261005-32">
 <script id="bandplan-early-sw">
 try{
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function(){});
+    // WHY: registration errors are surfaced to the app instead of being silently swallowed.
+    navigator.serviceWorker.getRegistration(new URL('./', location.href).href).then(function(existing){
+      // WHY: reuse the active registration to avoid duplicate registration work in installed PWAs.
+      return existing || navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+    }).catch(function(error){ window.__bandplanPwaError = error?.message || 'Не удалось зарегистрировать Service Worker'; window.dispatchEvent(new CustomEvent('bandplan:pwa-error',{detail:window.__bandplanPwaError})); });
+    // WHY: the first controller acquisition on a fresh install must not trigger a pointless reload loop.
+    let bpController = navigator.serviceWorker.controller;
+    let bpHadController = !!bpController;
+    navigator.serviceWorker.addEventListener('controllerchange', function(event){
+      const nextController = event?.target?.controller || navigator.serviceWorker.controller;
+      if (!bpHadController) { bpHadController = true; bpController = nextController; return; }
+      if (!nextController || nextController === bpController) return;
+      bpController = nextController;
+      location.reload();
+    });
   }
 }catch(e){}
 </script>
@@ -22,7 +37,7 @@ try{
 try{
 var bpDoc=document.documentElement,bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpStoredAccent=localStorage.getItem('accent')||'',bpThemeIds=['light','dark','amoled'];
 var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');bpDoc.dataset.theme=bpTheme;
-var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim(),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
+var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim()||(bpTheme==='light'?'#F4F6FA':'#14161C'),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
 var bpStoredPreset=bpPresetIds.indexOf(bpStoredAccent.toLowerCase())>=0?bpStoredAccent.toLowerCase():'',bpPreset=(bpBoot&&bpPresetIds.indexOf(bpBoot.accentPreset)>=0)?bpBoot.accentPreset:bpStoredPreset,bpPresetColor=bpPreset?bpCss.getPropertyValue('--accent-preset-'+bpPreset+'-'+bpTheme).trim():'';
 var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpStoredAccent)?bpStoredAccent.toUpperCase():(/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accent||'')?bpBoot.accent.toUpperCase():(bpPresetColor||bpCss.getPropertyValue('--accent-default').trim()));
 var bpWhite=bpCss.getPropertyValue('--token-white').trim(),bpBlack=bpCss.getPropertyValue('--token-black').trim();
@@ -30,7 +45,7 @@ function bpLum(hex){var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&25
 function bpContrast(a,b){var x=bpLum(a),y=bpLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
 var bpOn=bpContrast(bpAccent,bpWhite)>=bpContrast(bpAccent,bpBlack)?bpWhite:bpBlack;bpDoc.style.setProperty('--accent',bpAccent);bpDoc.style.setProperty('--accent-contrast',bpOn);bpDoc.style.setProperty('--accent-on-bg',bpAccent);bpDoc.style.setProperty('--accent-text',bpAccent);
 document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',bpThemeColor)});
-}catch(e){}
+}catch(e){console.error('BandPlan early theme bootstrap failed:',e)}
 </script>
 <style id="bandplan-auth-lock">html.bp-auth-required .app,html.bp-auth-required .bottom-nav{visibility:hidden!important;pointer-events:none!important}</style>
 
@@ -44,7 +59,6 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 <link rel="icon" type="image/png" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=waves-bars-3">
 <meta name="application-name" content="BandPlan">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BandPlan">
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" href="vendor/supabase.min.js" as="script">
@@ -54,11 +68,16 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 </head>
 <body data-route="calendar">
 <div id="boot" class="boot" role="status" aria-live="polite" aria-label="Загрузка BandPlan">
+  <!-- WHY: Boot.stage()/fail() target these stable elements; keep all boot UI inside one replaceable container. -->
+  <div class="boot-core">
+  <div id="bootStage" class="boot-stage">Запускаем BandPlan</div>
+  <div class="boot-progress" aria-hidden="true"><div id="bootBar" class="boot-bar"></div></div>
   <div class="boot-shell" aria-hidden="true">
     <aside class="boot-sidebar"><div class="boot-brand"><i></i><b></b></div><div class="boot-nav"><i></i><i></i><i></i><i></i><i></i></div></aside>
     <div class="boot-main"><div class="boot-head"><b></b><i></i></div><div class="boot-content"><div class="boot-title"><b></b><i></i></div><div class="boot-events"><i></i><i></i><i></i></div></div></div>
   </div>
   <div class="boot-slow" id="bootSlow" hidden><p>Подключение занимает дольше обычного</p><div class="boot-acts"><button type="button" id="bootOffline">Продолжить офлайн</button><button type="button" id="bootRetry">Повторить</button></div></div>
+  </div>
 </div>
 
 <a class="skip-link" href="#view">Перейти к содержимому</a>
@@ -125,6 +144,7 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 <noscript><div class="noscript" role="alert"><strong>BandPlan</strong><p>Для работы приложения необходим JavaScript.</p></div></noscript>
 
 <script defer src="vendor/supabase.min.js" onerror="this.onerror=null;this.src=window.__bandplanSupabaseFallback"></script>
+<script defer src="config.js"></script>
 <script defer src="supabase.js"></script>
 <script defer src="bandplan.js?v=20261005-4"></script>
 </body>
