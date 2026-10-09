@@ -9,8 +9,7 @@
   window.__bandplanSupabaseVersion = '2.117.2';
   window.__bandplanSupabaseFallback = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js';
 </script>
-<meta name="theme-color" content="#F4F6FA">
-<meta name="theme-color" content="#14161C" media="(prefers-color-scheme: dark)">
+<meta name="theme-color">
 <link rel="stylesheet" href="bandplan.css?v=20261005-32">
 <script id="bandplan-early-sw">
 try{
@@ -37,7 +36,7 @@ try{
 try{
 var bpDoc=document.documentElement,bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpStoredAccent=localStorage.getItem('accent')||'',bpThemeIds=['light','dark','amoled'];
 var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');bpDoc.dataset.theme=bpTheme;
-var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim()||(bpTheme==='light'?'#F4F6FA':'#14161C'),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
+var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim()||bpCss.getPropertyValue('--theme-color-light').trim(),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
 var bpStoredPreset=bpPresetIds.indexOf(bpStoredAccent.toLowerCase())>=0?bpStoredAccent.toLowerCase():'',bpPreset=(bpBoot&&bpPresetIds.indexOf(bpBoot.accentPreset)>=0)?bpBoot.accentPreset:bpStoredPreset,bpPresetColor=bpPreset?bpCss.getPropertyValue('--accent-preset-'+bpPreset+'-'+bpTheme).trim():'';
 var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpStoredAccent)?bpStoredAccent.toUpperCase():(/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accent||'')?bpBoot.accent.toUpperCase():(bpPresetColor||bpCss.getPropertyValue('--accent-default').trim()));
 var bpWhite=bpCss.getPropertyValue('--token-white').trim(),bpBlack=bpCss.getPropertyValue('--token-black').trim();
