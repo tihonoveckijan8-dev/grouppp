@@ -7629,6 +7629,13 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
 .dyn-instrument-picker { padding:0 14px 14px; }
 .dyn-instrument-add-row { display:flex; align-items:center; gap:8px; }
 .dyn-instrument-add-row .select { min-width:0; flex:1; }
+.dyn-instrument-picker .select { min-height:44px; padding-right:38px; border-radius:var(--r-md); border-color:var(--border-strong, var(--border)); background-color:var(--surface-2, var(--surface)); color:var(--text); font:inherit; box-shadow:inset 0 1px 0 color-mix(in srgb, var(--text) 3%, transparent); }
+.dyn-instrument-picker .select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-color:var(--accent); }
+.dyn-instrument-dropdown > summary { transition:background-color .16s ease; }
+.dyn-instrument-dropdown > summary:hover { background:color-mix(in srgb, var(--accent) 5%, transparent); }
+.dyn-instrument-dropdown[open] > summary { border-bottom:1px solid var(--border); }
+.song-detail-work-actions { flex-wrap:wrap; }
+.song-detail-work-actions > .btn { flex:1 1 180px; }
 .dyn-instrument-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 .dyn-instrument-tag { display:inline-flex; align-items:center; gap:7px; padding:5px 8px 5px 11px; border:1px solid var(--border); border-radius:999px; background:var(--surface); font-size:var(--fs-body-s); }
 .dyn-instrument-tag button { display:grid; place-items:center; width:22px; height:22px; border:0; border-radius:50%; color:var(--muted); background:transparent; font-size:17px; cursor:pointer; }

@@ -217,12 +217,13 @@ function parseSectionHeading(line) {
     const source = bracketed[1].trim();
     return source && !isChord(source) ? { source: source, bracketed: true } : null;
   }
-  // Also recognize common standalone headings pasted without square brackets:
-  // "Припев", "Куплет 2:", "(Bridge)", "CHORUS 2".
-  const plain = raw.replace(/^\((.*)\)$/, '$1').replace(/[:：]\s*$/, '').trim();
+  // Normalize common headings from pasted lyric sheets:
+  // "# Куплет 1", "1. Куплет", "Куплет 1:", "(Bridge)", "CHORUS 2 (x2)".
+  let plain = raw.replace(/^#{1,3}\s*/, '').replace(/^\d{1,2}[.)]\s*/, '');
+  plain = plain.replace(/^\((.*)\)$/, '$1').replace(/\s*\((?:x|х)\s*\d+\)$/i, '').replace(/[：:]\s*$/, '').trim();
   if (!plain || plain.length > 48) return null;
   const parsed = classifySongSection(plain);
-  return !parsed.custom ? { source: plain, bracketed: false } : null;
+  return !parsed.custom ? { source: parsed.label || plain, bracketed: false } : null;
 }
 function isSection(l) { return !!parseSectionHeading(l); }
 function isChordLine(l) {
@@ -269,16 +270,16 @@ function classifySongSection(value) {
   const raw = String(value || '').trim().replace(/\s+/g, ' ');
   const lower = raw.toLocaleLowerCase('ru');
   const patterns = [
-    { type: 'Вступление', re: /^(?:intro|интро|вступлени(?:е|я))(?:\s*\d+)?$/i },
-    { type: 'Куплет', re: /^(?:verse|куплет)(?:\s*\d+)?$/i },
-    { type: 'Предприпев', re: /^(?:pre[ -]?chorus|предприпев|предприпевная часть)(?:\s*\d+)?$/i },
-    { type: 'Припев', re: /^(?:chorus|refrain|припев|рефрен)(?:\s*\d+)?$/i },
-    { type: 'Бридж', re: /^(?:bridge|бридж|переход)(?:\s*\d+)?$/i },
-    { type: 'Проигрыш', re: /^(?:instrumental|проигрыш|инструментал)(?:\s*\d+)?$/i },
-    { type: 'Соло', re: /^(?:solo|соло)(?:\s*\d+)?$/i },
-    { type: 'Финал', re: /^(?:outro|финал|окончание|концовка)(?:\s*\d+)?$/i },
+    { type: 'Вступление', re: /^(?:intro|интро|вступлени(?:е|я)|opening)(?:\s*\d+)?$/i },
+    { type: 'Куплет', re: /^(?:verse|куплет|стих)(?:\s*\d+)?$/i },
+    { type: 'Предприпев', re: /^(?:pre[ -]?chorus|предприпев|предприпевная часть|подводка к припеву)(?:\s*\d+)?$/i },
+    { type: 'Припев', re: /^(?:chorus|refrain|hook|припев|рефрен|хук)(?:\s*\d+)?$/i },
+    { type: 'Бридж', re: /^(?:bridge|бридж|переход|связка)(?:\s*\d+)?$/i },
+    { type: 'Проигрыш', re: /^(?:instrumental|instrumental break|проигрыш|инструментал|инструментальная часть)(?:\s*\d+)?$/i },
+    { type: 'Соло', re: /^(?:solo|гитарное соло|соло)(?:\s*\d+)?$/i },
+    { type: 'Финал', re: /^(?:outro|финал|окончание|концовка|кода|coda)(?:\s*\d+)?$/i },
     { type: 'Постприпев', re: /^(?:post[ -]?chorus|постприпев)(?:\s*\d+)?$/i },
-    { type: 'Брейк', re: /^(?:break|брейк|пауза)(?:\s*\d+)?$/i }
+    { type: 'Брейк', re: /^(?:break|брейк|пауза|stop time)(?:\s*\d+)?$/i }
   ];
   for (const item of patterns) {
     const match = item.re.exec(raw);
@@ -290,8 +291,9 @@ function classifySongSection(value) {
   return { type: raw, label: raw, numbered: /\d+/.test(raw), custom: true };
 }
 function extractSectionOccurrences(text) {
+  const lines = String(text || '').split('\n');
   const out = [], counts = Object.create(null), used = Object.create(null);
-  String(text || '').split('\n').forEach(function (line) {
+  lines.forEach(function (line, lineIndex) {
     const heading = parseSectionHeading(line);
     if (!heading) return;
     const parsed = classifySongSection(heading.source);
@@ -301,16 +303,50 @@ function extractSectionOccurrences(text) {
     let label = parsed.label;
     // Repeated unnumbered section headings get independent dynamics entries.
     if (!parsed.numbered && count > 1) label = parsed.type + ' ' + count;
-    // Keep every dynamics key unique, even if the lyrics already repeat a numbered heading.
     if (used[label]) {
       let suffix = Math.max(count, 2);
       while (used[parsed.type + ' ' + suffix]) suffix++;
       label = parsed.type + ' ' + suffix;
     }
     used[label] = true;
-    out.push({ source: heading.source, type: parsed.type, label: label });
+    out.push({ source: heading.source, type: parsed.type, label: label, lineIndex: lineIndex, explicit: true });
   });
-  return out;
+  if (out.length) return out;
+
+  // If headings are absent, scan blank-line-separated stanzas. A repeated stanza
+  // is a strong chorus signal; only then infer verse/chorus labels to avoid guessing
+  // structure from arbitrary lyric lines.
+  const stanzas = [];
+  let start = -1, chunk = [];
+  function finishStanza() {
+    if (start < 0) return;
+    const raw = chunk.join('\n').trim();
+    const normalized = chunk.filter(line => !isChordLine(line))
+      .join(' ').replace(/\[[A-G](?:#|b)?[^\]]*\]/g, ' ')
+      .toLocaleLowerCase('ru').replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
+    if (normalized) stanzas.push({ startLine: start, source: raw, normalized: normalized });
+    start = -1; chunk = [];
+  }
+  lines.forEach((line, index) => {
+    if (!line.trim()) { finishStanza(); return; }
+    if (start < 0) start = index;
+    chunk.push(line);
+  });
+  finishStanza();
+  if (stanzas.length < 3) return [];
+  const frequency = Object.create(null);
+  stanzas.forEach(stanza => { frequency[stanza.normalized] = (frequency[stanza.normalized] || 0) + 1; });
+  const repeated = stanzas.some(stanza => frequency[stanza.normalized] > 1);
+  if (!repeated) return [];
+  let verse = 0, chorus = 0;
+  return stanzas.map(stanza => {
+    if (frequency[stanza.normalized] > 1) {
+      chorus++;
+      return { source: 'Припев', type: 'Припев', label: chorus === 1 ? 'Припев' : 'Припев ' + chorus, lineIndex: stanza.startLine, explicit: false };
+    }
+    verse++;
+    return { source: 'Куплет ' + verse, type: 'Куплет', label: 'Куплет ' + verse, lineIndex: stanza.startLine, explicit: false };
+  });
 }
 function extractSections(text) {
   return extractSectionOccurrences(text).map(section => section.label);
@@ -1811,21 +1847,30 @@ function dynamicsHTML(song) {
 }
 function renderSceneLyrics(song, shift) {
   const d = normalizeDynamics(song && song.dynamics);
+  const lines = String(song && song.lyrics || '').split('\n');
   const occurrences = extractSectionOccurrences(song && song.lyrics || '');
+  const inferred = occurrences.length && !occurrences[0].explicit;
+  const byLine = Object.create(null);
+  if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
-  return String(song && song.lyrics || '').split('\n').map(function(line) {
+  function renderNotes(key) {
+    const note = String(d.sectionNotes[key] || '').trim();
+    const cues = d.instruments.map(ins => {
+      const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
+      return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
+    }).join('');
+    return (note ? '<span class="ln scene-dyn-note"><b>ОБЩАЯ ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '') + cues;
+  }
+  return lines.map(function(line, lineIndex) {
     const heading = parseSectionHeading(line);
     if (heading) {
       const occurrence = occurrences[sectionIndex++];
-      const name = heading.source;
-      const key = occurrence ? occurrence.label : name;
-      const note = String(d.sectionNotes[key] || '').trim();
-      const cues = d.instruments.map(ins => {
-        const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
-        return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
-      }).join('');
-      return '<span class="ln sec">' + esc(name) + '</span>' +
-        (note ? '<span class="ln scene-dyn-note"><b>ОБЩАЯ ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '') + cues;
+      const key = occurrence ? occurrence.label : heading.source;
+      return '<span class="ln sec">' + esc(heading.source) + '</span>' + renderNotes(key);
+    }
+    const inferredSection = byLine[lineIndex];
+    if (inferredSection) {
+      return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
     }
     return renderLyrics(line, shift);
   }).join('');
@@ -1855,23 +1900,17 @@ function vSong(id) {
     (s.key && tr ? '<div class="t-xs t-muted">оригинал: ' + esc(s.key) + '</div>' : '') + '</div></div>' +
     '<div class="row mt"><button class="chip' + (state.settings.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (state.settings.showChords !== false) + '">' + ic('music', 14) + 'Аккорды в тексте</button></div>' +
     (String(s.lyrics || '').split(String.fromCharCode(10)).length > 10 || String(s.lyrics || '').length > 420
-      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-label="Показать весь текст" title="Показать весь текст" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '"><span class="lyrics-expand-chevron" aria-hidden="true"></span></button></div>'
-      : '<div class="lyrics mt" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div>') + '</section>';
+      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderSceneLyrics(s, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-label="Показать весь текст" title="Показать весь текст" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '"><span class="lyrics-expand-chevron" aria-hidden="true"></span></button></div>'
+      : '<div class="lyrics mt" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderSceneLyrics(s, tr) + '</div>') + '</section>';
   h += '</div><div class="stack">';
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>' + ic('wave', 17) + ' Ваша динамика</h2>' +
     '<div class="sub">Роль в профиле: ' + esc(rolesLabel(myRoles())) + '</div></div>' +
     '<button class="icon-btn" type="button" data-act="edit-song" data-id="' + s.id + '" aria-label="Изменить песню">' + ic('edit', 16) + '</button></div>';
   const dynamicsView = dynamicsHTML(s);
-  h += dynamicsView || stateHTML('empty', 'Динамика ещё не расписана', 'Добавь общие указания и заметки к частям песни. В сценическом режиме они появятся рядом с соответствующими куплетами, припевами и бриджами.', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Заполнить динамику</button>');
+  h += dynamicsView || stateHTML('empty', 'Динамика ещё не расписана', 'Алгоритм автоматически ищет названия частей песни в тексте. Добавь заголовки вроде «Куплет 1», «Припев», «Бридж» — они появятся здесь в том же порядке; указания по инструментам будут показаны рядом с соответствующими частями.', '<button class="btn btn-primary btn-sm" type="button" data-act="edit-song" data-id="' + s.id + '">Заполнить динамику</button>');
+  h += '<div class="row mt song-detail-work-actions"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button>' +
+    '<button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>';
   h += '</section>';
-  h += '<section class="card rise" style="animation-delay:.1s"><div class="card-h"><div><h2>Параметры песни</h2></div></div>' +
-    infoRow('Тональность', '<span class="num">' + esc(transposeKey(s.key || '—', tr)) + '</span>') +
-    infoRow('Темп', s.bpm ? '<span class="num">' + s.bpm + ' BPM</span>' : '—') +
-    infoRow('Длительность', s.duration ? '<span class="num">' + fmtDur(s.duration) + '</span>' : '—') +
-    infoRow('Теги', (s.tags || []).length ? (s.tags || []).map(t => '<span class="badge b-muted" style="margin-left:4px">' + esc(t) + '</span>').join('') : '—') +
-    '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
-    '</section>';
 
   return h + '</div></div></div>';
 }
@@ -2388,7 +2427,7 @@ function renderDynBlock() {
         '</section>';
     }).join('');
   }
-  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+  html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
     '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
     '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
     (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
