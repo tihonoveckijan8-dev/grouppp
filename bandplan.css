@@ -7243,7 +7243,7 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .content{padding-left:16px!important;padding-right:16px!important}
   .page-head{padding-left:16px!important;padding-right:16px!important}
 }
-@media (max-width:640px){
+@media (max-width:767px){
   .cal-selected-day{display:block;margin-top:16px;padding:16px;background:var(--surf-2);border:1px solid var(--border);border-radius:16px}
   .cal-selected-day .card-h{align-items:center}
   .cal-selected-day .ev-row{margin-top:8px}
