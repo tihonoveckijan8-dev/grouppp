@@ -28,7 +28,7 @@ for (const dir of ['assets', 'fonts', 'vendor']) {
   if (existsSync(source)) await cp(source, path.join(out, dir), {recursive:true});
 }
 
-for (const file of ['bandplan.js','bandplan-core.js','supabase.js','sw.js','bandplan.css']) {
+for (const file of ['bandplan.js','bandplan-core.js','config.js','supabase.js','sw.js','bandplan.css']) {
   // WHY: generate a fresh shell cache namespace on every build instead of relying on manual SW edits.
   if (file === 'sw.js') {
     const source = await readFile(path.join(root, file), 'utf8');
