@@ -7530,3 +7530,46 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   #boot .boot-error-text { font-size:14px; line-height:1.55; overflow-wrap:anywhere; margin:0 0 18px; }
   #boot .boot-acts { display:flex; flex-wrap:wrap; gap:10px; }
 }
+
+
+/* Stage 2 · targeted layout safeguards (presentation only; no handlers or data changes). */
+#f_members{min-width:0;align-items:stretch}
+#f_members .chip{
+  min-width:0;
+  max-width:100%;
+  flex:0 1 auto;
+  height:auto;
+  min-height:var(--tap);
+  padding-block:8px;
+  line-height:1.35;
+  text-align:left;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.data-action-danger>div:first-child{min-width:0;overflow-wrap:anywhere}
+.data-action-danger .data-action-buttons{min-width:0;max-width:100%}
+.data-action-danger .data-action-buttons .btn{
+  min-width:0;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.setlist-detail .tb-search{
+  width:100%;
+  min-width:0;
+  flex:1 1 100%;
+  overflow:visible;
+}
+.setlist-detail .tb-search input#libQ{
+  position:static!important;
+  opacity:1!important;
+  width:100%;
+  min-width:0;
+  flex:1 1 auto;
+  cursor:text;
+}
+@media (min-width:901px) and (max-width:1099px){
+  .data-action-danger{grid-template-columns:minmax(0,1fr)}
+  .data-action-danger .data-action-buttons{width:100%}
+  .data-action-danger .data-action-buttons .btn{width:100%}
+}
