@@ -3922,18 +3922,6 @@ function init() {
   render();
   if (window.BandPlanCloud) bootCloudSync(had, window.__bandplanDurable || null);
   uiInitialized = true;
-  // WHY: consume the PWA error event so registration failures are visible instead of silently disappearing.
-  if (!window.__bandplanPwaErrorListener) {
-    window.__bandplanPwaErrorListener = true;
-    window.addEventListener('bandplan:pwa-error', event => {
-      // WHY: PWA errors must remain visible even when ordinary informational toasts are disabled in settings.
-      const previousMode = state.settings.toastMode;
-      state.settings.toastMode = 'all';
-      toast(String(event.detail || 'Не удалось обновить офлайн-режим'), 'warn', 6000);
-      state.settings.toastMode = previousMode;
-    });
-    if (window.__bandplanPwaError) window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail:window.__bandplanPwaError}));
-  }
 }
 /*
   Auth handoff: Supabase is the only auth source of truth. The auth module
@@ -4156,6 +4144,17 @@ async function startBandPlanInternal(forceOffline) {
   Boot.done();
   window.__bandplanActiveUserId = user.id;
   window.__bandplanAppReady = true;
+}
+// WHY: install the PWA error consumer before any auth-gated early return, so login screens also report service-worker failures.
+if (!window.__bandplanPwaErrorListener) {
+  window.__bandplanPwaErrorListener = true;
+  window.addEventListener('bandplan:pwa-error', event => {
+    const previousMode = state.settings.toastMode;
+    state.settings.toastMode = 'all';
+    toast(String(event.detail || 'Не удалось обновить офлайн-режим'), 'warn', 6000);
+    state.settings.toastMode = previousMode;
+  });
+  if (window.__bandplanPwaError) window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail:window.__bandplanPwaError}));
 }
 // WHY: passing the DOM Event as forceOffline accidentally bypassed the normal online startup path.
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => startBandPlan(false), {once:true}); else startBandPlan(false);
