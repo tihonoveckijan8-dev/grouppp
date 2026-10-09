@@ -73,10 +73,10 @@ for (const theme of themes) {
     assert.ok(ratio>=3,theme.id+' control border on '+surfaceName+' is '+ratio.toFixed(2)+':1 (needs 3:1)');
   }
 }
-assert.match(css, /#f_members \.chip[\\s\\S]*?white-space:normal/,'Participant chips must wrap');
-assert.match(css, /\\.data-action-danger \\.data-action-buttons \\.btn[\\s\\S]*?white-space:normal/,'Destructive action labels must not be clipped');
-assert.match(css, /#libQ::placeholder[^\\{]*\\{[^}]*opacity:1/,'Setlist library search placeholder must remain visible');
-assert.match(css, /:focus-visible\\{outline:2px solid var\\(--accent-ring/,'Focus outline must use the accent color token');
-assert.match(css, /@media \\(max-width:767px\\)\\{\\s*\\.cal-selected-day\\{display:block/,'Selected-day list must appear throughout the mobile breakpoint');
+assert.ok(css.includes('#f_members .chip{') && css.includes('white-space:normal;'), 'Participant chips must wrap');
+assert.ok(css.includes('.data-action-danger .data-action-buttons .btn{') && css.includes('white-space:normal;'), 'Destructive action labels must not be clipped');
+assert.ok(css.includes('#libQ::placeholder') && css.includes('opacity:1!important'), 'Setlist library search placeholder must remain visible');
+assert.ok(css.includes(':focus-visible{outline:2px solid var(--accent-ring'), 'Focus outline must use the accent color token');
+assert.ok(css.includes('@media (max-width:767px){\n  .cal-selected-day{display:block'), 'Selected-day list must appear throughout the mobile breakpoint');
 console.log('BandPlan component contrast audit: PASS');
 console.log('Matrix: 3 themes × 3 text roles × 2 surfaces + control-border checks against both surfaces');
