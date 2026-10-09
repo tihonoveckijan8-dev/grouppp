@@ -32,5 +32,9 @@
     the "login succeeds but the app never opens" race.
   */
   window.__bandplanEnsureCore = loadCore;
-  // Core stays deferred until Supabase has resolved authentication.
+  // Start the runtime deterministically. The core itself waits for Supabase's
+  // shared initialize() promise before opening authenticated data, so it is
+  // safe to load now and avoids a deadlock where auth waits for core while
+  // core loading waits for an auth event that never arrives.
+  loadCore().catch(() => {});
 })();
