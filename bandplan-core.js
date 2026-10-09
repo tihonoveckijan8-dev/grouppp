@@ -291,8 +291,9 @@ function classifySongSection(value) {
   return { type: raw, label: raw, numbered: /\d+/.test(raw), custom: true };
 }
 function extractSectionOccurrences(text) {
+  const lines = String(text || '').split('\n');
   const out = [], counts = Object.create(null), used = Object.create(null);
-  String(text || '').split('\n').forEach(function (line) {
+  lines.forEach(function (line, lineIndex) {
     const heading = parseSectionHeading(line);
     if (!heading) return;
     const parsed = classifySongSection(heading.source);
@@ -302,16 +303,50 @@ function extractSectionOccurrences(text) {
     let label = parsed.label;
     // Repeated unnumbered section headings get independent dynamics entries.
     if (!parsed.numbered && count > 1) label = parsed.type + ' ' + count;
-    // Keep every dynamics key unique, even if the lyrics already repeat a numbered heading.
     if (used[label]) {
       let suffix = Math.max(count, 2);
       while (used[parsed.type + ' ' + suffix]) suffix++;
       label = parsed.type + ' ' + suffix;
     }
     used[label] = true;
-    out.push({ source: heading.source, type: parsed.type, label: label });
+    out.push({ source: heading.source, type: parsed.type, label: label, lineIndex: lineIndex, explicit: true });
   });
-  return out;
+  if (out.length) return out;
+
+  // If headings are absent, scan blank-line-separated stanzas. A repeated stanza
+  // is a strong chorus signal; only then infer verse/chorus labels to avoid guessing
+  // structure from arbitrary lyric lines.
+  const stanzas = [];
+  let start = -1, chunk = [];
+  function finishStanza() {
+    if (start < 0) return;
+    const raw = chunk.join('\n').trim();
+    const normalized = chunk.filter(line => !isChordLine(line))
+      .join(' ').replace(/\[[A-G](?:#|b)?[^\]]*\]/g, ' ')
+      .toLocaleLowerCase('ru').replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
+    if (normalized) stanzas.push({ startLine: start, source: raw, normalized: normalized });
+    start = -1; chunk = [];
+  }
+  lines.forEach((line, index) => {
+    if (!line.trim()) { finishStanza(); return; }
+    if (start < 0) start = index;
+    chunk.push(line);
+  });
+  finishStanza();
+  if (stanzas.length < 3) return [];
+  const frequency = Object.create(null);
+  stanzas.forEach(stanza => { frequency[stanza.normalized] = (frequency[stanza.normalized] || 0) + 1; });
+  const repeated = stanzas.some(stanza => frequency[stanza.normalized] > 1);
+  if (!repeated) return [];
+  let verse = 0, chorus = 0;
+  return stanzas.map(stanza => {
+    if (frequency[stanza.normalized] > 1) {
+      chorus++;
+      return { source: 'Припев', type: 'Припев', label: chorus === 1 ? 'Припев' : 'Припев ' + chorus, lineIndex: stanza.startLine, explicit: false };
+    }
+    verse++;
+    return { source: 'Куплет ' + verse, type: 'Куплет', label: 'Куплет ' + verse, lineIndex: stanza.startLine, explicit: false };
+  });
 }
 function extractSections(text) {
   return extractSectionOccurrences(text).map(section => section.label);
@@ -1812,21 +1847,30 @@ function dynamicsHTML(song) {
 }
 function renderSceneLyrics(song, shift) {
   const d = normalizeDynamics(song && song.dynamics);
+  const lines = String(song && song.lyrics || '').split('\n');
   const occurrences = extractSectionOccurrences(song && song.lyrics || '');
+  const inferred = occurrences.length && !occurrences[0].explicit;
+  const byLine = Object.create(null);
+  if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
-  return String(song && song.lyrics || '').split('\n').map(function(line) {
+  function renderNotes(key) {
+    const note = String(d.sectionNotes[key] || '').trim();
+    const cues = d.instruments.map(ins => {
+      const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
+      return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
+    }).join('');
+    return (note ? '<span class="ln scene-dyn-note"><b>ОБЩАЯ ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '') + cues;
+  }
+  return lines.map(function(line, lineIndex) {
     const heading = parseSectionHeading(line);
     if (heading) {
       const occurrence = occurrences[sectionIndex++];
-      const name = heading.source;
-      const key = occurrence ? occurrence.label : name;
-      const note = String(d.sectionNotes[key] || '').trim();
-      const cues = d.instruments.map(ins => {
-        const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
-        return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
-      }).join('');
-      return '<span class="ln sec">' + esc(name) + '</span>' +
-        (note ? '<span class="ln scene-dyn-note"><b>ОБЩАЯ ДИНАМИКА</b> ' + esc(note).replace(/\n/g, '<br>') + '</span>' : '') + cues;
+      const key = occurrence ? occurrence.label : heading.source;
+      return '<span class="ln sec">' + esc(heading.source) + '</span>' + renderNotes(key);
+    }
+    const inferredSection = byLine[lineIndex];
+    if (inferredSection) {
+      return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
     }
     return renderLyrics(line, shift);
   }).join('');
