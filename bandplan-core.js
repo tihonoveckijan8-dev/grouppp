@@ -219,11 +219,19 @@ function parseSectionHeading(line) {
   }
   // Normalize common headings from pasted lyric sheets:
   // "# Куплет 1", "1. Куплет", "Куплет 1:", "(Bridge)", "CHORUS 2 (x2)".
-  let plain = raw.replace(/^#{1,3}\s*/, '').replace(/^\d{1,2}[.)]\s*/, '');
+  let plain = raw.replace(/^#{1,3}\s*/, '');
+  const leadingNumber = /^(\d{1,2})[.)]\s*(.+)$/.exec(plain);
+  if (leadingNumber) plain = leadingNumber[2].trim();
   plain = plain.replace(/^\((.*)\)$/, '$1').replace(/\s*\((?:x|х)\s*\d+\)$/i, '').replace(/[：:]\s*$/, '').trim();
   if (!plain || plain.length > 48) return null;
   const parsed = classifySongSection(plain);
-  return !parsed.custom ? { source: parsed.label || plain, bracketed: false } : null;
+  if (parsed.custom) return null;
+  // Keep numeric prefixes as part of the displayed section label:
+  // "1. Куплет", "2) Куплет", "Куплет 1" all become "Куплет 1".
+  const label = leadingNumber && parsed.type === 'Куплет' && !/\d+/.test(plain)
+    ? 'Куплет ' + leadingNumber[1]
+    : (parsed.label || plain);
+  return { source: label, bracketed: false };
 }
 function isSection(l) { return !!parseSectionHeading(l); }
 function isChordLine(l) {
