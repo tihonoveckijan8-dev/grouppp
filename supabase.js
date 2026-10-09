@@ -318,7 +318,15 @@
         setTimeout(() => {
           Promise.resolve()
             .then(async () => {
-              if (typeof window.__bandplanEnsureCore !== 'function') throw new Error('Не удалось запустить BandPlan.');
+              // WHY: deferred scripts can briefly race INITIAL_SESSION; wait for the loader rather than reporting a false startup failure.
+              if (typeof window.__bandplanEnsureCore !== 'function') {
+                await new Promise((resolve, reject) => {
+                  const timeout = setTimeout(() => { window.removeEventListener('bandplan:core-loader-ready', ready); reject(new Error('Не удалось загрузить загрузчик BandPlan.')); }, 10000);
+                  const ready = () => { clearTimeout(timeout); resolve(); };
+                  window.addEventListener('bandplan:core-loader-ready', ready, {once:true});
+                  if (typeof window.__bandplanEnsureCore === 'function') ready();
+                });
+              }
               await window.__bandplanEnsureCore();
               // WHY: initialize() can run inside startBandPlan(); resuming here would await the same bootstrap mutex and deadlock.
             })
