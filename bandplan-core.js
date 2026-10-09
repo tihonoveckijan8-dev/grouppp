@@ -1752,7 +1752,7 @@ function vSong(id) {
     (s.key && tr ? '<div class="t-xs t-muted">оригинал: ' + esc(s.key) + '</div>' : '') + '</div></div>' +
     '<div class="row mt"><button class="chip' + (state.settings.showChords !== false ? ' on' : '') + '" type="button" data-act="toggle-chords" aria-pressed="' + (state.settings.showChords !== false) + '">' + ic('music', 14) + 'Аккорды в тексте</button></div>' +
     (String(s.lyrics || '').split(String.fromCharCode(10)).length > 10 || String(s.lyrics || '').length > 420
-      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '">Показать весь текст</button></div>'
+      ? '<div class="lyrics-expand-shell is-collapsed"><div class="lyrics mt" id="songLyrics-' + esc(s.id) + '" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div><button class="btn btn-tertiary btn-sm lyrics-expand-btn" type="button" data-act="toggle-lyrics" aria-label="Показать весь текст" title="Показать весь текст" aria-expanded="false" aria-controls="songLyrics-' + esc(s.id) + '"><span class="lyrics-expand-chevron" aria-hidden="true"></span></button></div>'
       : '<div class="lyrics mt" style="--lsize:' + state.settings.lyricsSize + 'px">' + renderLyrics(s.lyrics, tr) + '</div>') + '</section>';
   h += '</div><div class="stack">';
   h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>' + ic('wave', 17) + ' Ваша динамика</h2>' +
@@ -2819,7 +2819,9 @@ document.addEventListener('click', function (e) {
       const expanded = shell.classList.toggle('is-expanded');
       shell.classList.toggle('is-collapsed', !expanded);
       el.setAttribute('aria-expanded', String(expanded));
-      el.textContent = expanded ? 'Свернуть текст' : 'Показать весь текст';
+      const label = expanded ? 'Свернуть текст' : 'Показать весь текст';
+      el.setAttribute('aria-label', label);
+      el.setAttribute('title', label);
       break;
     }
     case 'scene-chords': stop(); state.settings.showChords = state.settings.showChords === false; save(); drawScene(); break;
