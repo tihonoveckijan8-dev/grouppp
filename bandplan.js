@@ -35,5 +35,7 @@
     the "login succeeds but the app never opens" race.
   */
   window.__bandplanEnsureCore = loadCore;
+  // WHY: INITIAL_SESSION may fire before this deferred script executes; notify Auth waiters instead of failing a valid startup.
+  window.dispatchEvent(new Event('bandplan:core-loader-ready'));
   // Core stays deferred until Supabase has resolved authentication.
 })();
