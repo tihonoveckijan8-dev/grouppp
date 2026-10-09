@@ -3924,7 +3924,14 @@ function init() {
   // WHY: consume the PWA error event so registration failures are visible instead of silently disappearing.
   if (!window.__bandplanPwaErrorListener) {
     window.__bandplanPwaErrorListener = true;
-    window.addEventListener('bandplan:pwa-error', event => toast(String(event.detail || 'Не удалось обновить офлайн-режим'), 'warn', 6000));
+    window.addEventListener('bandplan:pwa-error', event => {
+      // WHY: PWA errors must remain visible even when ordinary informational toasts are disabled in settings.
+      const previousMode = state.settings.toastMode;
+      state.settings.toastMode = 'all';
+      toast(String(event.detail || 'Не удалось обновить офлайн-режим'), 'warn', 6000);
+      state.settings.toastMode = previousMode;
+    });
+    if (window.__bandplanPwaError) window.dispatchEvent(new CustomEvent('bandplan:pwa-error', {detail:window.__bandplanPwaError}));
   }
 }
 /*
