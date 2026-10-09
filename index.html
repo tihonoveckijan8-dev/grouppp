@@ -9,7 +9,8 @@
   window.__bandplanSupabaseVersion = '2.117.2';
   window.__bandplanSupabaseFallback = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js';
 </script>
-<meta name="theme-color" content="">
+<meta name="theme-color" content="#F4F6FA">
+<meta name="theme-color" content="#14161C" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="bandplan.css?v=20261005-32">
 <script id="bandplan-early-sw">
 try{
@@ -30,7 +31,7 @@ function bpLum(hex){var n=parseInt(hex.slice(1),16),rgb=[n>>16&255,n>>8&255,n&25
 function bpContrast(a,b){var x=bpLum(a),y=bpLum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
 var bpOn=bpContrast(bpAccent,bpWhite)>=bpContrast(bpAccent,bpBlack)?bpWhite:bpBlack;bpDoc.style.setProperty('--accent',bpAccent);bpDoc.style.setProperty('--accent-contrast',bpOn);bpDoc.style.setProperty('--accent-on-bg',bpAccent);bpDoc.style.setProperty('--accent-text',bpAccent);
 document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute('content',bpThemeColor)});
-}catch(e){}
+}catch(e){console.error('BandPlan early theme bootstrap failed:',e)}
 </script>
 <style id="bandplan-auth-lock">html.bp-auth-required .app,html.bp-auth-required .bottom-nav{visibility:hidden!important;pointer-events:none!important}</style>
 
@@ -44,7 +45,6 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 <link rel="icon" type="image/png" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=waves-bars-3">
 <meta name="application-name" content="BandPlan">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BandPlan">
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" href="vendor/supabase.min.js" as="script">
@@ -54,6 +54,10 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 </head>
 <body data-route="calendar">
 <div id="boot" class="boot" role="status" aria-live="polite" aria-label="Загрузка BandPlan">
+  <!-- WHY: Boot.stage()/fail() target these stable elements; keep all boot UI inside one replaceable container. -->
+  <div class="boot-core">
+  <div id="bootStage" class="boot-stage">Запускаем BandPlan</div>
+  <div class="boot-progress" aria-hidden="true"><div id="bootBar" class="boot-bar"></div></div>
   <div class="boot-shell" aria-hidden="true">
     <aside class="boot-sidebar"><div class="boot-brand"><i></i><b></b></div><div class="boot-nav"><i></i><i></i><i></i><i></i><i></i></div></aside>
     <div class="boot-main"><div class="boot-head"><b></b><i></i></div><div class="boot-content"><div class="boot-title"><b></b><i></i></div><div class="boot-events"><i></i><i></i><i></i></div></div></div>
