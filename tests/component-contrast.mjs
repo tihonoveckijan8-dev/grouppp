@@ -19,7 +19,7 @@ function declaration(block, name) {
   return match[1].trim();
 }
 function resolve(value, seen = new Set()) {
-  const raw = value.match(/^var\\((--[\\w-]+)\\)$/);
+  const raw = value.match(/^var\((--[\w-]+)\)$/);
   if (!raw) return value;
   assert.ok(!seen.has(raw[1]), 'Circular token reference: ' + raw[1]);
   seen.add(raw[1]);
@@ -27,9 +27,9 @@ function resolve(value, seen = new Set()) {
 }
 function parseColor(value, background = '#FFFFFF') {
   value = resolve(value);
-  if (/^#[\\da-f]{3}$/i.test(value)) value = '#' + [...value.slice(1)].map(c=>c+c).join('');
-  if (/^#[\\da-f]{6}$/i.test(value)) return [1,3,5].map(i => parseInt(value.slice(i,i+2),16));
-  const rgba = value.match(/^rgba?\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*(?:,\\s*([\\d.]+))?\\s*\\)$/i);
+  if (/^#[\da-f]{3}$/i.test(value)) value = '#' + [...value.slice(1)].map(c=>c+c).join('');
+  if (/^#[\da-f]{6}$/i.test(value)) return [1,3,5].map(i => parseInt(value.slice(i,i+2),16));
+  const rgba = value.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)$/i);
   assert.ok(rgba, 'Unsupported token color format: ' + value);
   const foreground = [Number(rgba[1]),Number(rgba[2]),Number(rgba[3])];
   const alpha = rgba[4] === undefined ? 1 : Number(rgba[4]);
