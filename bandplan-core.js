@@ -1740,8 +1740,9 @@ function vSong(id) {
   let h = '<div class="split setlist-detail"><div class="stack">'
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="font-size:var(--fs-h3);overflow-wrap:anywhere">' + esc(s.title) + '</h2>' +
     '<div class="sub">' + esc(s.artist || 'Исполнитель не указан') + '</div></div>' +
-    '<div class="row"><button class="icon-btn fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное">' + ic('star', 17) + '</button>' +
-    '<button class="icon-btn" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать" aria-label="Печать песни">' + ic('print', 17) + '</button></div></div>' +
+    '<div class="row song-detail-actions"><button class="icon-btn fav' + (s.fav ? ' on' : '') + '" type="button" data-act="fav" data-id="' + s.id + '" aria-pressed="' + !!s.fav + '" aria-label="Избранное" title="Избранное">' + ic('star', 17) + '</button>' +
+    '<button class="icon-btn danger" type="button" data-act="song-del" data-id="' + s.id + '" aria-label="Удалить песню" title="Удалить песню">' + ic('trash', 17) + '</button>' +
+    '<button class="icon-btn" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать">' + ic('print', 17) + '</button></div></div>' +
     '<div class="trans-box"><div><div class="cap" style="margin-bottom:6px">Транспонирование</div>' +
     '<div class="row" style="gap:var(--s2)"><button class="icon-btn" type="button" data-act="song-trans" data-id="' + s.id + '" data-d="-1" aria-label="Опустить на полутон">♭</button>' +
     '<div class="trans-val" aria-live="polite">' + (tr > 0 ? '+' : '') + tr + '</div>' +
@@ -1771,7 +1772,7 @@ function vSong(id) {
     infoRow('Теги', (s.tags || []).length ? (s.tags || []).map(t => '<span class="badge b-muted" style="margin-left:4px">' + esc(t) + '</span>').join('') : '—') +
     '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
     '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
-    '<div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="song-del" data-id="' + s.id + '">' + ic('trash', 16) + 'Удалить песню</button></div></section>';
+    '</section>';
   if (chords.length) h += '<section class="card rise" style="animation-delay:.13s"><div class="card-h"><div><h2>Используемые аккорды</h2><div class="sub">' + chords.length + ' уникальных</div></div></div>' +
     '<div class="row" style="gap:6px">' + chords.map(c => '<span class="badge b-muted num" style="font-size:var(--fs-body-s);padding:6px 12px">' + esc(c) + '</span>').join('') + '</div></section>';
   h += '<section class="card rise" style="animation-delay:.16s"><div class="card-h"><div><h2>Входит в сет-листы</h2><div class="sub">' + used.length + '</div></div></div>' +
