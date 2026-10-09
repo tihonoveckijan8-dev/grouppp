@@ -1809,11 +1809,7 @@ function vSong(id) {
     '<div class="row mt"><button class="btn btn-primary btn-block" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
     '<div class="row mt-s"><button class="btn btn-secondary btn-block" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 16) + 'Добавить в сет-лист</button></div>' +
     '</section>';
-  if (chords.length) h += '<section class="card rise" style="animation-delay:.13s"><div class="card-h"><div><h2>Используемые аккорды</h2><div class="sub">' + chords.length + ' уникальных</div></div></div>' +
-    '<div class="row" style="gap:6px">' + chords.map(c => '<span class="badge b-muted num" style="font-size:var(--fs-body-s);padding:6px 12px">' + esc(c) + '</span>').join('') + '</div></section>';
-  h += '<section class="card rise" style="animation-delay:.16s"><div class="card-h"><div><h2>Входит в сет-листы</h2><div class="sub">' + used.length + '</div></div></div>' +
-    (used.length ? used.map(sl => '<a class="ev-row" href="#/setlist/' + sl.id + '"><div class="ev-date" style="width:48px"><div class="d" style="font-size:var(--fs-body)">' + (sl.items || []).length + '</div></div><div class="ev-body"><h3 class="ev-title">' + esc(sl.name) + '</h3><div class="ev-meta"><span>' + ic('clock', 12) + fmtDur(setlistDur(sl)) + '</span></div></div></a>').join('')
-      : '<p class="t-sm t-muted">Песня пока не добавлена ни в один сет-лист.</p>') + '</section>';
+
   return h + '</div></div></div>';
 }
 const infoRow = (l, v) => '<div class="info-row"><span class="l">' + esc(l) + '</span><span class="v">' + (v || '—') + '</span></div>';
@@ -2292,15 +2288,19 @@ function songModal(id) {
     '<div class="field"><label class="field-label" for="f_sbpm">Темп (BPM)</label><input class="input" id="f_sbpm" type="number" min="20" max="400" inputmode="numeric" value="' + esc(d.bpm || '') + '" placeholder="100"><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_sdur">Длительность</label><input class="input" id="f_sdur" inputmode="numeric" value="' + (d.duration ? fmtDur(d.duration) : '') + '" placeholder="3:45"><span class="hint">мм:сс</span></div></div>' +
     '<div class="field"><label class="field-label" for="f_stags">Теги через запятую</label><input class="input" id="f_stags" value="' + esc((d.tags || []).join(', ')) + '" placeholder="рок, баллада, сет"></div>' +
-    '<div class="field"><label class="field-label" for="f_slyr">Текст и аккорды</label><textarea class="textarea" id="f_slyr" rows="11" spellcheck="false" placeholder="' + esc(tpl) + '">' + esc(d.lyrics || '') + '</textarea>' +
-    '<div class="song-section-quick"><span class="field-label">Быстро вставить часть</span><div class="song-section-actions">' +
+    '<div class="song-editor-grid">' +
+    '<section class="song-lyrics-pane"><div class="field song-lyrics-field">' +
+    '<div class="song-section-quick"><span class="field-label">Быстро вставить часть песни</span><div class="song-section-actions">' +
     [['Вступление','Вступление'],['Куплет 1','Куплет'],['Куплет 2','Куплет 2'],['Предприпев','Предприпев'],['Припев','Припев'],['Бридж','Бридж'],['Проигрыш','Проигрыш'],['Соло','Соло'],['Финал','Финал']].map(([label, value]) => '<button class="chip song-section-chip" type="button" data-act="insert-song-section" data-section="' + esc(value) + '">' + esc(label) + '</button>').join('') +
-    '</div></div><span class="hint">Нажми кнопку — заголовок вставится в текст в позиции курсора. Он автоматически появится в динамике и в сценическом режиме.</span>' +
-    '<span class="hint">Аккорды — отдельной строкой над текстом (<code class="mono">Am F C G</code>) или в скобках внутри строки (<code class="mono">[Am]текст</code>).</span></div>' +
-    '<div class="field"><label class="field-label" for="dynOverall">' + ic('wave', 14) + ' Общая динамика песни</label>' +
-    '<textarea class="textarea" id="dynOverall" rows="4" placeholder="Например: начинаем спокойно, постепенно наращиваем мощность; перед финальным припевом делаем паузу.">' + esc(dynDraft.notes || '') + '</textarea>' +
-    '<span class="hint">Опиши развитие всей песни обычным текстом — без уровней громкости и таблиц.</span></div>' +
-    '<div class="field"><span class="field-label">Указания по частям песни</span><span class="hint">Структура автоматически определяется по заголовкам в тексте: [Куплет 1], [Припев], [Бридж].</span><div id="dynBlock"></div></div>';
+    '</div></div>' +
+    '<label class="field-label" for="f_slyr">Текст песни</label><textarea class="textarea song-lyrics-textarea" id="f_slyr" rows="18" spellcheck="false" placeholder="' + esc(tpl) + '">' + esc(d.lyrics || '') + '</textarea>' +
+    '<span class="hint">Нажми кнопку выше — заголовок вставится в текст в позиции курсора и появится в панели динамики и сценическом режиме.</span></div></section>' +
+    '<section class="song-dynamics-pane"><div class="song-dynamics-panel">' +
+    '<div class="song-dynamics-panel-head">' + ic('wave', 16) + '<div><h3>Динамика песни</h3><p>Общие указания и отдельные партии инструментов</p></div></div>' +
+    '<div class="field"><label class="field-label" for="dynOverall">Общая динамика</label>' +
+    '<textarea class="textarea" id="dynOverall" rows="4" placeholder="Например: начинаем спокойно, постепенно наращиваем мощность; перед финальным припевом делаем паузу.">' + esc(dynDraft.notes || '') + '</textarea></div>' +
+    '<div class="song-dynamics-sections"><span class="field-label">Динамика по частям песни</span><div id="dynBlock"></div></div>' +
+    '</div></section></div>';
   openModal({
     title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', fullscreen: true, editor: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="song-save" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : 'Добавить песню') + '</button>',
@@ -2311,23 +2311,32 @@ function renderDynBlock() {
   const box = $('#dynBlock'); if (!box || !dynDraft) return;
   const sections = dynDraft.sections || [];
   const available = ROLES.filter(r => !dynDraft.instruments.includes(r.k));
+  const previousSelect = $('#dynInstrumentFocus');
+  const active = (previousSelect && previousSelect.value) || dynDraft.activeInstrument || dynDraft.instruments[0] || '';
+  const selectedInstrument = dynDraft.instruments.includes(active) ? active : (dynDraft.instruments[0] || '');
   let html = '<div class="dyn-editor">';
-  if (!sections.length) html += '<p class="t-sm t-muted">Нажми кнопку части песни над текстом — структура появится здесь автоматически.</p>';
-  else html += sections.map(function(name, index) {
-    const instrumentFields = dynDraft.instruments.map(ins => {
-      const note = String((dynDraft.instrumentNotes[ins] || {})[name] || '');
-      return '<div class="dyn-instrument-field"><label class="dyn-instrument-label" for="dyn_ins_' + index + '_' + esc(ins) + '">' + esc(dynamicsInstrumentLabel(ins)) + '</label>' +
-        '<textarea class="textarea dyn-section-text" id="dyn_ins_' + index + '_' + esc(ins) + '" rows="2" data-dyn-instrument="' + esc(ins) + '" data-sec="' + esc(name) + '" placeholder="Например: вступить на второй строке, играть тише…">' + esc(note) + '</textarea></div>';
+  if (!sections.length) {
+    html += '<div class="dyn-empty-state"><strong>Сначала добавь части песни</strong><span>Нажми «Куплет», «Припев» или другую кнопку над текстом песни — здесь появятся отдельные поля динамики.</span></div>';
+  } else {
+    html += sections.map(function(name, index) {
+      const instrumentNote = selectedInstrument
+        ? String((dynDraft.instrumentNotes[selectedInstrument] || {})[name] || '')
+        : '';
+      return '<section class="dyn-section-editor"><div class="dyn-section-heading"><span class="dyn-section-index">' + (index + 1) + '</span><label class="field-label" for="dyn_note_' + index + '">' + esc(name) + '</label></div>' +
+        '<label class="dyn-sub-label" for="dyn_note_' + index + '">Для всей группы</label><textarea class="textarea dyn-section-text" id="dyn_note_' + index + '" rows="2" data-dyn-section="' + esc(name) + '" placeholder="Например: начать тихо, пауза перед припевом, постепенно нарастать…">' + esc(dynDraft.sectionNotes[name] || '') + '</textarea>' +
+        (selectedInstrument ? '<div class="dyn-instrument-section-field"><label class="dyn-sub-label" for="dyn_ins_' + index + '">' + esc(dynamicsInstrumentLabel(selectedInstrument)) + '</label><textarea class="textarea dyn-section-text" id="dyn_ins_' + index + '" rows="2" data-dyn-instrument="' + esc(selectedInstrument) + '" data-sec="' + esc(name) + '" placeholder="Отдельная партия: когда вступить, играть тише/громче, сделать акцент…">' + esc(instrumentNote) + '</textarea></div>' : '<p class="t-sm t-muted">Добавь инструмент ниже, чтобы прописать его партию отдельно.</p>') +
+        '</section>';
     }).join('');
-    return '<section class="dyn-section-editor"><div class="dyn-section-heading"><span class="dyn-section-index">' + (index + 1) + '</span><label class="field-label" for="dyn_note_' + index + '">' + esc(name) + '</label></div>' +
-      '<textarea class="textarea dyn-section-text" id="dyn_note_' + index + '" rows="2" data-dyn-section="' + esc(name) + '" placeholder="Общее указание для группы: пауза, нарастание, акцент…">' + esc(dynDraft.sectionNotes[name] || '') + '</textarea>' +
-      (instrumentFields ? '<div class="dyn-instrument-notes">' + instrumentFields + '</div>' : '') + '</section>';
-  }).join('');
-  html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('gear', 16) + '</span><span><strong>Динамика по инструментам</strong><small>Отдельные указания для каждой партии</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
-    '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentSelect">Инструмент или роль</label><div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentSelect">' +
+  }
+  html += '<details class="dyn-instrument-dropdown" open><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Инструменты</strong><small>Выбери инструмент — поля динамики переключатся на его партию</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
+    '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
+    '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
+    (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
+    '</select><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-instrument-remove-active"' + (selectedInstrument ? '' : ' disabled') + ' title="Убрать выбранный инструмент">' + ic('x', 14) + 'Убрать</button></div>' +
+    '<label class="field-label dyn-add-label" for="dynInstrumentSelect">Добавить ещё инструмент</label><div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentSelect">' +
     available.map(r => '<option value="' + esc(r.k) + '">' + esc(r.label) + '</option>').join('') +
     '</select><button class="btn btn-primary btn-sm" type="button" data-act="dyn-instrument-add"' + (available.length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить</button></div>' +
-    (dynDraft.instruments.length ? '<div class="dyn-instrument-tags">' + dynDraft.instruments.map(ins => '<span class="dyn-instrument-tag">' + esc(dynamicsInstrumentLabel(ins)) + '<button type="button" data-act="dyn-instrument-remove" data-ins="' + esc(ins) + '" aria-label="Убрать ' + esc(dynamicsInstrumentLabel(ins)) + '">×</button></span>').join('') + '</div>' : '<p class="t-sm t-muted">Выбери инструмент, чтобы добавить для него отдельные указания в каждом разделе.</p>') +
+    (!dynDraft.instruments.length ? '<p class="t-sm t-muted">Каждый инструмент хранит собственные указания по каждой части песни — переключение не перезаписывает другие партии.</p>' : '') +
     '</div></details>';
   box.innerHTML = html + '</div>';
 }
@@ -3402,6 +3411,13 @@ document.addEventListener('click', function (e) {
 });
 document.addEventListener('change', function (e) {
   const t = e.target;
+  if (t && t.id === 'dynInstrumentFocus' && dynDraft) {
+    dynDraft.activeInstrument = t.value || '';
+    renderDynBlock();
+    const details = $('#dynBlock .dyn-instrument-dropdown');
+    if (details) details.open = true;
+    return;
+  }
   if (t.getAttribute && t.getAttribute('data-act') === 'dyn-lv' && dynDraft) {
     const ins = t.getAttribute('data-ins'), sec = t.getAttribute('data-sec');
     dynDraft.levels[ins] = dynDraft.levels[ins] || {};
@@ -3410,7 +3426,7 @@ document.addEventListener('change', function (e) {
   }
 });
 document.addEventListener('click', function (e) {
-  const button = e.target.closest && e.target.closest('[data-act="insert-song-section"],[data-act="dyn-instrument-add"],[data-act="dyn-instrument-remove"]');
+  const button = e.target.closest && e.target.closest('[data-act="insert-song-section"],[data-act="dyn-instrument-add"],[data-act="dyn-instrument-remove"],[data-act="dyn-instrument-remove-active"]');
   if (!button || !dynDraft) return;
   const action = button.getAttribute('data-act');
   if (action === 'insert-song-section') {
@@ -3441,6 +3457,7 @@ document.addEventListener('click', function (e) {
     const ins = select && select.value;
     if (!ins || dynDraft.instruments.includes(ins)) return;
     dynDraft.instruments.push(ins);
+    dynDraft.activeInstrument = ins;
     dynDraft.instrumentNotes[ins] = dynDraft.instrumentNotes[ins] || {};
     (dynDraft.sections || []).forEach(name => { if (!(name in dynDraft.instrumentNotes[ins])) dynDraft.instrumentNotes[ins][name] = ''; });
     renderDynBlock();
@@ -3448,12 +3465,15 @@ document.addEventListener('click', function (e) {
     if (details) details.open = true;
     return;
   }
-  if (action === 'dyn-instrument-remove') {
-    const ins = button.getAttribute('data-ins');
+  if (action === 'dyn-instrument-remove' || action === 'dyn-instrument-remove-active') {
+    const ins = action === 'dyn-instrument-remove-active' ? ($('#dynInstrumentFocus') && $('#dynInstrumentFocus').value) : button.getAttribute('data-ins');
+    if (!ins) return;
     dynDraft.instruments = dynDraft.instruments.filter(key => key !== ins);
+    if (dynDraft.activeInstrument === ins) dynDraft.activeInstrument = dynDraft.instruments[0] || '';
     renderDynBlock();
     const details = $('#dynBlock .dyn-instrument-dropdown');
     if (details) details.open = true;
+    return;
   }
 });
 document.addEventListener('input', function (e) {
