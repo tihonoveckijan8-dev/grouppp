@@ -1,13 +1,19 @@
 /* BandPlan — Supabase Auth + isolated per-account cloud state */
 (function () {
   'use strict';
+  if (!window.BANDPLAN_CONFIG || window.__bandplanConfigError) {
+    window.__bandplanSupabaseSdkError = true;
+    console.error('BandPlan: Supabase configuration is missing or invalid.');
+    return;
+  }
   if (!window.supabase || typeof window.supabase.createClient !== 'function') {
     window.__bandplanSupabaseSdkError = true;
     console.error('BandPlan: Supabase SDK не загрузился.');
     return;
   }
-  const SUPABASE_URL = 'https://oczcjphvzoadfqntoqlc.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_EOBM5JQZQvtXcph4JNFA4w_LjfOjkiY';
+  // WHY: read the single validated public configuration instead of duplicating credentials in the auth module.
+  const SUPABASE_URL = window.BANDPLAN_CONFIG.supabaseUrl;
+  const SUPABASE_KEY = window.BANDPLAN_CONFIG.supabasePublishableKey;
   const TABLE = 'bandplan_user_state';
   /*
     Use Supabase's standard browser storage key. A previous repair introduced a
