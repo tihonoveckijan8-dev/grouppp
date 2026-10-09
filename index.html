@@ -15,7 +15,18 @@
 <script id="bandplan-early-sw">
 try{
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function(){});
+    // WHY: registration errors are surfaced to the app instead of being silently swallowed.
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(function(error){ window.__bandplanPwaError = error?.message || 'Не удалось зарегистрировать Service Worker'; window.dispatchEvent(new CustomEvent('bandplan:pwa-error',{detail:window.__bandplanPwaError})); });
+    // WHY: the first controller acquisition on a fresh install must not trigger a pointless reload loop.
+    let bpController = navigator.serviceWorker.controller;
+    let bpHadController = !!bpController;
+    navigator.serviceWorker.addEventListener('controllerchange', function(event){
+      const nextController = event?.target?.controller || navigator.serviceWorker.controller;
+      if (!bpHadController) { bpHadController = true; bpController = nextController; return; }
+      if (!nextController || nextController === bpController) return;
+      bpController = nextController;
+      location.reload();
+    });
   }
 }catch(e){}
 </script>
