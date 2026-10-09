@@ -33,7 +33,11 @@ for (const file of ['bandplan.js','bandplan-core.js','config.js','supabase.js','
   if (file === 'sw.js') {
     const source = await readFile(path.join(root, file), 'utf8');
     const version = `bandplan-${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
-    await writeFile(path.join(out, file), source.replaceAll('__BANDPLAN_CACHE_VERSION__', version));
+    await build({
+      stdin: { contents: source.replaceAll('__BANDPLAN_CACHE_VERSION__', version), resolveDir: root, sourcefile: file, loader: 'js' },
+      outfile: path.join(out, file), bundle: false, minify: true,
+      target: ['es2020', 'safari15'], legalComments: 'none', charset: 'utf8'
+    });
     continue;
   }
   await build({
