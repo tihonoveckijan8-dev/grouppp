@@ -32,7 +32,7 @@ for (const file of ['bandplan.js','bandplan-core.js','config.js','supabase.js','
   // WHY: generate a fresh shell cache namespace on every build instead of relying on manual SW edits.
   if (file === 'sw.js') {
     const source = await readFile(path.join(root, file), 'utf8');
-    const version = `bandplan-${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
+    const version = `${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
     await build({
       stdin: { contents: source.replaceAll('__BANDPLAN_CACHE_VERSION__', version), resolveDir: root, sourcefile: file, loader: 'js' },
       outfile: path.join(out, file), bundle: false, minify: true,
