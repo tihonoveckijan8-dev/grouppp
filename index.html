@@ -34,7 +34,7 @@ try{
 try{
 var bpDoc=document.documentElement,bpBoot=JSON.parse(localStorage.getItem('bandplan.boot')||'null'),bpStoredAccent=localStorage.getItem('accent')||'',bpThemeIds=['light','dark','amoled'];
 var bpTheme=(bpBoot&&bpThemeIds.indexOf(bpBoot.theme)>=0)?bpBoot.theme:(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');bpDoc.dataset.theme=bpTheme;
-var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim(),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
+var bpCss=getComputedStyle(bpDoc),bpThemeColor=bpCss.getPropertyValue('--theme-color-'+bpTheme).trim()||(bpTheme==='light'?'#F4F6FA':'#14161C'),bpPresetIds=['red','orange','amber','green','teal','blue','indigo','purple','pink'];
 var bpStoredPreset=bpPresetIds.indexOf(bpStoredAccent.toLowerCase())>=0?bpStoredAccent.toLowerCase():'',bpPreset=(bpBoot&&bpPresetIds.indexOf(bpBoot.accentPreset)>=0)?bpBoot.accentPreset:bpStoredPreset,bpPresetColor=bpPreset?bpCss.getPropertyValue('--accent-preset-'+bpPreset+'-'+bpTheme).trim():'';
 var bpAccent=/^#[0-9a-fA-F]{6}$/.test(bpStoredAccent)?bpStoredAccent.toUpperCase():(/^#[0-9a-fA-F]{6}$/.test(bpBoot&&bpBoot.accent||'')?bpBoot.accent.toUpperCase():(bpPresetColor||bpCss.getPropertyValue('--accent-default').trim()));
 var bpWhite=bpCss.getPropertyValue('--token-white').trim(),bpBlack=bpCss.getPropertyValue('--token-black').trim();
@@ -74,6 +74,7 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
     <div class="boot-main"><div class="boot-head"><b></b><i></i></div><div class="boot-content"><div class="boot-title"><b></b><i></i></div><div class="boot-events"><i></i><i></i><i></i></div></div></div>
   </div>
   <div class="boot-slow" id="bootSlow" hidden><p>Подключение занимает дольше обычного</p><div class="boot-acts"><button type="button" id="bootOffline">Продолжить офлайн</button><button type="button" id="bootRetry">Повторить</button></div></div>
+  </div>
 </div>
 
 <a class="skip-link" href="#view">Перейти к содержимому</a>
@@ -140,6 +141,7 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 <noscript><div class="noscript" role="alert"><strong>BandPlan</strong><p>Для работы приложения необходим JavaScript.</p></div></noscript>
 
 <script defer src="vendor/supabase.min.js" onerror="this.onerror=null;this.src=window.__bandplanSupabaseFallback"></script>
+<script defer src="config.js"></script>
 <script defer src="supabase.js"></script>
 <script defer src="bandplan.js?v=20261005-4"></script>
 </body>
