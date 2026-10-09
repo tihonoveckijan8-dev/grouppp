@@ -39,7 +39,8 @@ const Boot = (() => {
   }
   function fail(opts) {
     if (!el) return;
-    // WHY: a late auth/network failure must remain visible even if startup already called done().
+    // WHY: a late auth/network failure must remain visible even if startup already called done() and detached the boot surface.
+    if (!el.isConnected && document.body) document.body.prepend(el);
     clearTimeout(slowT);
     finished = false;
     el.classList.remove('is-leaving');
