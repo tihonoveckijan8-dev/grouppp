@@ -3,6 +3,8 @@ name: BandPlan Design Contrast Audit
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,3 +23,5 @@ jobs:
           node-version: 22
       - name: Run design contrast audit
         run: node tests/design-contrast.mjs
+      - name: Run component contrast audit
+        run: node tests/component-contrast.mjs

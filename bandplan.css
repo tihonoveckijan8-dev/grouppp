@@ -89,6 +89,7 @@ table{border-collapse:separate;border-spacing:0}
 --accent-preset-pink-light:#BE185D;--accent-preset-pink-dark:#FF6FAE;--accent-preset-pink-amoled:#FF6FAE;
 --semantic-info-base:#2563EB;--palette-1:#2457FF;--palette-2:#00B87A;--palette-3:#9B4DFF;--palette-4:#FFB000;--palette-5:#FF3B30;--palette-6:#00B8D9;--palette-7:#687080;--palette-8:#B56A2B;--print-bg:#FFFFFF;--print-text:#111111;--print-border:#999999}
 :root{--raw-color-count:223;--raw-color-001:#7A8492;--raw-color-002:#667180;--raw-color-003:#4E5968;--raw-color-004:rgba(255,255,255,.32);--raw-color-005:rgba(255,255,255,.46);--raw-color-006:rgba(255,255,255,.62);--raw-color-007:rgba(255,255,255,.40);--raw-color-008:#F7F9FC;--raw-color-009:#EFF2F6;--raw-color-010:#FFFFFF;--raw-color-011:#F0F3F7;--raw-color-012:#E2E6ED;--raw-color-013:#CAD1DC;--raw-color-014:#94A0B4;--raw-color-015:#D1D7E2;--raw-color-016:#0F172A;--raw-color-017:#334155;--raw-color-018:#64748B;--raw-color-019:#F8FAFC;--raw-color-020:#079B68;--raw-color-021:#D68A00;--raw-color-022:#E0443E;--raw-color-023:#874FA3;--raw-color-024:#98A2B3;--raw-color-025:rgba(15,23,42,.06);--raw-color-026:rgba(15,23,42,.03);--raw-color-027:rgba(15,23,42,.08);--raw-color-028:rgba(15,23,42,.04);--raw-color-029:rgba(15,23,42,.12);--raw-color-030:#000000;--raw-color-031:rgba(255,255,255,.08);--raw-color-032:rgba(255,255,255,.14);--raw-color-033:rgba(255,255,255,.16);--raw-color-034:rgba(56,189,248,.18);--raw-color-035:rgba(15,23,42,.45);--raw-color-036:rgba(255,255,255,.12);--raw-color-037:rgba(255,255,255,.18);--raw-color-038:rgba(15,23,42,.05);--raw-color-039:#0F1117;--raw-color-040:#090A0E;--raw-color-041:#151821;--raw-color-042:#1B1E29;--raw-color-043:#222634;--raw-color-044:#1F232F;--raw-color-045:rgba(255,255,255,.09);--raw-color-046:rgba(255,255,255,.20);--raw-color-047:#CBD5E1;--raw-color-048:#8E9CB2;--raw-color-049:#55E6AE;--raw-color-050:#FFC65A;--raw-color-051:#FF8078;--raw-color-052:#D09AE6;--raw-color-053:#5B6070;--raw-color-054:rgba(0,0,0,.35);--raw-color-055:rgba(0,0,0,.2);--raw-color-056:rgba(0,0,0,.5);--raw-color-057:rgba(0,0,0,.3);--raw-color-058:rgba(0,0,0,.7);--raw-color-059:rgba(0,0,0,.4);--raw-color-060:rgba(0,0,0,.32);--raw-color-061:rgba(0,0,0,.42);--raw-color-062:rgba(0,0,0,.55);--raw-color-063:rgba(255,255,255,.06);--raw-color-064:#0A0A0E;--raw-color-065:#111116;--raw-color-066:#181820;--raw-color-067:#141419;--raw-color-068:rgba(255,255,255,.11);--raw-color-069:rgba(255,255,255,.30);--raw-color-070:#CCD3E0;--raw-color-071:#8893A6;--raw-color-072:#70D3A6;--raw-color-073:#E1B66A;--raw-color-074:#F09A92;--raw-color-075:#CBA2DA;--raw-color-076:#5F6472;--raw-color-077:rgba(0,0,0,.6);--raw-color-078:rgba(0,0,0,.75);--raw-color-079:rgba(0,0,0,.9);--raw-color-080:rgba(0,0,0,.85);--raw-color-081:rgba(0,0,0,.95);--raw-color-082:rgba(0,0,0,.72);--raw-color-083:rgba(255,255,255,.04);--raw-color-084:#F4F6F8;--raw-color-085:#14161C;--raw-color-086:#0B0B0E;--raw-color-087:#1554FF;--raw-color-088:#D7263D;--raw-color-089:#FF5A67;--raw-color-090:#C2410C;--raw-color-091:#FF8A3D;--raw-color-092:#B45309;--raw-color-093:#FFB020;--raw-color-094:#15803D;--raw-color-095:#3DD68C;--raw-color-096:#0F766E;--raw-color-097:#2DD4BF;--raw-color-098:#1D4ED8;--raw-color-099:#5B9BFF;--raw-color-100:#4F46E5;--raw-color-101:#8E8BFF;--raw-color-102:#7E22CE;--raw-color-103:#B07CFF;--raw-color-104:#BE185D;--raw-color-105:#FF6FAE;--raw-color-106:#2563EB;--raw-color-107:#2457FF;--raw-color-108:#00B87A;--raw-color-109:#9B4DFF;--raw-color-110:#FFB000;--raw-color-111:#FF3B30;--raw-color-112:#00B8D9;--raw-color-113:#687080;--raw-color-114:#B56A2B;--raw-color-115:#111111;--raw-color-116:#999999;--raw-color-117:rgba(255,255,255,.24);--raw-color-118:rgba(255,255,255,.38);--raw-color-119:rgba(255,255,255,.55);--raw-color-120:rgba(255,255,255,.34);--raw-color-121:rgba(0,0,0,.03);--raw-color-122:rgba(0,0,0,.04);--raw-color-123:rgba(255,255,255,.1);--raw-color-124:rgba(12,14,18,.92);--raw-color-125:rgba(255,255,255,.6);--raw-color-126:rgba(255,255,255,.07);--raw-color-127:#38BDF8;--raw-color-128:rgba(255,255,255,.5);--raw-color-129:rgba(255,255,255,.15);--raw-color-130:rgba(16,24,40,.05);--raw-color-131:rgba(16,24,40,.035);--raw-color-132:rgba(16,24,40,.045);--raw-color-133:rgba(16,24,40,.10);--raw-color-134:rgba(0,0,0,.28);--raw-color-135:rgba(0,0,0,.20);--raw-color-136:rgba(0,0,0,.22);--raw-color-137:rgba(0,0,0,.38);--raw-color-138:rgba(16,24,40,.06);--raw-color-139:rgba(16,24,40,.12);--raw-color-140:#F2F4F7;--raw-color-141:rgba(255,255,255,.92);--raw-color-142:#101828;--raw-color-143:#475467;--raw-color-144:#E4E7EC;--raw-color-145:#D0D5DD;--raw-color-146:#15956B;--raw-color-147:rgba(16,24,40,.03);--raw-color-148:rgba(16,24,40,.055);--raw-color-149:rgba(16,24,40,.025);--raw-color-150:rgba(16,24,40,.04);--raw-color-151:rgba(16,24,40,.08);--raw-color-152:rgba(16,24,40,.46);--raw-color-153:rgba(37,71,208,.04);--raw-color-154:rgba(37,71,208,.09);--raw-color-155:rgba(37,71,208,.24);--raw-color-156:rgba(37,71,208,.12);--raw-color-157:rgba(37,71,208,.16);--raw-color-158:rgba(255,255,255,.10);--raw-color-159:rgba(255,255,255,.72);--raw-color-160:rgba(17,24,39,.16);--raw-color-161:rgba(0,0,0,.10);--raw-color-162:rgba(0,0,0,.08);--raw-color-163:rgba(255,255,255,.02);--raw-color-164:rgba(255,255,255,.05);--raw-color-165:rgba(0,0,0,.06);--raw-color-166:rgba(15, 23, 42, 0.03);--raw-color-167:rgba(255, 255, 255, 0.15);--raw-color-168:rgba(0, 0, 0, 0.12);--raw-color-169:rgba(0, 0, 0, 0.06);--raw-color-170:rgba(18, 20, 26, 0.88);--raw-color-171:rgba(255, 255, 255, 0.12);--raw-color-172:rgba(0, 0, 0, 0.6);--raw-color-173:rgba(255, 255, 255, 0.08);--raw-color-174:rgba(15, 23, 42, 0.04);--raw-color-175:rgba(255, 255, 255, 0.7);--raw-color-176:rgba(255, 255, 255, 0.1);--raw-color-177:rgba(0, 0, 0, 0.5);--raw-color-178:rgba(255, 255, 255, 0.06);--raw-color-179:rgba(0, 0, 0, 0.08);--raw-color-180:rgba(255, 255, 255, 0.6);--raw-color-181:rgba(255, 255, 255, 0.09);--raw-color-182:rgba(0, 0, 0, 0.4);--raw-color-183:rgba(255, 255, 255, 0.05);--raw-color-184:rgba(0, 0, 0, 0.35);--raw-color-185:rgba(255, 255, 255, 0.04);--raw-color-186:rgba(15, 23, 42, 0.08);--raw-color-187:rgba(255, 255, 255, 0.2);--raw-color-188:rgba(0, 0, 0, 0.05);--raw-color-189:rgba(0, 0, 0, 0.04);--raw-color-190:rgba(10, 10, 12, 0.95);--raw-color-191:rgba(255, 255, 255, 0.65);--raw-color-192:rgba(255, 255, 255, 0.14);--raw-color-193:rgba(255, 255, 255, 0.18);--raw-color-194:rgba(255, 255, 255, 0.28);--raw-color-195:rgba(56, 189, 248, 0.35);--raw-color-196:rgba(56, 189, 248, 0.2);--raw-color-197:rgba(56, 189, 248, 0.4);--raw-color-198:rgba(15, 23, 42, 0.5);--raw-color-199:rgba(0, 0, 0, 0.25);--raw-color-200:rgba(15, 23, 42, 0.15);--raw-color-201:#FAFBFC;--raw-color-202:#111827;--raw-color-203:#667085;--raw-color-204:#FFF;--raw-color-205:#344054;--raw-color-206:#101217;--raw-color-207:#191C23;--raw-color-208:#1D2028;--raw-color-209:#232730;--raw-color-210:#20242C;--raw-color-211:#ECEEF3;--raw-color-212:#C8CDD8;--raw-color-213:#000;--raw-color-214:#17181D;--raw-color-215:#121318;--raw-color-216:rgba(12,14,18,.96);--raw-color-217:rgba(255,255,255,.48);--raw-color-218:rgba(255,255,255,.075);--raw-color-219:#050608;--raw-color-220:rgba(255,255,255,.065);--raw-color-221:rgba(255,255,255,.22);--raw-color-222:rgba(12,14,18,.97);--raw-color-223:rgba(255,255,255,.13)
+:root{--control-border-light:var(--raw-color-001);--control-border-dark:rgba(255,255,255,.42);--control-border-amoled:rgba(255,255,255,.42)}
 [data-theme="light"]{--theme-color:var(--theme-color-light)}}
 [data-theme="dark"]{--theme-color:var(--theme-color-dark)}
 [data-theme="amoled"]{--theme-color:var(--theme-color-amoled);--surf-1:#0B0B0E;--surf-2:#0B0B0E;--border:rgba(255,255,255,.24);--border-2:rgba(255,255,255,.38);--border-3:rgba(255,255,255,.55);--control-border:rgba(255,255,255,.34)}
@@ -107,7 +108,7 @@ body{
 h1,h2,h3,h4{line-height:var(--lh-tight);font-weight:var(--fw-bold);letter-spacing:var(--ls-head);color:var(--text)}
 h1{font-size:var(--fs-h1)} h2{font-size:var(--fs-h3)} h3{font-size:var(--fs-body)} h4{font-size:var(--fs-body-s)}
 p{line-height:var(--lh)}
-:focus-visible{outline:2px solid var(--focus-ring,var(--accent));outline-offset:2px;border-radius:6px}
+:focus-visible{outline:2px solid var(--accent-ring,var(--accent));outline-offset:2px;border-radius:6px}
 ::selection{background:var(--accent-soft-2)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .skip-link{position:absolute;left:var(--s5);top:-72px;z-index:var(--z-onb);background:var(--surf-4);color:var(--text);
@@ -4078,7 +4079,7 @@ input::placeholder,textarea::placeholder,.bare-input::placeholder{
 .btn:focus-visible,.btn-icon:focus-visible,.icon-btn:focus-visible,
 .settings-tab:focus-visible,.seg button:focus-visible,.chip:focus-visible,
 input:focus-visible,select:focus-visible,textarea:focus-visible{
-  outline:2px solid var(--focus-ring);
+  outline:2px solid var(--accent-ring,var(--accent));
   outline-offset:2px;
 }
 .settings-tab.on,.seg button.on,.chip.on,.filter-chip.on{
@@ -6031,9 +6032,9 @@ body[data-route="calendar"] .hero-metric .l{
 
 @layer tokens{
 :root{;--surface-bg:var(--raw-color-084);--surface-elevated:var(--raw-color-201);--text-primary:var(--raw-color-202);--text-muted:var(--raw-color-203);--border-subtle:var(--raw-color-144);--radius-lg:8px;--radius-xl:12px;--radius-2xl:16px;--radius-3xl:24px;--page-gutter:16px;--sidebar-width:280px;--content-max:1280px;--shadow-card:0 1px 2px var(--raw-color-165),0 8px 24px var(--raw-color-162)}
-[data-theme="light"]{--bg:var(--raw-color-084);--surf-1:var(--raw-color-204);--surf-2:var(--raw-color-204);--surf-3:var(--raw-color-019);--surf-4:var(--raw-color-204);--text:var(--raw-color-202);--text-2:var(--raw-color-205);--muted:var(--raw-color-203);--border:var(--raw-color-144);--border-2:var(--raw-color-145);--control-border:var(--raw-color-145);}
-[data-theme="dark"]{--bg:var(--raw-color-085);--bg-deep:var(--raw-color-206);--surf-1:var(--raw-color-207);--surf-2:var(--raw-color-208);--surf-3:var(--raw-color-209);--surf-4:var(--raw-color-210);--text:var(--raw-color-211);--text-2:var(--raw-color-212);--muted:var(--raw-color-024);--border:var(--raw-color-036);--border-2:var(--raw-color-046);--control-border:var(--raw-color-037);;--shadow-card:none}
-[data-theme="amoled"]{--bg:var(--raw-color-213);--bg-deep:var(--raw-color-213);--surf-1:var(--amoled-card);--surf-2:var(--amoled-card);--surf-3:var(--raw-color-214);--surf-4:var(--raw-color-215);--text:var(--raw-color-211);--text-2:var(--raw-color-212);--muted:var(--raw-color-024);--border:var(--raw-color-117);--border-2:var(--raw-color-118);--control-border:var(--raw-color-120);--shadow-card:none}
+[data-theme="light"]{--bg:var(--raw-color-084);--surf-1:var(--raw-color-204);--surf-2:var(--raw-color-204);--surf-3:var(--raw-color-019);--surf-4:var(--raw-color-204);--text:var(--raw-color-202);--text-2:var(--raw-color-205);--muted:var(--raw-color-203);--border:var(--raw-color-144);--border-2:var(--raw-color-145);--control-border:var(--control-border-light);}
+[data-theme="dark"]{--bg:var(--raw-color-085);--bg-deep:var(--raw-color-206);--surf-1:var(--raw-color-207);--surf-2:var(--raw-color-208);--surf-3:var(--raw-color-209);--surf-4:var(--raw-color-210);--text:var(--raw-color-211);--text-2:var(--raw-color-212);--muted:var(--raw-color-024);--border:var(--raw-color-036);--border-2:var(--raw-color-046);--control-border:var(--control-border-dark);--shadow-card:none}
+[data-theme="amoled"]{--bg:var(--raw-color-213);--bg-deep:var(--raw-color-213);--surf-1:var(--amoled-card);--surf-2:var(--amoled-card);--surf-3:var(--raw-color-214);--surf-4:var(--raw-color-215);--text:var(--raw-color-211);--text-2:var(--raw-color-212);--muted:var(--raw-color-024);--border:var(--control-border-amoled);--border-2:var(--raw-color-118);--control-border:var(--control-border-amoled);--shadow-card:none}
 }
 @layer base{body{font-family:var(--font);font-size:16px;color:var(--text);background:var(--bg)}:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}}
 @layer components{.card{border-radius:var(--radius-2xl);box-shadow:var(--shadow-card)}[data-theme="dark"] .card,[data-theme="amoled"] .card{box-shadow:none}.btn-primary{background:var(--accent-fill);color:var(--on-accent)}.brand-mark{background:var(--accent-fill);color:var(--on-accent);box-shadow:none}.input,.select,.textarea{border-radius:var(--radius-xl);box-shadow:none}}
@@ -7243,7 +7244,7 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
   .content{padding-left:16px!important;padding-right:16px!important}
   .page-head{padding-left:16px!important;padding-right:16px!important}
 }
-@media (max-width:640px){
+@media (max-width:767px){
   .cal-selected-day{display:block;margin-top:16px;padding:16px;background:var(--surf-2);border:1px solid var(--border);border-radius:16px}
   .cal-selected-day .card-h{align-items:center}
   .cal-selected-day .ev-row{margin-top:8px}
@@ -7520,13 +7521,60 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 
 /* WHY: keep Boot.stage/Boot.fail targets visible and aligned; the error surface must work without changing the application layout. */
 @layer boot {
-  #boot.is-error { display:flex!important; visibility:visible!important; pointer-events:auto!important; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:24px; background:var(--bg,#F4F6FA); color:var(--text,#20232B); }
+  #boot.is-error { display:flex!important; visibility:visible!important; pointer-events:auto!important; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:24px; background:var(--bg); color:var(--text); }
   #boot .boot-core { width:min(100%,520px); max-height:100%; overflow:auto; }
   #boot .boot-stage { margin:0 auto 10px; text-align:center; font-size:14px; font-weight:600; }
-  #boot .boot-progress { height:4px; overflow:hidden; border-radius:999px; background:var(--border,#D9DDE6); margin:0 auto 18px; }
-  #boot .boot-bar { height:100%; width:100%; transform:scaleX(.08); transform-origin:left center; background:var(--accent,#5069E8); transition:transform .2s ease; }
+  #boot .boot-progress { height:4px; overflow:hidden; border-radius:999px; background:var(--border); margin:0 auto 18px; }
+  #boot .boot-bar { height:100%; width:100%; transform:scaleX(.08); transform-origin:left center; background:var(--accent); transition:transform .2s ease; }
   #boot.is-error .boot-stage,#boot.is-error .boot-progress,#boot.is-error .boot-shell,#boot.is-error .boot-slow { display:none!important; }
   #boot .boot-error-title { font-size:20px; line-height:1.3; font-weight:750; margin:0 0 10px; }
   #boot .boot-error-text { font-size:14px; line-height:1.55; overflow-wrap:anywhere; margin:0 0 18px; }
   #boot .boot-acts { display:flex; flex-wrap:wrap; gap:10px; }
 }
+
+
+/* Stage 2 · targeted layout safeguards (presentation only; no handlers or data changes). */
+#f_members{min-width:0;align-items:stretch}
+#f_members .chip{
+  min-width:0;
+  max-width:100%;
+  flex:0 1 auto;
+  height:auto;
+  min-height:var(--tap);
+  padding-block:8px;
+  line-height:1.35;
+  text-align:left;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.data-action-danger>div:first-child{min-width:0;overflow-wrap:anywhere}
+.data-action-danger .data-action-buttons{min-width:0;max-width:100%}
+.data-action-danger .data-action-buttons .btn{
+  min-width:0;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.setlist-detail .tb-search{
+  width:100%;
+  min-width:0;
+  flex:1 1 100%;
+  overflow:visible;
+}
+.setlist-detail .tb-search input#libQ{
+  position:static!important;
+  opacity:1!important;
+  width:100%;
+  min-width:0;
+  flex:1 1 auto;
+  cursor:text;
+}
+@media (min-width:901px) and (max-width:1099px){
+  .data-action-danger{grid-template-columns:minmax(0,1fr)}
+  .data-action-danger .data-action-buttons{width:100%}
+  .data-action-danger .data-action-buttons .btn{width:100%}
+}
+
+
+/* Stage 4 · ensure interactive calendar cells meet the control-border contrast token. */
+.cal-cell{border-color:var(--control-border)!important}
