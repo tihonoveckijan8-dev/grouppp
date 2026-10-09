@@ -333,14 +333,16 @@ function extractSectionOccurrences(text) {
     chunk.push(line);
   });
   finishStanza();
-  if (stanzas.length < 3) return [];
+  if (!stanzas.length) return [];
   const frequency = Object.create(null);
   stanzas.forEach(stanza => { frequency[stanza.normalized] = (frequency[stanza.normalized] || 0) + 1; });
-  const repeated = stanzas.some(stanza => frequency[stanza.normalized] > 1);
-  if (!repeated) return [];
+  // Repeated stanzas are the strongest chorus signal. If there are no repeated
+  // stanzas, expose each lyric stanza as a sequential verse instead of leaving
+  // the dynamics panel empty; musicians can refine labels with explicit headings.
+  const hasRepeated = stanzas.some(stanza => frequency[stanza.normalized] > 1);
   let verse = 0, chorus = 0;
   return stanzas.map(stanza => {
-    if (frequency[stanza.normalized] > 1) {
+    if (hasRepeated && frequency[stanza.normalized] > 1) {
       chorus++;
       return { source: 'Припев', type: 'Припев', label: chorus === 1 ? 'Припев' : 'Припев ' + chorus, lineIndex: stanza.startLine, explicit: false };
     }
