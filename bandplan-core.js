@@ -1859,10 +1859,17 @@ function dynamicsInstrumentLabel(key) {
   const role = ROLES.find(r => r.k === key);
   return role ? role.label : String(key || 'Инструмент');
 }
+function dynamicsRoleKey(value) {
+  const raw = String(value == null ? '' : value).trim().toLocaleLowerCase('ru');
+  const role = ROLES.find(r => r.k.toLocaleLowerCase('ru') === raw || r.label.toLocaleLowerCase('ru') === raw);
+  return role ? role.k : raw;
+}
 function dynamicsVisibleInstruments(d, userRoles) {
-  const roles = Array.isArray(userRoles) ? userRoles : (typeof myRoles === 'function' ? myRoles() : []);
-  // Instrument dynamics are private to matching profile roles. No role means no instrument notes.
-  return d.instruments.filter(ins => roles.includes(ins));
+  const roles = (Array.isArray(userRoles) ? userRoles : (typeof myRoles === 'function' ? myRoles() : []))
+    .map(dynamicsRoleKey).filter(Boolean);
+  // Instrument cues in lyrics and song details are visible only to matching profile roles.
+  // Empty/unrecognized roles intentionally reveal no instrument-specific notes.
+  return d.instruments.filter(ins => roles.includes(dynamicsRoleKey(ins)));
 }
 function dynamicsHTML(song, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
@@ -1879,7 +1886,7 @@ function dynamicsHTML(song, userRoles) {
     return '<div class="song-dynamics-section"><strong>' + esc(name) + '</strong>' + instruments + '</div>';
   }).join('') + '</div>';
 }
-function renderSceneLyrics(song, shift) {
+function renderSceneLyrics(song, shift, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
   const lines = String(song && song.lyrics || '').split('\n');
   const occurrences = extractSectionOccurrences(song && song.lyrics || '');
@@ -1888,7 +1895,7 @@ function renderSceneLyrics(song, shift) {
   if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
   function renderNotes(key) {
-    const cues = dynamicsVisibleInstruments(d).map(ins => {
+    const cues = dynamicsVisibleInstruments(d, userRoles).map(ins => {
       const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
       return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
     }).join('');
@@ -4101,7 +4108,8 @@ if (location.search.includes('bandplan-test=1')) {
     shouldCleanupOfflineEventSongRow,
     rebuildOfflineSongIndex,
     offlineSongLookup: id => offlineSongIndex.get(String(id || '')) || null,
-    dynamicsHTML
+    dynamicsHTML,
+    renderSceneLyrics
   };
 }
 
