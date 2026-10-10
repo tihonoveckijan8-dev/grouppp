@@ -9187,3 +9187,37 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   filter: none !important;
   transform: none !important;
 }
+
+
+/* Final consistency pass: preserve the exact shape, spacing and selected-state
+   treatment used by the other participation buttons; only the status color differs. */
+.part-switch .part-btn[data-v="no"],
+.part-switch .part-btn[data-v="no"]:hover,
+.part-switch .part-btn[data-v="no"]:active,
+.part-switch .part-btn[data-v="no"]:focus,
+.part-switch .part-btn[data-v="no"]:focus-visible {
+  border-radius: var(--r-pill) !important;
+  font: inherit;
+  min-height: 44px !important;
+}
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]) {
+  color: var(--muted) !important;
+  background: var(--surf-3) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn[data-v="no"].status-no,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"],
+.part-switch .part-btn[data-v="no"].on:hover,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
+.part-switch .part-btn[data-v="no"].on:active,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
+  color: var(--danger) !important;
+  background: var(--danger-bg) !important;
+  background-color: var(--danger-bg) !important;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent) !important;
+  border-radius: var(--r-pill) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 25%, transparent) !important;
+  font-weight: var(--fw-bold) !important;
+}
