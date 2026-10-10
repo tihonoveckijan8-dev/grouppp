@@ -518,6 +518,68 @@ function eventEndMs(ev) {
   }
   return start+3*60*60*1000;
 }
+/*
+ * Automatically remove expired one-off events. For repeating events, expire only
+ * the past occurrence so the rest of the series remains intact. Cleanup is
+ * persisted through the existing local snapshot/cloud queue.
+ */
+function cleanupExpiredEvents() {
+  const now = Date.now();
+  const todayKey = today();
+  let changed = false;
+  const kept = [];
+
+  state.events.forEach(ev => {
+    if (!ev || !ev.date) { kept.push(ev); return; }
+    const repeat = ev.repeat && ev.repeat !== 'none';
+    if (!repeat) {
+      if (eventEndMs(ev) <= now) changed = true;
+      else kept.push(ev);
+      return;
+    }
+
+    const start = new Date(String(ev.date) + 'T00:00:00');
+    if (!Number.isFinite(start.getTime()) || iso(start) > todayKey) {
+      kept.push(ev);
+      return;
+    }
+
+    const until = ev.repeatUntil ? new Date(String(ev.repeatUntil) + 'T00:00:00') : new Date(todayKey + 'T00:00:00');
+    const stop = until < new Date(todayKey + 'T00:00:00') ? until : new Date(todayKey + 'T00:00:00');
+    const except = Array.isArray(ev.except) ? ev.except.slice() : [];
+    const originalCount = except.length;
+    const d = new Date(start);
+    let guard = 0;
+    while (d <= stop && guard++ < 400) {
+      const occurrenceDate = iso(d);
+      if (except.indexOf(occurrenceDate) < 0 && eventEndMs({ ...ev, date: occurrenceDate }) <= now) {
+        except.push(occurrenceDate);
+      }
+      if (ev.repeat === 'weekly') d.setDate(d.getDate() + 7);
+      else if (ev.repeat === 'biweekly') d.setDate(d.getDate() + 14);
+      else if (ev.repeat === 'monthly') d.setMonth(d.getMonth() + 1);
+      else break;
+    }
+    if (except.length !== originalCount) {
+      ev.except = except;
+      changed = true;
+    }
+    kept.push(ev);
+  });
+
+  if (!changed) return false;
+  state.events = kept;
+  expandCache.clear();
+  searchCorpus = null;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { console.warn('BandPlan expired-event cleanup local persistence failed:', e); }
+  if (window.BandPlanCloud && typeof window.BandPlanCloud.schedule === 'function') {
+    window.BandPlanCloud.schedule(state);
+  }
+  scheduleOfflineSongSync();
+  return true;
+}
+
 function eligibleOfflineEvents() {
   const cfg=offlineSongSettings(), now=Date.now(), limit=now+cfg.days*86400000;
   return state.events
@@ -1368,6 +1430,7 @@ function skeletonFor(routeName) {
    rendering the same route twice. */
 let skipNextHashRoute = false;
 function render() {
+  cleanupExpiredEvents();
   expandCache.clear(); searchCorpus = null;
   const r = parseHash(), hd = HEADERS[r.name] || HEADERS.calendar;
   document.body.setAttribute('data-route', r.name);
