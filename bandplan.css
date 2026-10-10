@@ -9275,3 +9275,18 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn .part-symbol {
   color: inherit !important;
 }
+
+
+/* One shared selected color for all participation choices; keep their styling identical. */
+.part-switch .part-btn.on[data-v="yes"],
+.part-switch .part-btn.on[data-v="maybe"],
+.part-switch .part-btn.on[data-v="no"],
+.part-switch .part-btn[aria-pressed="true"][data-v="yes"],
+.part-switch .part-btn[aria-pressed="true"][data-v="maybe"],
+.part-switch .part-btn[aria-pressed="true"][data-v="no"] {
+  color: var(--accent) !important;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surf-2)) !important;
+  background-color: color-mix(in srgb, var(--accent) 14%, var(--surf-2)) !important;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important;
+  box-shadow: none !important;
+}
