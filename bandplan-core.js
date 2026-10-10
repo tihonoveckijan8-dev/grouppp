@@ -2014,9 +2014,7 @@ function vSetlist(id) {
   const sl = slById(id);
   if (!sl) return '<div class="card">' + stateHTML('err', 'Сет-лист не найден', 'Возможно, он был удалён.', '<a class="btn btn-primary" href="#/setlists">Вернуться к сет-листам</a>') + '</div>';
 
-  const up = expand(today(), iso(new Date(Date.now() + 86400000 * 365)));
   const linkedEvent = sl.eventId ? evById(sl.eventId) : state.events.find(e => e.setlistId === sl.id && (e.status || 'upcoming') === 'upcoming');
-  const linkedEventId = linkedEvent ? linkedEvent.id : (sl.eventId || '');
   const count = (sl.items || []).length;
   const duration = setlistDur(sl);
 
@@ -2027,9 +2025,11 @@ function vSetlist(id) {
   h += '<section class="card rise"><div class="card-h"><div style="min-width:0"><h2 style="font-size:var(--fs-h3);overflow-wrap:anywhere">' + esc(sl.name) + '</h2>' +
     '<div class="sub">' + count + ' ' + plural(count, 'песня', 'песни', 'песен') + (duration ? ' · ' + fmtDur(duration) : '') + '</div>' +
     (linkedEvent ? '<div class="setlist-my-position">' + renderMyPositionBadge(linkedEvent, {compact:false}) + '</div>' : '') +
-    '</div><div class="row">' +
-    '<button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки" title="Изменить">' + ic('edit', 16) + '</button>' +
+    '</div><div class="row setlist-detail-actions">' +
+    '<button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки" title="Редактировать">' + ic('edit', 16) + '</button>' +
+    '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить сет-лист">' + ic('trash', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
+    '<button class="icon-btn" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
     '</div></div>' +
 
     '<div class="row mt" style="gap:6px">' +
@@ -2037,14 +2037,14 @@ function vSetlist(id) {
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
     (linkedEvent ? '<span class="badge b-muted">' + ic('calendar', 11) + esc(linkedEvent.title) + '</span>' : '') +
     '</div>' +
+    '<div class="row mt setlist-scene-action"><button class="btn btn-primary btn-sm" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
     '<div class="card-h mt" style="align-items:end"><div><h3>Состав программы</h3><div class="sub">Порядок песен, тональности и индивидуальные настройки партии</div></div>' +
     '<span class="cap num">' + count + ' ' + plural(count, 'трек', 'трека', 'треков') + '</span></div>' +
 
     '<div class="dropzone mt" id="dropZone">';
 
   if (!count) {
-    h += stateHTML('empty', 'Программа пуста', 'Перетащите сюда песни из библиотеки или добавьте их кнопкой «+».',
-      '<button class="btn btn-primary btn-sm" type="button" data-act="sl-rename" data-id="' + sl.id + '">Настроить сет-лист</button>');
+    h += stateHTML('empty', 'Программа пуста', 'Добавьте первую песню с помощью кнопки «Добавить» в библиотеке справа.');
   } else {
     (sl.items || []).forEach(function (it, i) {
       const s = songById(it.songId);
@@ -2082,35 +2082,21 @@ function vSetlist(id) {
 
   h += '</div><div class="stack">';
 
-  /* Same secondary information/action rhythm as vSong(). */
-  h += '<section class="card rise" style="animation-delay:.04s"><div class="card-h"><div><h2>Параметры сет-листа</h2><div class="sub">Основные данные программы и привязанное событие</div></div></div>' +
-    infoRow('Песни', '<span class="num">' + count + ' ' + plural(count, 'песня', 'песни', 'песен') + '</span>') +
-    infoRow('Длительность', '<span class="num">' + fmtDur(duration) + '</span>') +
-    infoRow('Событие', linkedEvent ? '<span>' + esc(linkedEvent.title) + '</span>' : '—') +
-    '<div class="field mt"><label class="field-label" for="slEventSel">Изменить событие</label><select class="select" id="slEventSel"><option value="">— не привязан —</option>' +
-    up.map(o => '<option value="' + o.ev.id + '"' + (linkedEventId === o.ev.id ? ' selected' : '') + '>' + esc(pdate(o.date) + ' · ' + o.ev.title) + '</option>').join('') +
-    state.events.filter(e => e.status === 'done').slice(0, 10).map(e => '<option value="' + e.id + '"' + (linkedEventId === e.id ? ' selected' : '') + '>' + esc(pdate(e.date) + ' · ' + e.title + ' (проведено)') + '</option>').join('') +
-    '</select></div>' +
-    '<div class="field"><label class="field-label" for="slNoteInp">Заметки к сет-листу</label><textarea class="input" id="slNoteInp" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Переходы, вступления, динамика программы">' + esc(sl.note || '') + '</textarea></div>' +
-    '<button class="btn btn-primary btn-block" type="button" data-act="sl-meta-save" data-id="' + sl.id + '">' + ic('check', 16) + 'Сохранить изменения</button>' +
-    '<div class="row mt" style="gap:var(--s2);flex-wrap:wrap">' +
-    '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button>' +
-    '<button class="btn btn-secondary" type="button" data-act="print-setlist" data-id="' + sl.id + '">' + ic('print', 16) + 'Печать</button>' +
-    '<button class="btn btn-secondary" type="button" data-act="dup-setlist" data-id="' + sl.id + '">' + ic('copy', 16) + 'Дублировать</button>' +
-    '</div>' +
-    '<div class="row mt-s"><button class="btn btn-danger btn-block" type="button" data-act="sl-del" data-id="' + sl.id + '">' + ic('trash', 16) + 'Удалить сет-лист</button></div></section>';
-
-  h += '<section class="card rise" style="animation-delay:.08s"><div class="card-h"><div><h2>Добавить песни</h2><div class="sub">' + state.songs.length + ' ' + plural(state.songs.length, 'песня', 'песни', 'песен') + ' в репертуаре</div></div></div>' +
-    '<div class="tb-search mb" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
+  const slSongCount = (sl.items || []).length;
+  h += '<section class="card rise setlist-library-card" style="animation-delay:.04s"><div class="card-h"><div><h2>Добавить песни</h2><div class="sub">Выберите композицию из репертуара</div></div><span class="badge b-brand">' + state.songs.length + ' в библиотеке</span></div>' +
+    '<div class="setlist-library-summary"><span>' + slSongCount + ' в сет-листе</span><span>Выбирайте песни кнопкой «Добавить»</span></div>' +
+    '<div class="tb-search mb setlist-library-search" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
     '<input id="libQ" class="bare-input" type="search" placeholder="Поиск песни…" value="' + esc(ui.libQuery) + '"></div>' +
     '<div class="lib-list" id="libList">';
   const q = ui.libQuery.toLowerCase().trim();
   const lib = state.songs.filter(s => !q || ((s.title || '') + ' ' + (s.artist || '')).toLowerCase().indexOf(q) >= 0).sort((a, b) => a.title.localeCompare(b.title, 'ru'));
-  if (!lib.length) h += stateHTML('search', 'Песня не найдена', 'Измените запрос или добавьте песню в репертуар.', '<button class="btn btn-secondary btn-sm" type="button" data-act="new-song">Добавить песню</button>');
+  if (!lib.length) h += stateHTML('search', 'Песни не найдены', q ? 'Попробуйте изменить запрос или очистить поиск.' : 'Сначала добавьте песни в репертуар.', q ? '' : '<button class="btn btn-secondary btn-sm" type="button" data-act="new-song">Добавить песню</button>');
   lib.forEach(function (s) {
-    h += '<div class="lib-item" draggable="true" data-lib="' + s.id + '"><span class="lk">' + esc(s.key || '—') + '</span>' +
-      '<span class="grow nowrap">' + esc(s.title) + '</span>' +
-      '<button class="icon-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" style="width:var(--tap);height:var(--tap)">' + ic('plus', 15) + '</button></div>';
+    const meta = [s.artist || '', s.bpm ? s.bpm + ' BPM' : '', s.duration ? fmtDur(s.duration) : ''].filter(Boolean).join(' · ');
+    h += '<div class="lib-item setlist-lib-item" data-lib="' + s.id + '"><span class="lk">' + esc(s.key || '—') + '</span>' +
+      '<div class="lib-item-main"><span class="lib-item-title">' + esc(s.title) + '</span>' +
+      (meta ? '<span class="lib-item-meta">' + esc(meta) + '</span>' : '') + '</div>' +
+      '<button class="btn btn-secondary btn-sm lib-add-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" title="Добавить в сет-лист">' + ic('plus', 15) + '<span class="lib-add-label">Добавить</span></button></div>';
   });
   h += '</div></section>';
 
@@ -2118,13 +2104,11 @@ function vSetlist(id) {
 }
 function bindDnD(slId) {
   const zone = $('#dropZone'); if (!zone) return;
-  let dragItem = null, dragSong = null;
+  let dragItem = null;
   const idxOf = iid => { const sl = slById(slId); return sl ? (sl.items || []).findIndex(x => x.id === iid) : -1; };
   const dataOf = e => {
     let t = ''; try { t = e.dataTransfer.getData('text/plain'); } catch (err) { }
-    if (t && t.indexOf('song:') === 0) return { song: t.slice(5) };
     if (t && t.indexOf('item:') === 0) return { item: t.slice(5) };
-    if (dragSong) return { song: dragSong };
     if (dragItem) return { item: dragItem };
     return {};
   };
@@ -2136,20 +2120,16 @@ function bindDnD(slId) {
     el.addEventListener('drop', function (e) {
       e.preventDefault(); el.classList.remove('over');
       const src = dataOf(e), at = idxOf(el.getAttribute('data-item'));
-      if (src.song) addItem(slId, src.song, at);
-      else if (src.item && src.item !== el.getAttribute('data-item')) moveItem(slId, src.item, at);
+      if (src.item && src.item !== el.getAttribute('data-item')) moveItem(slId, src.item, at);
     });
   });
-  $$('#libList .lib-item').forEach(function (el) {
-    el.addEventListener('dragstart', function (e) { dragSong = el.getAttribute('data-lib'); try { e.dataTransfer.setData('text/plain', 'song:' + dragSong); } catch (err) { } e.dataTransfer.effectAllowed = 'copy'; });
-    el.addEventListener('dragend', function () { dragSong = null; zone.classList.remove('hot'); });
-  });
-  zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('hot'); });
+  zone.addEventListener('dragover', function (e) { if (!dragItem) return; e.preventDefault(); zone.classList.add('hot'); });
   zone.addEventListener('dragleave', function (e) { if (e.target === zone) zone.classList.remove('hot'); });
   zone.addEventListener('drop', function (e) {
-    e.preventDefault(); zone.classList.remove('hot');
     const src = dataOf(e);
-    if (src.song) addItem(slId, src.song, -1); else if (src.item) moveItem(slId, src.item, -1);
+    if (!src.item) return;
+    e.preventDefault(); zone.classList.remove('hot');
+    moveItem(slId, src.item, -1);
   });
 }
 function addItem(slId, songId, at) {
