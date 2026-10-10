@@ -8399,3 +8399,92 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     max-height:40px!important;
   }
 }
+
+
+/* BandPlan focused UI fixes — participation, set-list cards, event actions */
+.part-switch .part-btn[data-v="no"],
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn.status-no,
+.part-switch .part-btn.on.status-no,
+.part-btn[data-v="no"],
+.part-btn[data-v="no"].on,
+[data-event-switch] .part-btn[data-v="no"],
+[data-event-switch] .part-btn[data-v="no"].on {
+  color: var(--danger, #dc2626) !important;
+  background: var(--danger-bg, #fee2e2) !important;
+  border-color: var(--danger, #dc2626) !important;
+}
+.part-switch .part-btn[data-v="no"].on *,
+.part-btn[data-v="no"].on * { color: inherit !important; }
+
+/* Keep the existing set-list action order, but use restrained rectangular controls
+   sized to the card rather than oversized round buttons. */
+.setlists-list > .song-card > .song-acts.setlist-quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(36px, auto) !important;
+  gap: 7px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 0 2px !important;
+  margin-top: 10px !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 38px !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+  display: inline !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.setlists-list > .song-card { min-width: 0; overflow: hidden; }
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > * { min-width: 0; }
+
+/* Event cards: remove member avatar circles and keep participation + quick actions
+   grouped at the right edge without pushing content beyond the card. */
+.ev-row .avatars,
+.ev-card .avatars,
+.event-card .avatars,
+.event-row .avatars { display: none !important; }
+.ev-row [data-event-switch],
+.ev-card [data-event-switch],
+.event-card [data-event-switch],
+.event-row [data-event-switch] {
+  margin-left: auto !important;
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+.ev-row .ev-acts,
+.ev-card .ev-acts,
+.event-card .ev-acts,
+.event-row .ev-acts {
+  margin-left: auto !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.ev-row .ev-acts .icon-btn,
+.ev-card .ev-acts .icon-btn,
+.event-card .ev-acts .icon-btn,
+.event-row .ev-acts .icon-btn { flex: 0 0 auto; }
+@media (max-width: 600px) {
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    gap: 6px !important;
+    padding-inline: 0 !important;
+  }
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+    min-height: 36px !important;
+    padding-inline: 7px !important;
+  }
+}
