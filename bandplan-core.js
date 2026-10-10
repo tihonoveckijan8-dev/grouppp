@@ -765,15 +765,15 @@ function renderParticipationSwitch(ev, options) {
   const pending = !draft && ev && participationPending.has(String(ev.id));
   const disabled = !!o.disabled || (!draft && !participationMutable(ev));
   const states = [
-    ['yes','Участвую','check','main'],
-    ['maybe','Под вопросом','info','secondary'],
-    ['no','Не участвую','x','main']
+    ['yes','Участвую','check','main','✓'],
+    ['maybe','Под вопросом','info','secondary','?'],
+    ['no','Не участвую','x','main','×']
   ];
   let html = '<div class="part-switch part-switch-' + esc(size) + ' part-switch-' + esc(variant) + '" data-event-switch="' + esc(String(ev?.id || '')) + '" role="group" aria-label="Ваше участие"' + (disabled ? ' aria-disabled="true"' : '') + '>';
   states.forEach(p => {
     const active = status === p[0];
     html += '<button class="part-btn part-btn-' + p[3] + (p[1] === 'Под вопросом' ? ' part-btn-secondary' : '') + (active ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
-      (draft ? ' data-draft="1"' : '') + ' aria-pressed="' + active + '"' + (disabled ? ' disabled' : '') + ' aria-label="' + p[1] + (active ? ' — выбрано' : '') + '">' + ic(p[2], 13) + '<span>' + p[1] + '</span></button>';
+      (draft ? ' data-draft="1"' : '') + ' aria-pressed="' + active + '"' + (disabled ? ' disabled' : '') + ' aria-label="' + p[1] + (active ? ' — выбрано' : '') + '">' + '<span class="part-symbol" aria-hidden="true">' + p[4] + '</span></button>';
   });
   if (status) {
     html += '<button class="part-reset" type="button" data-v="" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
@@ -2047,11 +2047,11 @@ function vSetlists() {
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
       '<span class="card-chevron" aria-hidden="true">›</span></div>' +
-      '<div class="song-acts">' +
-      '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
-      '<button class="icon-btn" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
-      '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '</button>' +
-      '<button class="btn btn-primary btn-sm setlist-scene" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">Открыть на сцене</span></button></div></article>';
+      '<div class="song-acts setlist-quick-actions">' +
+      '<button class="icon-btn setlist-quick-action" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
+      '<button class="icon-btn setlist-quick-action" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
+      '<button class="icon-btn danger setlist-quick-action" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '</button>' +
+      '<button class="btn btn-primary btn-sm setlist-scene setlist-quick-action" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">Открыть на сцене</span></button></div></article>';
   });
   h += '</div></div>';
   if (selectedSetlist) h += '<aside class="master-detail-panel" aria-label="Выбранный сет-лист">' + vSetlist(selectedSetlist.id) + '</aside>';
@@ -2237,7 +2237,6 @@ function vSettings() {
       '<div class="grow"><div style="font-weight:600;font-size:var(--fs-body-s)">' + esc(m.name) + (window.BandPlanCloud?.user?.()?.id && String(m.accountId || m.id) === String(window.BandPlanCloud.user().id) ? ' <span class="member-you">Вы</span>' : '') + '</div>' +
       '<div class="t-xs t-muted">' + esc(rolesLabel(rolesOf(m))) + (m.note ? ' · ' + esc(m.note) : '') + '</div></div>' +
       '<div class="member-status-wrap">' +
-        '<span class="member-participation status-' + (summary.status || 'unset') + '" title="' + esc(statusTitle) + '" aria-label="' + esc(statusTitle) + '"><span class="member-participation-text">' + esc(participantStatusLabel(summary.status)) + '</span></span>' +
         '<span class="member-event-context">' + (summary.event ? esc(summary.event.title || 'Событие') + ' · ' + esc(pdate(summary.event.date)) : 'Нет ближайших событий') + '</span></div>' +
       (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
       '</div>';
@@ -3181,9 +3180,10 @@ document.addEventListener('click', function (e) {
     case 'my-status': {
       stop();
       const eventId=String(id||'');
-      const value=String(el.getAttribute('data-v')||'');
+      let value=String(el.getAttribute('data-v')||'');
       const isDraft=el.getAttribute('data-draft')==='1';
       const ev=evById(eventId);
+      if (el.getAttribute('aria-pressed') === 'true') value='';
       if (isDraft && !ev) {
         if (eventId === '__onboarding__') onbData.participation = value;
         const roots = [modalRoot && $('#f_my', modalRoot), $('#ob_part')].filter(Boolean);
@@ -3202,10 +3202,6 @@ document.addEventListener('click', function (e) {
       if(!ev || !participationMutable(ev))break;
       if(participationPending.has(eventId))break;
       const previous=eventStatusFor(ev)||'';
-      if(previous===value && value){
-        toast('Этот статус уже выбран. Для снятия используйте «Сбросить».','info',2200);
-        return;
-      }
       const stamp=new Date().toISOString();
       participationPrevious.set(eventId,previous);
       setMyParticipation(ev,value,stamp);
