@@ -9038,3 +9038,62 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   filter: none !important;
   transform: none !important;
 }
+
+
+/* Final fix: action labels and buttons must fit fully inside setlist cards. */
+body[data-route="setlists"] .setlists-list > .song-card,
+.setlists-list > .song-card {
+  overflow: visible !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding-bottom: 16px !important;
+}
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-rows: auto auto !important;
+  grid-auto-rows: auto !important;
+  gap: 6px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  flex: 0 0 100% !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  justify-content: start !important;
+  align-content: start !important;
+}
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+  display: inline-flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 10px 8px !important;
+  flex: 0 1 auto !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  border-radius: 6px !important;
+  white-space: normal !important;
+}
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+  display: inline !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
