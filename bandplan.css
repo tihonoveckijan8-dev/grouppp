@@ -9440,3 +9440,21 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { order: 4 !important; }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) { order: 5 !important; }
 #scene .scene-ctrl > .sbtn[data-act="scene-next"] { order: 6 !important; }
+
+
+/* Put the previous-song button on the bottom row, immediately left of the key-change control. */
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  order: 50 !important;
+  align-self: end !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  order: 51 !important;
+  align-self: end !important;
+}
+@media (max-width: 700px) {
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+    margin-top: 0 !important;
+    align-self: end !important;
+  }
+}
