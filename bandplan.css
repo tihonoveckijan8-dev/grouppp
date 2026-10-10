@@ -8512,3 +8512,44 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   .ev-row > .ev-body > [data-event-switch] { max-width: 100%; }
   .ev-row > .ev-body > [data-event-switch] .part-switch { gap: 5px; }
 }
+
+/* Final event-card alignment: participation and action controls belong on the LEFT. */
+.ev-row [data-event-switch],
+.ev-card [data-event-switch],
+.event-card [data-event-switch],
+.event-row [data-event-switch] {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  justify-content: flex-start !important;
+}
+.ev-row .ev-acts,
+.ev-card .ev-acts,
+.event-card .ev-acts,
+.event-row .ev-acts {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  justify-content: flex-start !important;
+}
+.ev-row > .ev-body > [data-event-switch],
+.ev-card > .ev-body > [data-event-switch],
+.event-card > .ev-body > [data-event-switch],
+.event-row > .ev-body > [data-event-switch] {
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+.ev-row > .ev-body > [data-event-switch] .part-switch,
+.ev-card > .ev-body > [data-event-switch] .part-switch,
+.event-card > .ev-body > [data-event-switch] .part-switch,
+.event-row > .ev-body > [data-event-switch] .part-switch {
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+@media (max-width: 700px) {
+  .ev-row > .ev-acts {
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
