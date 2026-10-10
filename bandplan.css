@@ -7959,10 +7959,10 @@ body[data-route="calendar"] .cal-cell.sel .cal-num{
   min-width:29px;
   margin:-2px 0 0 -2px;
   border-radius:50%;
-  background:var(--accent);
-  border:0;
-  color:var(--accent-contrast,var(--accent-on-bg,#fff));
-  box-shadow:0 2px 5px var(--accent-ring);
+  background:var(--accent-soft);
+  border:1px solid var(--accent-ring);
+  color:var(--accent);
+  box-shadow:0 1px 3px var(--raw-color-027);
 }
 body[data-route="calendar"] .cal-dot-today{
   width:5px;
