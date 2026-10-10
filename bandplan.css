@@ -8759,3 +8759,31 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     font-size: 11px !important;
   }
 }
+
+
+/* HARD OVERRIDE: selected “Не участвую” state must always be red in every theme/state. */
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn[data-v="no"].status-no,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"],
+.part-switch .part-btn.part-btn-main[data-v="no"].on,
+.part-switch .part-btn.part-btn-main[data-v="no"][aria-pressed="true"],
+.part-switch .part-btn[data-v="no"].on:disabled,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:disabled {
+  color: var(--token-white, #fff) !important;
+  background: var(--danger, #dc2626) !important;
+  background-color: var(--danger, #dc2626) !important;
+  border-color: var(--danger, #dc2626) !important;
+  box-shadow: 0 0 0 1px var(--danger, #dc2626) !important;
+  opacity: 1 !important;
+}
+.part-switch .part-btn[data-v="no"].on:hover,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
+.part-switch .part-btn[data-v="no"].on:active,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
+  color: var(--token-white, #fff) !important;
+  background: var(--danger, #dc2626) !important;
+  background-color: var(--danger, #dc2626) !important;
+  border-color: var(--danger, #dc2626) !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
