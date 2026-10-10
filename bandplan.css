@@ -8234,9 +8234,41 @@ body[data-route="calendar"] .cal-legend i{
 }
 
 
-/* Optical alignment: nudge mobile calendar day numbers slightly left. */
+/* Mobile calendar alignment: center dates, selection circles, and event markers on each cell's horizontal centerline. */
 @media(max-width:767px){
   body[data-route="calendar"] .cal-cell .cal-num{
-    transform:translateX(-2px);
+    align-self:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    margin-inline:0;
+    padding-inline:0;
+    text-align:center;
+    transform:none;
+  }
+  body[data-route="calendar"] .cal-cell.sel .cal-num{
+    width:25px;
+    min-width:25px;
+    height:25px;
+    margin-inline:auto;
+    padding:0;
+    justify-content:center;
+    transform:none;
+  }
+  body[data-route="calendar"] .cal-cell .cal-events{
+    width:100%;
+    margin-inline:0;
+    justify-content:center;
+    align-items:center;
+    align-content:center;
+  }
+  body[data-route="calendar"] .cal-cell .cal-ev{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    align-self:center;
+    margin-inline:0;
+    box-sizing:border-box;
   }
 }
