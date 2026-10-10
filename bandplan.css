@@ -7713,3 +7713,38 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
 }
 .song-lyrics-textarea { scroll-margin-block:16px; }
 .lyrics .sec { max-width:100%; width:max-content; white-space:normal; overflow-wrap:anywhere; vertical-align:baseline; }
+
+
+/* Setlist detail: compact actions and a clearer, button-driven song picker. */
+.setlist-detail-actions{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;flex:none}
+.setlist-detail-actions .icon-btn{width:var(--tap);height:var(--tap);flex:none}
+.setlist-detail-actions .icon-btn.danger{color:var(--danger)}
+.setlist-scene-action{margin-top:var(--s3)}
+.setlist-library-card{min-width:0}
+.setlist-library-summary{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);flex-wrap:wrap;
+  margin:0 0 var(--s3);padding:9px 11px;border:1px solid var(--border);border-radius:var(--r-12);
+  background:var(--surf-1);color:var(--muted);font-size:var(--fs-caption)}
+.setlist-library-search{margin-bottom:var(--s3)}
+.setlist-lib-item{display:flex;align-items:center;gap:var(--s3);padding:10px 11px;cursor:default}
+.setlist-lib-item:hover{color:var(--text)}
+.setlist-lib-item .lib-item-main{display:flex;flex:1;flex-direction:column;gap:3px;min-width:0}
+.setlist-lib-item .lib-item-title{font-size:var(--fs-body-s);font-weight:var(--fw-semi);line-height:1.35;color:var(--text);
+  overflow-wrap:anywhere}
+.setlist-lib-item .lib-item-meta{font-size:var(--fs-caption);line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.setlist-lib-item .lib-add-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:var(--tap);
+  flex:none;white-space:nowrap;padding:0 11px}
+.setlist-lib-item .lib-add-btn:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+@media(max-width:520px){
+  .setlist-detail-actions{gap:4px}
+  .setlist-detail-actions .icon-btn{width:40px;height:40px}
+  .setlist-library-card .card-h{align-items:flex-start;gap:8px}
+  .setlist-library-card .card-h .badge{white-space:nowrap}
+  .setlist-lib-item{gap:8px;padding:9px}
+  .setlist-lib-item .lk{padding:3px 6px}
+  .setlist-lib-item .lib-add-btn{padding:0 8px;gap:4px}
+}
+@media(max-width:390px){
+  .setlist-detail-actions .icon-btn{width:36px;height:36px}
+  .setlist-lib-item .lib-add-label{font-size:11px}
+  .setlist-library-summary{font-size:11px}
+}
