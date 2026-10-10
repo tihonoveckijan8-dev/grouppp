@@ -919,8 +919,21 @@ body[data-route="setlist"] .page-head{background:var(--bg);backdrop-filter:none;
   #setBandDesc{grid-column:1/-1}
   body[data-route="song"] .page-head,
   body[data-route="setlist"] .page-head{position:sticky;top:0;box-shadow:var(--shadow-1)}
-  .cal-cell.cal-has-events::after{display:block;width:6px;height:6px;margin:3px auto 0;border-radius:50%;background:var(--cal-event-color);content:""}
-  .cal-cell.cal-has-events .cal-events{display:none}
+  /* On phones, show event-type icons inside each calendar day instead of a generic dot. */
+  .cal-cell.cal-has-events::after{display:none}
+  .cal-cell.cal-has-events .cal-events{
+    display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;
+    width:100%;min-width:0;min-height:12px;margin-top:auto;overflow:hidden
+  }
+  .cal-cell.cal-has-events .cal-ev{
+    display:inline-flex;align-items:center;justify-content:center;flex:0 0 13px;
+    width:13px;height:13px;min-width:13px;padding:0;border:1px solid currentColor;
+    border-left:1px solid currentColor;border-radius:4px;background:var(--surf-2);
+    box-shadow:none;overflow:hidden
+  }
+  .cal-cell.cal-has-events .cal-ev-icon{width:11px;height:11px;flex:0 0 11px}
+  .cal-cell.cal-has-events .cal-ev-icon svg{width:10px;height:10px}
+  .cal-cell.cal-has-events .cal-ev-label{display:none}
   .cal-cell.cal-has-events .cal-more{display:none}
   .tb-search{flex:0 0 var(--tap);width:var(--tap);height:var(--tap);padding:0;overflow:hidden}
   .tb-search .tb-search-ic{margin:auto}
