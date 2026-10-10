@@ -9588,3 +9588,46 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     padding-inline: .16em;
   }
 }
+
+
+/* Stage Mode fixes: unmistakable section labels and single-row copied chords */
+#scene #scBody .ln.sec {
+  display: block !important;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.35em 0 .55em !important;
+  padding: .42em .78em !important;
+  border: 1px solid var(--accent) !important;
+  border-left: 5px solid var(--accent) !important;
+  border-radius: 10px !important;
+  background: var(--accent-ring) !important;
+  color: var(--accent) !important;
+  font-family: var(--font) !important;
+  font-size: clamp(16px, .72em, 24px) !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .07em !important;
+  text-transform: uppercase;
+  opacity: 1 !important;
+  visibility: visible !important;
+  text-shadow: 0 0 1px currentColor;
+}
+#scene #scBody .scene-chord-line {
+  display: block !important;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+#scene #scBody .scene-chord-line::-webkit-scrollbar {
+  display: none;
+}
+#scene #scBody .scene-chord-line b.ch {
+  display: inline !important;
+  white-space: pre;
+}
