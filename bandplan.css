@@ -8211,3 +8211,24 @@ body[data-route="calendar"] .cal-legend i{
     text-align:center;
   }
 }
+
+
+/* Precisely center the day number (and its today marker) in mobile calendar cells. */
+@media(max-width:767px){
+  body[data-route="calendar"] .cal-cell .cal-num{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    text-align:center;
+    padding-inline:0;
+  }
+  body[data-route="calendar"] .cal-cell.sel .cal-num{
+    width:25px;
+    min-width:25px;
+    height:25px;
+    margin-inline:auto;
+    padding:0;
+    justify-content:center;
+  }
+}
