@@ -8863,3 +8863,85 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   white-space: nowrap !important;
   font-size: 12px !important;
 }
+
+
+/* User-requested final override: unselected "Не участвую" is completely neutral. */
+.part-switch .part-btn[data-v="no"]:not(.on),
+.part-switch .part-btn[data-v="no"]:not(.on):hover,
+.part-switch .part-btn[data-v="no"]:not(.on):active,
+.part-switch .part-btn[data-v="no"]:not(.on):focus,
+.part-switch .part-btn[data-v="no"]:not(.on):focus-visible,
+.part-switch .part-btn[data-v="no"]:not([aria-pressed="true"]) {
+  color: var(--text-2) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: var(--control-border) !important;
+  box-shadow: none !important;
+  outline-color: transparent !important;
+  filter: none !important;
+}
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"] {
+  color: var(--token-white) !important;
+  background: #DC2626 !important;
+  background-color: #DC2626 !important;
+  border-color: #DC2626 !important;
+  box-shadow: 0 0 0 1px #DC2626 !important;
+  outline-color: transparent !important;
+}
+
+/* Set-list actions: large, rectangular, easy-to-tap buttons sized to the card. */
+.setlists-list > .song-card > .song-acts.setlist-quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(52px, auto) !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 14px 0 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  justify-content: stretch !important;
+  align-content: start !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+  display: inline-flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 52px !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 12px 14px !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 9px !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  border-radius: 7px !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+  display: inline !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+@media (max-width: 420px) {
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    gap: 8px !important;
+  }
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+    min-height: 48px !important;
+    padding: 10px 7px !important;
+    gap: 5px !important;
+  }
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+    font-size: 11px !important;
+  }
+}
