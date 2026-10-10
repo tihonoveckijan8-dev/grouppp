@@ -9290,3 +9290,39 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important;
   box-shadow: none !important;
 }
+
+
+/* Stage mode: clean, uncluttered control bar. Keep only navigation, play/pause and fullscreen.
+   Fine adjustments remain available in settings; hide the cramped inline steppers. */
+#scene .scene-ctrl {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-x: auto !important;
+}
+#scene .scene-ctrl .sctl,
+#scene .scene-ctrl #scChords {
+  display: none !important;
+}
+#scene .scene-ctrl > .sbtn {
+  width: 52px !important;
+  height: 48px !important;
+  min-width: 44px !important;
+  flex: 0 1 52px !important;
+  border-radius: 12px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    gap: 8px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  #scene .scene-ctrl > .sbtn {
+    width: 48px !important;
+    height: 46px !important;
+    flex-basis: 48px !important;
+  }
+}
