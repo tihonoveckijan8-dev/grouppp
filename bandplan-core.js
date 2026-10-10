@@ -1959,8 +1959,8 @@ function renderSceneLyrics(song, shift, userRoles) {
     // Do not split chords into separate blocks or normalize their spacing/order.
     if (isChordLine(line)) {
       if (state.settings.showChords === false) return '';
-      return '<span class="ln scene-chord-line">' + line.split(/(\\s+)/).map(function(part) {
-        if (/^\\s+$/.test(part)) return part;
+      return '<span class="ln scene-chord-line">' + line.split(/(\s+)/).map(function(part) {
+        if (/^\s+$/.test(part)) return part;
         return isChord(part) ? '<b class="ch">' + esc(transposeChord(part, shift)) + '</b>' : esc(part);
       }).join('') + '</span>';
     }
