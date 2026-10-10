@@ -9151,3 +9151,39 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] * {
   color: inherit !important;
 }
+
+
+/* Final participation-state styling:
+   selected "Не участвую" = soft red chip as in the reference;
+   unselected = exactly the same neutral style as the other unselected status buttons. */
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]),
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):hover,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
+  color: var(--muted) !important;
+  background: var(--surf-2) !important;
+  background-color: var(--surf-2) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn[data-v="no"].status-no,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"],
+.part-switch .part-btn[data-v="no"].on:hover,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
+.part-switch .part-btn[data-v="no"].on:active,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
