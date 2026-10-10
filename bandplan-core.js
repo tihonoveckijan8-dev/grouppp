@@ -2044,10 +2044,10 @@ function vSetlists() {
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
       '<span class="card-chevron" aria-hidden="true">›</span></div>' +
       '<div class="song-acts setlist-quick-actions">' +
-      '<button class="icon-btn setlist-quick-action" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
-      '<button class="icon-btn setlist-quick-action" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
-      '<button class="icon-btn danger setlist-quick-action" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '</button>' +
-      '<button class="btn btn-primary btn-sm setlist-scene setlist-quick-action" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">Открыть на сцене</span></button></div></article>';
+      '<button class="icon-btn setlist-quick-action" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="icon-btn setlist-quick-action" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '<span class="btn-txt">Дублировать</span></button>' +
+      '<button class="icon-btn danger setlist-quick-action" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить">' + ic('trash', 16) + '<span class="btn-txt">Удалить</span></button>' +
+      '<button class="btn btn-primary btn-sm setlist-scene setlist-quick-action" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть на сцене" title="Открыть на сцене">' + ic('monitor', 15) + '<span class="btn-txt">На сцену</span></button></div></article>';
   });
   h += '</div></div>';
   if (selectedSetlist) h += '<aside class="master-detail-panel" aria-label="Выбранный сет-лист">' + vSetlist(selectedSetlist.id) + '</aside>';
@@ -2920,7 +2920,9 @@ document.addEventListener('keydown', function (e) {
   }
 });
 document.addEventListener('click', function (e) {
-  const el = e.target.closest('[data-act]');
+  // Prefer an actionable button over the clickable card/article that contains it.
+  // This prevents card-level navigation from swallowing delete, edit and participation clicks.
+  const el = e.target.closest('button[data-act], [data-act]');
   if (!el) { if (!e.target.closest('#searchWrap')) closeSearch(); return; }
   const a = el.getAttribute('data-act'), id = el.getAttribute('data-id');
   const stop = () => { e.preventDefault(); e.stopPropagation(); };
