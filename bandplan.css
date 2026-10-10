@@ -8680,3 +8680,82 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     gap: 6px !important;
   }
 }
+
+
+/* Corrective pass: make event participation and set-list actions visibly usable. */
+.part-switch .part-btn.on[data-v="no"],
+.part-switch .part-btn.on.status-no,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"] {
+  color: #fff !important;
+  background: #d92d3a !important;
+  border-color: #d92d3a !important;
+  box-shadow: 0 0 0 1px rgba(217,45,58,.28) !important;
+}
+.part-switch .part-btn[data-v="no"]:hover {
+  color: #fff !important;
+  background: #b91f2b !important;
+  border-color: #b91f2b !important;
+}
+.part-switch .part-btn[data-v="no"]:focus-visible {
+  outline: 2px solid #d92d3a !important;
+  outline-offset: 2px !important;
+}
+
+/* Event controls stay left-aligned, and the event card remains clickable only outside controls. */
+.ev-row > .ev-acts,
+.ev-row > .ev-body > [data-event-switch],
+.ev-row > .ev-body > [data-event-switch] .part-switch {
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+.ev-row > .ev-acts { justify-self: start !important; }
+
+/* Set-list actions have visible labels and generous, centered hit areas. */
+.setlists-list > .song-card > .song-acts.setlist-quick-actions {
+  grid-template-columns: repeat(2, minmax(120px, 1fr)) !important;
+  justify-content: center !important;
+  justify-items: stretch !important;
+  align-content: start !important;
+  width: min(100%, 330px) !important;
+  margin: 14px auto 0 !important;
+  gap: 10px !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  height: auto !important;
+  flex: initial !important;
+  padding: 10px 12px !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 12px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+  display: inline !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+@media (max-width: 380px) {
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+    padding-inline: 6px !important;
+    gap: 5px !important;
+  }
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+    font-size: 11px !important;
+  }
+}
