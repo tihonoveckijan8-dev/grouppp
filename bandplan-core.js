@@ -1603,7 +1603,7 @@ function monthHTML(y, mo) {
       list.slice(0, 3).forEach(o => {
         const type = evType(o.ev.type);
         const label = [o.ev.title, o.ev.time, type.label].filter(Boolean).join(', ');
-        h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '">' + esc(o.ev.time || '') + ' ' + esc(o.ev.title) + '</div>';
+        h += '<div class="cal-ev ce-' + o.ev.type + '" data-act="event-info" data-id="' + esc(o.ev.id) + '" data-date="' + esc(o.date) + '" role="button" tabindex="0" aria-label="' + esc(label) + '"><span class="cal-ev-icon" aria-hidden="true">' + ic(type.ic, 12) + '</span><span class="cal-ev-label">' + esc(o.ev.time || '') + (o.ev.time ? ' ' : '') + esc(o.ev.title) + '</span></div>';
       });
       if (list.length > 3) {
         const remaining = list.length - 3;
