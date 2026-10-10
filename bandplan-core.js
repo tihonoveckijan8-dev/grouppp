@@ -969,22 +969,6 @@ function refreshParticipationUI(evId) {
   document.querySelectorAll('[data-event-participation-summary="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
     node.innerHTML = '<span class="status-yes">' + sum.yes + ' · Участвуют</span><span class="status-maybe">' + sum.maybe + ' · Под вопросом</span><span class="status-no">' + sum.no + ' · Не участвуют</span><span class="status-unset">' + sum.unset + ' · Не ответили</span>';
   });
-  document.querySelectorAll('.part-switch[data-event-switch="' + CSS.escape(String(ev.id)) + '"]').forEach(sw => {
-    let reset = sw.querySelector('.part-reset');
-    if (my && !reset) {
-      reset = document.createElement('button');
-      reset.className = 'part-reset';
-      reset.type = 'button';
-      reset.setAttribute('data-v','');
-      reset.setAttribute('data-act','my-status');
-      reset.setAttribute('data-id',String(ev.id));
-      reset.setAttribute('aria-label','Сбросить отметку участия');
-      reset.innerHTML = ic('x',13) + '<span>Сбросить</span>';
-      sw.appendChild(reset);
-    } else if (!my && reset) {
-      reset.remove();
-    }
-  });
   const pendingNode = document.querySelectorAll('[data-participation-pending="' + CSS.escape(String(ev.id)) + '"]');
   pendingNode.forEach(node => node.remove());
   if (participationPending.has(String(ev.id))) {
