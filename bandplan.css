@@ -8410,9 +8410,9 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-btn[data-v="no"].on,
 [data-event-switch] .part-btn[data-v="no"],
 [data-event-switch] .part-btn[data-v="no"].on {
-  color: var(--danger, #dc2626) !important;
-  background: var(--danger-bg, #fee2e2) !important;
-  border-color: var(--danger, #dc2626) !important;
+  color: var(--danger) !important;
+  background: var(--danger-bg) !important;
+  border-color: var(--danger) !important;
 }
 .part-switch .part-btn[data-v="no"].on *,
 .part-btn[data-v="no"].on * { color: inherit !important; }
@@ -8686,18 +8686,18 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn.on.status-no,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] {
-  color: #fff !important;
-  background: #d92d3a !important;
-  border-color: #d92d3a !important;
-  box-shadow: 0 0 0 1px rgba(217,45,58,.28) !important;
+  color: var(--token-white) !important;
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--danger) 28%,transparent) !important;
 }
 .part-switch .part-btn[data-v="no"]:hover {
-  color: #fff !important;
-  background: #b91f2b !important;
-  border-color: #b91f2b !important;
+  color: var(--token-white) !important;
+  background: color-mix(in srgb,var(--danger) 82%,black) !important;
+  border-color: color-mix(in srgb,var(--danger) 82%,black) !important;
 }
 .part-switch .part-btn[data-v="no"]:focus-visible {
-  outline: 2px solid #d92d3a !important;
+  outline: 2px solid var(--danger) !important;
   outline-offset: 2px !important;
 }
 
