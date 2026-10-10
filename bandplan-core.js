@@ -775,10 +775,6 @@ function renderParticipationSwitch(ev, options) {
     html += '<button class="part-btn part-btn-' + p[3] + (p[1] === 'Под вопросом' ? ' part-btn-secondary' : '') + (active ? ' on status-' + p[0] : '') + '" type="button" data-v="' + p[0] + '" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
       (draft ? ' data-draft="1"' : '') + ' aria-pressed="' + active + '"' + (disabled ? ' disabled' : '') + ' aria-label="' + p[1] + (active ? ' — выбрано' : '') + '">' + '<span class="part-symbol" aria-hidden="true">' + p[4] + '</span></button>';
   });
-  if (status) {
-    html += '<button class="part-reset" type="button" data-v="" data-act="my-status" data-id="' + esc(ev?.id || '') + '"' +
-      (draft ? ' data-draft="1"' : '') + (disabled ? ' disabled' : '') + ' aria-label="Сбросить отметку участия">' + ic('x', 13) + '<span>Сбросить</span></button>';
-  }
   if (pending) html += '<span class="participation-pending" data-participation-pending="' + esc(String(ev.id)) + '">' + ic('clock', 12) + '<span>Ожидает отправки</span></span>';
   return html + '</div>';
 }
