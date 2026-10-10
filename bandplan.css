@@ -8186,3 +8186,28 @@ body[data-route="calendar"] .cal-legend i{
     height:13px;
   }
 }
+
+
+/* Center day numbers and event markers inside mobile calendar cells. */
+@media(max-width:767px){
+  body[data-route="calendar"] .cal-cell{
+    align-items:center;
+  }
+  body[data-route="calendar"] .cal-num{
+    align-self:center;
+    width:100%;
+    text-align:center;
+  }
+  body[data-route="calendar"] .cal-events{
+    width:100%;
+    justify-content:center;
+    align-content:center;
+    align-items:center;
+    margin-inline:auto;
+  }
+  body[data-route="calendar"] .cal-more{
+    width:100%;
+    margin-inline:auto;
+    text-align:center;
+  }
+}
