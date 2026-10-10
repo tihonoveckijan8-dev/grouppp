@@ -3168,7 +3168,7 @@ document.addEventListener('click', function (e) {
         }, 'Удалить эту дату', true);
       } else {
         confirmBox('Удалить событие?', '«' + ev.title + '» будет удалено' + (ev.repeat && ev.repeat !== 'none' ? ' вместе со всеми повторениями серии' : '') + '. Отменить удаление можно будет только через резервную копию.', function () {
-          state.events = state.events.filter(x => x.id !== id); commit(); toast('Событие удалено', 'ok');
+          state.events = state.events.filter(x => String(x.id) !== String(id)); commit(); toast('Событие удалено', 'ok');
         }, 'Удалить событие', true);
       }
       break;
