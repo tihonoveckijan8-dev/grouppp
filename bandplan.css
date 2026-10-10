@@ -7779,7 +7779,7 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
   border-radius:16px;
   background:var(--surf-1);
   color:var(--muted);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  box-shadow:inset 0 1px 0 var(--raw-color-164);
   transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 .setlist-detail .setlist-library-search > .tb-search:focus-within{
@@ -7827,7 +7827,7 @@ body:not([data-route="calendar"]) .lyrics-expand-shell.is-expanded .lyrics{max-h
   border:1px solid var(--border);
   border-radius:16px;
   background:var(--surf-1);
-  box-shadow:0 16px 42px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+  box-shadow:0 16px 42px var(--raw-color-135), 0 2px 8px var(--raw-color-162);
   scrollbar-width:thin;
 }
 .setlist-detail .setlist-library-search:has(.setlist-song-suggestion) .setlist-song-suggestions,
@@ -7928,7 +7928,7 @@ body[data-route="calendar"] .cal-cell{
   border-radius:18px;
   border-color:color-mix(in srgb,var(--border) 78%,transparent);
   background:linear-gradient(155deg,var(--surf-2),color-mix(in srgb,var(--surf-3) 26%,var(--surf-2)));
-  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent),0 2px 5px rgba(0,0,0,.025);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--raw-color-010) 25%,transparent),0 2px 5px var(--raw-color-121);
 }
 body[data-route="calendar"] .cal-grid>.cal-cell:nth-child(7n),
 body[data-route="calendar"] .cal-grid>.cal-cell:nth-child(7n - 1){
