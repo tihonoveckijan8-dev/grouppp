@@ -8964,3 +8964,77 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   filter: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
+
+
+/* Setlists: align every action to the card's left edge; use rectangular, full-width controls. */
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: minmax(48px, auto) !important;
+  justify-content: start !important;
+  justify-items: stretch !important;
+  align-content: start !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 48px !important;
+  padding: 10px 12px !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+}
+body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt,
+.setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+  display: inline !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 420px) {
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions,
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    gap: 7px !important;
+  }
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action,
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+    min-height: 46px !important;
+    padding: 9px 6px !important;
+    gap: 5px !important;
+  }
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt,
+  .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+    font-size: 11px !important;
+  }
+}
+
+/* The unselected "Не участвую" control uses the same neutral button treatment as its siblings. */
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]),
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):hover,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
+  color: var(--muted) !important;
+  background: var(--surf-3) !important;
+  background-color: var(--surf-3) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow-1) !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
