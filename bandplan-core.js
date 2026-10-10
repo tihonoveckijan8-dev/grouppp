@@ -1951,6 +1951,22 @@ function renderSceneLyrics(song, shift, userRoles) {
       const key = occurrence ? occurrence.label : heading.source;
       return '<span class="ln sec">' + esc(heading.source) + '</span>' + renderNotes(key);
     }
+
+    // Lyrics pasted from chord sheets often put the section label and the
+    // first lyric on the same line, e.g. "[Припев] Текст..." or "Бридж: Текст...".
+    // Split the label from the lyric instead of letting the whole line disappear
+    // into plain text or being misread as a chord row.
+    const sectionPrefix = /^\\s*(?:\\[([^\\]]+)\\]|(куплет(?:\\s*\\d+)?|припев(?:\\s*\\d+)?|предприпев|постприпев|бридж|переход|связка|verse(?:\\s*\\d+)?|chorus(?:\\s*\\d+)?|pre[ -]?chorus|post[ -]?chorus|bridge))\\s*(?::|：|[-—])?\\s+(.+)$/i.exec(line);
+    if (sectionPrefix) {
+      const sectionText = sectionPrefix[1] || sectionPrefix[2];
+      const parsedPrefix = parseSectionHeading(sectionText);
+      if (parsedPrefix) {
+        const occurrence = occurrences[sectionIndex++];
+        const key = occurrence ? occurrence.label : parsedPrefix.source;
+        return '<span class="ln sec">' + esc(parsedPrefix.source) + '</span>' + renderNotes(key) + renderLyrics(sectionPrefix[3], shift);
+      }
+    }
+
     const inferredSection = byLine[lineIndex];
     if (inferredSection) {
       return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
