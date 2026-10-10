@@ -2038,10 +2038,29 @@ function vSetlist(id) {
     (linkedEvent ? '<span class="badge b-muted">' + ic('calendar', 11) + esc(linkedEvent.title) + '</span>' : '') +
     '</div>' +
     '<div class="row mt setlist-scene-action"><button class="btn btn-primary btn-sm" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
-    '<div class="card-h mt" style="align-items:end"><div><h3>Состав программы</h3><div class="sub">Порядок песен, тональности и индивидуальные настройки партии</div></div>' +
+    '<div class="card-h mt" style="align-items:end"><div><h3>Репертуар</h3><div class="sub">Ищите песню и выбирайте её из списка</div></div>' +
     '<span class="cap num">' + count + ' ' + plural(count, 'трек', 'трека', 'треков') + '</span></div>' +
+    '<div class="setlist-library-search mt"><div class="tb-search">' + ic('search', 17) +
+    '<label class="sr-only" for="libQ">Поиск песни в репертуаре</label>' +
+    '<input id="libQ" class="bare-input" type="search" autocomplete="off" placeholder="Найти песню в репертуаре…" value="' + esc(ui.libQuery) + '"></div>' +
+    '<div class="setlist-song-suggestions" id="setlistSongSuggestions" role="listbox" aria-label="Найденные песни">';
+ 
+  const q = String(ui.libQuery || '').toLowerCase().trim();
+  if (q) {
+    const matches = state.songs.filter(s => ((s.title || '') + ' ' + (s.artist || '')).toLowerCase().includes(q))
+      .sort((a, b) => a.title.localeCompare(b.title, 'ru')).slice(0, 8);
+    if (!matches.length) h += '<div class="setlist-song-empty">Ничего не найдено</div>';
+    matches.forEach(function (song) {
+      const alreadyAdded = (sl.items || []).some(item => item.songId === song.id);
+      const meta = [song.artist || '', song.key || ''].filter(Boolean).join(' · ');
+      h += '<button class="setlist-song-suggestion" type="button" role="option" data-act="sl-search-add" data-sl="' + sl.id + '" data-song="' + song.id + '"' +
+        (alreadyAdded ? ' disabled aria-disabled="true"' : '') + '><span class="setlist-song-suggestion-main"><b>' + esc(song.title) + '</b>' +
+        (meta ? '<small>' + esc(meta) + '</small>' : '') + '</span><span class="setlist-song-suggestion-action">' +
+        (alreadyAdded ? 'Уже в программе' : ic('plus', 15) + ' Добавить') + '</span></button>';
+    });
+  }
+  h += '</div></div><div class="dropzone mt" id="dropZone">';
 
-    '<div class="dropzone mt" id="dropZone">';
 
   if (!count) {
     h += stateHTML('empty', 'Программа пуста', 'Добавьте первую песню с помощью кнопки «Добавить» в библиотеке справа.');
@@ -2079,26 +2098,6 @@ function vSetlist(id) {
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
     '<button class="btn btn-danger btn-sm" type="button" data-act="sl-clear" data-id="' + sl.id + '">Очистить программу</button>' +
     '</div></section>';
-
-  h += '</div><div class="stack">';
-
-  const slSongCount = (sl.items || []).length;
-  h += '<section class="card rise setlist-library-card" style="animation-delay:.04s"><div class="card-h"><div><h2>Добавить песни</h2><div class="sub">Выберите композицию из репертуара</div></div><span class="badge b-brand">' + state.songs.length + ' в библиотеке</span></div>' +
-    '<div class="setlist-library-summary"><span>' + slSongCount + ' в сет-листе</span><span>Выбирайте песни кнопкой «Добавить»</span></div>' +
-    '<div class="tb-search mb setlist-library-search" style="height:44px">' + ic('search', 17) + '<label class="sr-only" for="libQ">Поиск песни</label>' +
-    '<input id="libQ" class="bare-input" type="search" placeholder="Поиск песни…" value="' + esc(ui.libQuery) + '"></div>' +
-    '<div class="lib-list" id="libList">';
-  const q = ui.libQuery.toLowerCase().trim();
-  const lib = state.songs.filter(s => !q || ((s.title || '') + ' ' + (s.artist || '')).toLowerCase().indexOf(q) >= 0).sort((a, b) => a.title.localeCompare(b.title, 'ru'));
-  if (!lib.length) h += stateHTML('search', 'Песни не найдены', q ? 'Попробуйте изменить запрос или очистить поиск.' : 'Сначала добавьте песни в репертуар.', q ? '' : '<button class="btn btn-secondary btn-sm" type="button" data-act="new-song">Добавить песню</button>');
-  lib.forEach(function (s) {
-    const meta = [s.artist || '', s.bpm ? s.bpm + ' BPM' : '', s.duration ? fmtDur(s.duration) : ''].filter(Boolean).join(' · ');
-    h += '<div class="lib-item setlist-lib-item" data-lib="' + s.id + '"><span class="lk">' + esc(s.key || '—') + '</span>' +
-      '<div class="lib-item-main"><span class="lib-item-title">' + esc(s.title) + '</span>' +
-      (meta ? '<span class="lib-item-meta">' + esc(meta) + '</span>' : '') + '</div>' +
-      '<button class="btn btn-secondary btn-sm lib-add-btn" type="button" data-act="sl-add" data-sl="' + sl.id + '" data-song="' + s.id + '" aria-label="Добавить ' + esc(s.title) + ' в сет-лист" title="Добавить в сет-лист">' + ic('plus', 15) + '<span class="lib-add-label">Добавить</span></button></div>';
-  });
-  h += '</div></section>';
 
   return h + '</div></div>';
 }
@@ -3297,6 +3296,7 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'sl-add': { stop(); const slId = el.getAttribute('data-sl'); const songId = el.getAttribute('data-song'); const sl = slById(slId); if (!sl || !songId) { toast('Не удалось добавить песню', 'err'); break; } const alreadyAdded = (sl.items || []).some(item => item.songId === songId); if (alreadyAdded) { toast('Эта песня уже есть в сет-листе', 'info'); break; } addItem(slId, songId, -1); toast('Песня добавлена в сет-лист', 'ok', 2000); break; }
+    case 'sl-search-add': { stop(); const slId = el.getAttribute('data-sl'); const songId = el.getAttribute('data-song'); const sl = slById(slId); if (!sl || !songId) break; if ((sl.items || []).some(item => item.songId === songId)) { toast('Эта песня уже есть в сет-листе', 'info'); break; } ui.libQuery = ''; addItem(slId, songId, -1); toast('Песня добавлена в сет-лист', 'ok', 1800); break; }
     case 'sl-add-go': { stop(); const slId = el.getAttribute('data-sl'); addItem(slId, el.getAttribute('data-song'), -1); hardClose(modalRoot); go('#/setlist/' + slId); toast('Песня добавлена в сет-лист', 'ok'); break; }
     case 'sl-item-del': { stop(); const sl = slById(el.getAttribute('data-sl')); if (!sl) break; sl.items = (sl.items || []).filter(x => x.id !== el.getAttribute('data-item')); sl.updatedAt = new Date().toISOString(); commit(); break; }
     case 'sl-item-move': {
