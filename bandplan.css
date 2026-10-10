@@ -8553,3 +8553,26 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     margin-right: auto !important;
   }
 }
+
+
+/* Final placement: keep event-card quick actions beneath the details, aligned to the left. */
+.ev-row > .ev-acts {
+  grid-column: 2 / -1 !important;
+  grid-row: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  justify-content: flex-start !important;
+  justify-self: stretch !important;
+}
+.ev-row > .ev-acts > .icon-btn {
+  margin-left: 0 !important;
+}
+@media (max-width: 700px) {
+  .ev-row > .ev-acts {
+    grid-column: 2 / -1 !important;
+    justify-content: flex-start !important;
+  }
+}
