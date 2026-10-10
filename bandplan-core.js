@@ -1955,6 +1955,15 @@ function renderSceneLyrics(song, shift, userRoles) {
     if (inferredSection) {
       return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
     }
+    // In Stage Mode, keep a copied chord-only row in its original left-to-right order.
+    // Do not split chords into separate blocks or normalize their spacing/order.
+    if (isChordLine(line)) {
+      if (state.settings.showChords === false) return '';
+      return '<span class="ln scene-chord-line">' + line.split(/(\\s+)/).map(function(part) {
+        if (/^\\s+$/.test(part)) return part;
+        return isChord(part) ? '<b class="ch">' + esc(transposeChord(part, shift)) + '</b>' : esc(part);
+      }).join('') + '</span>';
+    }
     return renderLyrics(line, shift);
   }).join('');
 }
