@@ -9615,7 +9615,10 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 #scene #scBody .scene-chord-line {
   display: block !important;
   box-sizing: border-box;
+  width: 100%;
   max-width: 100%;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: pre !important;
@@ -9630,4 +9633,9 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 #scene #scBody .scene-chord-line b.ch {
   display: inline !important;
   white-space: pre;
+  margin-inline: 0 !important;
+  padding-inline: .08em !important;
+}
+#scene #scBody .scene-chord-line b.ch + b.ch {
+  margin-left: 0 !important;
 }
