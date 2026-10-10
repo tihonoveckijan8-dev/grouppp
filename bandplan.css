@@ -9630,14 +9630,22 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 #scene #scBody .scene-chord-line::-webkit-scrollbar {
   display: none;
 }
+/* Chords must remain visually distinct from lyric text in every Stage Mode layout. */
+#scene #scBody b.ch,
 #scene #scBody .scene-chord-line b.ch {
-  display: inline !important;
-  white-space: pre;
+  display: inline-block !important;
+  box-sizing: border-box;
   color: var(--accent) !important;
+  background: var(--accent-ring) !important;
+  border: 1px solid var(--accent) !important;
+  border-radius: 5px !important;
   font-weight: 900 !important;
-  text-shadow: 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
-  margin-inline: 0 !important;
-  padding-inline: .08em !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+  line-height: 1.3 !important;
+  margin: 0 .04em !important;
+  padding: 0 .16em !important;
+  white-space: pre;
 }
 #scene #scBody .scene-chord-line b.ch + b.ch {
   margin-left: 0 !important;
