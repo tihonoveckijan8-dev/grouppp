@@ -9362,3 +9362,47 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   min-width: 24px !important;
   text-align: center !important;
 }
+
+
+/* Stage toolbar: show speed and text-size steppers alongside song navigation and transposition. */
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  display: flex !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+  width: 34px !important;
+  min-width: 30px !important;
+  height: 40px !important;
+  padding: 0 4px !important;
+  flex: 0 1 auto !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) span {
+  min-width: 22px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    row-gap: 7px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+    width: 30px !important;
+    min-width: 28px !important;
+    height: 38px !important;
+    padding: 0 2px !important;
+  }
+}
