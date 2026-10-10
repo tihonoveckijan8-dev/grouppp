@@ -3296,7 +3296,7 @@ document.addEventListener('click', function (e) {
       state.setlists.push(c); save(); go('#/setlist/' + c.id); render(); toast('Копия сет-листа создана', 'ok');
       break;
     }
-    case 'sl-add': stop(); addItem(id, el.getAttribute('data-song'), -1); toast('Песня добавлена в программу', 'ok', 2000); break;
+    case 'sl-add': { stop(); const slId = el.getAttribute('data-sl'); const songId = el.getAttribute('data-song'); const sl = slById(slId); if (!sl || !songId) { toast('Не удалось добавить песню', 'err'); break; } const alreadyAdded = (sl.items || []).some(item => item.songId === songId); if (alreadyAdded) { toast('Эта песня уже есть в сет-листе', 'info'); break; } addItem(slId, songId, -1); toast('Песня добавлена в сет-лист', 'ok', 2000); break; }
     case 'sl-add-go': { stop(); const slId = el.getAttribute('data-sl'); addItem(slId, el.getAttribute('data-song'), -1); hardClose(modalRoot); go('#/setlist/' + slId); toast('Песня добавлена в сет-лист', 'ok'); break; }
     case 'sl-item-del': { stop(); const sl = slById(el.getAttribute('data-sl')); if (!sl) break; sl.items = (sl.items || []).filter(x => x.id !== el.getAttribute('data-item')); sl.updatedAt = new Date().toISOString(); commit(); break; }
     case 'sl-item-move': {
