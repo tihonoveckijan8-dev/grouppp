@@ -7138,9 +7138,22 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 .setlist-detail .sl-row-actions{
   flex:0 0 auto;
 }
+.setlist-detail{
+  grid-template-columns:minmax(0,1fr);
+}
 .setlist-detail .lib-item{
   min-height:44px;
 }
+.setlist-library-search{position:relative;min-width:0}
+.setlist-song-suggestions{display:flex;flex-direction:column;gap:4px;margin-top:5px}
+.setlist-song-suggestion{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:48px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-12);background:var(--surf-1);color:var(--text);text-align:left;cursor:pointer}
+.setlist-song-suggestion:hover:not(:disabled),.setlist-song-suggestion:focus-visible{border-color:var(--accent);background:var(--accent-soft);outline:none}
+.setlist-song-suggestion:disabled{opacity:.65;cursor:default}
+.setlist-song-suggestion-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.setlist-song-suggestion-main b{font-size:var(--fs-body-s);font-weight:var(--fw-semi);overflow-wrap:anywhere}
+.setlist-song-suggestion-main small{font-size:var(--fs-caption);color:var(--muted)}
+.setlist-song-suggestion-action{display:flex;align-items:center;gap:5px;flex:none;font-size:var(--fs-caption);color:var(--accent)}
+.setlist-song-empty{padding:12px;color:var(--muted);font-size:var(--fs-body-s);border:1px solid var(--border);border-radius:var(--r-12);}
 @media(max-width:900px){
   .setlist-detail{
     grid-template-columns:minmax(0,1fr);
