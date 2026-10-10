@@ -1012,7 +1012,7 @@ const songById = id => {
   if (navigator.onLine === false && offlineSongIndex.has(key)) return offlineSongIndex.get(key);
   return state.songs.find(s => String(s.id) === key);
 };
-const evById = id => state.events.find(e => e.id === id);
+const evById = id => state.events.find(e => String(e.id) === String(id));
 const slById = id => state.setlists.find(s => s.id === id);
 const memById = id => state.members.find(m => m.id === id);
 
