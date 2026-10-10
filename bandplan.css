@@ -8232,3 +8232,11 @@ body[data-route="calendar"] .cal-legend i{
     justify-content:center;
   }
 }
+
+
+/* Optical alignment: nudge mobile calendar day numbers slightly left. */
+@media(max-width:767px){
+  body[data-route="calendar"] .cal-cell .cal-num{
+    transform:translateX(-2px);
+  }
+}
