@@ -2063,7 +2063,7 @@ function vSetlist(id) {
 
 
   if (!count) {
-    h += stateHTML('empty', 'Программа пуста', 'Добавьте первую песню с помощью кнопки «Добавить» в библиотеке справа.');
+    h += stateHTML('empty', 'Программа пуста', 'Найдите песню по названию в поле поиска выше.');
   } else {
     (sl.items || []).forEach(function (it, i) {
       const s = songById(it.songId);
