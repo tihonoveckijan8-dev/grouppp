@@ -9458,3 +9458,59 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     align-self: end !important;
   }
 }
+
+
+/* Stage toolbar: fixed two-row layout. Bottom row: previous | transpose | next. */
+#scene .scene-ctrl {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  justify-items: center !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  align-content: center !important;
+  gap: 8px 10px !important;
+  flex-wrap: initial !important;
+  overflow: visible !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) {
+  grid-column: 1 !important; grid-row: 1 !important; order: initial !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  grid-column: 2 !important; grid-row: 1 !important; order: initial !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  grid-column: 3 !important; grid-row: 1 !important; order: initial !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  grid-column: 1 !important; grid-row: 2 !important; order: initial !important;
+  justify-self: center !important; align-self: center !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  grid-column: 2 !important; grid-row: 2 !important; order: initial !important;
+  justify-self: center !important; align-self: center !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  grid-column: 3 !important; grid-row: 2 !important; order: initial !important;
+  justify-self: center !important; align-self: center !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-fs"],
+#scene .scene-ctrl #scChords { display: none !important; }
+#scene .scene-ctrl .sctl { min-width: 0 !important; max-width: 100% !important; }
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 7px 5px !important;
+    padding-left: 10px !important; padding-right: 10px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) { gap: 1px !important; }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+    width: 28px !important; min-width: 26px !important; padding: 0 2px !important;
+  }
+}
