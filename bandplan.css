@@ -9326,3 +9326,39 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     flex-basis: 48px !important;
   }
 }
+
+
+/* Stage controls: retain previous/next, play-pause, and key transposition.
+   Fullscreen is intentionally removed from the visible toolbar. */
+#scene .scene-ctrl .sctl { display: none !important; }
+#scene .scene-ctrl > .sbtn[data-act="scene-fs"] { display: none !important; }
+#scene .scene-ctrl > .sbtn[data-act="scene-trans"] { display: none !important; }
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"],
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  display: grid !important;
+}
+/* Reintroduce the transposition stepper, but keep the other compact steppers hidden. */
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+  display: flex !important;
+  flex: 0 0 auto !important;
+}
+#scene .scene-ctrl {
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  justify-content: center !important;
+  overflow-x: auto !important;
+}
+#scene .scene-ctrl > .sbtn {
+  flex: 0 0 46px !important;
+  width: 46px !important;
+  height: 46px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+  width: 38px !important;
+  height: 42px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) span {
+  min-width: 24px !important;
+  text-align: center !important;
+}
