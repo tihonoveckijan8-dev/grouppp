@@ -9097,3 +9097,30 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   white-space: nowrap !important;
   font-size: 12px !important;
 }
+
+
+/* Match "Не участвую" to the outlined amber "Под вопросом" style, using red status colors. */
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]),
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):hover,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
+.part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent) !important;
+  border-radius: var(--r-14, 12px) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+.part-switch .part-btn[data-v="no"].on,
+.part-switch .part-btn[data-v="no"][aria-pressed="true"] {
+  color: var(--danger) !important;
+  background: color-mix(in srgb, var(--danger) 16%, var(--surf-2)) !important;
+  background-color: color-mix(in srgb, var(--danger) 16%, var(--surf-2)) !important;
+  border: 1px solid color-mix(in srgb, var(--danger) 60%, transparent) !important;
+  border-radius: var(--r-14, 12px) !important;
+  box-shadow: none !important;
+}
