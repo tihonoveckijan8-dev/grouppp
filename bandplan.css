@@ -8135,3 +8135,54 @@ body[data-route="calendar"] .cal-legend i{
   body[data-route="calendar"] .cal-cell,
   body[data-route="calendar"] .cal-ev{transition:none}
 }
+
+
+/* Mobile calendar readability: taller day cards and larger event-type markers. */
+@media(max-width:767px){
+  body[data-route="calendar"] .cal-cell{
+    aspect-ratio:auto;
+    min-height:78px!important;
+    padding:7px 3px;
+    gap:6px;
+  }
+  body[data-route="calendar"] .cal-events{
+    flex:1 1 auto;
+    min-height:0;
+    align-content:flex-start;
+    gap:3px;
+  }
+  body[data-route="calendar"] .cal-ev{
+    width:20px;
+    height:20px;
+    min-width:20px;
+    border-radius:6px;
+  }
+  body[data-route="calendar"] .cal-ev-icon{
+    flex:0 0 15px;
+    width:15px;
+    height:15px;
+  }
+  body[data-route="calendar"] .cal-ev-icon svg{
+    width:14px;
+    height:14px;
+  }
+}
+@media(max-width:380px){
+  body[data-route="calendar"] .cal-cell{
+    min-height:72px!important;
+  }
+  body[data-route="calendar"] .cal-ev{
+    width:18px;
+    height:18px;
+    min-width:18px;
+  }
+  body[data-route="calendar"] .cal-ev-icon{
+    flex-basis:14px;
+    width:14px;
+    height:14px;
+  }
+  body[data-route="calendar"] .cal-ev-icon svg{
+    width:13px;
+    height:13px;
+  }
+}
