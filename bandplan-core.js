@@ -1767,13 +1767,13 @@ function vSongs() {
   const list = filteredSongs(), tags = allTags();
   let h = '<div class="songs-head-row">' +
     '<h1>Репертуар</h1>' +
-    '<button class="btn btn-primary" type="button" data-act="new-song">' + ic('plus', 17) + 'Добавить песню</button>' +
   '</div>' +
-  '<div class="toolbar songs-search-row">' +
+  '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
     '<button class="btn ' + (songFilterActive() ? 'btn-primary' : 'btn-secondary') + '" type="button" data-act="song-filter-open" aria-label="Фильтры">' + ic('filter', 17) + '<span class="btn-lbl">Фильтры</span></button>' +
+    '<button class="btn btn-primary songs-add-btn" type="button" data-act="new-song">' + ic('plus', 17) + '<span>Добавить песню</span></button>' +
   '</div>';
   if (songFilterActive() || ui.songQuery) {
     h += '<div class="active-chips"><span class="lbl">Активные фильтры:</span>' +
