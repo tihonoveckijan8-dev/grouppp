@@ -10658,10 +10658,27 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
 }
 
 
-/* Songs tab: make the filter control twice as tall, without resizing adjacent controls. */
-body[data-route="songs"] .songs-search-row [data-act="song-filter-open"] {
-  height: calc(var(--tap, 44px) * 2) !important;
-  min-height: calc(var(--tap, 44px) * 2) !important;
-  align-self: flex-start !important;
-  box-sizing: border-box !important;
+/* Songs tab: keep filter and add-song controls grouped as one action cluster. */
+body[data-route="songs"] .songs-search-action-row{
+  grid-template-columns:minmax(0,1fr) auto;
+}
+body[data-route="songs"] .songs-search-actions{
+  display:flex;
+  align-items:center;
+  justify-self:end;
+  gap:var(--s2);
+  min-width:0;
+}
+body[data-route="songs"] .songs-search-actions > .btn{
+  flex:none;
+  white-space:nowrap;
+}
+body[data-route="songs"] .songs-search-actions [data-act="song-filter-open"]{
+  height:calc(var(--tap, 44px) * 2) !important;
+  min-height:calc(var(--tap, 44px) * 2) !important;
+  align-self:center !important;
+  box-sizing:border-box !important;
+}
+@media(max-width:640px){
+  body[data-route="songs"] .songs-search-actions{gap:6px}
 }
