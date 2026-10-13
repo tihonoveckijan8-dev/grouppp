@@ -10525,3 +10525,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
   background: transparent !important;
   border: 0 !important;
 }
+
+
+/* Remove the blue vertical focus/outline line beside the sidebar. */
+#app > .sidebar {
+  outline: none !important;
+  border-right-color: transparent !important;
+  box-shadow: none !important;
+}
+#app > .main {
+  border-left: 0 !important;
+  box-shadow: none !important;
+}
