@@ -551,8 +551,18 @@
     const httpStatus = Number(error?.status || 0);
     const text = raw.toLowerCase();
 
+    // Supabase's built-in email provider has a strict send limit. Surface the
+    // real signup cause in Russian so users do not keep retrying blindly.
+    if (actionMode === 'signup' && (
+      code === 'over_email_send_rate_limit' ||
+      /email rate limit|over_email_send_rate_limit|email.*rate limit/.test(text)
+    )) {
+      return 'Не удалось отправить письмо: временно исчерпан лимит отправки писем Supabase. Не нажимайте «Зарегистрироваться» повторно — подождите и попробуйте позже. Для стабильной регистрации подключите собственный SMTP в настройках Supabase.';
+    }
     if (httpStatus === 429 || /too many|rate limit|rate_limit|over_request/.test(text) || code.includes('rate')) {
-      return 'Слишком много попыток. Подождите немного и попробуйте снова.';
+      return actionMode === 'signup'
+        ? 'Слишком много запросов на регистрацию. Подождите немного перед следующей попыткой.'
+        : 'Слишком много попыток. Подождите немного и попробуйте снова.';
     }
     if (/invalid login credentials|invalid credentials|invalid email or password/.test(text)) {
       return 'Неверная почта или пароль.';
