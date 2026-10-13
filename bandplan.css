@@ -9970,9 +9970,9 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 button[data-act="cal-today"]{display:none!important}
 
 
-/* Move the Add Event button 20px right from its current position. */
+/* Move the Add Event button 10px further right. */
 @media (min-width:1100px){
   body[data-route="calendar"] [aria-labelledby="upH"] .card-h > [data-act="new-event"]{
-    transform:translateX(-30px)!important;
+    transform:translateX(-20px)!important;
   }
 }
