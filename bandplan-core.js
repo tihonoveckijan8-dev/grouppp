@@ -4486,15 +4486,20 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
       width: label.style.width,
       maxWidth: label.style.maxWidth
     };
-    Object.assign(label.style, {
-      display: 'inline-block',
-      position: 'absolute',
-      visibility: 'hidden',
-      width: 'max-content',
-      maxWidth: 'none'
-    });
+    /* The icon-only state hides labels with !important; override that rule while measuring. */
+    label.style.setProperty('display', 'inline-block', 'important');
+    label.style.setProperty('position', 'absolute', 'important');
+    label.style.setProperty('visibility', 'hidden', 'important');
+    label.style.setProperty('width', 'max-content', 'important');
+    label.style.setProperty('max-width', 'none', 'important');
     const labelWidth = label.getBoundingClientRect().width;
-    Object.assign(label.style, old);
+    for (const [property, value] of [
+      ['display', old.display], ['position', old.position],
+      ['visibility', old.visibility], ['width', old.width], ['max-width', old.maxWidth]
+    ]) {
+      if (value) label.style.setProperty(property, value);
+      else label.style.removeProperty(property);
+    }
 
     const style = getComputedStyle(button);
     const icon = button.querySelector('svg, .ti, .icon, [data-icon]');
