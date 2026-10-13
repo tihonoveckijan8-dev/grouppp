@@ -1330,6 +1330,19 @@ button.accent-dropdown-option{cursor:pointer}
 .accent-dropdown-option.on .accent-dot {
   box-shadow: 0 0 0 2px var(--surf-1), 0 0 0 4px var(--accent);
 }
+
+/* Fix: render actual preset hues in the accent dropdown, independent of theme tokens. */
+.accent-dropdown .accent-dot[data-preset="red"] { background-color: #ef4444 !important; }
+.accent-dropdown .accent-dot[data-preset="orange"] { background-color: #ff7a1a !important; }
+.accent-dropdown .accent-dot[data-preset="amber"] { background-color: #f59e0b !important; }
+.accent-dropdown .accent-dot[data-preset="green"] { background-color: #22c55e !important; }
+.accent-dropdown .accent-dot[data-preset="teal"] { background-color: #14b8a6 !important; }
+.accent-dropdown .accent-dot[data-preset="blue"] { background-color: #3b82f6 !important; }
+.accent-dropdown .accent-dot[data-preset="indigo"] { background-color: #6366f1 !important; }
+.accent-dropdown .accent-dot[data-preset="purple"] { background-color: #a855f7 !important; }
+.accent-dropdown .accent-dot[data-preset="pink"] { background-color: #ec4899 !important; }
+.accent-dropdown .accent-dot[data-preset="custom"] { background: conic-gradient(red, #ff0, #0f0, #0ff, #00f, #f0f, red) !important; }
+
 .accent-dropdown-custom input[type="color"] {
   display: block;
   opacity: 1;
