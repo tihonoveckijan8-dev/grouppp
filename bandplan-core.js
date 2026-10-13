@@ -4463,6 +4463,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
     const labels = button.querySelectorAll(':scope > .bp-btn-label');
     if (!labels.length) return;
+    if (button.hasAttribute('title') && !button.hasAttribute('data-bp-original-title')) button.setAttribute('data-bp-original-title', button.getAttribute('title'));
     if (!button.hasAttribute('aria-label')) {
       const accessibleName = Array.from(labels).map(label => label.textContent.trim()).filter(Boolean).join(' ');
       if (accessibleName) button.setAttribute('aria-label', accessibleName);
@@ -4502,9 +4503,14 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
     const needed = labelWidth + iconWidth + gap + padding + 2;
     const constrained = button.clientWidth > 0 && needed > button.clientWidth + 1;
-    button.toggleAttribute('data-bp-label-hidden', constrained);
-    if (constrained) button.setAttribute('title', button.getAttribute('aria-label') || label.textContent.trim());
-    else if (button.dataset.bpHadTitle !== '1') button.removeAttribute('title');
+    if (constrained) {
+      button.dataset.bpLabelHidden = 'true';
+      button.setAttribute('title', button.getAttribute('aria-label') || label.textContent.trim());
+    } else {
+      delete button.dataset.bpLabelHidden;
+      if (button.hasAttribute('data-bp-original-title')) button.setAttribute('title', button.getAttribute('data-bp-original-title'));
+      else button.removeAttribute('title');
+    }
   }
 
   const observer = new ResizeObserver(entries => {
