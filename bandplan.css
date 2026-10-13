@@ -9983,6 +9983,6 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
 /* Move the Settings heading 70px left on desktop. */
 @media (min-width:1100px){
   body[data-route="settings"] #pageHead h1{
-    transform:translateX(-100px)!important;
+    transform:translateX(-105px)!important;
   }
 }
