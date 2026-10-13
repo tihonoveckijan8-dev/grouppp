@@ -10460,6 +10460,9 @@ body[data-route="setlists"] .setlists-search-row > .tb-search {
   width: 100% !important;
   min-width: 0 !important;
 }
+body[data-route="setlists"] .setlists-search-row > .tb-search {
+  margin-right: -20px !important;
+}
 body[data-route="setlists"] .setlists-search-row > .setlists-add-btn {
   flex: 0 0 auto !important;
 }
