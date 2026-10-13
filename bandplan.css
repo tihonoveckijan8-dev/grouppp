@@ -9952,10 +9952,10 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 }
 
 
-/* Offset the "Расписание" heading 15px right from the calendar card's left edge. */
+/* Offset the "Расписание" heading 30px right from the calendar card's left edge. */
 @media (min-width:1100px){
   body[data-route="calendar"] .page-head{
-    padding-left:15px!important;
+    padding-left:30px!important;
     padding-right:0!important;
     margin-left:0!important;
     box-sizing:border-box!important;
