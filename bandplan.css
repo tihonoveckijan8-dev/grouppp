@@ -10416,6 +10416,22 @@ body {
   #app .sidebar .nav { flex-shrink: 0; }
   #app .sidebar .sidebar-foot { margin-top: auto; padding-bottom: 16px; }
 }
+/* Desktop floating sidebar: keep its bottom edge inside the viewport and mirror the top outer gap. */
+@media (min-width: 901px) {
+  #app > .sidebar {
+    height: calc(100dvh - 24px) !important;
+    min-height: 0 !important;
+    margin-top: 12px !important;
+    margin-bottom: 12px !important;
+    box-sizing: border-box !important;
+    padding-bottom: 18px !important;
+  }
+  #app .sidebar .sidebar-foot {
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+}
+
 @media (max-width: 767px) {
   #app > .main {
     padding-bottom: env(safe-area-inset-bottom);
