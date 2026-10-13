@@ -10454,6 +10454,16 @@ body {
 }
 
 
+/* Setlists: extend search field right up to the Add Setlist button. */
+body[data-route="setlists"] .setlists-search-row > .tb-search {
+  flex: 1 1 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+body[data-route="setlists"] .setlists-search-row > .setlists-add-btn {
+  flex: 0 0 auto !important;
+}
+
 /* Set-lists: keep the create action aligned with the search field. */
 @layer screens {
   .setlists-search-row {
