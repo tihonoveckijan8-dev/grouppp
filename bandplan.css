@@ -10151,3 +10151,27 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
     }
   }
 
+
+
+/* Zoom fallback applies to every real button with both an icon and a label. */
+button[data-bp-label-hidden="true"]{
+  width:var(--tap, 40px)!important;
+  min-width:var(--tap, 40px)!important;
+  max-width:var(--tap, 40px)!important;
+  flex:0 0 var(--tap, 40px)!important;
+  padding-inline:0!important;
+  gap:0!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+}
+button[data-bp-label-hidden="true"]>.bp-btn-label{display:none!important}
+button[data-bp-label-hidden="true"]>svg,
+button[data-bp-label-hidden="true"]>.ti,
+button[data-bp-label-hidden="true"]>.icon,
+button[data-bp-label-hidden="true"]>[data-icon],
+button[data-bp-label-hidden="true"]>[aria-hidden="true"]{
+  flex:0 0 auto!important;
+  margin-inline:auto!important;
+}
+button>.bp-btn-label{min-width:0;white-space:nowrap}
