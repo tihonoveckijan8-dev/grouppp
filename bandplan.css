@@ -9721,3 +9721,82 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   color: var(--accent) !important;
   padding: .42em .78em !important;
 }
+
+
+/* Profile tab: gather identity, roles and account actions into one clear layout. */
+@layer screens{
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:14px!important;
+    align-items:start!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+    padding:18px!important;
+    border:1px solid var(--border)!important;
+    border-radius:18px!important;
+    background:var(--surf-1)!important;
+    box-shadow:var(--shadow-1)!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main .field{
+    min-width:0;
+    margin:0!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:auto!important;
+    align-items:stretch!important;
+    gap:14px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+    min-width:0;
+    padding:18px!important;
+    border:1px solid var(--border)!important;
+    border-radius:18px!important;
+    background:var(--surf-1)!important;
+    box-shadow:var(--shadow-1)!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box .card-h{
+    margin:0 0 12px!important;
+    padding:0 0 10px!important;
+    border-bottom:1px solid var(--border)!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .account-settings-row{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .account-settings-row>div{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-danger{
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  @media(max-width:760px){
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-grid{
+      gap:12px!important;
+    }
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main,
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+      grid-template-columns:minmax(0,1fr)!important;
+      gap:12px!important;
+    }
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main,
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+      padding:14px!important;
+    }
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main{
+      display:grid!important;
+    }
+  }
+}
