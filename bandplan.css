@@ -10405,14 +10405,16 @@ body {
     display: none !important;
   }
 }
-@media (max-height: 620px) {
+@media (max-height: 667px) {
   #app > .sidebar {
     overflow-y: auto;
     overscroll-behavior: contain;
+    padding-bottom: 16px;
+    scrollbar-gutter: stable;
   }
   #app .sidebar .brand { flex-shrink: 0; }
   #app .sidebar .nav { flex-shrink: 0; }
-  #app .sidebar .sidebar-foot { margin-top: auto; }
+  #app .sidebar .sidebar-foot { margin-top: auto; padding-bottom: 16px; }
 }
 @media (max-width: 767px) {
   #app > .main {
