@@ -14,6 +14,19 @@
   // WHY: read the single validated public configuration instead of duplicating credentials in the auth module.
   const SUPABASE_URL = window.BANDPLAN_CONFIG.supabaseUrl;
   const SUPABASE_KEY = window.BANDPLAN_CONFIG.supabasePublishableKey;
+
+  // Capture the Supabase signup-confirmation callback before supabase-js consumes
+  // the URL fragment during session detection.
+  const emailConfirmationCallback = (() => {
+    try {
+      const params = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+      const query = new URLSearchParams(location.search || '');
+      const type = params.get('type') || query.get('type');
+      const hasAuthError = params.has('error') || params.has('error_code') || query.has('error') || query.has('error_code');
+      return type === 'signup' && !hasAuthError;
+    } catch (_) { return false; }
+  })();
+  let emailConfirmationScreenShown = false;
   const TABLE = 'bandplan_user_state';
   /*
     Use Supabase's standard browser storage key. A previous repair introduced a
@@ -311,6 +324,15 @@
       currentSession = session || null;
       if (authEvent === 'INITIAL_SESSION') {
         authState = 'ready';
+        if (emailConfirmationCallback) {
+          if (renderEmailConfirmationResult(currentSession?.user)) return;
+          // Wait for Supabase to finish exchanging the confirmation token. Do not
+          // start the app workspace from a signup-confirmation callback.
+          if (currentSession?.user) {
+            setTimeout(() => { renderEmailConfirmationResult(currentSession?.user); }, 0);
+          }
+          return;
+        }
         // Always start the app core after Supabase resolves the initial session.
         // Without a session, the login gate still needs to render; with a session,
         // resume the authenticated workspace only after the core has initialized.
@@ -336,6 +358,10 @@
       }
       if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED' || authEvent === 'USER_UPDATED') {
         authState = 'ready';
+        if (emailConfirmationCallback) {
+          renderEmailConfirmationResult(currentSession?.user);
+          return;
+        }
         if (currentSession?.user) {
           window.__bandplanAuthUserId = currentSession.user.id;
           window.dispatchEvent(new CustomEvent('bandplan:auth-ready',{detail:{userId:currentSession.user.id}}));
@@ -424,6 +450,45 @@
       document.body.appendChild(el);
     }
     return el;
+  }
+  function renderEmailConfirmationResult(user) {
+    if (!emailConfirmationCallback || emailConfirmationScreenShown) return false;
+    const confirmedAt = user?.email_confirmed_at || user?.confirmed_at;
+    if (!confirmedAt) return false;
+    emailConfirmationScreenShown = true;
+    setAuthShellLocked(true);
+    const el = gate();
+    el.hidden = false;
+    const email = user?.email ? '<p class="bp-auth-desc">' + escapeHtml(user.email) + '</p>' : '';
+    el.innerHTML = '<section class="bp-auth-card"><div class="bp-auth-mark">BP</div><div class="bp-auth-brand">BandPlan</div>' +
+      '<h1>Почта подтверждена!</h1>' +
+      '<p class="bp-auth-desc">Ваш аккаунт успешно активирован. Теперь можно войти в BandPlan.</p>' + email +
+      '<button class="bp-auth-submit" id="bpEmailConfirmedLogin" type="button">Перейти ко входу</button>' +
+      '<p class="bp-auth-message" role="status" aria-live="polite"></p></section>';
+    $('#bpEmailConfirmedLogin', el).addEventListener('click', async () => {
+      const button = $('#bpEmailConfirmedLogin', el);
+      button.disabled = true;
+      button.textContent = 'Подождите…';
+      try {
+        if (currentSession) {
+          const {error} = await client.auth.signOut();
+          if (error) throw error;
+        }
+        currentSession = null;
+        window.__bandplanAuthUserId = null;
+        try { history.replaceState(history.state, '', location.pathname + location.search); } catch (_) {}
+        mode = 'login';
+        passwordRecoveryMode = false;
+        renderGate('Почта подтверждена. Теперь войдите в аккаунт.');
+      } catch (error) {
+        console.error('BandPlan post-confirmation sign-out failed:', error);
+        const message = $('.bp-auth-message', el);
+        if (message) message.textContent = 'Почта подтверждена. Не удалось завершить переход ко входу автоматически — обновите страницу и войдите.';
+        button.disabled = false;
+        button.textContent = 'Перейти ко входу';
+      }
+    });
+    return true;
   }
   function renderGate(message, error=false) {
     setAuthShellLocked(true);
@@ -625,6 +690,14 @@
 
       currentSession=data?.session||null;
       authState='ready';
+      if (emailConfirmationCallback) {
+        if (renderEmailConfirmationResult(currentSession?.user)) return null;
+        // The auth-state listener will render success after token exchange; avoid
+        // accidentally entering the workspace before confirmation is handled.
+        mode='login';
+        renderGate('Проверяем подтверждение электронной почты…');
+        return null;
+      }
       if(currentSession?.user) {
         cleanupLegacyAuthStorage();
         setAuthShellLocked(false);
