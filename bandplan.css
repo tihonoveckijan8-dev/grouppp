@@ -10246,3 +10246,179 @@ button>.bp-btn-label{min-width:0;white-space:nowrap}
   .modal { max-width: calc(100vw - 20px) !important; }
   .modal-head, .modal-body, .modal-foot { min-width: 0; }
 }
+
+
+/* Final viewport/zoom safety net: keep the navigation rail and page content inside the visible viewport. */
+html, body {
+  max-width: 100%;
+  min-width: 0;
+}
+body {
+  overflow-x: clip;
+}
+#app.app {
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  min-height: 0;
+}
+#app > .sidebar {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+#app > .main {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+#app .content,
+#app #view,
+#app .page-head,
+#app .page-head > *,
+#app .toolbar,
+#app .toolbar > *,
+#app .ph-acts,
+#app .ph-acts > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+#app .content,
+#app #view {
+  max-width: 100%;
+}
+#app img,
+#app video,
+#app canvas,
+#app svg {
+  max-width: 100%;
+}
+#app input,
+#app select,
+#app textarea {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#app .page-head,
+#app .toolbar,
+#app .ph-acts,
+#app .modal-foot {
+  flex-wrap: wrap;
+}
+#app .page-head h1,
+#app .card-title,
+#app .nav-item,
+#app .side-profile {
+  overflow-wrap: anywhere;
+}
+#app .modal {
+  width: min(var(--modal-width, 720px), calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+}
+#app .modal-body {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* A compact icon rail is more reliable than squeezing navigation labels at browser zoom. */
+@media (min-width: 768px) and (max-width: 1099px) {
+  #app.app { grid-template-columns: 64px minmax(0, 1fr) !important; }
+  #app > .sidebar {
+    width: 64px !important;
+    min-width: 64px !important;
+    padding: 10px 6px !important;
+    gap: 8px;
+  }
+  #app .sidebar .brand {
+    width: 100%;
+    min-width: 0;
+    justify-content: center !important;
+    padding-inline: 0 !important;
+    flex: 0 0 auto;
+  }
+  #app .sidebar .brand-txt,
+  #app .sidebar .side-profile .nm,
+  #app .sidebar .side-profile .rl,
+  #app .sidebar .nav-item > span:not(.nb),
+  #app .sidebar .nav-item .nav-label,
+  #app .sidebar .side-note {
+    display: none !important;
+  }
+  #app .sidebar .nav {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-items: stretch;
+    gap: 4px;
+  }
+  #app .sidebar .nav-item {
+    position: relative;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 44px;
+    min-height: 44px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    box-sizing: border-box;
+  }
+  #app .sidebar .nav-item > svg,
+  #app .sidebar .nav-item > .ti,
+  #app .sidebar .nav-item > .icon,
+  #app .sidebar .nav-item > [aria-hidden="true"] {
+    flex: 0 0 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 auto !important;
+  }
+  #app .sidebar .side-profile {
+    flex: 0 0 auto;
+    min-width: 0;
+    justify-content: center !important;
+    padding: 4px !important;
+  }
+  #app .sidebar .sidebar-foot {
+    flex: 0 0 auto;
+    align-items: center !important;
+    gap: 6px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  #app .sidebar .sidebar-foot .btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    padding: 0 !important;
+  }
+  #app .sidebar .sidebar-foot .btn span,
+  #app .sidebar .sidebar-foot .btn .bp-btn-label {
+    display: none !important;
+  }
+}
+@media (max-height: 620px) {
+  #app > .sidebar {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #app .sidebar .brand { flex-shrink: 0; }
+  #app .sidebar .nav { flex-shrink: 0; }
+  #app .sidebar .sidebar-foot { margin-top: auto; }
+}
+@media (max-width: 767px) {
+  #app > .main {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #app .content {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
