@@ -10185,10 +10185,45 @@ button>.bp-btn-label{min-width:0;white-space:nowrap}
   .sidebar .brand-txt,
   .sidebar .side-profile .nm,
   .sidebar .side-profile .rl,
+  .sidebar .nav-item > span:not(.nb),
   .sidebar .nav-item .nav-label,
   .sidebar .side-note { display: none !important; }
-  .sidebar .nav-item { justify-content: center !important; gap: 0 !important; padding-inline: 0 !important; }
-  .sidebar .nav-item .nb { position: absolute; right: 0; top: 0; margin: 0; }
+  .sidebar .nav { width: 100%; align-items: stretch; gap: 5px; padding: 4px 0; }
+  .sidebar .nav-item {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 46px !important;
+    height: 46px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible;
+  }
+  .sidebar .nav-item > svg,
+  .sidebar .nav-item > .ti,
+  .sidebar .nav-item > .icon,
+  .sidebar .nav-item > [aria-hidden="true"] {
+    display: block;
+    flex: 0 0 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 auto !important;
+  }
+  .sidebar .nav-item.active::before { left: 0; top: 10px; bottom: 10px; }
+  .sidebar .nav-item .nb {
+    position: absolute;
+    right: -1px;
+    top: 1px;
+    margin: 0;
+    padding: 1px 4px;
+    min-width: 16px;
+    font-size: 9px;
+    line-height: 1.25;
+  }
   .sidebar .side-profile { justify-content: center !important; padding: 6px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
   .sidebar .sidebar-foot { align-items: center !important; }
   .sidebar .sidebar-foot .btn { width: 42px !important; min-width: 42px !important; padding: 0 !important; }
