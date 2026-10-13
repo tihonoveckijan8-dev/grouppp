@@ -7430,6 +7430,16 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
 }
 
 
+/* Keep month navigation arrows close to the displayed month label. */
+body[data-route="calendar"] .cal-head > .row-ns {
+  justify-content: center !important;
+  gap: 10px !important;
+}
+body[data-route="calendar"] .cal-head > .row-ns .cal-title {
+  flex: 0 1 auto !important;
+  text-align: center !important;
+}
+
 /* ═══ Calendar header refinement · compact controls ═══ */
 @layer screens{
   .cal-head > .row-ns{
