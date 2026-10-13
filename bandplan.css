@@ -9952,11 +9952,11 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 }
 
 
-/* Align "Расписание" with the calendar card's inner left edge on desktop. */
+/* Put the "Расписание" heading on the same left alignment line as the calendar card. */
 @media (min-width:1100px){
   body[data-route="calendar"] .page-head{
-    padding-left:16px!important;
-    padding-right:16px!important;
+    padding-left:0!important;
+    padding-right:0!important;
     margin-left:0!important;
     box-sizing:border-box!important;
   }
