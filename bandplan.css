@@ -9970,3 +9970,7 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     transform:translateX(40px)!important;
   }
 }
+
+
+/* Remove all visible "Сегодня" buttons without changing calendar navigation logic. */
+button[data-act="cal-today"]{display:none!important}
