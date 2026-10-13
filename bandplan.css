@@ -10510,3 +10510,18 @@ body {
     .songs-search-action-row > [data-act="song-filter-open"] .btn-lbl { display: none; }
   }
 }
+
+
+/* Hide scrollbar thumbs and tracks while preserving scrolling everywhere. */
+html, body, *, *::before, *::after {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
+*::-webkit-scrollbar-thumb, *::-webkit-scrollbar-track, *::-webkit-scrollbar-corner {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+  border: 0 !important;
+}
