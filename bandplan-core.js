@@ -4446,7 +4446,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   };
 
   function prepare(button) {
-    if (!(button instanceof HTMLButtonElement) || !button.classList.contains('btn')) return;
+    if (!(button instanceof HTMLButtonElement)) return;
     if (button.matches('.btn-icon, [data-bp-no-collapse], [aria-label=""]') || !isIcon(button)) return;
 
     // Wrap direct text and ordinary text spans without touching icons, badges, or action logic.
@@ -4519,8 +4519,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   window.__bandplanAdaptiveResizeObserver = observer;
 
   function scan(root) {
-    if (root instanceof Element && root.matches('button.btn')) prepare(root);
-    if (root.querySelectorAll) root.querySelectorAll('button.btn').forEach(prepare);
+    if (root instanceof Element && root.matches('button')) prepare(root);
+    if (root.querySelectorAll) root.querySelectorAll('button').forEach(prepare);
   }
 
   function start() {
