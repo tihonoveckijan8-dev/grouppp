@@ -10452,3 +10452,31 @@ body {
     padding-bottom: max(24px, env(safe-area-inset-bottom));
   }
 }
+
+
+/* Set-lists: keep the create action aligned with the search field. */
+@layer screens {
+  .setlists-search-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .setlists-search-row > .tb-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .setlists-search-row > .setlists-add-btn {
+    flex: 0 0 auto;
+    min-height: var(--tap);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  @media (max-width: 480px) {
+    .setlists-search-row { gap: 8px; }
+    .setlists-search-row > .setlists-add-btn { padding-inline: 12px; }
+    .setlists-search-row > .setlists-add-btn span { display: none; }
+  }
+}
