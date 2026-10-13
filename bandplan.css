@@ -10480,3 +10480,33 @@ body {
     .setlists-search-row > .setlists-add-btn span { display: none; }
   }
 }
+
+
+/* Repertoire: let search use the available width, with add-song beside it. */
+@layer screens {
+  .songs-search-action-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .songs-search-action-row > .tb-search {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .songs-search-action-row > .btn {
+    flex: 0 0 auto;
+    min-height: var(--tap);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  @media (max-width: 520px) {
+    .songs-search-action-row { gap: 6px; }
+    .songs-search-action-row > .songs-add-btn { padding-inline: 11px; }
+    .songs-search-action-row > .songs-add-btn span { display: none; }
+    .songs-search-action-row > [data-act="song-filter-open"] { padding-inline: 10px; }
+    .songs-search-action-row > [data-act="song-filter-open"] .btn-lbl { display: none; }
+  }
+}
