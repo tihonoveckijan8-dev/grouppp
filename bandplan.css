@@ -7308,11 +7308,21 @@ body[data-route="setlists"] .collection-grid.collection-list>article.song-card .
     .master-detail-shell.is-desktop .master-list{
       position:relative;
       top:auto;
-      padding:0 4px 12px 0;
+      box-sizing:border-box;
+      padding:0 4px 48px 0;
+      scroll-padding-bottom:48px;
     }
     .master-detail-shell.is-desktop .master-detail-panel{
-      padding:0 4px 12px 0;
+      box-sizing:border-box;
+      padding:0 4px 48px 0;
+      scroll-padding-bottom:48px;
       overscroll-behavior-y:contain;
+    }
+    /* Leave enough scrollable tail space so the final card/actions never sit
+       flush against the clipped edge of the independent desktop scroll areas. */
+    .master-detail-shell.is-desktop .master-list > :last-child,
+    .master-detail-shell.is-desktop .master-detail-panel > :last-child{
+      margin-bottom:12px;
     }
     .master-detail-shell.is-desktop .master-detail-panel > .split,
     .master-detail-shell.is-desktop .master-detail-panel .setlist-detail{
