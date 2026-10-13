@@ -1317,6 +1317,44 @@ button.accent-dropdown-option{cursor:pointer}
 .accent-dropdown-option svg{margin-left:auto;color:var(--accent)}
 .accent-dropdown-custom{cursor:default}
 .accent-dropdown-custom input{margin-left:auto;width:34px;height:30px;padding:0;border:0;background:transparent;cursor:pointer}
+
+/* Keep color choices clearly visible in the accent picker and customization swatches. */
+.accent-dropdown-option .accent-dot,
+.accent-dropdown-current .accent-dot {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  border: 2px solid var(--text-2);
+  box-shadow: 0 0 0 2px var(--surf-1), 0 0 0 3px var(--border);
+}
+.accent-dropdown-option.on .accent-dot {
+  box-shadow: 0 0 0 2px var(--surf-1), 0 0 0 4px var(--accent);
+}
+.accent-dropdown-custom input[type="color"] {
+  display: block;
+  opacity: 1;
+  appearance: auto;
+  -webkit-appearance: auto;
+  width: 42px;
+  height: 34px;
+  min-width: 42px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surf-2);
+}
+.sw-dot {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 2px solid var(--text-2);
+  box-shadow: 0 0 0 1px var(--surf-1), 0 0 0 2px var(--border);
+}
+.sw.on .sw-dot {
+  box-shadow: 0 0 0 2px var(--surf-1), 0 0 0 4px var(--accent);
+}
+
 .settings-card[data-settings-panel="interface"] .split2{align-items:start}
 .settings-card[data-settings-panel="interface"] .settings-inline-field{margin-bottom:14px}
 .settings-card[data-settings-panel="interface"] .settings-inline-field:last-child{margin-bottom:0}
