@@ -562,7 +562,10 @@
       }
 
       if(actionMode==='signup' && !result.data?.session) {
-        renderGate('Аккаунт создан. Проверьте почту и подтвердите адрес, затем войдите.');
+        // Email confirmation is enabled in Supabase: keep the user on the auth
+        // screen and clearly explain the next step instead of implying sign-in succeeded.
+        mode='login';
+        renderGate('Регистрация почти завершена! Мы отправили письмо для подтверждения на ' + email + '. Откройте свою почту и нажмите ссылку подтверждения. После этого вернитесь сюда и войдите в BandPlan. Если письма нет, проверьте папку «Спам».');
         return;
       }
       if(actionMode==='reset') {
