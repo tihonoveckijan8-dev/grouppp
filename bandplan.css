@@ -10537,3 +10537,28 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
   border-left: 0 !important;
   box-shadow: none !important;
 }
+
+
+/* Definitively remove the persistent blue divider around the sidebar/layout. */
+#app.app,
+#app > .sidebar,
+#app > .main,
+#app .sidebar,
+#app .main,
+#app .content {
+  outline: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  box-shadow: none !important;
+}
+#app.app::before,
+#app.app::after,
+#app > .sidebar::before,
+#app > .sidebar::after,
+#app > .main::before,
+#app > .main::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
