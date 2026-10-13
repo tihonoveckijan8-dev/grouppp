@@ -9963,12 +9963,7 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 }
 
 
-/* Shift the upcoming-events Add Event button 50px right on desktop. */
-@media (min-width:1100px){
-  body[data-route="calendar"] [aria-labelledby="upH"] .card-h > [data-act="new-event"]{
-    transform:translateX(50px)!important;
-  }
-}
+
 
 
 /* Remove all visible "Сегодня" buttons without changing calendar navigation logic. */
