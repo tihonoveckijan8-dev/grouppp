@@ -9976,3 +9976,13 @@ button[data-act="cal-today"]{display:none!important}
     transform:translateX(204px)!important;
   }
 }
+
+/* Hide the settings-page export button without removing its underlying export action. */
+body[data-route="settings"] #pageHead [data-act="export"]{display:none!important}
+
+/* Move the Settings heading 70px left on desktop. */
+@media (min-width:1100px){
+  body[data-route="settings"] #pageHead h1{
+    transform:translateX(-70px)!important;
+  }
+}
