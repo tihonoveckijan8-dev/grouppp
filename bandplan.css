@@ -10656,3 +10656,16 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
     border-radius: 7px !important;
   }
 }
+
+
+/* Setlists tab: make the filter control twice as tall, without resizing adjacent controls. */
+body[data-route="setlists"] .setlists-search-row [data-act*="filter"],
+body[data-route="setlists"] .setlists-search-row .filter-btn,
+body[data-route="setlists"] .setlists-search-row .btn-filter,
+body[data-route="setlists"] .setlists-search-row button[aria-label*="Фильтр"],
+body[data-route="setlists"] .setlists-search-row button[title*="Фильтр"] {
+  height: calc(var(--tap, 44px) * 2) !important;
+  min-height: calc(var(--tap, 44px) * 2) !important;
+  align-self: flex-start !important;
+  box-sizing: border-box !important;
+}
