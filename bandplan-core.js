@@ -1797,7 +1797,6 @@ function vSongs() {
   if (selectedSong) ui.songSelectedId = selectedSong.id;
   h += '<div class="master-detail-shell' + (desktopMaster ? ' is-desktop' : '') + '"><div class="master-list"><div class="collection-grid collection-list songs-list">';
   list.forEach(function (s, i) {
-    const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id)).length;
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 22, 180) + 'ms" data-act="open-song" data-id="' + s.id + '" role="link" tabindex="0" aria-label="Открыть песню ' + esc(s.title) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + esc(s.key || '—') + '</div>' +
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(s.title) + '</h3></div>' +
@@ -1809,7 +1808,7 @@ function vSongs() {
       (s.bpm ? '<span class="badge b-muted num">' + s.bpm + ' BPM</span>' : '') +
       (s.duration ? '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(s.duration) + '</span>' : '') +
       (s.tags || []).slice(0, 2).map(t => '<span class="badge b-muted">' + esc(t) + '</span>').join('') +
-      (used ? '<span class="badge b-ok">' + ic('list', 11) + used + '</span>' : '') + '</div>' +
+      '</div>' +
       '<div class="song-acts">' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
@@ -1988,7 +1987,6 @@ function vSong(id) {
   if (!s) return '<div class="card">' + stateHTML('err', 'Песня не найдена', 'Возможно, она была удалена или ссылка устарела.', '<a class="btn btn-primary" href="#/songs">Вернуться в репертуар</a>') + '</div>';
   const tr = ui.detailTrans[s.id] || 0;
   const chords = extractChords(s.lyrics).map(c => transposeChord(c, tr));
-  const used = state.setlists.filter(sl => (sl.items || []).some(it => it.songId === s.id));
   const myRole = myRoles()[0] || '';
   const mine = s.dynamics ? myRoles().filter(r => (s.dynamics.instruments || []).indexOf(r) >= 0) : [];
   const hasMy = mine.length > 0;
