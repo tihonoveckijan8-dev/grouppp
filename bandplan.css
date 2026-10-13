@@ -9800,3 +9800,73 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     }
   }
 }
+
+
+/* Keep every profile control inside one shared outer card, with subtle internal grouping. */
+@layer screens{
+  .settings-shell .settings-card[data-settings-panel="profile"]{
+    padding:20px!important;
+    border:1px solid var(--border)!important;
+    border-radius:22px!important;
+    background:var(--surf-1)!important;
+    box-shadow:var(--shadow-1)!important;
+    overflow:visible!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:16px!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+    padding:0 0 16px!important;
+    border:0!important;
+    border-bottom:1px solid var(--border)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:auto!important;
+    gap:16px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-role-box,
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box{
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .settings-shell .settings-card[data-settings-panel="profile"] .profile-account-box .card-h{
+    padding:0 0 10px!important;
+    border-bottom:1px solid var(--border)!important;
+  }
+  @media(max-width:760px){
+    .settings-shell .settings-card[data-settings-panel="profile"]{
+      padding:15px!important;
+      border-radius:18px!important;
+    }
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main,
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-side{
+      grid-template-columns:minmax(0,1fr)!important;
+      gap:14px!important;
+    }
+    .settings-shell .settings-card[data-settings-panel="profile"] .profile-settings-main{
+      padding-bottom:14px!important;
+    }
+  }
+}
