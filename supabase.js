@@ -490,6 +490,24 @@
     });
     return true;
   }
+  function renderSignupPending(email) {
+    setAuthShellLocked(true);
+    const el = gate();
+    el.hidden = false;
+    el.innerHTML = '<section class="bp-auth-card" role="dialog" aria-modal="true" aria-labelledby="bpSignupPendingTitle">' +
+      '<div class="bp-auth-mark" aria-hidden="true">✉</div><div class="bp-auth-brand">BandPlan</div>' +
+      '<h1 id="bpSignupPendingTitle">Подтвердите аккаунт в почте</h1>' +
+      '<p class="bp-auth-desc">Мы отправили письмо со ссылкой для подтверждения адреса.</p>' +
+      '<p class="bp-auth-desc"><strong>' + escapeHtml(email) + '</strong></p>' +
+      '<p class="bp-auth-desc">Откройте письмо от BandPlan и нажмите «Подтвердить почту». Если письма нет, проверьте папку «Спам».</p>' +
+      '<button class="bp-auth-submit" id="bpSignupPendingLogin" type="button">Вернуться ко входу</button>' +
+      '<p class="bp-auth-message" role="status" aria-live="polite"></p></section>';
+    $('#bpSignupPendingLogin', el).addEventListener('click', () => {
+      mode = 'login';
+      renderGate('После подтверждения почты войдите с указанными адресом и паролем.');
+    });
+  }
+
   function renderGate(message, error=false) {
     setAuthShellLocked(true);
     const el = gate();
@@ -600,7 +618,7 @@
         result=await client.auth.signUp({
           email,
           password,
-          options:{data:{full_name:accountName,bandplan_onboarding_required:true}}
+          options:{data:{full_name:accountName,bandplan_onboarding_required:true},emailRedirectTo:location.origin+location.pathname}
         });
         if(result.error) throw result.error;
         if(result.data?.session?.user) {
@@ -627,10 +645,9 @@
       }
 
       if(actionMode==='signup' && !result.data?.session) {
-        // Email confirmation is enabled in Supabase: keep the user on the auth
-        // screen and clearly explain the next step instead of implying sign-in succeeded.
-        mode='login';
-        renderGate('Регистрация почти завершена! Мы отправили письмо для подтверждения на ' + email + '. Откройте свою почту и нажмите ссылку подтверждения. После этого вернитесь сюда и войдите в BandPlan. Если письма нет, проверьте папку «Спам».');
+        // Confirmation-required signups must stop here: do not enter onboarding
+        // until the user follows the verification link from their email.
+        renderSignupPending(email);
         return;
       }
       if(actionMode==='reset') {
