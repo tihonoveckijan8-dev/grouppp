@@ -10416,6 +10416,27 @@ body {
   #app .sidebar .nav { flex-shrink: 0; }
   #app .sidebar .sidebar-foot { margin-top: auto; padding-bottom: 16px; }
 }
+/* Compact sidebar actions when a desktop window is short or browser zoom reduces available space. */
+@media (min-width: 768px) and (max-height: 760px) {
+  #app .sidebar .sidebar-foot .btn {
+    min-width: 40px !important;
+    width: 100% !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    white-space: nowrap !important;
+  }
+  #app .sidebar .sidebar-foot .btn span,
+  #app .sidebar .sidebar-foot .btn .bp-btn-label {
+    display: none !important;
+  }
+  #app .sidebar .sidebar-foot .btn svg,
+  #app .sidebar .sidebar-foot .btn .ti,
+  #app .sidebar .sidebar-foot .btn .icon {
+    margin: 0 auto !important;
+    flex: 0 0 auto !important;
+  }
+}
+
 /* Desktop floating sidebar: keep its bottom edge inside the viewport and mirror the top outer gap. */
 @media (min-width: 901px) {
   #app > .sidebar {
