@@ -10048,3 +10048,107 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
 .tb-search:focus-within::before,.tb-search:focus-within::after,body[data-route="songs"] .songs-search-row .tb-search:focus-within::after,body[data-route="setlists"] .setlists-search-row .tb-search:focus-within::after{border-color:transparent!important;box-shadow:none!important;filter:none!important}
 .tb-search input::placeholder,.tb-search .bare-input::placeholder{color:var(--muted)!important;opacity:.82}
 @media(prefers-reduced-motion:reduce){.tb-search,.tb-search::before,.tb-search::after{transition:none!important}}
+
+
+/* Adaptive layout: prevent controls and content from clipping at browser zoom / narrow widths. */
+@layer screens {
+  .btn, .icon-btn, .sbtn, .settings-tab, .nav-item,
+  .toolbar > *, .page-head .ph-acts > *, .modal-foot > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .btn {
+    flex-shrink: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .btn .bp-btn-label {
+    min-width: 0;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn[data-bp-label-hidden="true"] {
+    width: var(--tap);
+    min-width: var(--tap);
+    max-width: var(--tap);
+    flex: 0 0 var(--tap);
+    padding-inline: 0;
+    gap: 0;
+    justify-content: center;
+  }
+
+  .btn[data-bp-label-hidden="true"] .bp-btn-label {
+    display: none !important;
+  }
+
+  .btn[data-bp-label-hidden="true"] svg,
+  .btn[data-bp-label-hidden="true"] .ti,
+  .btn[data-bp-label-hidden="true"] [aria-hidden="true"] {
+    flex: 0 0 auto;
+    margin-inline: auto;
+  }
+
+  /* Grid/flex children must be allowed to shrink instead of forcing page overflow. */
+  .content, .page-head, .toolbar, .toolbar > *,
+  .card, .card-body, .modal, .modal-head, .modal-body, .modal-foot,
+  .form-grid, .form-field, .settings-shell, .settings-card,
+  .songs-search-row, .setlists-search-row, .setlist-detail,
+  .event-card, .song-card, .setlist-card {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .card, .modal-body, .form-field, .settings-card,
+  .event-card, .song-card, .setlist-card {
+    overflow-wrap: anywhere;
+  }
+
+  .form-field input, .form-field select, .form-field textarea,
+  .toolbar input, .tb-search input, .tb-search .bare-input {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .modal {
+    width: min(100%, var(--modal-width, 720px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .modal-body {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .modal-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-foot > .btn {
+    flex: 0 1 auto;
+  }
+
+  @media (max-width: 600px) {
+    .page-head .ph-acts,
+    .toolbar,
+    .modal-foot {
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .page-head .ph-acts > .btn,
+    .toolbar > .btn,
+    .modal-foot > .btn {
+      max-width: 100%;
+    }
+  }
+}
