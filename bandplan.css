@@ -10817,3 +10817,17 @@ body[data-route="songs"] .songs-search-actions [data-act="song-filter-open"]{
  .accent-picker-custom-chip,.accent-picker-add{height:32px;min-height:32px}
 }
 @media(prefers-reduced-motion:reduce){.accent-picker-swatch,.accent-picker-custom-chip{transition:none}}
+
+
+/* Modal DOM uses .modal-card / #mTitle / .sub in openModal(). */
+.color-picker-modal{position:relative}
+.color-picker-modal .modal-head{position:relative;display:flex;align-items:center;justify-content:center;min-height:58px}
+.color-picker-modal .modal-head>div{width:100%;text-align:center;padding:0 42px}
+.color-picker-modal .modal-head h3#mTitle{margin:0;text-align:center;font-size:clamp(18px,2.2vw,22px);font-weight:750;line-height:1.25}
+.color-picker-modal .modal-head .sub{display:none}
+.color-picker-modal .modal-head>.icon-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%)}
+@media(max-width:520px){
+ .color-picker-modal .modal-head{min-height:50px}
+ .color-picker-modal .modal-head>div{padding:0 34px}
+ .color-picker-modal .modal-head>.icon-btn{right:8px}
+}
