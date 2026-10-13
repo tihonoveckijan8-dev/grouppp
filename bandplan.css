@@ -10175,3 +10175,39 @@ button[data-bp-label-hidden="true"]>[aria-hidden="true"]{
   margin-inline:auto!important;
 }
 button>.bp-btn-label{min-width:0;white-space:nowrap}
+
+
+/* Reliable responsive layout for compact desktop windows/tablets (e.g. 835×754). */
+@media (min-width: 768px) and (max-width: 900px) {
+  .app { grid-template-columns: 64px minmax(0, 1fr) !important; }
+  .sidebar { width: 64px !important; min-width: 64px !important; padding: 12px 6px !important; }
+  .sidebar .brand { padding-inline: 0 !important; justify-content: center !important; }
+  .sidebar .brand-txt,
+  .sidebar .side-profile .nm,
+  .sidebar .side-profile .rl,
+  .sidebar .nav-item .nav-label,
+  .sidebar .side-note { display: none !important; }
+  .sidebar .nav-item { justify-content: center !important; gap: 0 !important; padding-inline: 0 !important; }
+  .sidebar .nav-item .nb { position: absolute; right: 0; top: 0; margin: 0; }
+  .sidebar .side-profile { justify-content: center !important; padding: 6px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+  .sidebar .sidebar-foot { align-items: center !important; }
+  .sidebar .sidebar-foot .btn { width: 42px !important; min-width: 42px !important; padding: 0 !important; }
+  .sidebar .sidebar-foot .btn .bp-btn-label,
+  .sidebar .sidebar-foot .btn span { display: none !important; }
+  .content { padding-left: 18px !important; padding-right: 18px !important; }
+  .page-head { padding-left: 18px !important; padding-right: 18px !important; gap: 12px !important; }
+  .page-head h1 { font-size: clamp(22px, 2.8vw, 28px) !important; }
+  .page-head .ph-acts { min-width: 0 !important; gap: 6px !important; }
+  .toolbar, .page-head .ph-acts, .modal-foot { flex-wrap: wrap !important; }
+  .toolbar > *, .page-head .ph-acts > *, .modal-foot > * { min-width: 0 !important; max-width: 100% !important; }
+  .card { padding: clamp(12px, 1.8vw, 20px) !important; }
+  .master-detail-shell.is-desktop { display: block !important; height: auto !important; max-height: none !important; overflow: visible !important; }
+  .master-detail-shell.is-desktop .master-detail-panel { display: none !important; }
+  .master-detail-shell.is-desktop .master-list { position: static !important; max-height: none !important; overflow: visible !important; }
+}
+@media (max-width: 900px) {
+  .btn { min-width: 0; max-width: 100%; }
+  .ph-acts > .btn, .toolbar > .btn, .modal-foot > .btn { flex-shrink: 1; }
+  .modal { max-width: calc(100vw - 20px) !important; }
+  .modal-head, .modal-body, .modal-foot { min-width: 0; }
+}
