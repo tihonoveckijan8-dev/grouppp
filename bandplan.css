@@ -10600,3 +10600,59 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar,
   .cal-cell .cal-events { gap: 3px; }
   .cal-cell .cal-ev { min-height: 22px; padding: 3px 5px; border-radius: 7px; font-size: 9px; }
 }
+
+
+/* FINAL OVERRIDE: calendar event items use card-like sizing, matching song cards. */
+@media (min-width: 768px) {
+  body[data-route="calendar"] .cal-cell .cal-events {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  body[data-route="calendar"] .cal-cell .cal-ev {
+    display: flex !important;
+    flex: 0 1 auto !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    height: auto !important;
+    padding: 5px 8px !important;
+    border: 1px solid color-mix(in srgb,var(--cal-type-color,var(--accent)) 28%,var(--border)) !important;
+    border-left: 3px solid var(--cal-type-color,var(--accent)) !important;
+    border-radius: 10px !important;
+    background: color-mix(in srgb,var(--cal-type-color,var(--accent)) 9%,var(--surf-2)) !important;
+    color: var(--text) !important;
+    box-shadow: var(--shadow-1) !important;
+    overflow: hidden !important;
+    text-align: left !important;
+  }
+  body[data-route="calendar"] .cal-cell .cal-ev-icon {
+    display: inline-flex !important;
+    flex: 0 0 14px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+  body[data-route="calendar"] .cal-cell .cal-ev-label {
+    display: block !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+  }
+}
+@media (max-width: 767px) {
+  body[data-route="calendar"] .cal-cell .cal-ev {
+    box-sizing: border-box !important;
+    border-radius: 7px !important;
+  }
+}
