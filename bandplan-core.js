@@ -2033,7 +2033,6 @@ function vSetlists() {
   const list = filteredSetlists();
   let h = '<div class="songs-head-row setlists-head-row">' +
     '<h1>Сет-листы</h1>' +
-    '<button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 17) + 'Создать сет-лист</button>' +
   '</div>' +
   '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
@@ -2041,6 +2040,7 @@ function vSetlists() {
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
     (ui.setlistQuery ? '<button class="icon-btn" type="button" data-act="setlist-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') +
     '</div>' +
+    '<button class="btn btn-primary setlists-add-btn" type="button" data-act="new-setlist">' + ic('plus', 17) + '<span>Добавить сет-лист</span></button>' +
   '</div>';
 
   h += '<p class="t-sm t-muted mb">' + list.length + ' ' + plural(list.length, 'сет-лист', 'сет-листа', 'сет-листов') + ' из ' + state.setlists.length + '</p>';
