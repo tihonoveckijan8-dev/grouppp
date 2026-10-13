@@ -9968,3 +9968,11 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 
 /* Remove all visible "Сегодня" buttons without changing calendar navigation logic. */
 button[data-act="cal-today"]{display:none!important}
+
+
+/* Restore the Add Event button's previous desktop position. */
+@media (min-width:1100px){
+  body[data-route="calendar"] [aria-labelledby="upH"] .card-h > [data-act="new-event"]{
+    transform:translateX(40px)!important;
+  }
+}
