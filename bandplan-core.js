@@ -3024,21 +3024,23 @@ document.addEventListener('click', function (e) {
     case 'accent-custom-open': {
       stop();
       const current = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#1554ff';
-      openModal({title:'Выбор своего цвета',sub:'Настрой акцент интерфейса под себя',size:'color-picker-modal',guard:false,body:
-        '<div class="custom-color-layout"><div class="custom-color-preview" id="accentModalPreview" style="--chosen-color:'+current+'"><span>Предпросмотр</span><strong>BandPlan</strong><small>Акцентный цвет интерфейса</small></div>'+
-        '<div class="custom-color-controls"><label class="custom-color-label" for="accentModalColor">Выбери цвет</label><input type="color" id="accentModalColor" value="'+current+'" aria-label="Выбрать цвет">'+
-        '<label class="custom-color-label" for="accentModalHex">HEX-код</label><input class="custom-color-hex" id="accentModalHex" value="'+current+'" maxlength="7" spellcheck="false" aria-label="HEX-код цвета">'+
-        '<div class="custom-color-presets">'+['#ef4444','#ff7a1a','#f59e0b','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899'].map(v=>'<button type="button" class="custom-color-chip" data-act="accent-modal-preset" data-v="'+v+'" style="--chip:'+v+'" aria-label="Цвет '+v+'"></button>').join('')+'</div></div></div>',
-        footer:'<button type="button" class="btn" data-act="modal-close">Отмена</button><button type="button" class="btn primary" data-act="accent-custom-apply">Применить</button>'});
-      const color=$('#accentModalColor'), hex=$('#accentModalHex'), preview=$('#accentModalPreview');
-      const syncColor=v=>{if(!/^#[0-9a-fA-F]{6}$/.test(v))return;color.value=v;hex.value=v.toUpperCase();preview.style.setProperty('--chosen-color',v);};
+      openModal({title:'Выберите цвет',sub:'',size:'color-picker-modal',guard:false,body:
+        '<div class="accent-picker-dialog" id="accentPickerDialog">'+
+        '<div class="accent-picker-grid" role="group" aria-label="Палитра цветов">'+
+        [['#93c5fd','#60a5fa','#3b82f6','#1d70d8','#1e5aa8'],['#86efac','#4ade80','#22c55e','#16a765','#229b68'],['#fef08a','#fde047','#facc15','#eab308','#d99a08'],['#fdba74','#fb923c','#f97316','#ea580c','#c2410c'],['#f87171','#ef4444','#dc2626','#be123c','#a61b32'],['#e879f9','#c084fc','#a855f7','#9333b8','#6b21a8'],['#d6b49a','#b08968','#966b46','#805b3b','#60452f'],['#ffffff','#f5f5f4','#deddda','#bdbdbb','#999999'],['#a1a1aa','#71717a','#52525b','#27272a','#000000']].map(col=>'<div class="accent-picker-column">'+col.map(v=>'<button type="button" class="accent-picker-swatch'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'" aria-pressed="'+(v.toLowerCase()===current.toLowerCase())+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',17):'')+'</button>').join('')+'</div>').join('')+
+        '</div><div class="accent-picker-other"><div class="accent-picker-section-title">Другой</div><div class="accent-picker-custom-row"><label class="accent-picker-add" for="accentModalColor" aria-label="Выбрать произвольный цвет">＋<input type="color" id="accentModalColor" value="'+current+'" aria-label="Выбрать свой цвет"></label>'+
+        ['#ec4899','#ea580c','#fbbf24','#fb923c','#1554ff','#7e3a96','#f15b78','#8b5cf6'].map(v=>'<button type="button" class="accent-picker-custom-chip'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',16):'')+'</button>').join('')+'</div></div>'+
+        '<div class="accent-picker-hex-row"><span>HEX</span><input class="custom-color-hex" id="accentModalHex" value="'+current.toUpperCase()+'" maxlength="7" spellcheck="false" aria-label="HEX-код цвета"></div></div>',
+        footer:'<button type="button" class="btn" data-act="modal-close">Отмена</button><button type="button" class="btn primary" data-act="accent-custom-apply">Выбрать</button>'});
+      const color=$('#accentModalColor'), hex=$('#accentModalHex');
+      const syncColor=v=>{if(!/^#[0-9a-fA-F]{6}$/.test(v))return;if(color)color.value=v;hex.value=v.toUpperCase();$('#accentPickerDialog')?.querySelectorAll('[data-v]').forEach(b=>{const on=(b.getAttribute('data-v')||'').toLowerCase()===v.toLowerCase();b.classList.toggle('is-selected',on);b.setAttribute('aria-pressed',String(on));b.innerHTML=on?ic('check',16):'';});};
       color?.addEventListener('input',()=>syncColor(color.value));
-      hex?.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(hex.value)){color.value=hex.value;preview.style.setProperty('--chosen-color',hex.value);}});
+      hex?.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(hex.value)){if(color)color.value=hex.value;$('#accentPickerDialog')?.querySelectorAll('[data-v]').forEach(b=>{const on=(b.getAttribute('data-v')||'').toLowerCase()===hex.value.toLowerCase();b.classList.toggle('is-selected',on);b.setAttribute('aria-pressed',String(on));b.innerHTML=on?ic('check',16):'';});}});
       break;
     }
     case 'accent-modal-preset': {
       const v=el.getAttribute('data-v'); const color=$('#accentModalColor'),hex=$('#accentModalHex'),preview=$('#accentModalPreview');
-      if(color&&hex&&preview){color.value=v;hex.value=v.toUpperCase();preview.style.setProperty('--chosen-color',v);}
+      if(hex){hex.value=v.toUpperCase();if(color)color.value=v;$('#accentPickerDialog')?.querySelectorAll('[data-v]').forEach(b=>{const on=(b.getAttribute('data-v')||'').toLowerCase()===v.toLowerCase();b.classList.toggle('is-selected',on);b.setAttribute('aria-pressed',String(on));b.innerHTML=on?ic('check',16):'';});}
       break;
     }
     case 'accent-custom-apply': {
