@@ -9970,9 +9970,9 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 button[data-act="cal-today"]{display:none!important}
 
 
-/* Move the calendar header's "+ Новое событие" button 30px further right. */
+/* Move the calendar header's "+ Новое событие" button 4px left. */
 @media (min-width:1100px){
   body[data-route="calendar"] #pageHead .ph-acts [data-act="new-event"]{
-    transform:translateX(210px)!important;
+    transform:translateX(206px)!important;
   }
 }
