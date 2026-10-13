@@ -4430,3 +4430,116 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 
               
+
+
+/* Adaptive icon-only fallback for icon+label buttons when zoom or layout leaves insufficient room. */
+(function initAdaptiveButtonLabels() {
+  'use strict';
+  if (window.__bandplanAdaptiveButtons) return;
+  window.__bandplanAdaptiveButtons = true;
+
+  const isIcon = button => !!button.querySelector('svg, .ti, .icon, [data-icon]');
+  const isLabelSpan = span => {
+    if (span.classList.contains('bp-btn-label') || span.classList.contains('sr-only')) return false;
+    if (span.matches('.nb, .badge, .count, .ti, .icon, [aria-hidden="true"], [data-icon]')) return false;
+    return !!span.textContent.trim();
+  };
+
+  function prepare(button) {
+    if (!(button instanceof HTMLButtonElement) || !button.classList.contains('btn')) return;
+    if (button.matches('.btn-icon, [data-bp-no-collapse], [aria-label=""]') || !isIcon(button)) return;
+
+    // Wrap direct text and ordinary text spans without touching icons, badges, or action logic.
+    Array.from(button.childNodes).forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+        const label = document.createElement('span');
+        label.className = 'bp-btn-label';
+        label.textContent = node.textContent.trim();
+        button.replaceChild(label, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN' && isLabelSpan(node)) {
+        node.classList.add('bp-btn-label');
+      }
+    });
+
+    const labels = button.querySelectorAll(':scope > .bp-btn-label');
+    if (!labels.length) return;
+    if (button.hasAttribute('title') && !button.hasAttribute('data-bp-original-title')) button.setAttribute('data-bp-original-title', button.getAttribute('title'));
+    if (!button.hasAttribute('aria-label')) {
+      const accessibleName = Array.from(labels).map(label => label.textContent.trim()).filter(Boolean).join(' ');
+      if (accessibleName) button.setAttribute('aria-label', accessibleName);
+    }
+    button.dataset.bpAdaptive = '1';
+    measure(button);
+    if (window.__bandplanAdaptiveResizeObserver) window.__bandplanAdaptiveResizeObserver.observe(button);
+  }
+
+  function measure(button) {
+    if (!button.isConnected || button.dataset.bpAdaptive !== '1') return;
+    const label = button.querySelector(':scope > .bp-btn-label');
+    if (!label) return;
+
+    // Temporarily expose the label off-flow to measure its full width even when currently hidden.
+    const old = {
+      display: label.style.display,
+      position: label.style.position,
+      visibility: label.style.visibility,
+      width: label.style.width,
+      maxWidth: label.style.maxWidth
+    };
+    Object.assign(label.style, {
+      display: 'inline-block',
+      position: 'absolute',
+      visibility: 'hidden',
+      width: 'max-content',
+      maxWidth: 'none'
+    });
+    const labelWidth = label.getBoundingClientRect().width;
+    Object.assign(label.style, old);
+
+    const style = getComputedStyle(button);
+    const icon = button.querySelector('svg, .ti, .icon, [data-icon]');
+    const iconWidth = icon ? icon.getBoundingClientRect().width : 0;
+    const gap = parseFloat(style.columnGap || style.gap) || 0;
+    const padding = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    const needed = labelWidth + iconWidth + gap + padding + 2;
+    const constrained = button.clientWidth > 0 && needed > button.clientWidth + 1;
+    if (constrained) {
+      button.dataset.bpLabelHidden = 'true';
+      button.setAttribute('title', button.getAttribute('aria-label') || label.textContent.trim());
+    } else {
+      delete button.dataset.bpLabelHidden;
+      if (button.hasAttribute('data-bp-original-title')) button.setAttribute('title', button.getAttribute('data-bp-original-title'));
+      else button.removeAttribute('title');
+    }
+  }
+
+  const observer = new ResizeObserver(entries => {
+    entries.forEach(entry => measure(entry.target));
+  });
+  window.__bandplanAdaptiveResizeObserver = observer;
+
+  function scan(root) {
+    if (root instanceof Element && root.matches('button.btn')) prepare(root);
+    if (root.querySelectorAll) root.querySelectorAll('button.btn').forEach(prepare);
+  }
+
+  function start() {
+    scan(document);
+    const mutations = new MutationObserver(records => {
+      records.forEach(record => {
+        if (record.type === 'childList') record.addedNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) scan(node);
+        });
+        else if (record.type === 'characterData') {
+          const button = record.target.parentElement?.closest('button.btn');
+          if (button) prepare(button);
+        }
+      });
+    });
+    mutations.observe(document.body, {subtree: true, childList: true, characterData: true});
+    window.addEventListener('resize', () => document.querySelectorAll('button[data-bp-adaptive="1"]').forEach(measure), {passive: true});
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true});
+  else start();
+})();
