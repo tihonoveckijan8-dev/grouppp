@@ -2275,7 +2275,7 @@ function vSettings() {
     '<summary><span class="accent-dropdown-current"><span class="accent-dot" data-preset="' + esc(s.accentPreset || 'custom') + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[s.accentPreset] || 'Свой цвет') + '</span></span><span class="accent-dropdown-chevron">' + ic('chevronDown', 15) + '</span></summary>' +
     '<div class="accent-dropdown-menu">' +
     ACCENTS.map(a => '<button class="accent-dropdown-option' + (s.accentPreset === a ? ' on' : '') + '" type="button" data-act="accent-set" data-v="' + a + '" aria-pressed="' + (s.accentPreset === a) + '"><span class="accent-dot" data-preset="' + a + '" aria-hidden="true"></span><span>' + esc(ACCENT_LABELS[a]) + '</span>' + (s.accentPreset === a ? ic('check', 14) : '') + '</button>').join('') +
-    '<label class="accent-dropdown-option accent-dropdown-custom"><span class="accent-dot accent-dot-custom" data-preset="custom" aria-hidden="true"></span><span>Свой цвет</span><input type="color" id="accentCustom" value="' + esc(s.accent) + '" aria-label="Выбрать свой цвет"></label><button class="accent-dropdown-option accent-dropdown-reset" type="button" data-act="accent-reset">Сбросить</button>' +
+    '<button class="accent-dropdown-option accent-dropdown-custom" type="button" data-act="accent-custom-open"><span class="accent-dot accent-dot-custom" data-preset="custom" aria-hidden="true"></span><span>Свой цвет</span><span class="accent-custom-cta">Настроить</span></button><button class="accent-dropdown-option accent-dropdown-reset" type="button" data-act="accent-reset">Сбросить</button>' +
     '</div></details></div>' +
     '<div class="field settings-inline-field"><span class="field-label">Запись аккордов</span><div class="seg settings-one-line">' +
     [['auto', 'Как в оригинале'], ['sharp', 'Диезы (C#)'], ['flat', 'Бемоли (Db)']].map(o => '<button type="button" data-act="notation-set" data-v="' + o[0] + '" class="' + (s.notation === o[0] ? 'on' : '') + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div>' +
@@ -3021,6 +3021,31 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
+    case 'accent-custom-open': {
+      stop();
+      const current = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#1554ff';
+      openModal({title:'Выбор своего цвета',sub:'Настрой акцент интерфейса под себя',size:'color-picker-modal',guard:false,body:
+        '<div class="custom-color-layout"><div class="custom-color-preview" id="accentModalPreview" style="--chosen-color:'+current+'"><span>Предпросмотр</span><strong>BandPlan</strong><small>Акцентный цвет интерфейса</small></div>'+
+        '<div class="custom-color-controls"><label class="custom-color-label" for="accentModalColor">Выбери цвет</label><input type="color" id="accentModalColor" value="'+current+'" aria-label="Выбрать цвет">'+
+        '<label class="custom-color-label" for="accentModalHex">HEX-код</label><input class="custom-color-hex" id="accentModalHex" value="'+current+'" maxlength="7" spellcheck="false" aria-label="HEX-код цвета">'+
+        '<div class="custom-color-presets">'+['#ef4444','#ff7a1a','#f59e0b','#22c55e','#14b8a6','#3b82f6','#6366f1','#a855f7','#ec4899'].map(v=>'<button type="button" class="custom-color-chip" data-act="accent-modal-preset" data-v="'+v+'" style="--chip:'+v+'" aria-label="Цвет '+v+'"></button>').join('')+'</div></div></div>',
+        footer:'<button type="button" class="btn" data-act="modal-close">Отмена</button><button type="button" class="btn primary" data-act="accent-custom-apply">Применить</button>'});
+      const color=$('#accentModalColor'), hex=$('#accentModalHex'), preview=$('#accentModalPreview');
+      const syncColor=v=>{if(!/^#[0-9a-fA-F]{6}$/.test(v))return;color.value=v;hex.value=v.toUpperCase();preview.style.setProperty('--chosen-color',v);};
+      color?.addEventListener('input',()=>syncColor(color.value));
+      hex?.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(hex.value)){color.value=hex.value;preview.style.setProperty('--chosen-color',hex.value);}});
+      break;
+    }
+    case 'accent-modal-preset': {
+      const v=el.getAttribute('data-v'); const color=$('#accentModalColor'),hex=$('#accentModalHex'),preview=$('#accentModalPreview');
+      if(color&&hex&&preview){color.value=v;hex.value=v.toUpperCase();preview.style.setProperty('--chosen-color',v);}
+      break;
+    }
+    case 'accent-custom-apply': {
+      const v=$('#accentModalHex')?.value || $('#accentModalColor')?.value;
+      if(/^#[0-9a-fA-F]{6}$/.test(v)){hardClose($('#modalOverlay'));applyAccent(v);}
+      break;
+    }
     case 'accent-set': stop(); applyAccent(el.getAttribute('data-v')); break;
     case 'accent-reset': stop(); applyAccent('blue'); break;
     case 'notation-set': stop(); state.settings.notation = el.getAttribute('data-v'); commit(); break;
