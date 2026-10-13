@@ -10051,7 +10051,6 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
 
 
 /* Adaptive layout: prevent controls and content from clipping at browser zoom / narrow widths. */
-@layer screens {
   .btn, .icon-btn, .sbtn, .settings-tab, .nav-item,
   .toolbar > *, .page-head .ph-acts > *, .modal-foot > * {
     min-width: 0;
@@ -10151,4 +10150,4 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
       max-width: 100%;
     }
   }
-}
+
