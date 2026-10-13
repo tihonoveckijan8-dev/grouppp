@@ -9950,3 +9950,13 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
     font-size:12px!important;
   }
 }
+
+
+/* Align the calendar page heading ("Расписание") with the calendar content edge on desktop. */
+@media (min-width:1100px){
+  body[data-route="calendar"] .page-head{
+    padding-left:0!important;
+    padding-right:0!important;
+    margin-left:0!important;
+  }
+}
