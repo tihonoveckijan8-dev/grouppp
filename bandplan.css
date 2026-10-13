@@ -10831,3 +10831,159 @@ body[data-route="songs"] .songs-search-actions [data-act="song-filter-open"]{
  .color-picker-modal .modal-head>div{padding:0 34px}
  .color-picker-modal .modal-head>.icon-btn{right:8px}
 }
+
+
+/* Mobile layout hardening: prevent collisions instead of hiding overflow.
+   Keep calendar-specific geometry untouched; only constrain shared containers. */
+@media (max-width: 767px) {
+  html, body { max-width: 100%; }
+  body { overflow-x: clip; }
+  #app, #app > .main, #app .content, #app .page-head,
+  #view, #pageHead, .settings-shell, .settings-card,
+  .card, .card-body, .event-card, .song-card, .setlist-card,
+  .setlist-detail, .toolbar, .form-grid, .form-field {
+    min-width: 0 !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  #app .content { padding-inline: clamp(12px, 3.5vw, 20px) !important; }
+  #app .page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    padding-inline: clamp(12px, 3.5vw, 20px) !important;
+  }
+  #app .page-head > * { min-width: 0; max-width: 100%; }
+  #app .page-head h1, #app .page-head h2,
+  .card h1, .card h2, .card h3, .event-card h3,
+  .song-card h3, .setlist-card h3 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  #app .page-head .ph-acts {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+  }
+  #app .page-head .ph-acts > * { flex: 0 1 auto; min-width: 0; }
+  .toolbar, .toolbar > *, .songs-search-row, .songs-search-action-row,
+  .setlists-search-row, .songs-search-actions {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+  .toolbar, .songs-search-row, .songs-search-action-row, .setlists-search-row {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .toolbar > .tb-search, .songs-search-row > .tb-search,
+  .songs-search-action-row > .tb-search, .setlists-search-row > .tb-search {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    margin-right: 0 !important;
+  }
+  .toolbar > .btn, .songs-search-row > .btn,
+  .songs-search-action-row > .btn, .setlists-search-row > .btn,
+  .songs-search-actions > .btn {
+    min-width: 44px;
+    min-height: 44px;
+    max-width: 100%;
+  }
+  .form-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .form-field, .form-field > *, .form-field input, .form-field select,
+  .form-field textarea, input, select, textarea {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .card, .event-card, .song-card, .setlist-card, .settings-card {
+    overflow-wrap: anywhere;
+  }
+  .card-acts, .song-acts, .event-acts, .setlist-acts,
+  .card-actions, .settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .card-acts > *, .song-acts > *, .event-acts > *,
+  .setlist-acts > *, .card-actions > *, .settings-actions > * {
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 1 auto;
+  }
+  #modalOverlay .modal, #modalOverlay .modal-card {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px - env(safe-area-inset-top)) !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+  #modalOverlay .modal-head, #modalOverlay .modal-body,
+  #modalOverlay .modal-foot {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  #modalOverlay .modal-body {
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #modalOverlay .modal-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  #modalOverlay .modal-foot > .btn {
+    flex: 1 1 140px;
+    min-width: 0;
+    min-height: 44px;
+  }
+  .bottom-nav {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
+  }
+  .bottom-nav > * { min-width: 0; max-width: 100%; }
+  .scene { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .scene-top { min-width: 0; gap: 8px; }
+  .scene-title { flex: 1 1 auto; min-width: 0; }
+  .scene-title h2, .scene-title p { overflow-wrap: anywhere; }
+  .scene-ctrl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .scene-ctrl > *, .scene-ctrl .sctl { min-width: 0; max-width: 100%; }
+}
+@media (max-width: 420px) {
+  #app .content { padding-inline: 12px !important; }
+  #app .page-head { padding-inline: 12px !important; }
+  #app .page-head .ph-acts > .btn,
+  .toolbar > .btn, .songs-search-row > .btn,
+  .songs-search-action-row > .btn, .setlists-search-row > .btn {
+    min-height: 44px;
+  }
+  .card, .event-card, .song-card, .setlist-card, .settings-card {
+    padding-inline: 12px;
+  }
+  #modalOverlay .modal-foot > .btn { flex-basis: 100%; }
+  .scene-ctrl { gap: 6px; }
+}
+@media (max-width: 350px) {
+  .bottom-nav { gap: 2px; }
+  .bottom-nav > * { padding-inline: 3px; }
+  .scene-ctrl .sctl { flex: 1 1 72px; }
+}
