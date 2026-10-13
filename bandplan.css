@@ -9986,3 +9986,56 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
     transform:translateX(-117px)!important;
   }
 }
+
+/* Unified premium search field styling across the app. Keep the frame calm on click/focus. */
+:where(.tb-search,.setlist-detail .setlist-library-search > .tb-search){
+  box-sizing:border-box!important;
+  min-width:0;
+  border:1px solid var(--border)!important;
+  border-radius:14px!important;
+  background:var(--surf-1)!important;
+  box-shadow:var(--shadow-1)!important;
+  transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease!important;
+}
+:where(.tb-search,.setlist-detail .setlist-library-search > .tb-search):hover{
+  border-color:var(--border)!important;
+  background:var(--surf-2)!important;
+  box-shadow:var(--shadow-1)!important;
+}
+:where(.tb-search,.setlist-detail .setlist-library-search > .tb-search):focus-within{
+  border-color:var(--border)!important;
+  background:var(--surf-1)!important;
+  box-shadow:var(--shadow-1)!important;
+  outline:none!important;
+}
+:where(.tb-search,.setlist-detail .setlist-library-search > .tb-search)::before,
+:where(.tb-search,.setlist-detail .setlist-library-search > .tb-search)::after{
+  box-shadow:none!important;
+  filter:none!important;
+}
+:where(.tb-search input,.tb-search .bare-input,.setlist-detail .setlist-library-search input#libQ){
+  min-width:0;
+  color:var(--text)!important;
+  caret-color:var(--accent)!important;
+  outline:none!important;
+  box-shadow:none!important;
+}
+:where(.tb-search input,.tb-search .bare-input,.setlist-detail .setlist-library-search input#libQ):focus,
+:where(.tb-search input,.tb-search .bare-input,.setlist-detail .setlist-library-search input#libQ):focus-visible{
+  outline:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+:where(input[type="search"],input[placeholder*="Поиск"],input[aria-label*="Поиск"]){
+  outline:none;
+}
+:where(input[type="search"],input[placeholder*="Поиск"],input[aria-label*="Поиск"]):focus{
+  outline:none!important;
+  box-shadow:none!important;
+}
+@media(forced-colors:active){
+  :where(.tb-search,.setlist-detail .setlist-library-search > .tb-search){
+    border:1px solid CanvasText!important;
+    box-shadow:none!important;
+  }
+}
