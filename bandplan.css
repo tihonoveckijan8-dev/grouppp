@@ -11454,3 +11454,24 @@ html[data-theme="amoled"], body.theme-amoled {
     margin-top: 0;
   }
 }
+
+
+/* WHY: the song page title must stay below the top app bar, never overlap it. */
+@media (max-width: 900px) {
+  body[data-route="song"] .topbar,
+  body[data-route="setlist"] .topbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: 20 !important;
+  }
+  body[data-route="song"] #pageHead,
+  body[data-route="song"] .page-head,
+  body[data-route="setlist"] #pageHead,
+  body[data-route="setlist"] .page-head {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    z-index: 1 !important;
+    clear: both;
+  }
+}
