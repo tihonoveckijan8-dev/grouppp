@@ -10479,6 +10479,18 @@ body {
   #app .sidebar .sidebar-foot { margin-top: auto; padding-bottom: 16px; }
 }
 /* Keep sidebar action labels visible by default; hide them only in the compact icon-rail breakpoint. */
+/* Keep the account shortcut anchored low in the navigation rail, above the utility buttons. */
+@media (min-width: 768px) {
+  #app .sidebar .side-profile {
+    margin-top: auto !important;
+    flex-shrink: 0;
+  }
+  #app .sidebar .sidebar-foot {
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+}
+
 /* Desktop floating sidebar: keep its bottom edge inside the viewport and mirror the top outer gap. */
 @media (min-width: 901px) {
   #app > .sidebar {
