@@ -11042,3 +11042,27 @@ body[data-route="songs"] .songs-search-actions [data-act="song-filter-open"]{
 @media (prefers-reduced-motion: reduce) {
   .bp-auth-google { transition: none; }
 }
+
+
+/* Keep Google sign-in legible in every BandPlan theme.
+   WHY: theme token names vary across legacy surfaces, so the OAuth action uses
+   explicit high-contrast colors instead of inheriting a possibly pale surface. */
+.bp-auth-google {
+  background: var(--card-bg, var(--panel-bg, #20242c));
+  color: var(--text-primary, var(--text-color, #f5f7fb));
+  border-color: var(--border-color, rgba(255, 255, 255, .24));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+.bp-auth-google span {
+  color: inherit;
+  opacity: 1;
+}
+.bp-auth-google:hover:not(:disabled) {
+  background: var(--card-bg-hover, var(--panel-hover, #2b303a));
+  color: var(--text-primary, var(--text-color, #ffffff));
+  border-color: var(--border-color-strong, rgba(255, 255, 255, .42));
+}
+.bp-auth-google:disabled {
+  color: var(--text-primary, var(--text-color, #f5f7fb));
+  opacity: .82;
+}
