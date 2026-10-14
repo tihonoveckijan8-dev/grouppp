@@ -11119,3 +11119,53 @@ body.theme-amoled .bp-auth-google {
 .sidebar .side-profile {
   display: none !important;
 }
+
+
+/* BandPlan — subtle Apple-inspired depth.
+   WHY: create separation through restrained light, shadow and motion rather than heavy clay-style bevels.
+   Scope intentionally excludes calendar surfaces and leaves layout, colors and app logic unchanged. */
+:root {
+  --bp-depth-shadow: 0 8px 24px rgba(15, 23, 42, .055), 0 1px 3px rgba(15, 23, 42, .045);
+  --bp-depth-shadow-hover: 0 12px 30px rgba(15, 23, 42, .085), 0 3px 8px rgba(15, 23, 42, .055);
+  --bp-depth-inset: inset 0 1px 0 rgba(255, 255, 255, .62);
+  --bp-control-shadow: 0 1px 2px rgba(15, 23, 42, .035);
+}
+html[data-theme="dark"], [data-theme="dark"], body.theme-dark {
+  --bp-depth-shadow: 0 8px 24px rgba(0, 0, 0, .18), 0 1px 3px rgba(0, 0, 0, .14);
+  --bp-depth-shadow-hover: 0 12px 30px rgba(0, 0, 0, .28), 0 3px 8px rgba(0, 0, 0, .2);
+  --bp-depth-inset: inset 0 1px 0 rgba(255, 255, 255, .045);
+  --bp-control-shadow: 0 1px 2px rgba(0, 0, 0, .14);
+}
+html[data-theme="amoled"], [data-theme="amoled"], body.theme-amoled {
+  --bp-depth-shadow: 0 8px 24px rgba(0, 0, 0, .4), 0 1px 3px rgba(0, 0, 0, .28);
+  --bp-depth-shadow-hover: 0 12px 30px rgba(0, 0, 0, .52), 0 3px 8px rgba(0, 0, 0, .32);
+  --bp-depth-inset: inset 0 1px 0 rgba(255, 255, 255, .035);
+  --bp-control-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+/* Main content cards only — calendar remains visually untouched. */
+#app :is(.song-card, .setlist-card, .song-item, .setlist-item, .repertoire-card, .profile-card, .settings-card, .panel-card, .content-card):not(.calendar *):not(.calendar-card) {
+  box-shadow: var(--bp-depth-shadow);
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  #app :is(.song-card, .setlist-card, .song-item, .setlist-item, .repertoire-card, .profile-card, .settings-card, .panel-card, .content-card):not(.calendar *):not(.calendar-card):hover {
+    box-shadow: var(--bp-depth-shadow-hover);
+  }
+}
+/* Controls get a tactile finish without a new outline or layout shift. */
+#app :is(button, .btn, [role="button"]):not(.calendar *):not(.calendar-card):not(.side-profile) {
+  transition: box-shadow .18s ease, transform .18s ease, background-color .18s ease, border-color .18s ease;
+}
+#app :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select):not(.calendar *) {
+  box-shadow: var(--bp-control-shadow);
+}
+#app :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select):focus-visible:not(.calendar *) {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #1554ff) 13%, transparent), var(--bp-control-shadow);
+}
+@media (prefers-reduced-motion: reduce) {
+  #app :is(.song-card, .setlist-card, .song-item, .setlist-item, .repertoire-card, .profile-card, .settings-card, .panel-card, .content-card, button, .btn, [role="button"]) {
+    transition: none !important;
+  }
+}
