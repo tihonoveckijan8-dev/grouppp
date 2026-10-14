@@ -11090,12 +11090,21 @@ body.theme-light .bp-auth-google {
 }
 html[data-theme="dark"] .bp-auth-google,
 [data-theme="dark"] .bp-auth-google,
-body.theme-dark .bp-auth-google,
+body.theme-dark .bp-auth-google {
+  /* WHY: avoid white text on the white surface inherited from --surface. */
+  background: #202124;
+  color: #f5f7fb;
+  border-color: rgba(255, 255, 255, .24);
+  --bp-auth-google-hover-bg: #2b2d31;
+  --bp-auth-google-border: rgba(255, 255, 255, .24);
+}
 html[data-theme="amoled"] .bp-auth-google,
 [data-theme="amoled"] .bp-auth-google,
 body.theme-amoled .bp-auth-google {
+  background: #0b0b0e;
   color: #f5f7fb;
-  --bp-auth-google-hover-bg: #252a33;
+  border-color: rgba(255, 255, 255, .24);
+  --bp-auth-google-hover-bg: #18181c;
   --bp-auth-google-border: rgba(255, 255, 255, .24);
 }
 .bp-auth-google { border-color: var(--bp-auth-google-border, var(--border, rgba(127,127,127,.35))); }
