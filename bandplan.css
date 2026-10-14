@@ -11270,3 +11270,72 @@ html[data-theme="amoled"], body.theme-amoled {
     height: 15px;
   }
 }
+
+/* WHY: prevent mobile content from forcing the app wider than the viewport or
+   slipping underneath the fixed bottom navigation. Scope away from calendar
+   internals to preserve its established layout. */
+@media (max-width: 900px) {
+  #app,
+  #app .app,
+  #app .content,
+  #app main,
+  #app #page,
+  #app #pageHead {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #app .content {
+    padding-bottom: calc(var(--bn, 64px) + env(safe-area-inset-bottom, 0px) + 24px);
+  }
+
+  #app :is(.song-card, .sl-item, .card, .panel, .empty-state, .modal-card) {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #app :is(.song-card, .sl-item, .card, .panel, .empty-state) :is(h1, h2, h3, p, a, .muted, .text-muted) {
+    overflow-wrap: anywhere;
+  }
+
+  #app :is(.ph-acts, .hero-actions, .profile-actions, .data-action-buttons) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #app input:not([type="checkbox"]):not([type="radio"]),
+  #app select,
+  #app textarea {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  #app img,
+  #app video,
+  #app canvas,
+  #app svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  #app .content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  #app .page-head {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  #app .ph-acts,
+  #app .hero-actions,
+  #app .profile-actions,
+  #app .data-action-buttons {
+    gap: 6px;
+  }
+}
