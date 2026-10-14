@@ -11211,3 +11211,62 @@ html[data-theme="amoled"], body.theme-amoled {
     display: none;
   }
 }
+
+/* WHY: keep the Song page title and edit action in their original shared header
+   row on phones, while allowing the action to shrink instead of overflow. */
+@media (max-width: 640px) {
+  body[data-route="song"] #pageHead {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between;
+    flex-wrap: nowrap !important;
+    gap: 10px;
+    min-width: 0;
+  }
+  body[data-route="song"] #pageHead > div:first-child {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+  }
+  body[data-route="song"] #pageHead .crumb {
+    min-width: 0;
+    overflow: hidden;
+  }
+  body[data-route="song"] #pageHead .crumb .nowrap {
+    display: inline-block;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
+  body[data-route="song"] #pageHead .ph-acts {
+    display: flex !important;
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+    max-width: 48%;
+    margin: 0;
+  }
+  body[data-route="song"] #pageHead .ph-acts > button[data-act="edit-song"] {
+    display: inline-flex;
+    flex: 0 1 auto !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto;
+    min-width: 44px;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    font-size: 13px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  body[data-route="song"] #pageHead .ph-acts > button[data-act="edit-song"] svg {
+    flex: 0 0 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
