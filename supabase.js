@@ -523,12 +523,35 @@
       (reset && !changingPassword ? '' : '<label class="bp-auth-label" for="bpAuthPassword">' + (changingPassword ? 'Новый пароль' : 'Пароль') + '</label><div class="bp-auth-password-wrap"><input id="bpAuthPassword" class="bp-auth-input" type="password" minlength="8" autocomplete="' + ((signup || changingPassword)?'new-password':'current-password') + '" inputmode="text" enterkeyhint="done" placeholder="Не менее 8 символов" required><button type="button" class="bp-auth-password-toggle" id="bpAuthPasswordToggle" aria-label="Показать пароль" aria-pressed="false">Показать</button></div>') +
       '<p class="bp-auth-message ' + (error?'is-error':'') + '" id="bpAuthMessage" role="alert" aria-live="assertive">' + escapeHtml(message || '') + '</p>' +
       '<button class="bp-auth-submit" id="bpAuthSubmit" type="submit">' + (signup?'Зарегистрироваться':reset?'Отправить ссылку':'Войти') + '</button></form>' +
+      (!reset ? '<div class="bp-auth-divider" aria-hidden="true"><span>или</span></div>' +
+        '<button class="bp-auth-google" id="bpAuthGoogle" type="button"><svg aria-hidden="true" viewBox="0 0 48 48" focusable="false"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.73 7.18l7.64 5.93c4.46-4.12 7.13-10.2 7.13-17.58z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.87l-7.64-5.93c-2.12 1.42-4.84 2.26-8.27 2.26-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Продолжить с Google</span></button>' : '') +
       '<div class="bp-auth-links">' +
       (reset ? '<button type="button" data-auth-mode="login">Вернуться ко входу</button>' :
         (signup ? '<span>Уже есть аккаунт?</span><button type="button" data-auth-mode="login">Войти</button>' :
         '<button type="button" data-auth-mode="signup">Создать аккаунт</button><button type="button" data-auth-mode="reset">Забыли пароль?</button>')) +
       '</div></section>';
     $('#bpAuthForm',el).addEventListener('submit',submitAuth);
+    const googleButton = $('#bpAuthGoogle', el);
+    if (googleButton) googleButton.addEventListener('click', async () => {
+      googleButton.disabled = true;
+      googleButton.setAttribute('aria-busy', 'true');
+      const label = googleButton.querySelector('span');
+      if (label) label.textContent = 'Переход к Google…';
+      try {
+        // WHY: return to the deployed BandPlan shell; Supabase completes OAuth and restores the session.
+        const {error} = await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: {redirectTo: location.origin + location.pathname}
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error('BandPlan Google OAuth failed:', error);
+        setMessage(authErrorMessage(error, 'login'), true);
+        googleButton.disabled = false;
+        googleButton.removeAttribute('aria-busy');
+        if (label) label.textContent = 'Продолжить с Google';
+      }
+    });
     const passwordToggle = $('#bpAuthPasswordToggle', el);
     if (passwordToggle) passwordToggle.addEventListener('click', () => {
       const input = $('#bpAuthPassword', el);
