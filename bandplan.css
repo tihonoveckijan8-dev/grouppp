@@ -11066,3 +11066,39 @@ body[data-route="songs"] .songs-search-actions [data-act="song-filter-open"]{
   color: var(--text-primary, var(--text-color, #f5f7fb));
   opacity: .82;
 }
+
+
+/* Theme-aware Google OAuth contrast: dark text on light themes, light on dark. */
+html[data-theme="light"] .bp-auth-google,
+[data-theme="light"] .bp-auth-google,
+body.theme-light .bp-auth-google,
+html[data-theme="dark"] .bp-auth-google,
+[data-theme="dark"] .bp-auth-google,
+body.theme-dark .bp-auth-google,
+html[data-theme="amoled"] .bp-auth-google,
+[data-theme="amoled"] .bp-auth-google,
+body.theme-amoled .bp-auth-google {
+  background: var(--surface, var(--card-bg, #ffffff));
+  border-color: var(--border, rgba(127, 127, 127, .35));
+}
+html[data-theme="light"] .bp-auth-google,
+[data-theme="light"] .bp-auth-google,
+body.theme-light .bp-auth-google {
+  color: #202124;
+  --bp-auth-google-hover-bg: #f1f3f4;
+  --bp-auth-google-border: #dadce0;
+}
+html[data-theme="dark"] .bp-auth-google,
+[data-theme="dark"] .bp-auth-google,
+body.theme-dark .bp-auth-google,
+html[data-theme="amoled"] .bp-auth-google,
+[data-theme="amoled"] .bp-auth-google,
+body.theme-amoled .bp-auth-google {
+  color: #f5f7fb;
+  --bp-auth-google-hover-bg: #252a33;
+  --bp-auth-google-border: rgba(255, 255, 255, .24);
+}
+.bp-auth-google { border-color: var(--bp-auth-google-border, var(--border, rgba(127,127,127,.35))); }
+.bp-auth-google:hover:not(:disabled) {
+  background: var(--bp-auth-google-hover-bg, var(--surface-hover, rgba(127,127,127,.08)));
+}
