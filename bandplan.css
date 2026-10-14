@@ -11425,3 +11425,19 @@ html[data-theme="amoled"], body.theme-amoled {
     overflow-wrap: anywhere;
   }
 }
+
+/* WHY: reserve room for the fixed action panel as well as the bottom nav. */
+@media (max-width: 900px) {
+  body:not([data-route="calendar"]) .content {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+  }
+  #app .actionbar {
+    bottom: calc(var(--bn, 66px) + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: var(--z-action, 120);
+    box-sizing: border-box;
+    max-width: 100vw;
+  }
+  #app .actionbar > * { min-width: 0; max-width: 100%; }
+  #app .bottom-nav { bottom: 0; z-index: var(--z-nav, 30); max-width: 100vw; }
+}
