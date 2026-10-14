@@ -11126,34 +11126,34 @@ body.theme-amoled .bp-auth-google {
    while keeping theme tokens, layout, interactions and calendar styling unchanged.
    No backdrop-filter or translucent glass surfaces are introduced. */
 :root {
-  --bp-clay-raised: 0 2px 5px rgba(15, 23, 42, .035),
-    0 8px 20px rgba(15, 23, 42, .055),
-    inset 0 1px 0 rgba(255, 255, 255, .78),
-    inset 0 -1px 0 rgba(15, 23, 42, .025);
-  --bp-clay-raised-hover: 0 4px 8px rgba(15, 23, 42, .045),
-    0 12px 26px rgba(15, 23, 42, .075),
-    inset 0 1px 0 rgba(255, 255, 255, .88),
-    inset 0 -1px 0 rgba(15, 23, 42, .025);
+  --bp-clay-raised: 0 2px 5px color-mix(in srgb, var(--token-black) 3.5%, transparent),
+    0 8px 20px color-mix(in srgb, var(--token-black) 5.5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 78%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 2.5%, transparent);
+  --bp-clay-raised-hover: 0 4px 8px color-mix(in srgb, var(--token-black) 4.5%, transparent),
+    0 12px 26px color-mix(in srgb, var(--token-black) 7.5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 88%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 2.5%, transparent);
 }
 html[data-theme="dark"], body.theme-dark {
-  --bp-clay-raised: 0 2px 5px rgba(0, 0, 0, .20),
-    0 8px 20px rgba(0, 0, 0, .22),
-    inset 0 1px 0 rgba(255, 255, 255, .055),
-    inset 0 -1px 0 rgba(0, 0, 0, .18);
-  --bp-clay-raised-hover: 0 4px 8px rgba(0, 0, 0, .24),
-    0 12px 26px rgba(0, 0, 0, .28),
-    inset 0 1px 0 rgba(255, 255, 255, .075),
-    inset 0 -1px 0 rgba(0, 0, 0, .18);
+  --bp-clay-raised: 0 2px 5px color-mix(in srgb, var(--token-black) 20%, transparent),
+    0 8px 20px color-mix(in srgb, var(--token-black) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 5.5%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 18%, transparent);
+  --bp-clay-raised-hover: 0 4px 8px color-mix(in srgb, var(--token-black) 24%, transparent),
+    0 12px 26px color-mix(in srgb, var(--token-black) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 7.5%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 18%, transparent);
 }
 html[data-theme="amoled"], body.theme-amoled {
-  --bp-clay-raised: 0 2px 5px rgba(0, 0, 0, .48),
-    0 8px 20px rgba(0, 0, 0, .38),
-    inset 0 1px 0 rgba(255, 255, 255, .045),
-    inset 0 -1px 0 rgba(0, 0, 0, .34);
-  --bp-clay-raised-hover: 0 4px 8px rgba(0, 0, 0, .52),
-    0 12px 26px rgba(0, 0, 0, .46),
-    inset 0 1px 0 rgba(255, 255, 255, .06),
-    inset 0 -1px 0 rgba(0, 0, 0, .34);
+  --bp-clay-raised: 0 2px 5px color-mix(in srgb, var(--token-black) 48%, transparent),
+    0 8px 20px color-mix(in srgb, var(--token-black) 38%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 4.5%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 34%, transparent);
+  --bp-clay-raised-hover: 0 4px 8px color-mix(in srgb, var(--token-black) 52%, transparent),
+    0 12px 26px color-mix(in srgb, var(--token-black) 46%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 6%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--token-black) 34%, transparent);
 }
 
 /* Only repertoire cards: calendar and scene mode are deliberately excluded. */
