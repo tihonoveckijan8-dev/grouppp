@@ -11111,3 +11111,11 @@ body.theme-amoled .bp-auth-google {
 .bp-auth-google:hover:not(:disabled) {
   background: var(--bp-auth-google-hover-bg, var(--surface-hover, rgba(127,127,127,.08)));
 }
+
+
+/* Hide the sidebar account shortcut on every viewport. */
+#app .sidebar .side-profile,
+#app > .sidebar .side-profile,
+.sidebar .side-profile {
+  display: none !important;
+}
