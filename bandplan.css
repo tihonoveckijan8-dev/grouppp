@@ -11246,3 +11246,44 @@ html[data-theme="amoled"], body.theme-amoled {
     text-align: center;
   }
 }
+
+/* WHY: preserve the original single-row song heading; only shrink the edit
+   action enough to fit inside the available header width on narrow screens. */
+@media (max-width: 520px) {
+  body[data-route="song"] #pageHead {
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  body[data-route="song"] #pageHead > div:first-child {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+  }
+  body[data-route="song"] #pageHead .ph-acts {
+    flex: 0 1 auto !important;
+    width: auto !important;
+    min-width: 0;
+    max-width: 58%;
+    margin-left: auto;
+  }
+  body[data-route="song"] #pageHead .ph-acts > button[data-act="edit-song"] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    padding: 0 10px;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: clamp(12px, 3.2vw, 14px);
+  }
+  body[data-route="song"] #pageHead .ph-acts > button[data-act="edit-song"] svg {
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+  }
+}
