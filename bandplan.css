@@ -11441,3 +11441,16 @@ html[data-theme="amoled"], body.theme-amoled {
   #app .actionbar > * { min-width: 0; max-width: 100%; }
   #app .bottom-nav { bottom: 0; z-index: var(--z-nav, 30); max-width: 100vw; }
 }
+
+
+/* WHY: on the song detail screen, the sticky title header can slide over the
+   app's top panel on narrow screens; keep it in normal flow on mobile. */
+@media (max-width: 900px) {
+  body[data-route="song"] .page-head,
+  body[data-route="setlist"] .page-head {
+    position: relative !important;
+    top: auto !important;
+    z-index: 1 !important;
+    margin-top: 0;
+  }
+}
