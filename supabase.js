@@ -854,7 +854,7 @@
     */
     let accountProfile=null;
     try{
-      const account=await client.from('bandplan_accounts').select('display_name,roles,personal_settings').eq('user_id',uid).maybeSingle();
+      const account=await client.from('bandplan_accounts').select('user_id,display_name,roles,personal_settings').eq('user_id',uid).maybeSingle();
       if(!account.error) accountProfile=account.data||null;
     }catch(e){ console.warn('BandPlan account profile hydration skipped:',e); }
     const profile=Object.assign({},pstate.profile||{});
