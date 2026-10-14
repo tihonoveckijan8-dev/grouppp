@@ -953,7 +953,8 @@
       activeGroupId=row?.group_id||null;
     }
     if(activeGroupId) snapshot.profile=Object.assign({},snapshot.profile||{}, {groupId:activeGroupId, groupDetached:false});
-    if(!activeGroupId&&snapshot.onboardingDone&&!snapshot.profile?.groupDetached){
+    if(!activeGroupId&&(snapshot.onboardingDone||(snapshot.songs||[]).length>0||(snapshot.events||[]).length>0||(snapshot.setlists||[]).length>0)&&!snapshot.profile?.groupDetached){
+      // WHY: Google OAuth accounts can reach content before onboardingDone is persisted. Without a group, shared songs are never uploaded and load() later returns empty arrays.
       if(!groupSetupPromise)groupSetupPromise=(async()=>{
         assertSessionOwner(uid);
         const made=await client.rpc('bandplan_create_group',{p_name:snapshot.profile?.bandName||'Моя группа',p_display_name:snapshot.profile?.name||'',p_roles:snapshot.profile?.roles||(snapshot.profile?.role?[snapshot.profile.role]:[])});
