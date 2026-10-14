@@ -11387,3 +11387,41 @@ html[data-theme="amoled"], body.theme-amoled {
     white-space: nowrap;
   }
 }
+
+/* WHY: nested grid/flex children can keep intrinsic widths on narrow screens,
+   causing action rows and card contents to escape their parent. */
+@media (max-width: 640px) {
+  #app .content > *,
+  #app .content :is(.split, .split2, .grid, .grid-2, .grid-3, .grid-4),
+  #app .content :is(.split, .split2, .grid, .grid-2, .grid-3, .grid-4) > *,
+  #app .content :is(.song-top, .song-meta, .sl-head, .sl-meta, .card-head, .panel-head) > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #app .content :is(.ph-acts, .card-actions, .song-actions, .sl-actions, .modal-foot, .form-actions) {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  #app .content :is(.ph-acts, .card-actions, .song-actions, .sl-actions, .modal-foot, .form-actions) > .btn,
+  #app .content :is(.ph-acts, .card-actions, .song-actions, .sl-actions, .modal-foot, .form-actions) > button {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #app .content :is(input, select, textarea, .input, .select, .textarea) {
+    width: 100%;
+  }
+
+  #app .content pre,
+  #app .content code,
+  #app .content .lyrics,
+  #app .content .song-lyrics {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
