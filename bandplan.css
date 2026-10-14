@@ -11174,3 +11174,40 @@ html[data-theme="amoled"], body.theme-amoled {
     transition: none !important;
   }
 }
+
+/* WHY: the previous negative search-field margin made the Setlists "+" button
+   overlap the field on narrow phones. Keep both controls inside the row width. */
+@layer screens {
+  body[data-route="setlists"] .setlists-search-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+  }
+  body[data-route="setlists"] .setlists-search-row > .tb-search {
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    margin-right: 0 !important;
+  }
+  body[data-route="setlists"] .setlists-search-row > .setlists-add-btn {
+    flex: 0 0 44px !important;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    white-space: nowrap;
+  }
+  body[data-route="setlists"] .setlists-search-row > .setlists-add-btn span {
+    display: none;
+  }
+}
