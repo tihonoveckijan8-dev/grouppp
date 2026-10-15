@@ -181,7 +181,55 @@ try {
     assert.equal(themeState.color.toUpperCase(), expectedColor, `Theme color mismatch for ${theme}`);
     assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
+
+    // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
+    const participationColors = await page.evaluate(() => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.style.cssText = 'position:absolute;left:-10000px;top:0';
+      const host = document.createElement('div');
+      host.className = 'part-switch';
+      host.style.cssText = 'display:flex';
+      card.append(host);
+      const statuses = ['yes', 'maybe', 'no'];
+      const buttons = statuses.map(status => {
+        const button = document.createElement('button');
+        button.className = 'part-btn on status-' + status;
+        button.dataset.v = status;
+        button.setAttribute('aria-pressed', 'true');
+        button.textContent = status;
+        host.append(button);
+        return button;
+      });
+      document.body.append(card);
+      const result = buttons.map(button => ({
+        status: button.dataset.v,
+        background: getComputedStyle(button).backgroundColor,
+        border: getComputedStyle(button).borderColor,
+        text: getComputedStyle(button).color
+      }));
+      card.remove();
+      return result;
+    });
+    assert.equal(participationColors.length, 3, 'All three participation states must be styled');
+    const expected = [
+      { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
+      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
+      { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
+    ];
+    participationColors.forEach((actual, index) => {
+      assert.equal(actual.text, expected[index].text, `Wrong fixed text color for ${actual.status} in ${theme}`);
+      assert.equal(actual.background, expected[index].background, `Wrong fixed background color for ${actual.status} in ${theme}`);
+      assert.equal(actual.border, expected[index].border, `Wrong fixed border color for ${actual.status} in ${theme}`);
+    });
   }
+
+  const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
+  const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
+  assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
+  assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
+  assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
+  assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
 
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),

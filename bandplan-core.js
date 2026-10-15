@@ -953,6 +953,17 @@ function refreshParticipationUI(evId) {
     });
   });
 
+  // Keep every copy of the participation controls in sync, not only controls nested in the event-info row.
+  document.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
+    const v = btn.getAttribute('data-v');
+    const on = !!my && v === my;
+    btn.classList.toggle('on', on);
+    ['yes','maybe','no'].forEach(status => btn.classList.toggle('status-' + status, on && v === status));
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    const labels = {yes:'Участвую', maybe:'Под вопросом', no:'Не участвую'};
+    if (v && labels[v]) btn.setAttribute('aria-label', labels[v] + (on ? ' — выбрано' : ''));
+  });
+
   document.querySelectorAll('[data-event-my-state="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
     node.className = 'event-my-state my-position status-' + (my || 'unset');
     const statusNode = node.querySelector('.my-position-status');
@@ -2410,7 +2421,7 @@ function eventModal(evId, date) {
   const d = ev || { type: 'gig', title: '', date: date || ui.selDate || today(), time: '19:00', end: '', location: '', notes: '', status: 'upcoming', repeat: 'none', repeatUntil: '', setlistId: '', memberIds: state.members.map(m => m.id), except: [] };
   const body =
     '<div class="field"><span class="field-label">Тип события</span><div class="seg" id="evTypeSeg" style="flex-wrap:wrap">' +
-    Object.keys(EV_TYPES).map(k => '<button type="button" data-t="' + k + '" class="' + (d.type === k ? 'on' : '') + '" data-accent="1">' + ic(EV_TYPES[k].ic, 14) + esc(EV_TYPES[k].label) + '</button>').join('') + '</div></div>' +
+    Object.keys(EV_TYPES).map(k => '<button type="button" data-t="' + k + '" class="' + (d.type === k ? 'on' : '') + '" data-accent="1" data-bp-no-collapse="1">' + ic(EV_TYPES[k].ic, 14) + esc(EV_TYPES[k].label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_title">Название *</label><input class="input" id="f_title" maxlength="80" value="' + esc(d.title) + '" placeholder="Например: Концерт в «Портах»"><span class="err"></span></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_date">Дата *</label><input class="input" id="f_date" type="date" value="' + esc(d.date) + '"><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_time">Начало</label><input class="input" id="f_time" type="time" value="' + esc(d.time || '') + '"></div></div>' +
@@ -3023,13 +3034,18 @@ document.addEventListener('click', function (e) {
     case 'theme-set': stop(); setTheme(el.getAttribute('data-v')); break;
     case 'accent-custom-open': {
       stop();
-      const current = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : '#1554ff';
+      // WHY: the palette lives in the canonical CSS token layer so JS does not duplicate color literals.
+      const paletteStyles = getComputedStyle(document.documentElement);
+      const paletteRows = Array.from({length:9}, (_,i) => paletteStyles.getPropertyValue('--accent-picker-row-' + (i + 1)).split(',').map(v => v.trim()).filter(Boolean));
+      const customChipColors = paletteStyles.getPropertyValue('--accent-picker-chip-colors').split(',').map(v => v.trim()).filter(Boolean);
+      const accentDefault = getComputedStyle(document.documentElement).getPropertyValue('--accent-default').trim();
+      const current = /^#[0-9a-fA-F]{6}$/.test(state.settings.accent || '') ? state.settings.accent : accentDefault;
       openModal({title:'Выберите цвет',sub:'',size:'color-picker-modal',guard:false,body:
         '<div class="accent-picker-dialog" id="accentPickerDialog">'+
         '<div class="accent-picker-grid" role="group" aria-label="Палитра цветов">'+
-        [['#93c5fd','#60a5fa','#3b82f6','#1d70d8','#1e5aa8'],['#86efac','#4ade80','#22c55e','#16a765','#229b68'],['#fef08a','#fde047','#facc15','#eab308','#d99a08'],['#fdba74','#fb923c','#f97316','#ea580c','#c2410c'],['#f87171','#ef4444','#dc2626','#be123c','#a61b32'],['#e879f9','#c084fc','#a855f7','#9333b8','#6b21a8'],['#d6b49a','#b08968','#966b46','#805b3b','#60452f'],['#ffffff','#f5f5f4','#deddda','#bdbdbb','#999999'],['#a1a1aa','#71717a','#52525b','#27272a','#000000']].map(col=>'<div class="accent-picker-column">'+col.map(v=>'<button type="button" class="accent-picker-swatch'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'" aria-pressed="'+(v.toLowerCase()===current.toLowerCase())+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',17):'')+'</button>').join('')+'</div>').join('')+
+        paletteRows.map(col=>'<div class="accent-picker-column">'+col.map(v=>'<button type="button" class="accent-picker-swatch'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'" aria-pressed="'+(v.toLowerCase()===current.toLowerCase())+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',17):'')+'</button>').join('')+'</div>').join('')+
         '</div><div class="accent-picker-other"><div class="accent-picker-section-title">Другой</div><div class="accent-picker-custom-row"><label class="accent-picker-add" for="accentModalColor" aria-label="Выбрать произвольный цвет">＋<input type="color" id="accentModalColor" value="'+current+'" aria-label="Выбрать свой цвет"></label>'+
-        ['#ec4899','#ea580c','#fbbf24','#fb923c','#1554ff','#7e3a96','#f15b78','#8b5cf6'].map(v=>'<button type="button" class="accent-picker-custom-chip'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',16):'')+'</button>').join('')+'</div></div>'+
+        customChipColors.map(v=>'<button type="button" class="accent-picker-custom-chip'+(v.toLowerCase()===current.toLowerCase()?' is-selected':'')+'" data-act="accent-modal-preset" data-v="'+v+'" style="--swatch:'+v+'" aria-label="Цвет '+v+'">'+(v.toLowerCase()===current.toLowerCase()?ic('check',16):'')+'</button>').join('')+'</div></div>'+
         '<div class="accent-picker-hex-row"><span>HEX</span><input class="custom-color-hex" id="accentModalHex" value="'+current.toUpperCase()+'" maxlength="7" spellcheck="false" aria-label="HEX-код цвета"></div></div>',
         footer:'<button type="button" class="btn" data-act="modal-close">Отмена</button><button type="button" class="btn primary" data-act="accent-custom-apply">Выбрать</button>'});
       const color=$('#accentModalColor'), hex=$('#accentModalHex');

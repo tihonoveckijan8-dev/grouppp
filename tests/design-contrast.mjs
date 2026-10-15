@@ -3,9 +3,28 @@ import assert from 'node:assert/strict';
 
 const css=fs.readFileSync('bandplan.css','utf8');
 const tokenStart=css.indexOf('@layer tokens{');
-const baseStart=css.indexOf('@layer base{', tokenStart);
-assert.ok(tokenStart>=0 && baseStart>tokenStart,'Canonical token layer is missing or misplaced');
-const cssOutsideTokens=css.slice(baseStart);
+assert.ok(tokenStart>=0,'Canonical token layer is missing');
+// CSS has multiple token-layer blocks from its staged design-system migrations.
+// Mask every balanced token block, rather than scanning later token declarations as component CSS.
+function maskTokenLayers(source){
+  const ranges=[];
+  for(const match of source.matchAll(/@layer\s+tokens\s*\{/g)){
+    let i=match.index+match[0].length,depth=1,quote='',escaped=false,comment=false;
+    for(;i<source.length&&depth;i++){
+      const ch=source[i],next=source[i+1];
+      if(comment){if(ch==='*'&&next==='/'){comment=false;i++;}continue;}
+      if(quote){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch===quote)quote='';continue;}
+      if(ch==='/'&&next==='*'){comment=true;i++;continue;}
+      if(ch==="'"||ch==='"'){quote=ch;continue;}
+      if(ch==='{')depth++;else if(ch==='}')depth--;
+    }
+    ranges.push([match.index,i]);
+  }
+  let output='',last=0;
+  for(const [start,end] of ranges){output+=source.slice(last,start)+' '.repeat(end-start);last=end;}
+  return output+source.slice(last);
+}
+const cssOutsideTokens=maskTokenLayers(css);
 const cssColorLiterals=[...cssOutsideTokens.matchAll(/#[0-9A-Fa-f]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g)].map(m=>m[0]);
 assert.equal(cssColorLiterals.length,0,'Hardcoded CSS colors outside the canonical token layer: '+cssColorLiterals.slice(0,20).join(', '));
 const sources=['bandplan-core.js','bandplan.js','supabase.js','index.html'];
