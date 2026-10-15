@@ -181,7 +181,41 @@ try {
     assert.equal(themeState.color.toUpperCase(), expectedColor, `Theme color mismatch for ${theme}`);
     assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
+
+    // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
+    const participationColors = await page.evaluate(() => {
+      const host = document.createElement('div');
+      host.style.cssText = 'position:absolute;left:-10000px;top:0';
+      const statuses = ['yes', 'maybe', 'no'];
+      const buttons = statuses.map(status => {
+        const button = document.createElement('button');
+        button.className = 'part-btn on status-' + status;
+        button.dataset.v = status;
+        button.textContent = status;
+        host.append(button);
+        return button;
+      });
+      document.body.append(host);
+      const result = buttons.map(button => ({
+        status: button.dataset.v,
+        background: getComputedStyle(button).backgroundColor,
+        border: getComputedStyle(button).borderColor,
+        text: getComputedStyle(button).color
+      }));
+      host.remove();
+      return result;
+    });
+    assert.equal(participationColors.length, 3, 'All three participation states must be styled');
+    assert.equal(new Set(participationColors.map(x => x.border)).size, 3, `Participation border colors collide in ${theme}`);
+    assert.ok(participationColors.every(x => x.background !== 'rgba(0, 0, 0, 0)' && x.background !== 'transparent'), `Participation background missing in ${theme}`);
   }
+
+  const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
+  const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
+  assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
+  assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\\{display:inline!important/, 'Event type labels must remain visible');
+  assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
+  assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
 
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
