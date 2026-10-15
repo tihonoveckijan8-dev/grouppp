@@ -11562,11 +11562,11 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="yes"],
 .part-switch .part-btn.on[data-v="yes"],
 .part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
-  color: #16a34a !important;
-  -webkit-text-fill-color: #16a34a !important;
-  background: rgba(22, 163, 74, .16) !important;
-  background-color: rgba(22, 163, 74, .16) !important;
-  border-color: #16a34a !important;
+  color: var(--participation-yes) !important;
+  -webkit-text-fill-color: var(--participation-yes) !important;
+  background: var(--participation-yes-bg) !important;
+  background-color: var(--participation-yes-bg) !important;
+  border-color: var(--participation-yes) !important;
   box-shadow: none !important;
 }
 .event-card .part-switch .part-btn.on[data-v="maybe"],
@@ -11575,11 +11575,11 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="maybe"],
 .part-switch .part-btn.on[data-v="maybe"],
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
-  color: #eab308 !important;
-  -webkit-text-fill-color: #eab308 !important;
-  background: rgba(234, 179, 8, .2) !important;
-  background-color: rgba(234, 179, 8, .2) !important;
-  border-color: #eab308 !important;
+  color: var(--participation-maybe) !important;
+  -webkit-text-fill-color: var(--participation-maybe) !important;
+  background: var(--participation-maybe-bg) !important;
+  background-color: var(--participation-maybe-bg) !important;
+  border-color: var(--participation-maybe) !important;
   box-shadow: none !important;
 }
 .event-card .part-switch .part-btn.on[data-v="no"],
@@ -11588,11 +11588,11 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="no"],
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn[aria-pressed="true"][data-v="no"] {
-  color: #dc2626 !important;
-  -webkit-text-fill-color: #dc2626 !important;
-  background: rgba(220, 38, 38, .16) !important;
-  background-color: rgba(220, 38, 38, .16) !important;
-  border-color: #dc2626 !important;
+  color: var(--participation-no) !important;
+  -webkit-text-fill-color: var(--participation-no) !important;
+  background: var(--participation-no-bg) !important;
+  background-color: var(--participation-no-bg) !important;
+  border-color: var(--participation-no) !important;
   box-shadow: none !important;
 }
 .event-card .part-switch .part-btn .part-symbol,
