@@ -11483,6 +11483,11 @@ html[data-theme="amoled"], body.theme-amoled {
   width:auto;min-width:max-content;max-width:100%;padding:8px 14px;font-size:13px;line-height:1.35;
   color:var(--text);white-space:nowrap}
 #evTypeSeg button svg{flex:0 0 auto}
+#evTypeSeg button .bp-btn-label{display:inline!important;visibility:visible!important;position:static!important;
+  width:auto!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important;
+  white-space:nowrap!important;flex:0 0 auto}
+#evTypeSeg button[data-bp-label-hidden="true"]{width:auto!important;min-width:max-content!important;
+  max-width:100%!important;flex:0 0 auto!important;padding-inline:14px!important;gap:7px!important;justify-content:center!important}
 
 /* Semantic participation colors use theme tokens, never the user's accent color. */
 .part-btn.on[data-v="yes"],body .part-btn.on.status-yes{background:var(--ok-bg);color:var(--ok);
