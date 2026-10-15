@@ -11678,3 +11678,58 @@ html[data-theme="amoled"], body.theme-amoled {
     flex: 0 0 auto;
   }
 }
+
+
+/* WHY: the "На сцену" action in each setlist card must shrink within its grid
+   column on phones instead of widening the whole card/page. */
+@media (max-width: 640px) {
+  body[data-route="setlists"] .setlists-list > .song-card,
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    gap: 5px !important;
+    padding-inline: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action svg {
+    flex: 0 0 auto !important;
+  }
+
+  body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-quick-actions > .setlist-quick-action .btn-txt {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-overflow: clip !important;
+  }
+}
+
+
+/* WHY: visually align the setlist name with the full-width scene action below it
+   on mobile, without moving the existing edit/delete/print controls. */
+@media (max-width: 640px) {
+  /* WHY: opening a setlist from the list keeps the route as "setlists";
+     include that master-detail view as well as the standalone detail route. */
+  body[data-route="setlists"] .master-detail-panel .setlist-detail > .stack > .card:first-child > .card-h > div:first-child,
+  body[data-route="setlist"] .setlist-detail > .stack > .card:first-child > .card-h > div:first-child {
+    text-align: center;
+  }
+
+  body[data-route="setlists"] .master-detail-panel .setlist-detail > .stack > .card:first-child > .card-h > div:first-child > h2,
+  body[data-route="setlist"] .setlist-detail > .stack > .card:first-child > .card-h > div:first-child > h2 {
+    text-align: center;
+  }
+}
