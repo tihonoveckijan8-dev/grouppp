@@ -214,7 +214,7 @@ try {
     assert.equal(participationColors.length, 3, 'All three participation states must be styled');
     const expected = [
       { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
-      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.2)', border: 'rgb(234, 179, 8)' },
+      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
       { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
     ];
     participationColors.forEach((actual, index) => {
