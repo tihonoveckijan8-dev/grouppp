@@ -11475,3 +11475,19 @@ html[data-theme="amoled"], body.theme-amoled {
     clear: both;
   }
 }
+
+
+/* Event type choices: preserve readable labels on desktop and compact layouts. */
+#evTypeSeg{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap}
+#evTypeSeg button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;
+  width:auto;min-width:max-content;max-width:100%;padding:8px 14px;font-size:13px;line-height:1.35;
+  color:var(--text);white-space:nowrap}
+#evTypeSeg button svg{flex:0 0 auto}
+
+/* Semantic participation colors use theme tokens, never the user's accent color. */
+.part-btn.on[data-v="yes"],body .part-btn.on.status-yes{background:var(--ok-bg);color:var(--ok);
+  border-color:var(--ok);box-shadow:0 0 0 1px color-mix(in srgb,var(--ok) 24%,transparent)}
+.part-btn.on[data-v="maybe"],body .part-btn.on.status-maybe{background:var(--warn-bg);color:var(--warn);
+  border-color:var(--warn);box-shadow:0 0 0 1px color-mix(in srgb,var(--warn) 24%,transparent)}
+.part-btn.on[data-v="no"],body .part-btn.on.status-no{background:var(--danger-bg);color:var(--danger);
+  border-color:var(--danger);box-shadow:0 0 0 1px color-mix(in srgb,var(--danger) 24%,transparent)}
