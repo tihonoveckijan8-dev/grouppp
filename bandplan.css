@@ -11716,3 +11716,16 @@ html[data-theme="amoled"], body.theme-amoled {
     text-overflow: clip !important;
   }
 }
+
+
+/* WHY: visually align the setlist name with the full-width scene action below it
+   on mobile, without moving the existing edit/delete/print controls. */
+@media (max-width: 640px) {
+  body[data-route="setlist"] .setlist-detail > .stack > .card:first-child > .card-h > div:first-child {
+    text-align: center;
+  }
+
+  body[data-route="setlist"] .setlist-detail > .stack > .card:first-child > .card-h > div:first-child > h2 {
+    text-align: center;
+  }
+}
