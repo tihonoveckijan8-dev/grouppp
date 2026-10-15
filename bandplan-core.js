@@ -2124,7 +2124,6 @@ function vSetlist(id) {
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
     (linkedEvent ? '<span class="badge b-muted">' + ic('calendar', 11) + esc(linkedEvent.title) + '</span>' : '') +
     '</div>' +
-    '<div class="row mt setlist-scene-action"><button class="btn btn-primary btn-sm" type="button" data-act="scene-setlist" data-id="' + sl.id + '">' + ic('monitor', 16) + 'Открыть на сцене</button></div>' +
     '<div class="card-h mt" style="align-items:end"><div><h3>Репертуар</h3><div class="sub">Ищите песню и выбирайте её из списка</div></div>' +
     '<span class="cap num">' + count + ' ' + plural(count, 'трек', 'трека', 'треков') + '</span></div>' +
     '<div class="setlist-library-search mt"><div class="tb-search">' + ic('search', 17) +
