@@ -953,6 +953,17 @@ function refreshParticipationUI(evId) {
     });
   });
 
+  // Keep every copy of the participation controls in sync, not only controls nested in the event-info row.
+  document.querySelectorAll('[data-act="my-status"][data-id="' + CSS.escape(String(ev.id)) + '"]').forEach(btn => {
+    const v = btn.getAttribute('data-v');
+    const on = !!my && v === my;
+    btn.classList.toggle('on', on);
+    ['yes','maybe','no'].forEach(status => btn.classList.toggle('status-' + status, on && v === status));
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    const labels = {yes:'Участвую', maybe:'Под вопросом', no:'Не участвую'};
+    if (v && labels[v]) btn.setAttribute('aria-label', labels[v] + (on ? ' — выбрано' : ''));
+  });
+
   document.querySelectorAll('[data-event-my-state="' + CSS.escape(String(ev.id)) + '"]').forEach(node => {
     node.className = 'event-my-state my-position status-' + (my || 'unset');
     const statusNode = node.querySelector('.my-position-status');
