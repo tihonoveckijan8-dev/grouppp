@@ -11602,13 +11602,20 @@ html[data-theme="amoled"], body.theme-amoled {
 }
 
 
-/* WHY: on phones, make the primary scene action easy to find and tap without
-   changing the setlist desktop layout or the scene-mode implementation. */
+/* WHY: keep scene actions inside their card on narrow screens; flex/grid
+   children can otherwise retain an intrinsic minimum width and cause overflow. */
 @media (max-width: 640px) {
+  body[data-route="setlist"] .setlist-detail,
+  body[data-route="setlist"] .setlist-detail .setlist-scene-action {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   body[data-route="setlist"] .setlist-detail .setlist-scene-action {
     display: flex;
+    flex: 0 1 auto;
     width: 100%;
-    min-width: 0;
     margin-top: 16px;
   }
 
@@ -11616,8 +11623,9 @@ html[data-theme="amoled"], body.theme-amoled {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    flex: 0 1 auto;
     width: 100%;
+    max-width: 100%;
     min-width: 0;
     min-height: 48px;
     padding: 12px 16px;
@@ -11626,9 +11634,17 @@ html[data-theme="amoled"], body.theme-amoled {
     font-weight: 700;
     line-height: 1.25;
     white-space: normal;
+    overflow-wrap: anywhere;
     text-align: center;
     box-sizing: border-box;
     touch-action: manipulation;
+  }
+
+  body[data-route="setlists"] .sl-item,
+  body[data-route="setlists"] .sl-item .setlist-scene {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   body[data-route="setlists"] .sl-item .setlist-scene {
@@ -11637,12 +11653,11 @@ html[data-theme="amoled"], body.theme-amoled {
     justify-content: center;
     flex: 1 1 100%;
     width: 100%;
-    min-width: 0;
     min-height: 44px;
     padding: 10px 12px;
     border-radius: 12px;
-    box-sizing: border-box;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   body[data-route="setlists"] .sl-item .setlist-scene svg {
