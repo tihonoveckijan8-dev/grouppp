@@ -10391,7 +10391,8 @@ body {
 }
 
 /* A compact icon rail is more reliable than squeezing navigation labels at browser zoom. */
-@media (min-width: 768px) and (max-width: 1099px) {
+@media (min-width: 768px) and (max-width: 1101px),
+       (min-width: 768px) and (max-height: 667px) {
   #app.app { grid-template-columns: 64px minmax(0, 1fr) !important; }
   #app > .sidebar {
     width: 64px !important;
