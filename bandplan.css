@@ -11552,3 +11552,51 @@ html[data-theme="amoled"], body.theme-amoled {
   border-color:var(--participation-no)!important;
   box-shadow:none!important;
 }
+
+
+/* Event cards: semantic participation colors must override theme/accent button rules.
+   Keep unselected choices neutral; color only the currently selected state. */
+.event-card .part-switch .part-btn.on[data-v="yes"],
+.event-card .part-switch .part-btn[aria-pressed="true"][data-v="yes"],
+.event-card .part-switch .part-btn.on.status-yes,
+.part-switch.part-switch-inline .part-btn.on[data-v="yes"],
+.part-switch .part-btn.on[data-v="yes"],
+.part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
+  color: #16a34a !important;
+  -webkit-text-fill-color: #16a34a !important;
+  background: rgba(22, 163, 74, .16) !important;
+  background-color: rgba(22, 163, 74, .16) !important;
+  border-color: #16a34a !important;
+  box-shadow: none !important;
+}
+.event-card .part-switch .part-btn.on[data-v="maybe"],
+.event-card .part-switch .part-btn[aria-pressed="true"][data-v="maybe"],
+.event-card .part-switch .part-btn.on.status-maybe,
+.part-switch.part-switch-inline .part-btn.on[data-v="maybe"],
+.part-switch .part-btn.on[data-v="maybe"],
+.part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
+  color: #a16207 !important;
+  -webkit-text-fill-color: #a16207 !important;
+  background: rgba(234, 179, 8, .2) !important;
+  background-color: rgba(234, 179, 8, .2) !important;
+  border-color: #eab308 !important;
+  box-shadow: none !important;
+}
+.event-card .part-switch .part-btn.on[data-v="no"],
+.event-card .part-switch .part-btn[aria-pressed="true"][data-v="no"],
+.event-card .part-switch .part-btn.on.status-no,
+.part-switch.part-switch-inline .part-btn.on[data-v="no"],
+.part-switch .part-btn.on[data-v="no"],
+.part-switch .part-btn[aria-pressed="true"][data-v="no"] {
+  color: #dc2626 !important;
+  -webkit-text-fill-color: #dc2626 !important;
+  background: rgba(220, 38, 38, .16) !important;
+  background-color: rgba(220, 38, 38, .16) !important;
+  border-color: #dc2626 !important;
+  box-shadow: none !important;
+}
+.event-card .part-switch .part-btn .part-symbol,
+.part-switch .part-btn .part-symbol {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
