@@ -2421,7 +2421,7 @@ function eventModal(evId, date) {
   const d = ev || { type: 'gig', title: '', date: date || ui.selDate || today(), time: '19:00', end: '', location: '', notes: '', status: 'upcoming', repeat: 'none', repeatUntil: '', setlistId: '', memberIds: state.members.map(m => m.id), except: [] };
   const body =
     '<div class="field"><span class="field-label">Тип события</span><div class="seg" id="evTypeSeg" style="flex-wrap:wrap">' +
-    Object.keys(EV_TYPES).map(k => '<button type="button" data-t="' + k + '" class="' + (d.type === k ? 'on' : '') + '" data-accent="1">' + ic(EV_TYPES[k].ic, 14) + esc(EV_TYPES[k].label) + '</button>').join('') + '</div></div>' +
+    Object.keys(EV_TYPES).map(k => '<button type="button" data-t="' + k + '" class="' + (d.type === k ? 'on' : '') + '" data-accent="1" data-bp-no-collapse="1">' + ic(EV_TYPES[k].ic, 14) + esc(EV_TYPES[k].label) + '</button>').join('') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_title">Название *</label><input class="input" id="f_title" maxlength="80" value="' + esc(d.title) + '" placeholder="Например: Концерт в «Портах»"><span class="err"></span></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_date">Дата *</label><input class="input" id="f_date" type="date" value="' + esc(d.date) + '"><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_time">Начало</label><input class="input" id="f_time" type="time" value="' + esc(d.time || '') + '"></div></div>' +
