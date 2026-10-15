@@ -185,12 +185,14 @@ try {
     // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
     const participationColors = await page.evaluate(() => {
       const host = document.createElement('div');
-      host.style.cssText = 'position:absolute;left:-10000px;top:0';
+      host.className = 'part-switch';
+      host.style.cssText = 'position:absolute;left:-10000px;top:0;display:flex';
       const statuses = ['yes', 'maybe', 'no'];
       const buttons = statuses.map(status => {
         const button = document.createElement('button');
         button.className = 'part-btn on status-' + status;
         button.dataset.v = status;
+        button.setAttribute('aria-pressed', 'true');
         button.textContent = status;
         host.append(button);
         return button;
@@ -206,8 +208,16 @@ try {
       return result;
     });
     assert.equal(participationColors.length, 3, 'All three participation states must be styled');
-    assert.equal(new Set(participationColors.map(x => x.border)).size, 3, `Participation border colors collide in ${theme}`);
-    assert.ok(participationColors.every(x => x.background !== 'rgba(0, 0, 0, 0)' && x.background !== 'transparent'), `Participation background missing in ${theme}`);
+    const expected = [
+      { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
+      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
+      { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
+    ];
+    participationColors.forEach((actual, index) => {
+      assert.equal(actual.text, expected[index].text, `Wrong fixed text color for ${actual.status} in ${theme}`);
+      assert.equal(actual.background, expected[index].background, `Wrong fixed background color for ${actual.status} in ${theme}`);
+      assert.equal(actual.border, expected[index].border, `Wrong fixed border color for ${actual.status} in ${theme}`);
+    });
   }
 
   const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
