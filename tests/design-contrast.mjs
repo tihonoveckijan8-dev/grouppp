@@ -8,14 +8,14 @@ assert.ok(tokenStart>=0,'Canonical token layer is missing');
 // Mask every balanced token block, rather than scanning later token declarations as component CSS.
 function maskTokenLayers(source){
   const ranges=[];
-  for(const match of source.matchAll(/@layer\\s+tokens\\s*\\{/g)){
+  for(const match of source.matchAll(/@layer\s+tokens\s*\{/g)){
     let i=match.index+match[0].length,depth=1,quote='',escaped=false,comment=false;
     for(;i<source.length&&depth;i++){
       const ch=source[i],next=source[i+1];
       if(comment){if(ch==='*'&&next==='/'){comment=false;i++;}continue;}
-      if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote='';continue;}
+      if(quote){if(escaped)escaped=false;else if(ch==='\\')escaped=true;else if(ch===quote)quote='';continue;}
       if(ch==='/'&&next==='*'){comment=true;i++;continue;}
-      if(ch==='\\''||ch==='"'){quote=ch;continue;}
+      if(ch==="'"||ch==='"'){quote=ch;continue;}
       if(ch==='{')depth++;else if(ch==='}')depth--;
     }
     ranges.push([match.index,i]);
