@@ -11734,3 +11734,33 @@ html[data-theme="amoled"], body.theme-amoled {
     text-align: center;
   }
 }
+
+
+/* Stage Mode: keep chords and section names clear without boxed backgrounds. */
+#scene #scBody b.ch,
+#scene #scBody .scene-chord-line b.ch {
+  color: var(--accent) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 .08em !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+#scene #scBody .ln.sec {
+  display: block !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 1.2em 0 .35em !important;
+  padding: .08em 0 !important;
+  color: var(--accent) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-weight: 850 !important;
+  letter-spacing: .04em !important;
+  text-shadow: none !important;
+}
