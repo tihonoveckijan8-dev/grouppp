@@ -11505,6 +11505,7 @@ html[data-theme="amoled"], body.theme-amoled {
     --oauth-google-border:rgba(255,255,255,.24);
     --oauth-google-light-text:#202124;--oauth-google-light-hover:#f1f3f4;--oauth-google-light-border:#dadce0;
     --oauth-google-dark-hover:#2b2d31;--oauth-google-amoled-hover:#18181c;
+    --google-brand-red:#EA4335;--google-brand-blue:#4285F4;--google-brand-yellow:#FBBC05;--google-brand-green:#34A853;
     --accent-picker-row-1:#93c5fd,#60a5fa,#3b82f6,#1d70d8,#1e5aa8;
     --accent-picker-row-2:#86efac,#4ade80,#22c55e,#16a765,#229b68;
     --accent-picker-row-3:#fef08a,#fde047,#facc15,#eab308,#d99a08;
