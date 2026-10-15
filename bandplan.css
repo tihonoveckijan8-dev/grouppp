@@ -11516,5 +11516,39 @@ html[data-theme="amoled"], body.theme-amoled {
     --accent-picker-row-8:#ffffff,#f5f5f4,#deddda,#bdbdbb,#999999;
     --accent-picker-row-9:#a1a1aa,#71717a,#52525b,#27272a,#000000;
     --accent-picker-chip-colors:#ec4899,#ea580c,#fbbf24,#fb923c,#1554ff,#7e3a96,#f15b78,#8b5cf6;
+    /* Fixed status palette: deliberately identical in light, dark, AMOLED and every accent. */
+    --participation-yes:#16a34a;--participation-yes-bg:rgba(22,163,74,.16);
+    --participation-maybe:#eab308;--participation-maybe-bg:rgba(234,179,8,.18);
+    --participation-no:#dc2626;--participation-no-bg:rgba(220,38,38,.16);
   }
+}
+
+
+/* WHY: attendance choices communicate a fixed meaning; never recolor them with theme/accent tokens. */
+.part-switch .part-btn.on[data-v="yes"],
+.part-switch .part-btn.on.status-yes,
+.part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
+  color:var(--participation-yes)!important;
+  background:var(--participation-yes-bg)!important;
+  background-color:var(--participation-yes-bg)!important;
+  border-color:var(--participation-yes)!important;
+  box-shadow:none!important;
+}
+.part-switch .part-btn.on[data-v="maybe"],
+.part-switch .part-btn.on.status-maybe,
+.part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
+  color:var(--participation-maybe)!important;
+  background:var(--participation-maybe-bg)!important;
+  background-color:var(--participation-maybe-bg)!important;
+  border-color:var(--participation-maybe)!important;
+  box-shadow:none!important;
+}
+.part-switch .part-btn.on[data-v="no"],
+.part-switch .part-btn.on.status-no,
+.part-switch .part-btn[aria-pressed="true"][data-v="no"] {
+  color:var(--participation-no)!important;
+  background:var(--participation-no-bg)!important;
+  background-color:var(--participation-no-bg)!important;
+  border-color:var(--participation-no)!important;
+  box-shadow:none!important;
 }
