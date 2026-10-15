@@ -213,7 +213,7 @@ try {
   const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
   const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
   assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
-  assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\\{display:inline!important/, 'Event type labels must remain visible');
+  assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
 
