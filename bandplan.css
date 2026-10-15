@@ -11575,8 +11575,8 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="maybe"],
 .part-switch .part-btn.on[data-v="maybe"],
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
-  color: #a16207 !important;
-  -webkit-text-fill-color: #a16207 !important;
+  color: #eab308 !important;
+  -webkit-text-fill-color: #eab308 !important;
   background: rgba(234, 179, 8, .2) !important;
   background-color: rgba(234, 179, 8, .2) !important;
   border-color: #eab308 !important;
