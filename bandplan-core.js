@@ -580,6 +580,14 @@ function cleanupExpiredEvents() {
   return true;
 }
 
+
+/* Re-check expiry while the PWA remains open, even if the user does not navigate. */
+setInterval(() => {
+  if (!cleanupExpiredEvents()) return;
+  try { render(); }
+  catch (error) { console.warn('BandPlan expired-event view refresh failed:', error); }
+}, 60 * 1000);
+
 function eligibleOfflineEvents() {
   const cfg=offlineSongSettings(), now=Date.now(), limit=now+cfg.days*86400000;
   return state.events
