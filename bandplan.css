@@ -11605,6 +11605,20 @@ html[data-theme="amoled"], body.theme-amoled {
 /* WHY: keep scene actions inside their card on narrow screens; flex/grid
    children can otherwise retain an intrinsic minimum width and cause overflow. */
 @media (max-width: 640px) {
+  /* WHY: prevent the master-detail layout and nested card from imposing an
+     intrinsic width wider than the phone viewport. */
+  body[data-route="setlists"] .master-detail-panel,
+  body[data-route="setlists"] .master-detail-panel .setlist-detail,
+  body[data-route="setlists"] .master-detail-panel .setlist-detail > .stack,
+  body[data-route="setlist"] .setlist-detail,
+  body[data-route="setlist"] .setlist-detail > .stack,
+  body[data-route="setlist"] .setlist-detail > .stack > .card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   body[data-route="setlist"] .setlist-detail,
   body[data-route="setlist"] .setlist-detail .setlist-scene-action {
     min-width: 0;
