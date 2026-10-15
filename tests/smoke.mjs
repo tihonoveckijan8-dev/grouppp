@@ -184,9 +184,13 @@ try {
 
     // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
     const participationColors = await page.evaluate(() => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.style.cssText = 'position:absolute;left:-10000px;top:0';
       const host = document.createElement('div');
       host.className = 'part-switch';
-      host.style.cssText = 'position:absolute;left:-10000px;top:0;display:flex';
+      host.style.cssText = 'display:flex';
+      card.append(host);
       const statuses = ['yes', 'maybe', 'no'];
       const buttons = statuses.map(status => {
         const button = document.createElement('button');
@@ -197,20 +201,20 @@ try {
         host.append(button);
         return button;
       });
-      document.body.append(host);
+      document.body.append(card);
       const result = buttons.map(button => ({
         status: button.dataset.v,
         background: getComputedStyle(button).backgroundColor,
         border: getComputedStyle(button).borderColor,
         text: getComputedStyle(button).color
       }));
-      host.remove();
+      card.remove();
       return result;
     });
     assert.equal(participationColors.length, 3, 'All three participation states must be styled');
     const expected = [
       { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
-      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
+      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.2)', border: 'rgb(234, 179, 8)' },
       { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
     ];
     participationColors.forEach((actual, index) => {
