@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import { Resvg } from '@resvg/resvg-js';
 import { cp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -25,6 +26,15 @@ for (const file of staticFiles) {
   const source = path.join(root, file);
   if (existsSync(source)) await cp(source, path.join(out, file));
 }
+
+
+ // WHY: generate matching raster icons from the single source-of-truth SVG so
+ // installed browsers and iOS home-screen links never keep an older artwork.
+ const iconSvg = await readFile(path.join(out, 'icon-bandplan.svg'), 'utf8');
+ for (const [file, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['icon-maskable-512.png', 512], ['apple-touch-icon.png', 180]]) {
+   const png = new Resvg(iconSvg, { fitTo: { mode: 'width', value: size } }).render().asPng();
+   await writeFile(path.join(out, file), png);
+ }
 
 for (const dir of ['assets', 'fonts', 'vendor']) {
   const source = path.join(root, dir);
