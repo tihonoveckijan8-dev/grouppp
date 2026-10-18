@@ -1830,10 +1830,9 @@ function vSongs() {
       (s.tags || []).slice(0, 2).map(t => '<span class="badge b-muted">' + esc(t) + '</span>').join('') +
       '</div>' +
       '<div class="song-acts">' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
-      
-      '<button class="btn btn-secondary btn-sm" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
+      '<button class="icon-btn song-quick-action" type="button" data-act="print-song" data-id="' + s.id + '" aria-label="Печать песни" title="Печать">' + ic('print', 15) + '<span class="btn-txt">Печать</span></button>' +
+      '<button class="icon-btn song-quick-action" type="button" data-act="scene-song" data-id="' + s.id + '" aria-label="Сцена" title="Сцена">' + ic('monitor', 15) + '<span class="btn-txt">Сцена</span></button>' +
+      '<button class="icon-btn song-quick-action" type="button" data-act="to-setlist" data-id="' + s.id + '" aria-label="Добавить в сетлист" title="Сетлист">' + ic('list', 15) + '<span class="btn-txt">Сетлист</span></button></div></article>';
   });
   h += '</div></div>';
   if (selectedSong) h += '<aside class="master-detail-panel" aria-label="Карточка выбранной песни">' + vSong(selectedSong.id) + '</aside>';
