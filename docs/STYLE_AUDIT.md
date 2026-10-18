@@ -72,3 +72,11 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - This is scoped to the supplemental design layer and does not alter button markup or click behavior.
 - Static checks: targeted source blocks each matched once before replacement; CSS braces remain balanced; the supplemental layer still contains no `!important` declarations.
 - Runtime/browser verification is still outstanding; do not treat these source checks as a visual regression pass.
+
+## Control-surface conflict pass — 2026-10-18
+
+- Extended the recessed field treatment to the existing `.textarea` class as well as native `textarea` elements. This closes a selector gap in the visual layer without changing markup or form behavior.
+- Removed the remaining gradient from primary buttons' pressed state and from the floating/create/auth primary-action surface. The accent stays solid; the pressed state is expressed through the inset shadow and a subtle solid-color mix.
+- Included the existing `scene-quick` action in the same solid-accent primary-action rule so it does not retain the legacy gradient treatment.
+- Static checks after commit: both primary-action gradients are absent; the only remaining gradient in `bandplan-depth.css` is the loading skeleton shimmer; braces are balanced; the supplemental layer has no `!important` declarations.
+- Browser/build/smoke verification remains outstanding. No claims are made about runtime appearance or behavior until those checks can run.
