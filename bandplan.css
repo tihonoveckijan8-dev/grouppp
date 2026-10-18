@@ -12722,3 +12722,91 @@ body[data-route="songs"] #view .songs-list > .song-card .song-acts .btn:hover {
   body[data-route="songs"] #view .songs-list > .song-card { transition: none !important; }
   body[data-route="songs"] #view .songs-list > .song-card:hover { transform: none !important; }
 }
+
+
+/* WHY: Stronger, unmistakable repertoire redesign; target the Songs list directly and exclude Setlists explicitly. */
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
+  gap: 11px !important;
+  padding: 16px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border)) !important;
+  border-radius: 18px !important;
+  background: linear-gradient(125deg,
+    color-mix(in srgb, var(--accent) 9%, var(--surf-2)) 0%,
+    var(--surf-2) 42%,
+    color-mix(in srgb, var(--accent) 3%, var(--surf-1)) 100%) !important;
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--accent) 7%, transparent),
+              0 8px 22px color-mix(in srgb, var(--text) 7%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--surf-1) 90%, transparent) !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card::before {
+  width: 4px !important;
+  opacity: .95 !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-top {
+  grid-template-columns: 48px minmax(0,1fr) 74px !important;
+  gap: 11px !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .key-badge {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  border-radius: 15px !important;
+  font-size: 14px !important;
+  background: var(--accent) !important;
+  color: var(--accent-contrast, white) !important;
+  border: 0 !important;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 28%, transparent) !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-name {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.035em !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .fav {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  border-radius: 12px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border)) !important;
+  background: var(--surf-1) !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-meta {
+  padding-left: 59px !important;
+  justify-content: flex-start !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-meta .badge {
+  border-radius: 8px !important;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border)) !important;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surf-1)) !important;
+  padding: 5px 9px !important;
+  font-weight: 700 !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-acts {
+  border-top: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border)) !important;
+  padding-top: 11px !important;
+  margin-top: 0 !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-acts .btn {
+  border-radius: 12px !important;
+  border-color: color-mix(in srgb, var(--accent) 20%, var(--border)) !important;
+  background: var(--surf-1) !important;
+}
+body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 7px 0 color-mix(in srgb, var(--accent) 11%, transparent),
+              0 13px 28px color-mix(in srgb, var(--text) 11%, transparent) !important;
+}
+@media (max-width: 640px) {
+  body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card { padding: 13px !important; }
+  body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-top {
+    grid-template-columns: 42px minmax(0,1fr) 70px !important;
+    gap: 8px !important;
+  }
+  body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .key-badge {
+    width: 42px !important; min-width: 42px !important; height: 42px !important;
+  }
+  body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-meta { padding-left: 50px !important; }
+}
