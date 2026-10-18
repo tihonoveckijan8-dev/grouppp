@@ -531,3 +531,68 @@ html[data-theme] .cal-cell .cal-more {
   html[data-theme] .part-btn { transition:none; }
   html[data-theme] .cal-cell:hover { transform:none; }
 }
+
+/* ── Stage 6: desktop/mobile navigation and dialog surfaces ────────────── */
+:root { --sb:240px; --maxw:1100px; }
+html[data-theme] .sidebar {
+  background:var(--s1);
+  border-color:var(--ln);
+  box-shadow:10px 10px 26px color-mix(in srgb,#000000 10%,transparent),
+             -8px -8px 22px color-mix(in srgb,#ffffff 50%,transparent);
+}
+html[data-theme] .nav-item.active {
+  color:var(--a);
+  background:var(--s2);
+  box-shadow:var(--sh);
+  border-radius:14px;
+}
+html[data-theme] .nav-item.active::before { background:var(--a); }
+html[data-theme] .bottom-nav {
+  left:12px;
+  right:12px;
+  bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding:6px;
+  gap:4px;
+  border:1px solid var(--ln);
+  border-radius:22px;
+  background:var(--s1);
+  box-shadow:var(--sh);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme] .bottom-nav a {
+  min-height:44px;
+  border-radius:16px;
+}
+html[data-theme] .bottom-nav a.active {
+  color:var(--a);
+  background:var(--s2);
+  box-shadow:var(--sh);
+}
+html[data-theme] .content { padding-bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
+html[data-theme] .overlay {
+  background:rgba(0,0,0,.60);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme] .modal-card {
+  background:var(--s1);
+  border:1px solid var(--ln);
+  border-radius:var(--r-dialog);
+  box-shadow:var(--dp-raise-lg);
+}
+@media (min-width:861px) and (max-width:900px) {
+  html[data-theme] .app { grid-template-columns:240px minmax(0,1fr); }
+  html[data-theme] .sidebar { display:flex; }
+  html[data-theme] .bottom-nav { display:none; }
+  html[data-theme] .content { padding-bottom:var(--s10); }
+}
+@media (max-width:860px) {
+  html[data-theme] .app { grid-template-columns:minmax(0,1fr); }
+  html[data-theme] .sidebar { display:none; }
+  html[data-theme] .bottom-nav { display:flex; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .bottom-nav a,
+  html[data-theme] .nav-item { transition:none; }
+}
