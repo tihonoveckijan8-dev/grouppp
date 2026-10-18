@@ -838,3 +838,27 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   background: var(--surface-2) !important;
   box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
 }
+
+
+/* WHY: Song actions should behave like the favorite-star control: no square tile, border or raised box. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 8px !important;
+  border: 0 !important;
+  border-radius: var(--r-10, 10px) !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:hover {
+  border: 0 !important;
+  background: var(--warn-bg, color-mix(in srgb, var(--a) 8%, transparent)) !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:active {
+  background: color-mix(in srgb, var(--a) 12%, transparent) !important;
+  box-shadow: none !important;
+  transform: translateY(1px);
+}
