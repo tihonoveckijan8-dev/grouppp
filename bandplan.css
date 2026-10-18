@@ -11975,3 +11975,34 @@ html[data-theme="amoled"], body.theme-amoled {
     justify-content: flex-end !important;
   }
 }
+
+
+/* WHY: mirror the contained mobile setlist CTA behavior on a song detail page;
+   the song action wrapper/button must shrink to the available content width. */
+@media screen and (max-width: 640px) {
+  html body[data-route="song"] #app .song-detail-work-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 8px !important;
+  }
+  html body[data-route="song"] #app .song-detail-work-actions > button[data-act="scene-song"] {
+    display: flex !important;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-align: center !important;
+  }
+}
