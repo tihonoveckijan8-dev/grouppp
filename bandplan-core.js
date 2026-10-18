@@ -1129,7 +1129,7 @@ function toastAllowed(t) { const m = state.settings.toastMode || 'off'; return m
 function toast(msg, type, ms) {
   if (!msg || !toastAllowed(type)) return;
   const w = $('#toasts'); if (!w) return;
-  const t = type || 'info', life = ms || 4200;
+  const t = type || 'info', life = ms || 1800;
   const el = document.createElement('div');
   el.className = 'toast ' + t; el.setAttribute('role', t === 'err' ? 'alert' : 'status');
   el.innerHTML = '<span class="ti">' + ic(TOAST_ICONS[t] || 'info', 18) + '</span><span class="tt">' + esc(msg) + '</span>' +
@@ -1657,7 +1657,7 @@ function monthHTML(y, mo) {
     if (list.length) { cls.push('cal-has-events'); cls.push('cal-type-' + String(list[0].ev.type || 'other')); }
     const nearest = list.find(o => (o.ev.status || 'upcoming') === 'upcoming' && o.date >= today()) || list[0];
     const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
-    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
+    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-event-count="' + list.length + '" data-act="cal-day" data-date="' + k + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
       '</div>';
     if (list.length) {

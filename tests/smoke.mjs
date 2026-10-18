@@ -157,11 +157,11 @@ try {
 
 
   const themes = [
-    ['light', '#F4F6F8'],
-    ['dark', '#14161C'],
-    ['amoled', '#000000']
+    ['light', '#F4F6F8', {bg:'#eceef3',s1:'#f6f7fa',s2:'#ffffff',tx:'#161922',mu:'#6b7283',ln:'#d9dce5'}],
+    ['dark', '#14161C', {bg:'#12141a',s1:'#1a1d25',s2:'#21252f',tx:'#eef0f6',mu:'#8b92a5',ln:'#2b3040'}],
+    ['amoled', '#000000', {bg:'#000000',s1:'#0b0b0e',s2:'#14151a',tx:'#f2f3f8',mu:'#80879a',ln:'#20222b'}]
   ];
-  for (const [theme, expectedColor] of themes) {
+  for (const [theme, expectedColor, expectedTokens] of themes) {
     await page.evaluate(({theme}) => {
       const current = JSON.parse(localStorage.getItem('bandplan.boot') || '{}');
       localStorage.setItem('bandplan.boot', JSON.stringify({
@@ -175,14 +175,21 @@ try {
       theme: document.documentElement.dataset.theme,
       color: document.querySelector('meta[name="theme-color"]')?.getAttribute('content') || '',
       accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
-      onAccent: getComputedStyle(document.documentElement).getPropertyValue('--on-accent').trim()
+      onAccent: getComputedStyle(document.documentElement).getPropertyValue('--on-accent').trim(),
+      tokens: Object.fromEntries(['bg','s1','s2','tx','mu','ln'].map(name => [name,getComputedStyle(document.documentElement).getPropertyValue('--'+name).trim()])),
+      blur: ['.overlay','.bottom-nav','#scene .scene-top','.topbar.stuck'].map(selector => {
+        const node=document.querySelector(selector);
+        return node ? getComputedStyle(node).backdropFilter : 'none';
+      })
     }));
     assert.equal(themeState.theme, theme, `Boot theme mismatch for ${theme}`);
     assert.equal(themeState.color.toUpperCase(), expectedColor, `Theme color mismatch for ${theme}`);
     assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
+    assert.deepEqual(themeState.tokens, expectedTokens, `Soft-clay token mismatch for ${theme}`);
+    assert.ok(themeState.blur.every(value => !String(value).includes('blur')), `Glass blur remains active in ${theme}`);
 
-    // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
+    // WHY: active participation segments follow the selected accent in every theme.
     const participationColors = await page.evaluate(() => {
       const card = document.createElement('div');
       card.className = 'event-card';
@@ -213,14 +220,61 @@ try {
     });
     assert.equal(participationColors.length, 3, 'All three participation states must be styled');
     const expected = [
-      { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
-      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
-      { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' },
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' },
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' }
     ];
     participationColors.forEach((actual, index) => {
-      assert.equal(actual.text, expected[index].text, `Wrong fixed text color for ${actual.status} in ${theme}`);
-      assert.equal(actual.background, expected[index].background, `Wrong fixed background color for ${actual.status} in ${theme}`);
-      assert.equal(actual.border, expected[index].border, `Wrong fixed border color for ${actual.status} in ${theme}`);
+      assert.equal(actual.text, expected[index].text, `Wrong active text color for ${actual.status} in ${theme}`);
+      assert.equal(actual.background, expected[index].background, `Wrong active background color for ${actual.status} in ${theme}`);
+      assert.equal(actual.border, expected[index].border, `Wrong active border color for ${actual.status} in ${theme}`);
+    });
+
+    // WHY: check the same active component with five distinct user accent colors and WCAG AA foreground contrast.
+    const accentMatrix = await page.evaluate(() => {
+      const root = document.documentElement;
+      const previous = ['--accent','--accent-contrast','--on-accent'].map(name => [name, root.style.getPropertyValue(name)]);
+      const colors = ['#D7263D','#C2410C','#15803D','#1D4ED8','#B07CFF'];
+      const luminance = hex => {
+        const values = hex.match(/[0-9a-f]{2}/gi).map(part => parseInt(part,16)/255)
+          .map(value => value <= .04045 ? value/12.92 : Math.pow((value+.055)/1.055,2.4));
+        return .2126*values[0]+.7152*values[1]+.0722*values[2];
+      };
+      const contrast = (a,b) => {
+        const x=luminance(a), y=luminance(b);
+        return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+      };
+      const rgb = hex => {
+        const n=parseInt(hex.slice(1),16);
+        return 'rgb('+(n>>16&255)+', '+(n>>8&255)+', '+(n&255)+')';
+      };
+      const white='#FFFFFF', black='#000000';
+      const result=colors.map(accent => {
+        const on=contrast(accent,white)>=contrast(accent,black)?white:black;
+        root.style.setProperty('--accent',accent);
+        root.style.setProperty('--accent-contrast',on);
+        root.style.setProperty('--on-accent',on);
+        const button=document.createElement('button');
+        button.className='part-btn on';
+        button.dataset.v='yes';
+        button.setAttribute('aria-pressed','true');
+        button.textContent='active';
+        const host=document.createElement('div');
+        host.className='part-switch';
+        host.append(button);
+        document.body.append(host);
+        const style=getComputedStyle(button);
+        const item={accent,background:style.backgroundColor,text:style.color,border:style.borderColor,contrast:contrast(accent,on)};
+        host.remove();
+        return item;
+      });
+      previous.forEach(([name,value]) => value ? root.style.setProperty(name,value) : root.style.removeProperty(name));
+      return result;
+    });
+    accentMatrix.forEach(item => {
+      assert.equal(item.background, (() => { const n=parseInt(item.accent.slice(1),16); return 'rgb('+(n>>16&255)+', '+(n>>8&255)+', '+(n&255)+')'; })(), `Accent fill mismatch for ${item.accent}`);
+      assert.equal(item.border, item.background, `Accent border mismatch for ${item.accent}`);
+      assert.ok(item.contrast >= 4.5, `Accent foreground contrast below WCAG AA for ${item.accent}: ${item.contrast}`);
     });
   }
 
@@ -230,6 +284,9 @@ try {
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
+  assert.match(sourceCore, /data-event-count=/, 'Calendar event count label is not rendered');
+  assert.match(sourceCore, /life = ms \|\| 1800/, 'Default toast lifetime must be 1.8 seconds');
+  assert.doesNotMatch(sourceCss, /(?:-webkit-)?backdrop-filter\s*:\s*blur/i, 'Glass blur declarations remain in the main stylesheet');
 
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
@@ -240,7 +297,7 @@ try {
   assert.equal(removedUi.glassTheme, false, 'Removed Liquid Glass theme is still mounted');
   assert.equal(removedUi.liquidGlassText, false, 'Liquid Glass text is still visible');
   const responsive = [];
-  for (const width of [320, 375, 390, 430, 768, 820, 900, 1024, 1100, 1200, 1280, 1366, 1440, 1536, 1600, 1920, 2560, 3440]) {
+  for (const width of [320, 360, 375, 390, 430, 768, 820, 860, 900, 1024, 1100, 1200, 1280, 1366, 1440, 1536, 1600, 1920, 2560, 3440]) {
     await page.setViewportSize({width, height: 900});
     const metrics = await page.evaluate(() => ({
       width: innerWidth,
