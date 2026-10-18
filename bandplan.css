@@ -5338,52 +5338,52 @@ h1, h2, h3, h4 {
 
 /* ── 8. PARTICIPATION SWITCH (STATUS BUTTONS) ────────────────────── */
 .part-switch {
-  display: inline-flex !important;
-  gap: 4px !important;
-  background: var(--surf-3) !important;
-  padding: 4px !important;
-  border-radius: 12px !important;
-  border: 1px solid var(--border) !important;
-  margin-top: 8px !important;
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surf-3);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-top: 8px;
 }
 
 .part-btn {
-  padding: 5px 10px !important;
-  border-radius: 8px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  color: var(--text-2) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  transition: all 160ms ease !important;
-  border: 1px solid transparent !important;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 160ms ease;
+  border: 1px solid transparent;
 }
 
 .part-btn:hover {
-  background: color-mix(in srgb, var(--surf-1) 80%, transparent) !important;
-  color: var(--text) !important;
+  background: color-mix(in srgb, var(--surf-1) 80%, transparent);
+  color: var(--text);
 }
 
 .part-btn.on.status-yes {
-  background: var(--ok-bg) !important;
-  color: var(--ok) !important;
-  border-color: color-mix(in srgb, var(--ok) 35%, transparent) !important;
-  font-weight: 700 !important;
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 35%, transparent);
+  font-weight: 700;
 }
 
 .part-btn.on.status-maybe {
-  background: var(--warn-bg) !important;
-  color: var(--warn) !important;
-  border-color: color-mix(in srgb, var(--warn) 35%, transparent) !important;
-  font-weight: 700 !important;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+  font-weight: 700;
 }
 
 .part-btn.on.status-no {
-  background: var(--danger-bg) !important;
-  color: var(--danger) !important;
-  border-color: color-mix(in srgb, var(--danger) 35%, transparent) !important;
-  font-weight: 700 !important;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  font-weight: 700;
 }
 
 /* ── 9. BUTTONS, INPUTS & CONTROLS POLISH ─────────────────────────── */
@@ -5871,7 +5871,7 @@ body[data-route="setlists"] .setlists-list > article.song-card .song-open-top{
   margin:var(--s3) 0 0 !important;
 }
 .participation-collection.collection-blocks>.ev-row .part-switch{
-  margin:0 !important;
+  margin:0;
 }
 .participation-collection.collection-blocks>.ev-row>.ev-acts{
   grid-column:3;
@@ -8449,10 +8449,10 @@ body[data-route="calendar"] .cal-legend i{
 /* Correct the selected "not participating" state: it must never inherit the positive green treatment. */
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn.on.status-no{
-  background:var(--danger-bg)!important;
-  color:var(--danger)!important;
-  border-color:var(--danger)!important;
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger) 24%,transparent)!important;
+  background:var(--danger-bg);
+  color:var(--danger);
+  border-color:var(--danger);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--danger) 24%,transparent);
 }
 
 /* Set-list quick actions: enforce a true, equal 2×2 square layout inside each card. */
@@ -8526,12 +8526,12 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-btn[data-v="no"].on,
 [data-event-switch] .part-btn[data-v="no"],
 [data-event-switch] .part-btn[data-v="no"].on {
-  color: var(--danger) !important;
-  background: var(--danger-bg) !important;
-  border-color: var(--danger) !important;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: var(--danger);
 }
 .part-switch .part-btn[data-v="no"].on *,
-.part-btn[data-v="no"].on * { color: inherit !important; }
+.part-btn[data-v="no"].on * { color: inherit; }
 
 /* Keep the existing set-list action order, but use restrained rectangular controls
    sized to the card rather than oversized round buttons. */
@@ -8619,8 +8619,8 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .ev-card > .ev-body > [data-event-switch] .part-switch,
 .event-card > .ev-body > [data-event-switch] .part-switch,
 .event-row > .ev-body > [data-event-switch] .part-switch {
-  justify-content: flex-end !important;
-  margin-left: auto !important;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 @media (max-width: 700px) {
   .ev-row { grid-template-columns: 48px minmax(0, 1fr) !important; }
@@ -8658,9 +8658,9 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .ev-card > .ev-body > [data-event-switch] .part-switch,
 .event-card > .ev-body > [data-event-switch] .part-switch,
 .event-row > .ev-body > [data-event-switch] .part-switch {
-  justify-content: flex-start !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
+  justify-content: flex-start;
+  margin-left: 0;
+  margin-right: auto;
 }
 @media (max-width: 700px) {
   .ev-row > .ev-acts {
@@ -8725,8 +8725,8 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   margin: 8px 0 0 !important;
 }
 .ev-row > .ev-body > [data-event-switch] .part-switch {
-  justify-content: flex-start !important;
-  margin: 0 !important;
+  justify-content: flex-start;
+  margin: 0;
 }
 @media (max-width: 700px) {
   .ev-row {
@@ -8802,29 +8802,29 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn.on.status-no,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  border-color: var(--danger) !important;
-  box-shadow: 0 0 0 1px color-mix(in srgb,var(--danger) 28%,transparent) !important;
+  color: var(--token-white);
+  background: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--danger) 28%,transparent);
 }
 .part-switch .part-btn[data-v="no"]:hover {
-  color: var(--token-white) !important;
-  background: color-mix(in srgb,var(--danger) 82%,black) !important;
-  border-color: color-mix(in srgb,var(--danger) 82%,black) !important;
+  color: var(--token-white);
+  background: color-mix(in srgb,var(--danger) 82%,black);
+  border-color: color-mix(in srgb,var(--danger) 82%,black);
 }
 .part-switch .part-btn[data-v="no"]:focus-visible {
-  outline: 2px solid var(--danger) !important;
-  outline-offset: 2px !important;
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
 }
 
 /* Event controls stay left-aligned, and the event card remains clickable only outside controls. */
 .ev-row > .ev-acts,
 .ev-row > .ev-body > [data-event-switch],
 .ev-row > .ev-body > [data-event-switch] .part-switch {
-  justify-content: flex-start !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-  text-align: left !important;
+  justify-content: flex-start;
+  margin-left: 0;
+  margin-right: auto;
+  text-align: left;
 }
 .ev-row > .ev-acts { justify-self: start !important; }
 
@@ -8885,23 +8885,23 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn.part-btn-main[data-v="no"][aria-pressed="true"],
 .part-switch .part-btn[data-v="no"].on:disabled,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:disabled {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  background-color: var(--danger) !important;
-  border-color: var(--danger) !important;
-  box-shadow: 0 0 0 1px var(--danger) !important;
-  opacity: 1 !important;
+  color: var(--token-white);
+  background: var(--danger);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+  opacity: 1;
 }
 .part-switch .part-btn[data-v="no"].on:hover,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
 .part-switch .part-btn[data-v="no"].on:active,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  background-color: var(--danger) !important;
-  border-color: var(--danger) !important;
-  filter: none !important;
-  opacity: 1 !important;
+  color: var(--token-white);
+  background: var(--danger);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  filter: none;
+  opacity: 1;
 }
 
 
@@ -8909,33 +8909,33 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]),
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):hover,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active {
-  color: var(--text-2) !important;
-  background: var(--surf-2) !important;
-  background-color: var(--surf-2) !important;
-  border-color: var(--control-border) !important;
-  box-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
+  color: var(--text-2);
+  background: var(--surf-2);
+  background-color: var(--surf-2);
+  border-color: var(--control-border);
+  box-shadow: none;
+  filter: none;
+  opacity: 1;
 }
 .part-switch .part-btn[data-v="no"].on,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  background-color: var(--danger) !important;
-  border-color: var(--danger) !important;
-  box-shadow: 0 0 0 1px var(--danger) !important;
-  filter: none !important;
-  opacity: 1 !important;
+  color: var(--token-white);
+  background: var(--danger);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+  filter: none;
+  opacity: 1;
 }
 .part-switch .part-btn[data-v="no"].on:hover,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
 .part-switch .part-btn[data-v="no"].on:active,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  background-color: var(--danger) !important;
-  border-color: var(--danger) !important;
-  filter: none !important;
+  color: var(--token-white);
+  background: var(--danger);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  filter: none;
 }
 
 /* Set-list card actions: consistent, readable two-column controls that stay inside the card. */
@@ -8988,22 +8988,22 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):focus,
 .part-switch .part-btn[data-v="no"]:not(.on):focus-visible,
 .part-switch .part-btn[data-v="no"]:not([aria-pressed="true"]) {
-  color: var(--text-2) !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border-color: var(--control-border) !important;
-  box-shadow: none !important;
-  outline-color: transparent !important;
-  filter: none !important;
+  color: var(--text-2);
+  background: transparent;
+  background-color: transparent;
+  border-color: var(--control-border);
+  box-shadow: none;
+  outline-color: transparent;
+  filter: none;
 }
 .part-switch .part-btn[data-v="no"].on,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] {
-  color: var(--token-white) !important;
-  background: var(--danger) !important;
-  background-color: var(--danger) !important;
-  border-color: var(--danger) !important;
-  box-shadow: 0 0 0 1px var(--danger) !important;
-  outline-color: transparent !important;
+  color: var(--token-white);
+  background: var(--danger);
+  background-color: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+  outline-color: transparent;
 }
 
 /* Set-list actions: large, rectangular, easy-to-tap buttons sized to the card. */
@@ -9069,16 +9069,16 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
-  color: var(--text-2) !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-  outline-color: transparent !important;
-  text-shadow: none !important;
-  filter: none !important;
-  -webkit-tap-highlight-color: transparent !important;
+  color: var(--text-2);
+  background: transparent;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+  outline-color: transparent;
+  text-shadow: none;
+  filter: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 
@@ -9145,14 +9145,14 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
-  color: var(--muted) !important;
-  background: var(--surf-3) !important;
-  background-color: var(--surf-3) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow-1) !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
+  color: var(--muted);
+  background: var(--surf-3);
+  background-color: var(--surf-3);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+  outline: none;
+  filter: none;
+  transform: none;
 }
 
 
@@ -9221,24 +9221,24 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
-  color: var(--danger) !important;
-  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent) !important;
-  border-radius: var(--r-14, 12px) !important;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  border-radius: var(--r-14, 12px);
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  transform: none;
 }
 .part-switch .part-btn[data-v="no"].on,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] {
-  color: var(--danger) !important;
-  background: color-mix(in srgb, var(--danger) 16%, var(--surf-2)) !important;
-  background-color: color-mix(in srgb, var(--danger) 16%, var(--surf-2)) !important;
-  border: 1px solid color-mix(in srgb, var(--danger) 60%, transparent) !important;
-  border-radius: var(--r-14, 12px) !important;
-  box-shadow: none !important;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 16%, var(--surf-2));
+  background-color: color-mix(in srgb, var(--danger) 16%, var(--surf-2));
+  border: 1px solid color-mix(in srgb, var(--danger) 60%, transparent);
+  border-radius: var(--r-14, 12px);
+  box-shadow: none;
 }
 
 
@@ -9253,19 +9253,19 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
 .part-switch .part-btn[data-v="no"].on:active,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
-  color: var(--danger) !important;
-  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent) !important;
-  box-shadow: none !important;
-  outline: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
 }
 .part-switch .part-btn[data-v="no"].on *,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"] * {
-  color: inherit !important;
+  color: inherit;
 }
 
 
@@ -9277,14 +9277,14 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):active,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus,
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]):focus-visible {
-  color: var(--muted) !important;
-  background: var(--surf-2) !important;
-  background-color: var(--surf-2) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-  transform: none !important;
+  color: var(--muted);
+  background: var(--surf-2);
+  background-color: var(--surf-2);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  transform: none;
 }
 .part-switch .part-btn[data-v="no"].on,
 .part-switch .part-btn[data-v="no"].status-no,
@@ -9293,15 +9293,15 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
 .part-switch .part-btn[data-v="no"].on:active,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
-  color: var(--danger) !important;
-  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2)) !important;
-  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent) !important;
-  box-shadow: none !important;
-  outline: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  background-color: color-mix(in srgb, var(--danger) 12%, var(--surf-2));
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+  filter: none;
+  transform: none;
 }
 
 
@@ -9312,15 +9312,15 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"]:active,
 .part-switch .part-btn[data-v="no"]:focus,
 .part-switch .part-btn[data-v="no"]:focus-visible {
-  border-radius: var(--r-pill) !important;
+  border-radius: var(--r-pill);
   font: inherit;
-  min-height: 44px !important;
+  min-height: 44px;
 }
 .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]) {
-  color: var(--muted) !important;
-  background: var(--surf-3) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow-1) !important;
+  color: var(--muted);
+  background: var(--surf-3);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
 }
 .part-switch .part-btn[data-v="no"].on,
 .part-switch .part-btn[data-v="no"].status-no,
@@ -9329,13 +9329,13 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:hover,
 .part-switch .part-btn[data-v="no"].on:active,
 .part-switch .part-btn[data-v="no"][aria-pressed="true"]:active {
-  color: var(--danger) !important;
-  background: var(--danger-bg) !important;
-  background-color: var(--danger-bg) !important;
-  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent) !important;
-  border-radius: var(--r-pill) !important;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 25%, transparent) !important;
-  font-weight: var(--fw-bold) !important;
+  color: var(--danger);
+  background: var(--danger-bg);
+  background-color: var(--danger-bg);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  border-radius: var(--r-pill);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 25%, transparent);
+  font-weight: var(--fw-bold);
 }
 
 
@@ -9346,50 +9346,50 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn:active,
 .part-switch .part-btn:focus,
 .part-switch .part-btn:focus-visible {
-  box-sizing: border-box !important;
-  min-width: 0 !important;
-  min-height: 44px !important;
-  height: 44px !important;
-  padding: 8px 14px !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  background: var(--surf-2) !important;
-  color: var(--muted) !important;
-  box-shadow: none !important;
-  outline: none !important;
-  transform: none !important;
-  filter: none !important;
-  font: inherit !important;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 44px;
+  height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surf-2);
+  color: var(--muted);
+  box-shadow: none;
+  outline: none;
+  transform: none;
+  filter: none;
+  font: inherit;
 }
 .part-switch .part-btn.on[data-v="yes"],
 .part-switch .part-btn.on.status-yes,
 .part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
-  background: var(--ok-bg) !important;
-  color: var(--ok) !important;
-  border-color: color-mix(in srgb, var(--ok) 45%, var(--border)) !important;
-  box-shadow: none !important;
-  font-weight: var(--fw-bold) !important;
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+  box-shadow: none;
+  font-weight: var(--fw-bold);
 }
 .part-switch .part-btn.on[data-v="maybe"],
 .part-switch .part-btn.on.status-maybe,
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
-  background: var(--warn-bg) !important;
-  color: var(--warn) !important;
-  border-color: color-mix(in srgb, var(--warn) 45%, var(--border)) !important;
-  box-shadow: none !important;
-  font-weight: var(--fw-bold) !important;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--border));
+  box-shadow: none;
+  font-weight: var(--fw-bold);
 }
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn.on.status-no,
 .part-switch .part-btn[aria-pressed="true"][data-v="no"] {
-  background: var(--danger-bg) !important;
-  color: var(--danger) !important;
-  border-color: color-mix(in srgb, var(--danger) 45%, var(--border)) !important;
-  box-shadow: none !important;
-  font-weight: var(--fw-bold) !important;
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  box-shadow: none;
+  font-weight: var(--fw-bold);
 }
 .part-switch .part-btn .part-symbol {
-  color: inherit !important;
+  color: inherit;
 }
 
 
@@ -9400,11 +9400,11 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 .part-switch .part-btn[aria-pressed="true"][data-v="yes"],
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"],
 .part-switch .part-btn[aria-pressed="true"][data-v="no"] {
-  color: var(--accent) !important;
-  background: color-mix(in srgb, var(--accent) 14%, var(--surf-2)) !important;
-  background-color: color-mix(in srgb, var(--accent) 14%, var(--surf-2)) !important;
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border)) !important;
-  box-shadow: none !important;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surf-2));
+  background-color: color-mix(in srgb, var(--accent) 14%, var(--surf-2));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  box-shadow: none;
 }
 
 
@@ -11529,29 +11529,29 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch .part-btn.on[data-v="yes"],
 .part-switch .part-btn.on.status-yes,
 .part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
-  color:var(--participation-yes)!important;
-  background:var(--participation-yes-bg)!important;
-  background-color:var(--participation-yes-bg)!important;
-  border-color:var(--participation-yes)!important;
-  box-shadow:none!important;
+  color:var(--participation-yes);
+  background:var(--participation-yes-bg);
+  background-color:var(--participation-yes-bg);
+  border-color:var(--participation-yes);
+  box-shadow:none;
 }
 .part-switch .part-btn.on[data-v="maybe"],
 .part-switch .part-btn.on.status-maybe,
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
-  color:var(--participation-maybe)!important;
-  background:var(--participation-maybe-bg)!important;
-  background-color:var(--participation-maybe-bg)!important;
-  border-color:var(--participation-maybe)!important;
-  box-shadow:none!important;
+  color:var(--participation-maybe);
+  background:var(--participation-maybe-bg);
+  background-color:var(--participation-maybe-bg);
+  border-color:var(--participation-maybe);
+  box-shadow:none;
 }
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn.on.status-no,
 .part-switch .part-btn[aria-pressed="true"][data-v="no"] {
-  color:var(--participation-no)!important;
-  background:var(--participation-no-bg)!important;
-  background-color:var(--participation-no-bg)!important;
-  border-color:var(--participation-no)!important;
-  box-shadow:none!important;
+  color:var(--participation-no);
+  background:var(--participation-no-bg);
+  background-color:var(--participation-no-bg);
+  border-color:var(--participation-no);
+  box-shadow:none;
 }
 
 
@@ -11563,12 +11563,12 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="yes"],
 .part-switch .part-btn.on[data-v="yes"],
 .part-switch .part-btn[aria-pressed="true"][data-v="yes"] {
-  color: var(--participation-yes) !important;
-  -webkit-text-fill-color: var(--participation-yes) !important;
-  background: var(--participation-yes-bg) !important;
-  background-color: var(--participation-yes-bg) !important;
-  border-color: var(--participation-yes) !important;
-  box-shadow: none !important;
+  color: var(--participation-yes);
+  -webkit-text-fill-color: var(--participation-yes);
+  background: var(--participation-yes-bg);
+  background-color: var(--participation-yes-bg);
+  border-color: var(--participation-yes);
+  box-shadow: none;
 }
 .event-card .part-switch .part-btn.on[data-v="maybe"],
 .event-card .part-switch .part-btn[aria-pressed="true"][data-v="maybe"],
@@ -11576,12 +11576,12 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="maybe"],
 .part-switch .part-btn.on[data-v="maybe"],
 .part-switch .part-btn[aria-pressed="true"][data-v="maybe"] {
-  color: var(--participation-maybe) !important;
-  -webkit-text-fill-color: var(--participation-maybe) !important;
-  background: var(--participation-maybe-bg) !important;
-  background-color: var(--participation-maybe-bg) !important;
-  border-color: var(--participation-maybe) !important;
-  box-shadow: none !important;
+  color: var(--participation-maybe);
+  -webkit-text-fill-color: var(--participation-maybe);
+  background: var(--participation-maybe-bg);
+  background-color: var(--participation-maybe-bg);
+  border-color: var(--participation-maybe);
+  box-shadow: none;
 }
 .event-card .part-switch .part-btn.on[data-v="no"],
 .event-card .part-switch .part-btn[aria-pressed="true"][data-v="no"],
@@ -11589,17 +11589,17 @@ html[data-theme="amoled"], body.theme-amoled {
 .part-switch.part-switch-inline .part-btn.on[data-v="no"],
 .part-switch .part-btn.on[data-v="no"],
 .part-switch .part-btn[aria-pressed="true"][data-v="no"] {
-  color: var(--participation-no) !important;
-  -webkit-text-fill-color: var(--participation-no) !important;
-  background: var(--participation-no-bg) !important;
-  background-color: var(--participation-no-bg) !important;
-  border-color: var(--participation-no) !important;
-  box-shadow: none !important;
+  color: var(--participation-no);
+  -webkit-text-fill-color: var(--participation-no);
+  background: var(--participation-no-bg);
+  background-color: var(--participation-no-bg);
+  border-color: var(--participation-no);
+  box-shadow: none;
 }
 .event-card .part-switch .part-btn .part-symbol,
 .part-switch .part-btn .part-symbol {
-  color: inherit !important;
-  -webkit-text-fill-color: currentColor !important;
+  color: inherit;
+  -webkit-text-fill-color: currentColor;
 }
 
 
