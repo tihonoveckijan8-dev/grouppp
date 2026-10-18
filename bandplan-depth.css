@@ -302,3 +302,65 @@ html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent)[aria-disable
   html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent) { transition:none; }
   html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):active { transform:none; }
 }
+
+/* ── Stage 3: recessed fields and explicit validation states ───────────── */
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  color:var(--tx);
+  background-color:var(--bg);
+  border:1px solid var(--ln);
+  border-radius:var(--r-field);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 9%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,#ffffff 55%,transparent);
+  transition:border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+html[data-theme="dark"] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 35%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,#ffffff 3%,transparent);
+}
+html[data-theme="amoled"] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  box-shadow:inset 0 2px 5px #000000,inset 0 0 0 1px #20222b;
+}
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+):focus {
+  outline:none;
+  border-color:var(--a);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent),
+             inset 1px 1px 3px color-mix(in srgb,#000000 8%,transparent);
+}
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:2px;
+}
+html[data-theme] :where(input,select,textarea,.input,.select)[aria-invalid="true"],
+html[data-theme] :where(.field.error,.field.is-invalid,.has-error) :where(input,select,textarea,.input,.select) {
+  border-color:var(--danger);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--danger) 20%,transparent),
+             inset 1px 1px 3px color-mix(in srgb,#000000 8%,transparent);
+}
+html[data-theme] :where(input,select,textarea,.input,.select):disabled,
+html[data-theme] :where(input,select,textarea,.input,.select)[aria-disabled="true"] {
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+html[data-theme] :where(input,select,textarea,.input,.select)::placeholder {
+  color:var(--mu);
+  opacity:.85;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(input,select,textarea,.input,.select) { transition:none; }
+}
