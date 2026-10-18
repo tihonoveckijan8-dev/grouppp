@@ -16,6 +16,10 @@
   --r-dialog: 24px;
   --r-chip: 99px;
   --sh: 12px 12px 28px #c9ccd6, -10px -10px 24px #ffffff;
+  --dp-raise-sm: var(--sh);
+  --dp-raise-md: var(--sh);
+  --dp-raise-lg: var(--shadow-3);
+  --dp-press: inset 2px 2px 5px color-mix(in srgb,#000000 20%,transparent), inset -2px -2px 5px color-mix(in srgb,#ffffff 20%,transparent);
   --bg: #eceef3;
   --surf-1: var(--s1);
   --surf-2: var(--s2);
