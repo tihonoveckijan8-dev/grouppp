@@ -12898,3 +12898,37 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   box-shadow: var(--dp-press) !important;
   transform: translateY(1px) !important;
 }
+
+
+/* WHY: Do not depend on the theme attribute: the song action buttons must always use the same circular surface as .fav. */
+#view .song-card .song-acts button.song-quick-action {
+  box-sizing: border-box !important;
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 1px solid var(--ln, var(--border)) !important;
+  border-radius: 50% !important;
+  background: var(--surface-2, var(--surf-2, transparent)) !important;
+  background-image: none !important;
+  box-shadow: var(--dp-raise-sm, var(--shadow-1)) !important;
+  color: var(--muted) !important;
+  outline: none !important;
+}
+#view .song-card .song-acts button.song-quick-action .btn-txt {
+  display: none !important;
+}
+#view .song-card .song-acts button.song-quick-action:hover {
+  background: var(--surf-3, var(--surface-2, transparent)) !important;
+  color: var(--a, var(--accent)) !important;
+  box-shadow: var(--dp-raise, var(--shadow-1)) !important;
+}
+#view .song-card .song-acts button.song-quick-action:active {
+  box-shadow: var(--dp-press, var(--shadow-1)) !important;
+  transform: translateY(1px) !important;
+}
