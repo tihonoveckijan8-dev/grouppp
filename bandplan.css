@@ -12436,3 +12436,13 @@ html[data-theme="amoled"], body.theme-amoled {
 }
 .ev-row .ev-acts::before,
 .ev-row .ev-acts::after{content:none !important;display:none !important}
+
+
+/* WHY: Keep the date anchored to the card's left edge while the event details and actions occupy the space to its right. */
+.ev-row{
+  grid-template-columns:60px minmax(0,1fr) auto;
+  justify-items:stretch;
+}
+.ev-row > .ev-date{grid-column:1;justify-self:start;margin-left:0}
+.ev-row > .ev-body{grid-column:2;min-width:0}
+.ev-row > .ev-acts{grid-column:3;justify-self:end;align-self:center}
