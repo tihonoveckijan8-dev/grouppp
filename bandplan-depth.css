@@ -630,3 +630,16 @@ html[data-theme] body .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pre
   border:1px solid var(--ln);
   box-shadow:none;
 }
+
+/* Remove decorative background treatments; keep gradients only where the
+   component itself encodes state (primary actions and event days). */
+html[data-theme] .hero,
+html[data-theme] .auth-screen,
+html[data-theme] .bp-auth-gate,
+html[data-theme] .color-picker-modal,
+html[data-theme] .custom-color-preview {
+  background-color:var(--s1);
+  background-image:none;
+}
+html[data-theme] .hero { border-color:var(--ln); }
+html[data-theme] .settings-tab::before { background:none; }
