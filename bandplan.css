@@ -12761,3 +12761,17 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   padding-top: 10px !important;
   padding-bottom: 10px !important;
 }
+
+
+/* WHY: Make the requested button size change unmistakable; the previous 48px controls were too close to their existing size. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button,
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
+  box-sizing: border-box !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  min-width: 48px !important;
+  border-radius: 6px !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  padding-inline: 14px !important;
+}
