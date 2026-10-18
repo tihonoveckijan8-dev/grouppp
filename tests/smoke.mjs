@@ -157,11 +157,11 @@ try {
 
 
   const themes = [
-    ['light', '#F4F6F8'],
-    ['dark', '#14161C'],
-    ['amoled', '#000000']
+    ['light', '#F4F6F8', {bg:'#eceef3',s1:'#f6f7fa',s2:'#ffffff',tx:'#161922',mu:'#6b7283',ln:'#d9dce5'}],
+    ['dark', '#14161C', {bg:'#12141a',s1:'#1a1d25',s2:'#21252f',tx:'#eef0f6',mu:'#8b92a5',ln:'#2b3040'}],
+    ['amoled', '#000000', {bg:'#000000',s1:'#0b0b0e',s2:'#14151a',tx:'#f2f3f8',mu:'#80879a',ln:'#20222b'}]
   ];
-  for (const [theme, expectedColor] of themes) {
+  for (const [theme, expectedColor, expectedTokens] of themes) {
     await page.evaluate(({theme}) => {
       const current = JSON.parse(localStorage.getItem('bandplan.boot') || '{}');
       localStorage.setItem('bandplan.boot', JSON.stringify({
@@ -175,12 +175,19 @@ try {
       theme: document.documentElement.dataset.theme,
       color: document.querySelector('meta[name="theme-color"]')?.getAttribute('content') || '',
       accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
-      onAccent: getComputedStyle(document.documentElement).getPropertyValue('--on-accent').trim()
+      onAccent: getComputedStyle(document.documentElement).getPropertyValue('--on-accent').trim(),
+      tokens: Object.fromEntries(['bg','s1','s2','tx','mu','ln'].map(name => [name,getComputedStyle(document.documentElement).getPropertyValue('--'+name).trim()])),
+      blur: ['.overlay','.bottom-nav','#scene .scene-top','.topbar.stuck'].map(selector => {
+        const node=document.querySelector(selector);
+        return node ? getComputedStyle(node).backdropFilter : 'none';
+      })
     }));
     assert.equal(themeState.theme, theme, `Boot theme mismatch for ${theme}`);
     assert.equal(themeState.color.toUpperCase(), expectedColor, `Theme color mismatch for ${theme}`);
     assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
+    assert.deepEqual(themeState.tokens, expectedTokens, `Soft-clay token mismatch for ${theme}`);
+    assert.ok(themeState.blur.every(value => !String(value).includes('blur')), `Glass blur remains active in ${theme}`);
 
     // WHY: active participation segments follow the selected accent in every theme.
     const participationColors = await page.evaluate(() => {
@@ -287,7 +294,7 @@ try {
   assert.equal(removedUi.glassTheme, false, 'Removed Liquid Glass theme is still mounted');
   assert.equal(removedUi.liquidGlassText, false, 'Liquid Glass text is still visible');
   const responsive = [];
-  for (const width of [320, 375, 390, 430, 768, 820, 900, 1024, 1100, 1200, 1280, 1366, 1440, 1536, 1600, 1920, 2560, 3440]) {
+  for (const width of [320, 360, 375, 390, 430, 768, 820, 860, 900, 1024, 1100, 1200, 1280, 1366, 1440, 1536, 1600, 1920, 2560, 3440]) {
     await page.setViewportSize({width, height: 900});
     const metrics = await page.evaluate(() => ({
       width: innerWidth,
