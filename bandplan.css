@@ -11766,3 +11766,50 @@ html[data-theme="amoled"], body.theme-amoled {
   letter-spacing: .04em !important;
   text-shadow: none !important;
 }
+
+
+/* WHY: keep the remove-song control beside the note control and prevent the
+   action cluster from wrapping outside the setlist item on narrow phones. */
+@media (max-width: 640px) {
+  body[data-route="setlist"] .setlist-detail .sl-item-song,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song {
+    min-width: 0;
+    grid-template-columns: 18px 30px minmax(0,1fr);
+    align-items: start;
+  }
+  body[data-route="setlist"] .setlist-detail .sl-item-song .sl-info,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song .sl-info {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  body[data-route="setlist"] .setlist-detail .sl-item-song .sl-row-actions,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song .sl-row-actions {
+    grid-column: 3;
+    width: 100%;
+    min-width: 0;
+    margin: 8px 0 0 auto;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+  }
+  body[data-route="setlist"] .setlist-detail .sl-item-song .sl-row-actions > .icon-btn,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song .sl-row-actions > .icon-btn {
+    flex: 0 0 38px;
+    width: 38px;
+    min-width: 38px;
+    height: 40px;
+    padding: 0;
+  }
+  body[data-route="setlist"] .setlist-detail .sl-item-song .mini-stepper,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song .mini-stepper {
+    flex: 0 1 108px;
+    min-width: 88px;
+    margin-right: auto;
+  }
+  body[data-route="setlist"] .setlist-detail .sl-item-song .mini-stepper span,
+  body[data-route="setlists"] .master-detail-panel .sl-item-song .mini-stepper span {
+    min-width: 22px;
+  }
+}
