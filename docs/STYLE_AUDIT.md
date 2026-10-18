@@ -64,3 +64,11 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - The two targeted legacy blocks now use transparent backgrounds and no border, with a short WHY comment. This is a narrowly scoped correction; unrelated `!important` declarations were left untouched because their effects have not been runtime-tested.
 - Source checks after the edit: both exact legacy blocks replaced once; no unmatched braces in `bandplan.css`; `!important` count reduced from 2,195 to 2,191.
 - Next safe cleanup targets should be chosen by confirmed visual conflicts, not by global removal of `!important`.
+
+## Soft Clay button refinement — 2026-10-18
+
+- Removed the decorative gradient from primary/accent/auth-submit buttons in `bandplan-depth.css`; the selected accent remains the solid button surface.
+- Replaced the strong accent-colored glow with the shared raised surface shadow for default and hover states, while preserving focus, disabled and active-state rules.
+- This is scoped to the supplemental design layer and does not alter button markup or click behavior.
+- Static checks: targeted source blocks each matched once before replacement; CSS braces remain balanced; the supplemental layer still contains no `!important` declarations.
+- Runtime/browser verification is still outstanding; do not treat these source checks as a visual regression pass.
