@@ -923,3 +923,39 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
     transition: none !important;
   }
 }
+
+
+/* WHY: Target the actual song-action class directly so each control matches the favorite star even if route attributes differ. */
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  width: auto !important;
+  min-height: 36px !important;
+  height: 36px !important;
+  padding: 0 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  transform: none;
+  transition: transform 180ms ease, background-color 180ms ease, color 180ms ease !important;
+}
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action:hover {
+  border-color: transparent !important;
+  background: var(--surf-3, var(--surface-2)) !important;
+  box-shadow: none !important;
+  color: var(--warn) !important;
+}
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action:active {
+  border-color: transparent !important;
+  background: var(--warn-bg) !important;
+  box-shadow: none !important;
+  color: var(--warn) !important;
+  transform: translateY(1px) !important;
+}
