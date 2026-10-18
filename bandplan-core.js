@@ -1752,7 +1752,6 @@ function evRow(o, withPart) {
     (!done && o.date >= today() ? '<span>' + ic('bolt', 12) + esc(countdown(o.date)) + '</span>' : '') +
     (sl ? '<span>' + ic('list', 12) + esc(sl.name) + '</span>' : '') + '</div>' +
     (mems.length ? '<div class="avatars" aria-label="Состав">' + mems.slice(0, 5).map(m => { const ps = participantStatusFor(e, m); return '<i class="part-avatar part-' + (ps || 'unset') + '" data-member-key="' + esc(m.id) + '" title="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '" aria-label="' + esc(m.name + ' — ' + participantStatusLabel(ps)) + '">' + esc(m.name.charAt(0).toUpperCase()) + '</i>'; }).join('') + (mems.length > 5 ? '<i class="more">+' + (mems.length - 5) + '</i>' : '') + '</div>' : '') +
-    (withPart ? '<div data-event-switch="' + esc(String(e.id)) + '">' + renderParticipationSwitch(e, {size:'sm', variant:'row'}) + '</div>' : '') +
     '</div>' +
     '<div class="ev-acts">' +
     (sl ? '<button class="icon-btn" type="button" data-act="scene-setlist" data-id="' + sl.id + '" aria-label="Открыть сцену" title="Сцена" aria-label="Открыть сет-лист на сцене">' + ic('monitor', 16) + '<span class="ia-t">Сцена</span></button>' : '') +
@@ -2403,12 +2402,8 @@ function eventInfoModal(evId, occurrenceDate) {
         (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong></div>' : '') +
       '</div>' +
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
-      (function(){ const s=participationSummary(ev); return '<div class="event-participation-summary" data-event-participation-summary="' + esc(String(ev.id)) + '">' +
-        '<span class="status-yes">' + s.yes + ' · Участвуют</span><span class="status-maybe">' + s.maybe + ' · Под вопросом</span><span class="status-no">' + s.no + ' · Не участвуют</span><span class="status-unset">' + s.unset + ' · Не ответили</span></div>'; })() +
       '<div class="offline-event-songs" data-offline-event-songs="' + esc(String(ev.id)) + '" hidden></div>' +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +
-      '<div class="event-info-section event-info-my"><div class="event-info-section-head"><strong>Ваше участие</strong><span class="participation-label status-' + (my || 'unset') + '">' + esc(myLabel) + '</span>' + (myRoleLabel() ? '<span class="my-position-role event-info-role">' + esc(myRoleLabel()) + '</span>' : '') + '</div>' +
-        '<div data-event-switch="' + esc(String(ev.id)) + '">' + renderParticipationSwitch(ev, {size:'lg', variant:'card'}) + '</div></div>' +
     '</div>';
   openModal({
     title: 'Событие',
