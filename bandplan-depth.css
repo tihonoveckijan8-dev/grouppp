@@ -726,3 +726,62 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   background: color-mix(in srgb, var(--a) 13%, transparent) !important;
   box-shadow: none !important;
 }
+
+
+/* WHY: One shared search treatment keeps search fields consistent across every tab and nested library search. */
+html[data-theme] :where(.tb-search,.toolbar .tb-search,.setlist-library-search > .tb-search) {
+  box-sizing: border-box !important;
+  min-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: 15px !important;
+  box-shadow: inset 0 2px 4px color-mix(in srgb, var(--token-black) 5%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease !important;
+}
+html[data-theme] :where(.tb-search,.toolbar .tb-search,.setlist-library-search > .tb-search):hover {
+  border-color: color-mix(in srgb, var(--a) 30%, var(--ln)) !important;
+}
+html[data-theme] :where(.tb-search,.toolbar .tb-search,.setlist-library-search > .tb-search):focus-within {
+  background: var(--surface-1) !important;
+  border-color: color-mix(in srgb, var(--a) 48%, var(--ln)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--a) 9%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--token-white) 18%, transparent) !important;
+}
+html[data-theme] :where(.tb-search input,.tb-search .bare-input,.setlist-library-search input#libQ) {
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--tx) !important;
+  font: inherit !important;
+}
+html[data-theme] :where(.tb-search input,.tb-search .bare-input,.setlist-library-search input#libQ):focus,
+html[data-theme] :where(.tb-search input,.tb-search .bare-input,.setlist-library-search input#libQ):focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme] :where(.tb-search input,.tb-search .bare-input,.setlist-library-search input#libQ)::placeholder {
+  color: var(--muted) !important;
+  opacity: .88 !important;
+}
+html[data-theme] :where(.tb-search > svg,.tb-search > .icon,.tb-search > .search-icon) {
+  flex: 0 0 auto !important;
+  opacity: .72;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] :where(.tb-search,.toolbar .tb-search,.setlist-library-search > .tb-search) {
+    transition: none !important;
+  }
+}
