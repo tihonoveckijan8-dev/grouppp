@@ -12686,7 +12686,7 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   display: flex !important;
   align-items: center !important;
   border: 0 !important;
-  padding-right: 0 !important;
+  padding-right: 48px !important;
   margin-top: 10px !important;
 }
 html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
