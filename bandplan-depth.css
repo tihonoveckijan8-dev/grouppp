@@ -681,8 +681,8 @@ html[data-theme] :where(
   button,.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,
   .lyrics-expand-btn,.fab,[role="button"]
 ):not(:disabled):not([aria-disabled="true"]) {
-  border-radius: 12px;
-  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent);
+  border-radius: 12px !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
   transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease;
 }
 html[data-theme] :where(
@@ -693,7 +693,7 @@ html[data-theme] :where(
   transform: translateY(1px);
 }
 html[data-theme] :where(.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,.lyrics-expand-btn):not(:disabled):not([aria-disabled="true"]) {
-  border: 1px solid var(--ln);
+  border: 1px solid var(--ln) !important;
 }
 html[data-theme] :where(.icon-btn,.fav,.lyrics-expand-btn) {
   min-width: 44px;
