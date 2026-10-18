@@ -12747,3 +12747,17 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
 html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav.active {
   color: var(--a) !important;
 }
+
+
+/* WHY: Make song-card action controls squarer and taller while preserving their existing clay colors and depth. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button,
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
+  min-height: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  border-radius: 8px !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
