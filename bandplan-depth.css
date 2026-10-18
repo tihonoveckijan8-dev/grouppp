@@ -1,3 +1,89 @@
+/* ── Canonical soft-clay tokens: compatibility aliases for the existing UI ──
+   WHY: old selectors still consume legacy variables. Map them to one theme layer
+   first; components can then be migrated one group at a time without JS changes. */
+:root {
+  --s1: #f6f7fa;
+  --s2: #ffffff;
+  --tx: #161922;
+  --mu: #6b7283;
+  --ln: #d9dce5;
+  --a: var(--accent, #1554ff);
+  --on: var(--on-accent, #ffffff);
+  --r-card: 20px;
+  --r-button: 14px;
+  --r-small-button: 11px;
+  --r-field: 13px;
+  --r-dialog: 24px;
+  --r-chip: 99px;
+  --sh: 12px 12px 28px #c9ccd6, -10px -10px 24px #ffffff;
+  --bg: #eceef3;
+  --surf-1: var(--s1);
+  --surf-2: var(--s2);
+  --surf-3: #e6e8ef;
+  --surf-4: var(--s1);
+  --text: var(--tx);
+  --text-2: #343847;
+  --muted: var(--mu);
+  --border: var(--ln);
+  --control-border: var(--ln);
+  --shadow-1: var(--sh);
+  --shadow-2: var(--sh);
+  --shadow-3: 16px 16px 36px #c4c7d1, -12px -12px 28px #ffffff;
+  --shadow-accent: 0 8px 22px color-mix(in srgb, var(--a) 40%, transparent);
+  --shadow-accent-hover: 0 10px 26px color-mix(in srgb, var(--a) 45%, transparent);
+}
+:root[data-theme="light"], html[data-theme="light"] {
+  --s1: #f6f7fa;
+  --s2: #ffffff;
+  --tx: #161922;
+  --mu: #6b7283;
+  --ln: #d9dce5;
+  --bg: #eceef3;
+  --sh: 12px 12px 28px #c9ccd6, -10px -10px 24px #ffffff;
+  --surf-3: #e6e8ef;
+  --text-2: #343847;
+  --overlay-bg: rgba(0, 0, 0, .60);
+}
+:root[data-theme="dark"], html[data-theme="dark"] {
+  --s1: #1a1d25;
+  --s2: #21252f;
+  --tx: #eef0f6;
+  --mu: #8b92a5;
+  --ln: #2b3040;
+  --bg: #12141a;
+  --sh: 10px 10px 26px #0a0b0f, -8px -8px 22px #1c2029;
+  --surf-3: #252a36;
+  --text-2: #c4c9d6;
+  --overlay-bg: rgba(0, 0, 0, .60);
+}
+:root[data-theme="amoled"], html[data-theme="amoled"] {
+  --s1: #0b0b0e;
+  --s2: #14151a;
+  --tx: #f2f3f8;
+  --mu: #80879a;
+  --ln: #20222b;
+  --bg: #000000;
+  --sh: 0 10px 30px #000000, 0 0 0 1px #1b1d25;
+  --surf-1: var(--s1);
+  --surf-2: var(--s2);
+  --surf-3: #17181e;
+  --surf-4: var(--s1);
+  --text: var(--tx);
+  --text-2: #c4c7d2;
+  --muted: var(--mu);
+  --border: var(--ln);
+  --control-border: var(--ln);
+  --shadow-1: var(--sh);
+  --shadow-2: 0 12px 34px #000000, 0 0 0 1px #1b1d25;
+  --shadow-3: 0 18px 48px #000000, 0 0 0 1px #1b1d25;
+  --overlay-bg: rgba(0, 0, 0, .78);
+}
+/* Accent foreground is calculated by the existing early-theme bootstrap using
+   relative luminance; aliases expose the same values to the new design system. */
+html[data-theme] {
+  --a: var(--accent, #1554ff);
+  --on: var(--on-accent, var(--accent-contrast, #ffffff));
+}
 /* BandPlan depth layer.
    WHY: adds physical volume (raised surfaces, recessed fields, pressed states)
    on top of bandplan.css WITHOUT touching layout, sizes, colors or logic.
