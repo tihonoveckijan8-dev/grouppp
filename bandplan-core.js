@@ -1745,7 +1745,7 @@ function evRow(o, withPart) {
     '<h3 class="ev-title"><span class="ev-title-main"><span class="ev-name">' + esc(e.title) + '</span><span class="badge ev-category ' + t.cls + '">' + ic(t.ic, 11) + esc(t.label) + '</span>' +
     (e.repeat && e.repeat !== 'none' ? '<span class="badge b-muted">' + ic('repeat', 11) + esc(REPEATS[e.repeat]) + '</span>' : '') +
     (done ? '<span class="badge b-ok">' + ic('check', 11) + 'Проведено</span>' : '') +
-    '</span><span class="ev-title-state">' + renderMyPositionBadge(e) + '</span></h3>' +
+    '</span></h3>' +
     '<div class="ev-meta">' +
     (e.time ? '<span>' + ic('clock', 12) + esc(e.time) + (e.end ? '–' + esc(e.end) : '') + '</span>' : '') +
     (e.location ? '<span class="ev-location">' + ic('pin', 12) + esc(e.location) + '</span>' : '') +
@@ -2460,7 +2460,7 @@ function readEventForm(id) {
   const title = fv('f_title'); if (!title) { fieldError('f_title', 'Введите название события'); return null; }
   const date = fv('f_date'); if (!date) { fieldError('f_date', 'Укажите дату события'); return null; }
   const time = fv('f_time'), end = fv('f_end');
-  if (time && end && mins(end) <= mins(time)) { fieldError('f_end', 'Окончание должно быть позже начала'); return null; }
+  // WHY: allow overnight events and any end time; users may enter schedules that cross midnight.
   const until = fv('f_until');
   if ($('#f_repeat', w).value !== 'none' && until && until < date) { fieldError('f_until', 'Дата окончания повтора раньше начала события'); return null; }
   const old = id ? evById(id) : null;
