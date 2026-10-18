@@ -1,4 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- WHY: use the selected glossy waveform artwork as the single source for PWA and iOS home-screen icons. -->
-  <image width="512" height="512" href="data:image/png;base64,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"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10131d"/>
+      <stop offset=".55" stop-color="#05060b"/>
+      <stop offset="1" stop-color="#111022"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#55dcff"/>
+      <stop offset=".48" stop-color="#347dff"/>
+      <stop offset="1" stop-color="#663bff"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#245dff" stop-opacity=".30"/>
+      <stop offset="1" stop-color="#245dff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a3d8ff" stop-opacity=".26"/>
+      <stop offset=".5" stop-color="#536cff" stop-opacity=".04"/>
+      <stop offset="1" stop-color="#6044ff" stop-opacity=".4"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="2" y="2" width="508" height="508" rx="114" fill="url(#glow)"/>
+  <rect x="2" y="2" width="508" height="508" rx="114" fill="none" stroke="url(#edge)" stroke-width="3"/>
+  <ellipse cx="256" cy="258" rx="180" ry="150" fill="#2766ff" opacity=".16" filter="url(#shadow)"/>
+  <g fill="url(#wave)">
+    <rect x="80" y="226" width="34" height="60" rx="17"/>
+    <rect x="132" y="190" width="36" height="132" rx="18"/>
+    <rect x="185" y="145" width="38" height="222" rx="19"/>
+    <rect x="237" y="108" width="38" height="296" rx="19"/>
+    <rect x="289" y="145" width="38" height="222" rx="19"/>
+    <rect x="344" y="190" width="36" height="132" rx="18"/>
+    <rect x="398" y="226" width="34" height="60" rx="17"/>
+  </g>
+  <g fill="none" stroke="#d7f7ff" stroke-opacity=".18" stroke-width="2">
+    <path d="M97 242v28M150 207v98M204 163v186M256 126v260M308 163v186M362 207v98M415 242v28"/>
+  </g>
 </svg>
