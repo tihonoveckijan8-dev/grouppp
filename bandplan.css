@@ -12513,3 +12513,67 @@ html body #view .ev-row > .ev-acts::after { content: none !important; display: n
 @media (max-width: 360px) {
   html body #view .ev-row { grid-template-columns: 44px minmax(0, 1fr) !important; column-gap: 9px !important; }
 }
+
+
+/* WHY: The requested card hierarchy is the reverse: keep all event information at the left and pin only the date block to the far right. */
+html body #view .ev-row {
+  grid-template-columns: minmax(0, 1fr) 60px !important;
+  column-gap: 14px !important;
+  align-items: center !important;
+}
+html body #view .ev-row > .ev-date {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+html body #view .ev-row > .ev-body {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+}
+html body #view .ev-row > .ev-acts {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+  align-self: start !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
+  flex-wrap: nowrap !important;
+}
+html body #view .ev-row > .ev-acts::before,
+html body #view .ev-row > .ev-acts::after { content: none !important; display: none !important; }
+@media (max-width: 680px) {
+  html body #view .ev-row {
+    grid-template-columns: minmax(0, 1fr) 48px !important;
+    column-gap: 10px !important;
+    row-gap: 6px !important;
+    align-items: start !important;
+  }
+  html body #view .ev-row > .ev-date {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    justify-self: end !important;
+    align-self: start !important;
+  }
+  html body #view .ev-row > .ev-body {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+  html body #view .ev-row > .ev-acts {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
+    margin-top: 6px !important;
+  }
+}
+@media (max-width: 360px) {
+  html body #view .ev-row { grid-template-columns: minmax(0, 1fr) 44px !important; column-gap: 8px !important; }
+}
