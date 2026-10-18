@@ -182,7 +182,7 @@ try {
     assert.match(themeState.accent, /^#[0-9A-Fa-f]{6}$/);
     assert.match(themeState.onAccent, /^#[0-9A-Fa-f]{6}$/);
 
-    // WHY: guard the event-type label regression and verify semantic participation colors in each theme.
+    // WHY: active participation segments follow the selected accent in every theme.
     const participationColors = await page.evaluate(() => {
       const card = document.createElement('div');
       card.className = 'event-card';
@@ -213,9 +213,9 @@ try {
     });
     assert.equal(participationColors.length, 3, 'All three participation states must be styled');
     const expected = [
-      { text: 'rgb(22, 163, 74)', background: 'rgba(22, 163, 74, 0.16)', border: 'rgb(22, 163, 74)' },
-      { text: 'rgb(234, 179, 8)', background: 'rgba(234, 179, 8, 0.18)', border: 'rgb(234, 179, 8)' },
-      { text: 'rgb(220, 38, 38)', background: 'rgba(220, 38, 38, 0.16)', border: 'rgb(220, 38, 38)' }
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' },
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' },
+      { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' }
     ];
     participationColors.forEach((actual, index) => {
       assert.equal(actual.text, expected[index].text, `Wrong fixed text color for ${actual.status} in ${theme}`);
