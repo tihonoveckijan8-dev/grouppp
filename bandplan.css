@@ -12446,3 +12446,70 @@ html[data-theme="amoled"], body.theme-amoled {
 .ev-row > .ev-date{grid-column:1;justify-self:start;margin-left:0}
 .ev-row > .ev-body{grid-column:2;min-width:0}
 .ev-row > .ev-acts{grid-column:3;justify-self:end;align-self:center}
+
+
+/* WHY: Use a deliberate two-column layout on phones; a third grid column squeezed the action buttons and made the change hard to see. */
+html body #view .ev-row {
+  grid-template-columns: 60px minmax(0, 1fr) auto !important;
+  column-gap: 14px !important;
+  row-gap: 8px !important;
+  align-items: center !important;
+}
+html body #view .ev-row > .ev-date {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  justify-self: start !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+html body #view .ev-row > .ev-body {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+}
+html body #view .ev-row > .ev-acts {
+  grid-column: 3 !important;
+  grid-row: 1 / span 2 !important;
+  justify-self: end !important;
+  align-self: center !important;
+  width: auto !important;
+  min-width: max-content !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
+html body #view .ev-row > .ev-acts::before,
+html body #view .ev-row > .ev-acts::after { content: none !important; display: none !important; }
+@media (max-width: 680px) {
+  html body #view .ev-row {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+    row-gap: 8px !important;
+    align-items: start !important;
+  }
+  html body #view .ev-row > .ev-date {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: start !important;
+  }
+  html body #view .ev-row > .ev-body {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+  html body #view .ev-row > .ev-acts {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+    align-self: end !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex-wrap: nowrap !important;
+  }
+}
+@media (max-width: 360px) {
+  html body #view .ev-row { grid-template-columns: 44px minmax(0, 1fr) !important; column-gap: 9px !important; }
+}
