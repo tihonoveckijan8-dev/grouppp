@@ -162,11 +162,13 @@ html[data-theme] .toast-stack > * { box-shadow: var(--dp-raise-lg); }
 
 
 /* ---------- Canonical design-token bridge ---------- */
-/* WHY: expose the requested token vocabulary without breaking legacy selectors,
-   theme bootstrapping, saved accent preferences, or components still using old names. */
+/* WHY: expose non-conflicting canonical aliases while preserving legacy selectors,
+   theme bootstrapping, saved accent preferences, and the existing spacing scale. */
 :root {
-  --s1: var(--surf-1);
-  --s2: var(--surf-2);
+  /* --s1 and --s2 are legacy spacing tokens in bandplan.css; do not repurpose them
+     until every spacing reference is migrated in a dedicated, tested change. */
+  --surface-1: var(--surf-1);
+  --surface-2: var(--surf-2);
   --tx: var(--text);
   --mu: var(--muted);
   --ln: var(--border);
