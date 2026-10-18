@@ -12373,8 +12373,8 @@ html[data-theme="amoled"], body.theme-amoled {
   align-items:center;
   gap:6px;
   min-width:0;
-  padding-left:10px;
-  border-left:1px solid var(--border);
+  padding-left:0;
+  border-left:0;
 }
 .ev-acts .icon-btn{
   width:36px;height:36px;min-width:36px;flex:0 0 36px;
