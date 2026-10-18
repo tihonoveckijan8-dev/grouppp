@@ -814,3 +814,27 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
     padding-inline: 8px !important;
   }
 }
+
+
+/* WHY: Keep each song action visually independent while preserving its current position and order. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  column-gap: 12px !important;
+  row-gap: 8px !important;
+  background: transparent !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: var(--r-chip, 12px) !important;
+  background: var(--surface-2) !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
+}
