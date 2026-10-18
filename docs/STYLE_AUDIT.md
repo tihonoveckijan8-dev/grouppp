@@ -93,3 +93,10 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - Tablet layouts from 861–900px keep their existing compact desktop spacing rule; wider desktop layouts no longer inherit mobile-only blank space at the end of content.
 - WHY: fixed navigation padding should follow the breakpoint that displays that navigation, rather than adding a large empty tail on desktop.
 - This changes only content-bottom spacing; calendar day geometry, routing, interaction logic, and PWA/service-worker behavior are unchanged. CI browser smoke, contrast, Lighthouse, and production-build checks are the next verification gate.
+
+
+## Soft-clay depth pass — 2026-10-18
+
+- Increased the separation between raised surfaces in light and dark themes; AMOLED uses a visible fine rim and subtle inset highlight because external black shadows alone disappear on a black background.
+- Added a restrained top-edge highlight to shared cards/panels and strengthened the raised-to-pressed contrast for controls. This is CSS-only: no DOM, routing, data, auth, sync or event logic changed.
+- Calendar day selectors and participation status colors were not modified. Verify with the CI checks and then inspect actual desktop/mobile screens after deployment; static CSS validation alone cannot confirm visual quality.
