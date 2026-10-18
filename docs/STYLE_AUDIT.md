@@ -2,7 +2,7 @@
 
 **Branch:** `main` only  
 **Scope:** visual system and responsive presentation; preserve existing behavior, routes, storage, Supabase, authentication, sync, Service Worker and PWA installation.  
-**Status:** initial source audit; runtime verification is still required before calling the redesign complete.
+**Status:** soft-clay styling layer integrated into `main`; runtime verification is still required before calling the redesign complete.
 
 ## Source files inspected
 
@@ -29,7 +29,7 @@
 | Stage mode | Dedicated scene tokens and stage styles exist; the requested scene background is black. | Verify always-black background, readable chords/section labels and 4px accent progress line. | Keep stage controls and song progression intact; apply scene-specific tokens. |
 | Loading and skeletons | Boot shell and skeleton-related tokens/styles exist. | Verify geometry stability and reduced-motion behavior under slow/offline startup. | Avoid changing boot/auth initialization or Service Worker behavior. |
 | Responsive layout | Existing layout has sidebar, content and bottom-nav rules. | Must test 360, 390, 768, 1280 and 1920px, including 1101×667 and small desktop layouts; check horizontal overflow and safe-area spacing. | Make targeted breakpoint changes only when verified in browser. |
-| Blur / glass | The sticky topbar uses `backdrop-filter: blur(16px)` and its WebKit variant. | Direct conflict with the explicit no-blur/no-glass requirement. | Replace with an opaque token-based surface after confirming sticky-header readability and layering. |
+| Blur / glass | The supplemental layer now gives the sticky topbar an opaque surface and disables backdrop blur; overlays also avoid decorative glass blur. | Confirm readability and stacking in a real browser. | Keep opaque surfaces; do not reintroduce Liquid Glass or backdrop blur. |
 | Hard-coded colors / `!important` | Multiple raw color tokens and direct color values exist; print/auth-lock rules include `!important`. | Conflicts with the strict request, but global deletion can break auth visibility, forced colors, print and theme boot. | Inventory and remove component-level hardcoding incrementally; do not blindly delete safety-critical overrides without replacement and regression tests. |
 
 ## Required verification
@@ -45,3 +45,15 @@
 ## Current limitation
 
 This document is a source-based audit, not a claim that the browser scenarios or build have passed. The connected GitHub file operations can inspect and commit repository files, but they do not execute the repository's local build or Playwright tests. Runtime checks must be run in an environment with the repository and dependencies available.
+
+
+## Main-branch design pass — 2026-10-18
+
+- Integrated the soft-clay component layer into `bandplan-depth.css` on `main`, using the design branch as a source but adapting it before committing.
+- Added shared light/dark/AMOLED surface, radius, shadow, control, navigation, dialog, toast and stage-mode styling.
+- Preserved legacy `--s1` / `--s2` spacing tokens by using `--surface-1` / `--surface-2` for colors.
+- Deliberately excluded the design branch's calendar-cell redesign and event-count badge so the established calendar/day-cell appearance remains untouched.
+- Deliberately excluded accent-only participation overrides so the existing semantic green / yellow / red participation states remain in control.
+- Kept reduced-motion rules and removed backdrop blur from the sticky topbar.
+- Static checks on the committed stylesheet: balanced braces; no unresolved CSS custom properties against `bandplan.css`; no calendar selectors or participation-accent override in the new layer.
+- Not yet verified: production build, Playwright smoke suite, actual screenshots at target viewport sizes, and contrast measurements. These checks were not runnable from the connected GitHub file-editing environment.
