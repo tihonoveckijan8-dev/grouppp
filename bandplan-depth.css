@@ -430,3 +430,104 @@ html[data-theme] :where(.b-brand,.chip,.tag,.active-chips .chip) {
   html[data-theme] .ev-row,
   html[data-theme] .sl-item { transition:none; }
 }
+
+/* ── Stage 5: segmented participation and domino calendar ──────────────── */
+html[data-theme] .part-switch {
+  display:inline-flex;
+  align-items:stretch;
+  gap:4px;
+  padding:4px;
+  border:1px solid var(--ln);
+  border-radius:14px;
+  background:var(--bg);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 8%,transparent);
+}
+html[data-theme] .part-btn {
+  min-width:44px;
+  min-height:44px;
+  border:1px solid var(--ln);
+  border-radius:11px;
+  background:var(--bg);
+  color:var(--mu);
+  box-shadow:none;
+  transform:none;
+}
+html[data-theme] .part-btn.on,
+html[data-theme] .part-btn.on[data-v="yes"],
+html[data-theme] .part-btn.on[data-v="maybe"],
+html[data-theme] .part-btn.on[data-v="no"] {
+  background:var(--a);
+  color:var(--on);
+  border-color:var(--a);
+  box-shadow:inset 1px 1px 2px color-mix(in srgb,#000000 12%,transparent);
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] .part-btn:not(.on):not(:disabled):hover {
+    color:var(--a);
+    border-color:var(--a);
+    box-shadow:var(--dp-raise-sm);
+  }
+}
+html[data-theme] .part-btn:focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:2px;
+}
+html[data-theme] .part-btn:active:not(:disabled) { transform:scale(.96); }
+html[data-theme] .cal-cell {
+  aspect-ratio:1;
+  min-height:0;
+  padding:8px;
+  border-radius:16px;
+  border:1px solid var(--ln);
+  background:var(--s2);
+  box-shadow:var(--sh);
+}
+html[data-theme] .cal-cell.out {
+  background:var(--bg);
+  opacity:.42;
+  box-shadow:none;
+}
+html[data-theme] .cal-cell.today {
+  border:2px solid var(--a);
+  background:var(--s2);
+  box-shadow:var(--sh);
+}
+html[data-theme] .cal-cell.sel {
+  border-color:var(--a);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 10%,transparent);
+}
+html[data-theme] .cal-cell.cal-has-events {
+  background:linear-gradient(145deg,color-mix(in srgb,var(--a) 17%,var(--s2)),var(--s2));
+}
+html[data-theme] .cal-cell.cal-has-events.today {
+  border-color:var(--a);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--a) 20%,var(--s2)),var(--s2));
+}
+html[data-theme] .cal-cell .cal-num { font-weight:650; }
+html[data-theme] .cal-cell .cal-events {
+  margin-top:auto;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-height:14px;
+  flex-wrap:wrap;
+  overflow:hidden;
+}
+html[data-theme] .cal-cell .cal-ev {
+  border-left:0;
+  border-radius:5px;
+  background:color-mix(in srgb,var(--a) 20%,var(--s2));
+  color:var(--a);
+  box-shadow:none;
+}
+html[data-theme] .cal-cell .cal-more {
+  border-radius:var(--r-chip);
+  background:color-mix(in srgb,var(--a) 18%,transparent);
+  color:var(--a);
+  padding:1px 5px;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .cal-cell,
+  html[data-theme] .part-btn { transition:none; }
+  html[data-theme] .cal-cell:hover { transform:none; }
+}
