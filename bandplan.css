@@ -11863,3 +11863,51 @@ html[data-theme="amoled"], body.theme-amoled {
     flex: 0 1 108px !important;
   }
 }
+
+
+/* Mobile setlist header/action alignment — intentionally last to override legacy rules. */
+@media (max-width: 640px) {
+  /* WHY: the title's action row had legacy flex sizing that let its CTA keep an
+     intrinsic text width. Force the action container and CTA to the viewport's
+     available content width, including border and padding in the width. */
+  html body[data-route="setlist"] #app #pageHead .ph-acts,
+  html body[data-route="setlists"] #app #pageHead .ph-acts,
+  html body[data-route="setlist"] #app .page-head .ph-acts,
+  html body[data-route="setlists"] #app .page-head .ph-acts {
+    display: flex !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body[data-route="setlist"] #app #pageHead .ph-acts > button[data-act="scene-setlist"],
+  html body[data-route="setlists"] #app #pageHead .ph-acts > button[data-act="scene-setlist"],
+  html body[data-route="setlist"] #app .page-head .ph-acts > button[data-act="scene-setlist"],
+  html body[data-route="setlists"] #app .page-head .ph-acts > button[data-act="scene-setlist"] {
+    display: inline-flex !important;
+    flex: 1 1 0% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding-inline: 10px !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+  /* WHY: move the entire song-action row toward the card's right inner edge,
+     while retaining a small inset so the final button never touches the border. */
+  html body[data-route="setlist"] #app .setlist-detail .sl-item-song .sl-row-actions,
+  html body[data-route="setlists"] #app .master-detail-panel .sl-item-song .sl-row-actions {
+    width: calc(100% + 8px) !important;
+    margin-left: auto !important;
+    margin-right: -4px !important;
+    padding-right: 0 !important;
+    justify-content: flex-end !important;
+    box-sizing: border-box !important;
+  }
+}
