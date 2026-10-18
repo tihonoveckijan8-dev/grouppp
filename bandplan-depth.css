@@ -959,3 +959,40 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   color: var(--warn) !important;
   transform: translateY(1px) !important;
 }
+
+
+/* WHY: Match each compact song-action icon to the favorite star's individual circular control, not a square tile. */
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action {
+  box-sizing: border-box !important;
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: 50% !important;
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
+  color: var(--muted) !important;
+  transform: none;
+}
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action .btn-txt {
+  display: none !important;
+}
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action:hover {
+  border-color: color-mix(in srgb, var(--a) 30%, var(--ln)) !important;
+  background: var(--surface-2) !important;
+  box-shadow: var(--dp-raise), inset 0 1px 0 color-mix(in srgb, var(--token-white) 24%, transparent) !important;
+  color: var(--a) !important;
+}
+html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action:active {
+  background: var(--surface-2) !important;
+  box-shadow: var(--dp-press) !important;
+  transform: translateY(1px) !important;
+}
