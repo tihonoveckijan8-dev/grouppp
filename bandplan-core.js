@@ -1129,7 +1129,7 @@ function toastAllowed(t) { const m = state.settings.toastMode || 'off'; return m
 function toast(msg, type, ms) {
   if (!msg || !toastAllowed(type)) return;
   const w = $('#toasts'); if (!w) return;
-  const t = type || 'info', life = ms || 4200;
+  const t = type || 'info', life = ms || 1800;
   const el = document.createElement('div');
   el.className = 'toast ' + t; el.setAttribute('role', t === 'err' ? 'alert' : 'status');
   el.innerHTML = '<span class="ti">' + ic(TOAST_ICONS[t] || 'info', 18) + '</span><span class="tt">' + esc(msg) + '</span>' +
