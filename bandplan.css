@@ -5548,8 +5548,9 @@ h1, h2, h3, h4 {
 }
 
 #scene .scene-body b.ch.inl {
-  background: var(--raw-color-196) !important;
-  border: 1px solid var(--raw-color-197) !important;
+  /* WHY: keep chord labels as accent-colored text, not boxed badges. */
+  background: transparent;
+  border: 0;
 }
 
 #scene .scene-ctrl {
@@ -9674,9 +9675,10 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
   -webkit-text-stroke: .2px currentColor;
 }
 #scene .scene-body b.ch.inl {
-  border: 1px solid var(--accent) !important;
-  background: var(--accent-ring) !important;
-  padding: .02em .24em;
+  /* WHY: the Soft Clay layer owns chord presentation; avoid legacy badge overrides. */
+  border: 0;
+  background: transparent;
+  padding: 0;
 }
 #scene .scene-body .scene-dyn-note {
   display: block;
