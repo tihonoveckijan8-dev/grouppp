@@ -704,3 +704,47 @@ html[data-theme] .cal-cell.cal-has-events::after {
 }
 html[data-theme] .cal-cell.cal-has-events .cal-num { padding-right:18px; }
 html[data-theme] .cal-cell.out.cal-has-events::after { display:none; }
+
+/* Final surface parity for repertoire, setlists, timetable and settings. */
+html[data-theme] .lyrics,
+html[data-theme] .tg-wrap,
+html[data-theme] .settings-card,
+html[data-theme] .setlist-detail,
+html[data-theme] .event-info-panel {
+  background:var(--s1);
+  color:var(--tx);
+  border:1px solid var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .dyn-chip,
+html[data-theme] .dyn-scroll,
+html[data-theme] .filter-pop,
+html[data-theme] .accent-dropdown {
+  background:var(--s1);
+  color:var(--tx);
+  border:1px solid var(--ln);
+  border-radius:14px;
+  box-shadow:var(--sh);
+}
+html[data-theme] .tg-ev {
+  background:var(--s2);
+  color:var(--tx);
+  border-color:var(--ln);
+  border-left-color:var(--a);
+  border-radius:11px;
+  box-shadow:var(--sh);
+}
+html[data-theme] .dyn-chip .v,
+html[data-theme] .lyrics b.ch,
+html[data-theme] .trans-val { color:var(--a); }
+html[data-theme] .skel,
+html[data-theme] .skeleton {
+  background-color:var(--s1);
+}
+html[data-theme] :where(.skel,.skeleton)::after {
+  background-image:linear-gradient(90deg,transparent,var(--skel-hi),transparent);
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(.skel,.skeleton)::after { animation:none; }
+}
