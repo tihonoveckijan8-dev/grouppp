@@ -681,3 +681,26 @@ html[data-theme] #scene .scene-top,
 html[data-theme] #scene .scene-ctrl,
 html[data-theme] #scene .scene-body,
 html[data-theme] #scene .scene-dyn { background:var(--scene-bg); }
+
+/* Calendar day event count is visible without changing its click target. */
+html[data-theme] .cal-cell { position:relative; }
+html[data-theme] .cal-cell.cal-has-events::after {
+  content:attr(data-event-count);
+  position:absolute;
+  top:4px;
+  right:4px;
+  min-width:16px;
+  min-height:16px;
+  display:grid;
+  place-items:center;
+  padding:0 4px;
+  border-radius:var(--r-chip);
+  background:color-mix(in srgb,var(--a) 18%,transparent);
+  color:var(--a);
+  font-size:9px;
+  line-height:1;
+  font-weight:700;
+  pointer-events:none;
+}
+html[data-theme] .cal-cell.cal-has-events .cal-num { padding-right:18px; }
+html[data-theme] .cal-cell.out.cal-has-events::after { display:none; }
