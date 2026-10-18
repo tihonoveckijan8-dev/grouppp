@@ -154,7 +154,7 @@ html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent)[aria-disable
 /* ── Stage 3: recessed fields and explicit validation states ───────────── */
 html[data-theme] :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
-  select,textarea,.input,.select
+  select,textarea,.input,.select,.textarea
 ) {
   color:var(--tx);
   background-color:var(--bg);
@@ -166,20 +166,20 @@ html[data-theme] :where(
 }
 html[data-theme="dark"] :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
-  select,textarea,.input,.select
+  select,textarea,.input,.select,.textarea
 ) {
   box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 35%,transparent),
              inset -2px -2px 5px color-mix(in srgb,var(--token-white) 3%,transparent);
 }
 html[data-theme="amoled"] :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
-  select,textarea,.input,.select
+  select,textarea,.input,.select,.textarea
 ) {
   box-shadow:inset 0 2px 5px var(--token-black),inset 0 0 0 1px var(--scene-line);
 }
 html[data-theme] :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
-  select,textarea,.input,.select
+  select,textarea,.input,.select,.textarea
 ):focus {
   outline:none;
   border-color:var(--a);
@@ -188,29 +188,29 @@ html[data-theme] :where(
 }
 html[data-theme] :where(
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
-  select,textarea,.input,.select
+  select,textarea,.input,.select,.textarea
 ):focus-visible {
   outline:2px solid var(--a);
   outline-offset:2px;
 }
-html[data-theme] :where(input,select,textarea,.input,.select)[aria-invalid="true"],
-html[data-theme] :where(.field.error,.field.is-invalid,.has-error) :where(input,select,textarea,.input,.select) {
+html[data-theme] :where(input,select,textarea,.input,.select,.textarea)[aria-invalid="true"],
+html[data-theme] :where(.field.error,.field.is-invalid,.has-error) :where(input,select,textarea,.input,.select,.textarea) {
   border-color:var(--danger);
   box-shadow:0 0 0 2px color-mix(in srgb,var(--danger) 20%,transparent),
              inset 1px 1px 3px color-mix(in srgb,var(--token-black) 8%,transparent);
 }
-html[data-theme] :where(input,select,textarea,.input,.select):disabled,
-html[data-theme] :where(input,select,textarea,.input,.select)[aria-disabled="true"] {
+html[data-theme] :where(input,select,textarea,.input,.select,.textarea):disabled,
+html[data-theme] :where(input,select,textarea,.input,.select,.textarea)[aria-disabled="true"] {
   opacity:.55;
   cursor:not-allowed;
   box-shadow:none;
 }
-html[data-theme] :where(input,select,textarea,.input,.select)::placeholder {
+html[data-theme] :where(input,select,textarea,.input,.select,.textarea)::placeholder {
   color:var(--mu);
   opacity:.85;
 }
 @media (prefers-reduced-motion:reduce) {
-  html[data-theme] :where(input,select,textarea,.input,.select) { transition:none; }
+  html[data-theme] :where(input,select,textarea,.input,.select,.textarea) { transition:none; }
 }
 
 /* ── Stage 4: unified raised surfaces, cards and chips ─────────────────── */
