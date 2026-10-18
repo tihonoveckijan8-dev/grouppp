@@ -57,3 +57,10 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - Kept reduced-motion rules and removed backdrop blur from the sticky topbar.
 - Static checks on the committed stylesheet: balanced braces; no unresolved CSS custom properties against `bandplan.css`; no calendar selectors or participation-accent override in the new layer.
 - Not yet verified: production build, Playwright smoke suite, actual screenshots at target viewport sizes, and contrast measurements. These checks were not runnable from the connected GitHub file-editing environment.
+
+## Conflict cleanup — 2026-10-18
+
+- Fixed two legacy `#scene .scene-body b.ch.inl` rules in `bandplan.css` that used `!important` for chord badge backgrounds and borders. Those declarations prevented the newer stage-mode rule from rendering chords as unboxed accent-colored text.
+- The two targeted legacy blocks now use transparent backgrounds and no border, with a short WHY comment. This is a narrowly scoped correction; unrelated `!important` declarations were left untouched because their effects have not been runtime-tested.
+- Source checks after the edit: both exact legacy blocks replaced once; no unmatched braces in `bandplan.css`; `!important` count reduced from 2,195 to 2,191.
+- Next safe cleanup targets should be chosen by confirmed visual conflicts, not by global removal of `!important`.
