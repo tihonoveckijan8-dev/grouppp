@@ -5494,108 +5494,108 @@ h1, h2, h3, h4 {
 
 /* ── 11. SCENE MODE (LIVE STAGE AMOLED HIGH CONTRAST) ────────────── */
 #scene {
-  background: var(--raw-color-030) !important;
+  background: var(--raw-color-030);
 }
 
 #scene .scene-top {
-  background: var(--raw-color-190) !important;
-  border-bottom: 1px solid var(--raw-color-171) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
+  background: var(--raw-color-190);
+  border-bottom: 1px solid var(--raw-color-171);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 #scene .scene-title h2 {
-  font-size: 20px !important;
-  font-weight: 800 !important;
-  color: var(--raw-color-010) !important;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--raw-color-010);
 }
 
 #scene .scene-title p {
-  color: var(--raw-color-191) !important;
-  font-size: 12px !important;
+  color: var(--raw-color-191);
+  font-size: 12px;
 }
 
 #scene .sbtn {
-  border-radius: 12px !important;
-  background: var(--raw-color-173) !important;
-  border: 1px solid var(--raw-color-192) !important;
-  color: var(--raw-color-010) !important;
-  transition: all 160ms ease !important;
+  border-radius: 12px;
+  background: var(--raw-color-173);
+  border: 1px solid var(--raw-color-192);
+  color: var(--raw-color-010);
+  transition: all 160ms ease;
 }
 
 #scene .sbtn:hover {
-  background: var(--raw-color-193) !important;
-  border-color: var(--raw-color-194) !important;
+  background: var(--raw-color-193);
+  border-color: var(--raw-color-194);
 }
 
 #scene .sbtn.act {
-  background: var(--accent) !important;
-  color: var(--on-accent) !important;
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 16px var(--accent-ring) !important;
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-ring);
 }
 
 #scene .scene-body {
-  background: var(--raw-color-030) !important;
-  color: var(--raw-color-019) !important;
-  padding: 32px 8% !important;
+  background: var(--raw-color-030);
+  color: var(--raw-color-019);
+  padding: 32px 8%;
 }
 
 #scene .scene-body b.ch {
-  color: var(--raw-color-127) !important;
-  font-weight: 800 !important;
-  text-shadow: 0 0 8px var(--raw-color-195) !important;
+  color: var(--raw-color-127);
+  font-weight: 800;
+  text-shadow: 0 0 8px var(--raw-color-195);
 }
 
 #scene .scene-body b.ch.inl {
-  background: var(--raw-color-196) !important;
-  border: 1px solid var(--raw-color-197) !important;
+  background: var(--raw-color-196);
+  border: 1px solid var(--raw-color-197);
 }
 
 #scene .scene-ctrl {
-  background: var(--raw-color-190) !important;
-  border-top: 1px solid var(--raw-color-171) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  padding: 10px 16px max(10px, env(safe-area-inset-bottom, 10px)) !important;
+  background: var(--raw-color-190);
+  border-top: 1px solid var(--raw-color-171);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 10px 16px max(10px, env(safe-area-inset-bottom, 10px));
 }
 
 #scene .sctl {
-  background: var(--raw-color-173) !important;
-  border: 1px solid var(--raw-color-167) !important;
-  border-radius: 12px !important;
+  background: var(--raw-color-173);
+  border: 1px solid var(--raw-color-167);
+  border-radius: 12px;
 }
 
 /* ── 12. MODALS, SHEETS & TOASTS ──────────────────────────────────── */
 .overlay {
-  background: var(--raw-color-198) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: var(--raw-color-198);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-card {
-  border-radius: 20px !important;
-  background: var(--surf-1) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: 0 20px 50px -10px var(--raw-color-199), 0 0 0 1px var(--raw-color-173) inset !important;
+  border-radius: 20px;
+  background: var(--surf-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px -10px var(--raw-color-199), 0 0 0 1px var(--raw-color-173) inset;
 }
 
 .modal-head {
-  padding-bottom: 14px !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent) !important;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 
 .modal-foot {
-  padding-top: 14px !important;
-  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent) !important;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
 }
 
 .toast {
-  border-radius: 14px !important;
-  background: var(--surf-1) !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: 0 10px 30px -4px var(--raw-color-200) !important;
-  font-weight: 600 !important;
+  border-radius: 14px;
+  background: var(--surf-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px -4px var(--raw-color-200);
+  font-weight: 600;
 }
 
 
