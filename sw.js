@@ -1,7 +1,7 @@
 /* BandPlan offline app shell — resilient cache install and safe updates */
 // WHY: scripts/build.mjs replaces this token on every production build to invalidate stale app-shell caches.
 const V = 'bandplan-__BANDPLAN_CACHE_VERSION__';
-const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan-depth.css?v=9', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-bandplan.svg?v=4', 'icon-192.png?v=6', 'icon-512.png?v=6', 'icon-maskable-512.png?v=6', 'apple-touch-icon.png?v=6', 'icon-splash.svg', 'icon-maskable-splash.svg', 'config.js', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
+const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan-depth.css?v=10', 'bandplan.js', 'bandplan-core.js', 'manifest.webmanifest', 'icon-bandplan.svg?v=4', 'icon-192.png?v=6', 'icon-512.png?v=6', 'icon-maskable-512.png?v=6', 'apple-touch-icon.png?v=6', 'icon-splash.svg', 'icon-maskable-splash.svg', 'config.js', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
