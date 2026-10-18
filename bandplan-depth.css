@@ -132,7 +132,9 @@ html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):not(:disable
   box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 22%,transparent),inset -2px -2px 5px color-mix(in srgb,var(--token-white) 18%,transparent);
 }
 html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit):not(:disabled):not([aria-disabled="true"]):active {
-  background-image:linear-gradient(145deg,color-mix(in srgb,var(--a) 82%,var(--token-black)),color-mix(in srgb,var(--a) 62%,var(--token-black)));
+  /* WHY: pressed state is communicated by the inset shadow, not a decorative gradient. */
+  background-color:color-mix(in srgb,var(--a) 86%,var(--token-black));
+  background-image:none;
 }
 html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):focus-visible {
   outline:2px solid var(--a);
@@ -473,11 +475,13 @@ html[data-theme] .toast-stack > * {
 html[data-theme] .toast-stack {
   bottom:calc(20px + env(safe-area-inset-bottom,0px));
 }
-html[data-theme] :where(.fab,.bp-auth-submit,[data-act="event-new"],[data-act="song-new"],[data-act="setlist-new"]) {
+html[data-theme] :where(.fab,.bp-auth-submit,[data-act="scene-quick"],[data-act="event-new"],[data-act="song-new"],[data-act="setlist-new"]) {
+  /* WHY: primary actions share one solid accent surface; depth comes from the clay shadow. */
   color:var(--on);
-  background:linear-gradient(145deg,var(--a),color-mix(in srgb,var(--a) 70%,var(--token-black)));
+  background-color:var(--a);
+  background-image:none;
   border-color:transparent;
-  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+  box-shadow:var(--dp-raise-sm);
 }
 html[data-theme] :where(.fab,.settings-tab,.seg button,.sw,.lyrics-expand-btn):focus-visible {
   outline:2px solid var(--a);
