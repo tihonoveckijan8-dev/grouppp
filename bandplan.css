@@ -12669,3 +12669,31 @@ body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav
   z-index: 2 !important;
   margin: 0 !important;
 }
+
+
+/* WHY: Match repertoire cards to the existing setlist-card surface treatment without changing their layout or content. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
+  background: var(--surface-1, var(--surf-1)) !important;
+  border-color: var(--ln, var(--border)) !important;
+  border-radius: var(--r-card, 16px) !important;
+  box-shadow: var(--sh, var(--shadow-2)) !important;
+}
+/* WHY: Keep the favorite control on the same bottom baseline as the song action buttons. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
+  padding-bottom: 14px !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts {
+  display: flex !important;
+  align-items: center !important;
+  border: 0 !important;
+  padding-right: 0 !important;
+  margin-top: 10px !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
+  bottom: 14px !important;
+}
+html[data-theme="dark"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card,
+html[data-theme="amoled"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
+  background: var(--surface-1, var(--surf-1)) !important;
+  box-shadow: var(--sh, var(--shadow-2)) !important;
+}
