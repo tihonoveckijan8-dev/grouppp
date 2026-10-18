@@ -12644,3 +12644,28 @@ html[data-theme="amoled"] body[data-route="songs"] #view .songs-list:not(.setlis
   body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card { transition: none !important; }
   body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hover { transform: none !important; }
 }
+
+
+/* WHY: Keep song-card actions visually connected to the card; remove the divider and anchor the favorite star at bottom-right. */
+body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
+  position: relative !important;
+  padding-bottom: 54px !important;
+}
+body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts {
+  border-top: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  padding-right: 42px !important;
+}
+body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts::before,
+body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts::after {
+  content: none !important;
+  display: none !important;
+}
+body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 12px !important;
+  z-index: 2 !important;
+  margin: 0 !important;
+}
