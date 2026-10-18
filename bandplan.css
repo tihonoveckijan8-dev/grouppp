@@ -12810,3 +12810,114 @@ body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.
   }
   body[data-route="songs"] .master-list .songs-list:not(.setlists-list) > article.song-card .song-meta { padding-left: 50px !important; }
 }
+
+
+/* WHY: Repertoire cards should share the compact, neutral hierarchy of Setlist cards. */
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  padding: 15px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-card, 16px) !important;
+  background: var(--surf-1) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(15,23,42,.045)) !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card::before {
+  display: none !important;
+  content: none !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-top {
+  display: grid !important;
+  grid-template-columns: 40px minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 11px !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .key-badge {
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  background: var(--surf-3) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-name {
+  font-size: var(--fs-body, 14px) !important;
+  font-weight: 750 !important;
+  letter-spacing: -.02em !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-open-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .fav {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surf-1) !important;
+  box-shadow: none !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .card-chevron {
+  color: var(--muted) !important;
+  font-size: 22px !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  justify-content: flex-start !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-meta .badge {
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  background: var(--surf-3) !important;
+  color: var(--text-2) !important;
+  border: 1px solid var(--border) !important;
+  font-weight: 650 !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-acts {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-acts .song-quick-action {
+  min-width: 34px !important;
+  min-height: 34px !important;
+  width: auto !important;
+  height: 34px !important;
+  padding: 0 9px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--surf-1) !important;
+  box-shadow: none !important;
+  gap: 6px !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-acts .song-quick-action:hover {
+  border-color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+}
+body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card:hover {
+  transform: translateY(-1px) !important;
+  border-color: var(--border-2) !important;
+  box-shadow: var(--shadow-card-hover, 0 5px 14px rgba(15,23,42,.07)) !important;
+}
+@media (max-width: 640px) {
+  body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card { padding: 13px !important; gap: 10px !important; }
+  body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-top { grid-template-columns: 38px minmax(0,1fr) auto !important; gap: 9px !important; }
+  body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .key-badge { width: 38px !important; min-width: 38px !important; height: 38px !important; }
+  body[data-route="songs"] #view .master-list .songs-list:not(.setlists-list) > .song-card .song-acts .song-quick-action { padding: 0 8px !important; }
+}
