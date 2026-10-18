@@ -159,3 +159,38 @@ html[data-theme] .toast-stack > * { box-shadow: var(--dp-raise-lg); }
   html[data-theme] textarea { box-shadow: none !important; }
   html[data-theme] .btn-primary { background-image: none !important; }
 }
+
+
+/* ---------- Canonical design-token bridge ---------- */
+/* WHY: expose the requested token vocabulary without breaking legacy selectors,
+   theme bootstrapping, saved accent preferences, or components still using old names. */
+:root {
+  --s1: var(--surf-1);
+  --s2: var(--surf-2);
+  --tx: var(--text);
+  --mu: var(--muted);
+  --ln: var(--border);
+  --a: var(--accent);
+  --on: var(--on-accent, var(--accent-contrast, var(--token-white)));
+  --sh: var(--dp-raise-md);
+}
+
+/* WHY: the existing sticky topbar used glass blur, which conflicts with the
+   product's explicit opaque soft-clay direction. Keep its stacking/layout intact. */
+.topbar.stuck {
+  background: var(--bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* WHY: AMOLED uses a dark edge ring and deep shadow, never a light highlight. */
+html[data-theme="amoled"] {
+  --dp-hi: rgba(255, 255, 255, .035);
+  --dp-lo: rgba(255, 255, 255, .03);
+  --dp-amb: rgba(0, 0, 0, .72);
+  --dp-key: rgba(0, 0, 0, .92);
+  --dp-gloss: transparent;
+}
+html[data-theme="amoled"] .btn-primary:not(:disabled):not([aria-disabled="true"]) {
+  background-image: none;
+}
