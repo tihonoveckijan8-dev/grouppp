@@ -284,6 +284,9 @@ try {
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
+  assert.match(sourceCore, /data-event-count=/, 'Calendar event count label is not rendered');
+  assert.match(sourceCore, /life = ms \|\| 1800/, 'Default toast lifetime must be 1.8 seconds');
+  assert.doesNotMatch(sourceCss, /(?:-webkit-)?backdrop-filter\s*:\s*blur/i, 'Glass blur declarations remain in the main stylesheet');
 
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
