@@ -862,3 +862,25 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   box-shadow: none !important;
   transform: translateY(1px);
 }
+
+
+/* WHY: Apply the favorite-star control's transparent, borderless resting state to song action buttons too. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:hover {
+  border-color: transparent !important;
+  background: var(--surf-3, var(--surface-2)) !important;
+  box-shadow: none !important;
+  color: var(--tx) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:active {
+  border-color: transparent !important;
+  background: var(--warn-bg, color-mix(in srgb, var(--a) 12%, transparent)) !important;
+  box-shadow: none !important;
+}
