@@ -704,3 +704,25 @@ html[data-theme] :where(.icon-btn,.fav,.lyrics-expand-btn) {
     transition: none !important;
   }
 }
+
+
+/* WHY: Song actions should sit directly on the card surface, not inside individual raised rectangles. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding: 0 8px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:hover {
+  background: color-mix(in srgb, var(--a) 8%, transparent) !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:active {
+  transform: translateY(1px);
+  background: color-mix(in srgb, var(--a) 13%, transparent) !important;
+  box-shadow: none !important;
+}
