@@ -245,3 +245,60 @@ html[data-theme] .toast-stack > * { box-shadow: var(--dp-raise-lg); }
   html[data-theme] textarea { box-shadow: none !important; }
   html[data-theme] .btn-primary { background-image: none !important; }
 }
+
+/* ── Stage 2: canonical button states ───────────────────────────────────── */
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent) {
+  min-height:44px;
+  font-weight:650;
+  border-radius:var(--r-button);
+  transition:transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+html[data-theme] :where(.btn,.icon-btn) {
+  background-color:var(--s2);
+  color:var(--tx);
+  border-color:transparent;
+  box-shadow:var(--sh);
+}
+html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit) {
+  color:var(--on);
+  background-color:var(--a);
+  background-image:linear-gradient(145deg,var(--a),color-mix(in srgb,var(--a) 70%,#000000));
+  border-color:transparent;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+}
+html[data-theme] :where(.btn-secondary,.btn-tertiary,.btn-danger,.icon-btn) {
+  background-color:var(--s2);
+  color:var(--tx);
+  border-color:transparent;
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):not(:disabled):not([aria-disabled="true"]):hover {
+    box-shadow:var(--dp-raise-md);
+  }
+  html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit):not(:disabled):not([aria-disabled="true"]):hover {
+    box-shadow:0 10px 26px color-mix(in srgb,var(--a) 45%,transparent);
+  }
+}
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):not(:disabled):not([aria-disabled="true"]):active {
+  transform:scale(.96);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 22%,transparent),inset -2px -2px 5px color-mix(in srgb,#ffffff 18%,transparent);
+}
+html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit):not(:disabled):not([aria-disabled="true"]):active {
+  background-image:linear-gradient(145deg,color-mix(in srgb,var(--a) 82%,#000000),color-mix(in srgb,var(--a) 62%,#000000));
+}
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:3px;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent),var(--sh);
+}
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):disabled,
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent)[aria-disabled="true"] {
+  opacity:.48;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent) { transition:none; }
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):active { transform:none; }
+}
