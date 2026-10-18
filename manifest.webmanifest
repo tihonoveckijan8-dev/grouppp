@@ -7,17 +7,58 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "categories": ["music", "productivity"],
+  "categories": [
+    "music",
+    "productivity"
+  ],
   "icons": [
-    {"src": "icon-bandplan.svg?v=5", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+    {
+      "src": "icon-192.png?v=7",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png?v=7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png?v=7",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-bandplan.svg?v=5",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    {"name": "Календарь", "short_name": "Календарь", "url": "./#/calendar"},
-    {"name": "Песни", "short_name": "Песни", "url": "./#/songs"},
-    {"name": "Сет-листы", "short_name": "Сет-листы", "url": "./#/setlists"}
+    {
+      "name": "Календарь",
+      "short_name": "Календарь",
+      "url": "./#/calendar"
+    },
+    {
+      "name": "Песни",
+      "short_name": "Песни",
+      "url": "./#/songs"
+    },
+    {
+      "name": "Сет-листы",
+      "short_name": "Сет-листы",
+      "url": "./#/setlists"
+    }
   ]
 }
