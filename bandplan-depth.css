@@ -1,198 +1,599 @@
-/* BandPlan depth layer.
-   WHY: adds physical volume (raised surfaces, recessed fields, pressed states)
-   on top of bandplan.css WITHOUT touching layout, sizes, colors or logic.
-   Only box-shadow, background-image overlays and short transitions are used,
-   so nothing can overlap, reflow or change meaning.
-   Load order: after bandplan.css. Remove this file to return to the old look. */
-
-/* ---------- Depth tokens (per theme) ---------- */
+/* ── Canonical soft-clay tokens: compatibility aliases for the existing UI ──
+   WHY: old selectors still consume legacy variables. Map them to one theme layer
+   first; components can then be migrated one group at a time without JS changes. */
 :root {
-  --dp-hi: rgba(255, 255, 255, .85);
-  --dp-lo: rgba(20, 28, 48, .10);
-  --dp-amb: rgba(20, 28, 48, .07);
-  --dp-key: rgba(20, 28, 48, .14);
-  --dp-gloss: rgba(255, 255, 255, .18);
-  --dp-ease: cubic-bezier(.2, .7, .2, 1);
+  --surface-1: #f6f7fa;
+  --surface-2: #ffffff;
+  --tx: #161922;
+  --mu: #6b7283;
+  --ln: #d9dce5;
+  --a: var(--accent, #1554ff);
+  --on: var(--on-accent, #ffffff);
+  --r-card: 20px;
+  --r-button: 14px;
+  --r-small-button: 11px;
+  --r-field: 13px;
+  --r-dialog: 24px;
+  --r-chip: 99px;
+  --scene-bg: #000000;
+  --scene-fg: #f2f3f8;
+  --scene-muted: #aeb4c4;
+  --scene-surface: #14151a;
+  --scene-line: #20222b;
+  --sh: 12px 12px 28px #c9ccd6, -10px -10px 24px #ffffff;
+  --dp-raise-sm: var(--sh);
+  --dp-raise-md: var(--sh);
+  --dp-raise-lg: var(--shadow-3);
+  --dp-press: inset 2px 2px 5px color-mix(in srgb,#000000 20%,transparent), inset -2px -2px 5px color-mix(in srgb,#ffffff 20%,transparent);
+  --bg: #eceef3;
+  --surf-1: var(--surface-1);
+  --surf-2: var(--surface-2);
+  --surf-3: #e6e8ef;
+  --surf-4: var(--surface-1);
+  --text: var(--tx);
+  --text-2: #343847;
+  --muted: var(--mu);
+  --border: var(--ln);
+  --control-border: var(--ln);
+  --shadow-1: var(--sh);
+  --shadow-2: var(--sh);
+  --shadow-3: 16px 16px 36px #c4c7d1, -12px -12px 28px #ffffff;
+  --shadow-accent: 0 8px 22px color-mix(in srgb, var(--a) 40%, transparent);
+  --shadow-accent-hover: 0 10px 26px color-mix(in srgb, var(--a) 45%, transparent);
 }
-html[data-theme="dark"] {
-  --dp-hi: rgba(255, 255, 255, .07);
-  --dp-lo: rgba(0, 0, 0, .38);
-  --dp-amb: rgba(0, 0, 0, .30);
-  --dp-key: rgba(0, 0, 0, .48);
-  --dp-gloss: rgba(255, 255, 255, .14);
+:root[data-theme="light"], html[data-theme="light"] {
+  --surface-1: #f6f7fa;
+  --surface-2: #ffffff;
+  --tx: #161922;
+  --mu: #6b7283;
+  --ln: #d9dce5;
+  --bg: #eceef3;
+  --sh: 12px 12px 28px #c9ccd6, -10px -10px 24px #ffffff;
+  --surf-3: #e6e8ef;
+  --text-2: #343847;
+  --overlay-bg: rgba(0, 0, 0, .60);
 }
-html[data-theme="amoled"] {
-  /* WHY: on pure black shadows are invisible, so volume comes from edge light. */
-  --dp-hi: rgba(255, 255, 255, .10);
-  --dp-lo: rgba(255, 255, 255, .03);
-  --dp-amb: rgba(0, 0, 0, .60);
-  --dp-key: rgba(0, 0, 0, .85);
-  --dp-gloss: rgba(255, 255, 255, .12);
+:root[data-theme="dark"], html[data-theme="dark"] {
+  --surface-1: #1a1d25;
+  --surface-2: #21252f;
+  --tx: #eef0f6;
+  --mu: #8b92a5;
+  --ln: #2b3040;
+  --bg: #12141a;
+  --sh: 10px 10px 26px #0a0b0f, -8px -8px 22px #1c2029;
+  --surf-3: #252a36;
+  --text-2: #c4c9d6;
+  --overlay-bg: rgba(0, 0, 0, .60);
 }
-
-/* ---------- Elevation recipes ---------- */
-:root {
-  --dp-raise-sm:
-    0 1px 1px var(--dp-amb),
-    0 2px 5px -1px var(--dp-amb),
-    inset 0 1px 0 var(--dp-hi),
-    inset 0 -1px 0 var(--dp-lo);
-  --dp-raise-md:
-    0 1px 2px var(--dp-amb),
-    0 5px 10px -3px var(--dp-amb),
-    0 14px 26px -10px var(--dp-key),
-    inset 0 1px 0 var(--dp-hi),
-    inset 0 -2px 0 var(--dp-lo);
-  --dp-raise-lg:
-    0 2px 3px var(--dp-amb),
-    0 8px 16px -4px var(--dp-amb),
-    0 22px 38px -12px var(--dp-key),
-    inset 0 1px 0 var(--dp-hi),
-    inset 0 -2px 0 var(--dp-lo);
-  --dp-press:
-    inset 0 2px 5px var(--dp-key),
-    inset 0 0 0 1px var(--dp-lo);
-  --dp-sunken:
-    inset 0 2px 4px var(--dp-amb),
-    inset 0 0 0 1px var(--dp-lo),
-    0 1px 0 var(--dp-hi);
+:root[data-theme="amoled"], html[data-theme="amoled"] {
+  --surface-1: #0b0b0e;
+  --surface-2: #14151a;
+  --tx: #f2f3f8;
+  --mu: #80879a;
+  --ln: #20222b;
+  --bg: #000000;
+  --sh: 0 10px 30px #000000, 0 0 0 1px #1b1d25;
+  --surf-1: var(--surface-1);
+  --surf-2: var(--surface-2);
+  --surf-3: #17181e;
+  --surf-4: var(--surface-1);
+  --text: var(--tx);
+  --text-2: #c4c7d2;
+  --muted: var(--mu);
+  --border: var(--ln);
+  --control-border: var(--ln);
+  --shadow-1: var(--sh);
+  --shadow-2: 0 12px 34px #000000, 0 0 0 1px #1b1d25;
+  --shadow-3: 0 18px 48px #000000, 0 0 0 1px #1b1d25;
+  --overlay-bg: rgba(0, 0, 0, .78);
 }
-
-/* ---------- Cards ---------- */
-html[data-theme] .card { box-shadow: var(--dp-raise-md); }
-@media (hover: hover) {
-  html[data-theme] a.card:hover,
-  html[data-theme] .card[role="button"]:hover,
-  html[data-theme] .card[tabindex]:hover {
-    box-shadow: var(--dp-raise-lg);
+/* Accent foreground is calculated by the existing early-theme bootstrap using
+   relative luminance; aliases expose the same values to the new design system. */
+html[data-theme] {
+  --a: var(--accent, #1554ff);
+  --on: var(--on-accent, var(--accent-contrast, #ffffff));
+}
+/* ── Stage 2: canonical button states ───────────────────────────────────── */
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent) {
+  min-height:44px;
+  font-weight:650;
+  border-radius:var(--r-button);
+  transition:transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+html[data-theme] :where(.btn,.icon-btn) {
+  background-color:var(--surface-2);
+  color:var(--tx);
+  border-color:transparent;
+  box-shadow:var(--sh);
+}
+html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit) {
+  color:var(--on);
+  background-color:var(--a);
+  background-image:linear-gradient(145deg,var(--a),color-mix(in srgb,var(--a) 70%,var(--token-black)));
+  border-color:transparent;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+}
+html[data-theme] :where(.btn-secondary,.btn-tertiary,.btn-danger,.icon-btn) {
+  background-color:var(--surface-2);
+  color:var(--tx);
+  border-color:transparent;
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):not(:disabled):not([aria-disabled="true"]):hover {
+    box-shadow:var(--dp-raise-md);
+  }
+  html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit):not(:disabled):not([aria-disabled="true"]):hover {
+    box-shadow:0 10px 26px color-mix(in srgb,var(--a) 45%,transparent);
   }
 }
-html[data-theme] a.card:active,
-html[data-theme] .card[role="button"]:active {
-  box-shadow: var(--dp-raise-sm);
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):not(:disabled):not([aria-disabled="true"]):active {
+  transform:scale(.96);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 22%,transparent),inset -2px -2px 5px color-mix(in srgb,var(--token-white) 18%,transparent);
+}
+html[data-theme] :where(.btn-primary,.btn-accent,.bp-auth-submit):not(:disabled):not([aria-disabled="true"]):active {
+  background-image:linear-gradient(145deg,color-mix(in srgb,var(--a) 82%,var(--token-black)),color-mix(in srgb,var(--a) 62%,var(--token-black)));
+}
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:3px;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent),var(--sh);
+}
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):disabled,
+html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent)[aria-disabled="true"] {
+  opacity:.48;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent) { transition:none; }
+  html[data-theme] :where(.btn,.icon-btn,.bp-auth-submit,.btn-accent):active { transform:none; }
 }
 
-/* ---------- Buttons ---------- */
-html[data-theme] .btn:not(:focus-visible):not(:disabled):not([aria-disabled="true"]) {
-  box-shadow: var(--dp-raise-sm);
-  transition: box-shadow .16s var(--dp-ease), transform .16s var(--dp-ease);
+/* ── Stage 3: recessed fields and explicit validation states ───────────── */
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  color:var(--tx);
+  background-color:var(--bg);
+  border:1px solid var(--ln);
+  border-radius:var(--r-field);
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 9%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,var(--token-white) 55%,transparent);
+  transition:border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
-html[data-theme] .btn-primary:not(:disabled):not([aria-disabled="true"]) {
-  background-image: linear-gradient(180deg, var(--dp-gloss), rgba(255, 255, 255, 0) 55%, rgba(0, 0, 0, .08));
+html[data-theme="dark"] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 35%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,var(--token-white) 3%,transparent);
 }
-@supports (color: color-mix(in srgb, red 50%, transparent)) {
-  html[data-theme] .btn-primary:not(:focus-visible):not(:disabled):not([aria-disabled="true"]) {
-    box-shadow:
-      0 1px 1px var(--dp-amb),
-      0 6px 14px -4px color-mix(in srgb, var(--accent) 55%, transparent),
-      inset 0 1px 0 rgba(255, 255, 255, .28),
-      inset 0 -2px 0 rgba(0, 0, 0, .14);
+html[data-theme="amoled"] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+) {
+  box-shadow:inset 0 2px 5px var(--token-black),inset 0 0 0 1px var(--scene-line);
+}
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+):focus {
+  outline:none;
+  border-color:var(--a);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 25%,transparent),
+             inset 1px 1px 3px color-mix(in srgb,var(--token-black) 8%,transparent);
+}
+html[data-theme] :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]),
+  select,textarea,.input,.select
+):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:2px;
+}
+html[data-theme] :where(input,select,textarea,.input,.select)[aria-invalid="true"],
+html[data-theme] :where(.field.error,.field.is-invalid,.has-error) :where(input,select,textarea,.input,.select) {
+  border-color:var(--danger);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--danger) 20%,transparent),
+             inset 1px 1px 3px color-mix(in srgb,var(--token-black) 8%,transparent);
+}
+html[data-theme] :where(input,select,textarea,.input,.select):disabled,
+html[data-theme] :where(input,select,textarea,.input,.select)[aria-disabled="true"] {
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+html[data-theme] :where(input,select,textarea,.input,.select)::placeholder {
+  color:var(--mu);
+  opacity:.85;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(input,select,textarea,.input,.select) { transition:none; }
+}
+
+/* ── Stage 4: unified raised surfaces, cards and chips ─────────────────── */
+html[data-theme] .card,
+html[data-theme] .song-card,
+html[data-theme] .event-card,
+html[data-theme] .settings-card,
+html[data-theme] .member-card,
+html[data-theme] .setlist-card {
+  background-color:var(--surface-1);
+  border:1px solid var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .card { padding:18px; }
+html[data-theme] .card-flat { box-shadow:none; }
+html[data-theme] .ev-row,
+html[data-theme] .sl-item,
+html[data-theme] .dyn-row,
+html[data-theme] .trans-box,
+html[data-theme] .stat-mini,
+html[data-theme] .hero-metric,
+html[data-theme] .hv-card,
+html[data-theme] .event-info-my {
+  background-color:var(--surface-1);
+  border-color:var(--ln);
+  box-shadow:var(--sh);
+}
+html[data-theme] .hero {
+  background-color:var(--surface-1);
+  background-image:none;
+  border-color:var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .hero-metric,
+html[data-theme] .hv-card,
+html[data-theme] .stat-mini { border-radius:var(--r-card); }
+html[data-theme] .card-interactive:active,
+html[data-theme] .ev-row:active,
+html[data-theme] .sl-item:active {
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,var(--token-black) 16%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,var(--token-white) 35%,transparent);
+}
+html[data-theme] :where(.badge,.b-brand,.b-ok,.b-warn,.b-danger,.b-info,.b-muted,.chip,.tag,.active-chips .chip) {
+  border-radius:var(--r-chip);
+  font-size:12px;
+  font-weight:700;
+}
+html[data-theme] :where(.b-brand,.chip,.tag,.active-chips .chip) {
+  background:color-mix(in srgb,var(--a) 18%,transparent);
+  color:var(--a);
+  border-color:transparent;
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] .card-interactive:hover,
+  html[data-theme] .ev-row:hover,
+  html[data-theme] .sl-item:hover {
+    box-shadow:16px 16px 34px color-mix(in srgb,var(--token-black) 12%,transparent),
+               -10px -10px 24px color-mix(in srgb,var(--token-white) 70%,transparent);
   }
 }
-@media (hover: hover) {
-  html[data-theme] .btn:not(:focus-visible):not(:disabled):not([aria-disabled="true"]):hover {
-    box-shadow: var(--dp-raise-md);
-  }
-}
-html[data-theme] .btn:not(:focus-visible):not(:disabled):not([aria-disabled="true"]):active {
-  box-shadow: var(--dp-press);
-  transform: translateY(1px);
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .card-interactive,
+  html[data-theme] .ev-row,
+  html[data-theme] .sl-item { transition:none; }
 }
 
-/* ---------- Text fields ---------- */
-html[data-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="hidden"]):not(:focus):not(:focus-visible),
-html[data-theme] select:not(:focus):not(:focus-visible),
-html[data-theme] textarea:not(:focus):not(:focus-visible) {
-  box-shadow: var(--dp-sunken);
-}
-
-/* ---------- Navigation ---------- */
+/* ── Stage 6: desktop/mobile navigation and dialog surfaces ────────────── */
 html[data-theme] .sidebar {
-  box-shadow:
-    1px 0 0 var(--dp-lo),
-    10px 0 30px -14px var(--dp-key),
-    inset -1px 0 0 var(--dp-hi);
+  background:var(--surface-1);
+  border-color:var(--ln);
+  box-shadow:10px 10px 26px color-mix(in srgb,var(--token-black) 10%,transparent),
+             -8px -8px 22px color-mix(in srgb,var(--token-white) 50%,transparent);
 }
+html[data-theme] .nav-item.active {
+  color:var(--a);
+  background:var(--surface-2);
+  box-shadow:var(--sh);
+  border-radius:14px;
+}
+html[data-theme] .nav-item.active::before { background:var(--a); }
 html[data-theme] .bottom-nav {
-  box-shadow:
-    0 -1px 0 var(--dp-lo),
-    0 -10px 28px -14px var(--dp-key),
-    inset 0 1px 0 var(--dp-hi);
+  left:12px;
+  right:12px;
+  bottom:calc(12px + env(safe-area-inset-bottom,0px));
+  padding:6px;
+  gap:4px;
+  border:1px solid var(--ln);
+  border-radius:22px;
+  background:var(--surface-1);
+  box-shadow:var(--sh);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
-html[data-theme] .brand-mark { box-shadow: var(--dp-raise-md); }
-
-/* ---------- Scene mode controls ---------- */
-html[data-theme] .sbtn {
-  box-shadow: var(--dp-raise-sm);
-  transition: box-shadow .16s var(--dp-ease);
+html[data-theme] .bottom-nav a {
+  min-height:44px;
+  border-radius:16px;
 }
-html[data-theme] .sbtn:active { box-shadow: var(--dp-press); }
-html[data-theme] .sctl { box-shadow: var(--dp-raise-sm); }
-
-/* ---------- Toasts ---------- */
-html[data-theme] .toast-stack > * { box-shadow: var(--dp-raise-lg); }
-
-/* ---------- Safety nets ---------- */
-@media (prefers-reduced-motion: reduce) {
-  html[data-theme] .btn,
-  html[data-theme] .sbtn { transition: none; }
-  html[data-theme] .btn:active { transform: none; }
+html[data-theme] .bottom-nav a.active {
+  color:var(--a);
+  background:var(--surface-2);
+  box-shadow:var(--sh);
 }
-@media (forced-colors: active) {
-  html[data-theme] .card,
-  html[data-theme] .btn,
-  html[data-theme] .sbtn,
-  html[data-theme] .sctl,
-  html[data-theme] .sidebar,
-  html[data-theme] .bottom-nav,
-  html[data-theme] .brand-mark,
-  html[data-theme] .toast-stack > * { box-shadow: none; }
+html[data-theme] .content { padding-bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
+html[data-theme] .overlay {
+  background:rgba(0,0,0,.60);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
-@media print {
-  html[data-theme] .card,
-  html[data-theme] .btn,
-  html[data-theme] .sbtn,
-  html[data-theme] .sctl,
-  html[data-theme] .brand-mark,
-  html[data-theme] input,
-  html[data-theme] select,
-  html[data-theme] textarea { box-shadow: none !important; }
-  html[data-theme] .btn-primary { background-image: none !important; }
+html[data-theme] .modal-card {
+  background:var(--surface-1);
+  border:1px solid var(--ln);
+  border-radius:var(--r-dialog);
+  box-shadow:var(--dp-raise-lg);
 }
-
-
-/* ---------- Canonical design-token bridge ---------- */
-/* WHY: expose non-conflicting canonical aliases while preserving legacy selectors,
-   theme bootstrapping, saved accent preferences, and the existing spacing scale. */
-:root {
-  /* --s1 and --s2 are legacy spacing tokens in bandplan.css; do not repurpose them
-     until every spacing reference is migrated in a dedicated, tested change. */
-  --surface-1: var(--surf-1);
-  --surface-2: var(--surf-2);
-  --tx: var(--text);
-  --mu: var(--muted);
-  --ln: var(--border);
-  --a: var(--accent);
-  --on: var(--on-accent, var(--accent-contrast, var(--token-white)));
-  --sh: var(--dp-raise-md);
+@media (min-width:861px) and (max-width:900px) {
+  html[data-theme] .app { grid-template-columns:240px minmax(0,1fr); }
+  html[data-theme] .sidebar { display:flex; }
+  html[data-theme] .bottom-nav { display:none; }
+  html[data-theme] .content { padding-bottom:var(--s10); }
+}
+@media (max-width:860px) {
+  html[data-theme] .app { grid-template-columns:minmax(0,1fr); }
+  html[data-theme] .sidebar { display:none; }
+  html[data-theme] .bottom-nav { display:flex; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .bottom-nav a,
+  html[data-theme] .nav-item { transition:none; }
 }
 
-/* WHY: the existing sticky topbar used glass blur, which conflicts with the
-   product's explicit opaque soft-clay direction. Keep its stacking/layout intact. */
-.topbar.stuck {
-  background: var(--bg);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+/* ── Stage 7: high-contrast black stage mode ───────────────────────────── */
+html[data-theme] #scene,
+html[data-theme] #scene .scene-body,
+html[data-theme] #scene .scene-dyn {
+  background:var(--token-black);
+  color:var(--scene-fg);
+}
+html[data-theme] #scene .scene-top,
+html[data-theme] #scene .scene-ctrl {
+  background:var(--token-black);
+  border-color:var(--scene-line);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme] #scene .sbtn,
+html[data-theme] #scene .sctl {
+  background:var(--scene-surface);
+  color:var(--scene-fg);
+  border:1px solid var(--scene-line);
+  border-radius:14px;
+  box-shadow:0 10px 30px var(--token-black),0 0 0 1px var(--scene-line);
+}
+html[data-theme] #scene .sbtn { width:48px; height:48px; }
+html[data-theme] #scene .sbtn.act {
+  background:var(--a);
+  color:var(--on);
+  border-color:var(--a);
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+}
+html[data-theme] #scene .sctl button {
+  min-width:44px;
+  min-height:44px;
+  color:var(--scene-fg);
+  border-radius:11px;
+}
+html[data-theme] #scene .scene-body b.ch,
+html[data-theme] #scene .scene-body b.ch.inl {
+  color:var(--a);
+  background:transparent;
+  border:0;
+  text-shadow:none;
+}
+html[data-theme] #scene .scene-body .sec { color:var(--scene-muted); }
+html[data-theme] #scene .scene-bar { height:4px; background:var(--scene-line); }
+html[data-theme] #scene .scene-bar i { background:var(--a); }
+html[data-theme] #scene :where(.sbtn,.sctl button):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:3px;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] #scene :where(.sbtn,.sctl button) { transition:none; }
 }
 
-/* WHY: AMOLED uses a dark edge ring and deep shadow, never a light highlight. */
-html[data-theme="amoled"] {
-  --dp-hi: rgba(255, 255, 255, .035);
-  --dp-lo: rgba(255, 255, 255, .03);
-  --dp-amb: rgba(0, 0, 0, .72);
-  --dp-key: rgba(0, 0, 0, .92);
-  --dp-gloss: transparent;
+/* ── Stage 8: remaining controls, toast and no decorative glass ────────── */
+html[data-theme] .topbar.stuck {
+  background:var(--surface-1);
+  box-shadow:var(--sh);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
 }
-html[data-theme="amoled"] .btn-primary:not(:disabled):not([aria-disabled="true"]) {
-  background-image: none;
+html[data-theme] .toolbar {
+  background:var(--bg);
+  background-image:none;
+}
+html[data-theme] .auth-screen,
+html[data-theme] .bp-auth-gate {
+  background:var(--bg);
+  background-image:none;
+}
+html[data-theme] .auth-card {
+  background:var(--surface-1);
+  border:1px solid var(--ln);
+  border-radius:var(--r-dialog);
+  box-shadow:var(--sh);
+}
+html[data-theme] .settings-tab {
+  min-height:44px;
+  border-radius:var(--r-chip);
+  border:1px solid var(--ln);
+  background:var(--surface-2);
+  color:var(--mu);
+  box-shadow:var(--sh);
+}
+html[data-theme] .settings-tab.on {
+  background:var(--a);
+  color:var(--on);
+  border-color:var(--a);
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 32%,transparent);
+}
+html[data-theme] .settings-tab::after { display:none; }
+html[data-theme] .seg button {
+  min-height:44px;
+  border-radius:11px;
+}
+html[data-theme] .seg button.on,
+html[data-theme] .seg button.on[data-accent="1"] {
+  background:var(--a);
+  color:var(--on);
+  border-color:var(--a);
+  box-shadow:inset 1px 1px 2px color-mix(in srgb,var(--token-black) 12%,transparent);
+}
+html[data-theme] .sw {
+  min-width:44px;
+  min-height:44px;
+  border-radius:11px;
+  box-shadow:var(--sh);
+}
+html[data-theme] .sw.on {
+  outline:2px solid var(--a);
+  outline-offset:2px;
+  border-color:var(--a);
+}
+html[data-theme] .lyrics-expand-btn {
+  width:44px;
+  min-width:44px;
+  height:44px;
+  min-height:44px;
+  flex-basis:44px;
+}
+html[data-theme] .toast,
+html[data-theme] .toast-stack > * {
+  background:var(--bg);
+  color:var(--tx);
+  border:1px solid var(--ln);
+  border-radius:var(--r-chip);
+  box-shadow:var(--sh);
+}
+html[data-theme] .toast-stack {
+  bottom:calc(20px + env(safe-area-inset-bottom,0px));
+}
+html[data-theme] :where(.fab,.bp-auth-submit,[data-act="event-new"],[data-act="song-new"],[data-act="setlist-new"]) {
+  color:var(--on);
+  background:linear-gradient(145deg,var(--a),color-mix(in srgb,var(--a) 70%,var(--token-black)));
+  border-color:transparent;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+}
+html[data-theme] :where(.fab,.settings-tab,.seg button,.sw,.lyrics-expand-btn):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:3px;
+}
+html[data-theme] :where(.fab,.settings-tab,.seg button,.sw,.lyrics-expand-btn):disabled,
+html[data-theme] :where(.fab,.settings-tab,.seg button,.sw,.lyrics-expand-btn)[aria-disabled="true"] {
+  opacity:.48;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] .settings-tab:not(.on):hover,
+  html[data-theme] .seg button:not(.on):hover {
+    color:var(--a);
+    border-color:var(--a);
+    box-shadow:var(--sh);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .settings-tab,
+  html[data-theme] .seg button,
+  html[data-theme] .sw,
+  html[data-theme] .lyrics-expand-btn { transition:none; }
+}
+
+/* Remove decorative background treatments; keep gradients only where the
+   component itself encodes state (primary actions and event days). */
+html[data-theme] .hero,
+html[data-theme] .auth-screen,
+html[data-theme] .bp-auth-gate,
+html[data-theme] .color-picker-modal,
+html[data-theme] .custom-color-preview {
+  background-color:var(--surface-1);
+  background-image:none;
+}
+html[data-theme] .hero { border-color:var(--ln); }
+html[data-theme] .settings-tab::before { background:none; }
+
+/* Final parity fixes: remove remaining decorative logo/avatar gradients and
+   make light/dark/AMOLED navigation use the same semantic surface tokens. */
+html[data-theme] .brand-mark {
+  background:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] .side-profile .av {
+  background:color-mix(in srgb,var(--a) 18%,var(--surface-1));
+  color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme="dark"] .bottom-nav,
+html[data-theme="amoled"] .bottom-nav {
+  background:var(--surface-1);
+  border-color:var(--ln);
+  box-shadow:var(--sh);
+}
+html[data-theme="dark"] .bottom-nav a.active,
+html[data-theme="amoled"] .bottom-nav a.active {
+  background:var(--surface-2);
+  color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] .card.is-selected,
+html[data-theme] .song-card.is-selected,
+html[data-theme] .ev-row.is-selected,
+html[data-theme] .set-item.is-selected {
+  background:var(--surface-1);
+  background-image:none;
+  border-color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] #scene,
+html[data-theme] #scene .scene-top,
+html[data-theme] #scene .scene-ctrl,
+html[data-theme] #scene .scene-body,
+html[data-theme] #scene .scene-dyn { background:var(--scene-bg); }
+
+/* Final surface parity for repertoire, setlists, timetable and settings. */
+html[data-theme] .lyrics,
+html[data-theme] .tg-wrap,
+html[data-theme] .settings-card,
+html[data-theme] .setlist-detail,
+html[data-theme] .event-info-panel {
+  background:var(--surface-1);
+  color:var(--tx);
+  border:1px solid var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .dyn-chip,
+html[data-theme] .dyn-scroll,
+html[data-theme] .filter-pop,
+html[data-theme] .accent-dropdown {
+  background:var(--surface-1);
+  color:var(--tx);
+  border:1px solid var(--ln);
+  border-radius:14px;
+  box-shadow:var(--sh);
+}
+html[data-theme] .tg-ev {
+  background:var(--surface-2);
+  color:var(--tx);
+  border-color:var(--ln);
+  border-left-color:var(--a);
+  border-radius:11px;
+  box-shadow:var(--sh);
+}
+html[data-theme] .dyn-chip .v,
+html[data-theme] .lyrics b.ch,
+html[data-theme] .trans-val { color:var(--a); }
+html[data-theme] .skel,
+html[data-theme] .skeleton {
+  background-color:var(--surface-1);
+}
+html[data-theme] :where(.skel,.skeleton)::after {
+  background-image:linear-gradient(90deg,transparent,var(--skel-hi),transparent);
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] :where(.skel,.skeleton)::after { animation:none; }
 }
