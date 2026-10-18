@@ -80,3 +80,9 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - Included the existing `scene-quick` action in the same solid-accent primary-action rule so it does not retain the legacy gradient treatment.
 - Static checks after commit: both primary-action gradients are absent; the only remaining gradient in `bandplan-depth.css` is the loading skeleton shimmer; braces are balanced; the supplemental layer has no `!important` declarations.
 - Browser/build/smoke verification remains outstanding. No claims are made about runtime appearance or behavior until those checks can run.
+
+## Stylesheet cache invalidation — 2026-10-18
+
+- Bumped the stylesheet query versions in `index.html` after updating the visual layer: `bandplan.css?v=20261018-33` and `bandplan-depth.css?v=2`.
+- Updated the Service Worker shell entry for `bandplan-depth.css` to the same `?v=2` URL so installed/offline clients request the current design layer. The Service Worker cache-version token and install/update logic were not changed.
+- This addresses a deployment visibility risk: changing CSS contents without changing a versioned URL can leave browser HTTP caches serving the previous stylesheet. It does not prove that a live browser has already refreshed; verify after GitHub Pages deployment and normal PWA update activation.
