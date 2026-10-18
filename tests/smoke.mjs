@@ -218,9 +218,56 @@ try {
       { text: 'rgb(255, 255, 255)', background: 'rgb(37, 71, 208)', border: 'rgb(37, 71, 208)' }
     ];
     participationColors.forEach((actual, index) => {
-      assert.equal(actual.text, expected[index].text, `Wrong fixed text color for ${actual.status} in ${theme}`);
-      assert.equal(actual.background, expected[index].background, `Wrong fixed background color for ${actual.status} in ${theme}`);
-      assert.equal(actual.border, expected[index].border, `Wrong fixed border color for ${actual.status} in ${theme}`);
+      assert.equal(actual.text, expected[index].text, `Wrong active text color for ${actual.status} in ${theme}`);
+      assert.equal(actual.background, expected[index].background, `Wrong active background color for ${actual.status} in ${theme}`);
+      assert.equal(actual.border, expected[index].border, `Wrong active border color for ${actual.status} in ${theme}`);
+    });
+
+    // WHY: check the same active component with five distinct user accent colors and WCAG AA foreground contrast.
+    const accentMatrix = await page.evaluate(() => {
+      const root = document.documentElement;
+      const previous = ['--accent','--accent-contrast','--on-accent'].map(name => [name, root.style.getPropertyValue(name)]);
+      const colors = ['#D7263D','#C2410C','#15803D','#1D4ED8','#B07CFF'];
+      const luminance = hex => {
+        const values = hex.match(/[0-9a-f]{2}/gi).map(part => parseInt(part,16)/255)
+          .map(value => value <= .04045 ? value/12.92 : Math.pow((value+.055)/1.055,2.4));
+        return .2126*values[0]+.7152*values[1]+.0722*values[2];
+      };
+      const contrast = (a,b) => {
+        const x=luminance(a), y=luminance(b);
+        return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+      };
+      const rgb = hex => {
+        const n=parseInt(hex.slice(1),16);
+        return 'rgb('+(n>>16&255)+', '+(n>>8&255)+', '+(n&255)+')';
+      };
+      const white='#FFFFFF', black='#000000';
+      const result=colors.map(accent => {
+        const on=contrast(accent,white)>=contrast(accent,black)?white:black;
+        root.style.setProperty('--accent',accent);
+        root.style.setProperty('--accent-contrast',on);
+        root.style.setProperty('--on-accent',on);
+        const button=document.createElement('button');
+        button.className='part-btn on';
+        button.dataset.v='yes';
+        button.setAttribute('aria-pressed','true');
+        button.textContent='active';
+        const host=document.createElement('div');
+        host.className='part-switch';
+        host.append(button);
+        document.body.append(host);
+        const style=getComputedStyle(button);
+        const item={accent,background:style.backgroundColor,text:style.color,border:style.borderColor,contrast:contrast(accent,on)};
+        host.remove();
+        return item;
+      });
+      previous.forEach(([name,value]) => value ? root.style.setProperty(name,value) : root.style.removeProperty(name));
+      return result;
+    });
+    accentMatrix.forEach(item => {
+      assert.equal(item.background, (() => { const n=parseInt(item.accent.slice(1),16); return 'rgb('+(n>>16&255)+', '+(n>>8&255)+', '+(n&255)+')'; })(), `Accent fill mismatch for ${item.accent}`);
+      assert.equal(item.border, item.background, `Accent border mismatch for ${item.accent}`);
+      assert.ok(item.contrast >= 4.5, `Accent foreground contrast below WCAG AA for ${item.accent}: ${item.contrast}`);
     });
   }
 
