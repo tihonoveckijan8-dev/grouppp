@@ -605,3 +605,53 @@ html[data-theme] :where(.skel,.skeleton)::after {
 @media (prefers-reduced-motion:reduce) {
   html[data-theme] :where(.skel,.skeleton)::after { animation:none; }
 }
+
+
+/* ── Stage 9: stronger soft-clay depth across the existing surfaces ──────
+   WHY: the previous layer standardized colors and corners, but shared outer
+   shadows were too similar across cards, buttons and nested panels. Layer a
+   soft lift plus a fine top highlight; keep the calendar's day geometry intact. */
+:root[data-theme="light"], html[data-theme="light"] {
+  --sh: 14px 14px 30px rgba(174,179,194,.72), -10px -10px 24px rgba(255,255,255,.96);
+  --shadow-3: 20px 22px 44px rgba(164,169,185,.68), -12px -12px 30px rgba(255,255,255,.98);
+  --dp-raise-lg: var(--shadow-3);
+}
+:root[data-theme="dark"], html[data-theme="dark"] {
+  --sh: 12px 14px 28px rgba(0,0,0,.38), -7px -7px 20px rgba(48,53,67,.42);
+  --shadow-3: 18px 20px 42px rgba(0,0,0,.48), -9px -9px 24px rgba(48,53,67,.38);
+  --dp-raise-lg: var(--shadow-3);
+}
+:root[data-theme="amoled"], html[data-theme="amoled"] {
+  --sh: 0 12px 30px rgba(0,0,0,.78), 0 0 0 1px rgba(53,57,72,.72), inset 0 1px 0 rgba(255,255,255,.055);
+  --shadow-3: 0 20px 46px rgba(0,0,0,.88), 0 0 0 1px rgba(64,68,84,.82), inset 0 1px 0 rgba(255,255,255,.065);
+  --dp-raise-lg: var(--shadow-3);
+}
+html[data-theme] :where(
+  .card,.song-card,.event-card,.settings-card,.member-card,.setlist-card,
+  .hero,.lyrics,.tg-wrap,.setlist-detail,.event-info-panel,.auth-card,
+  .modal-card,.sidebar,.bottom-nav,.dyn-chip,.dyn-scroll,.filter-pop,.accent-dropdown
+) {
+  /* WHY: a subtle inset highlight gives the raised edge a clay-like soft rim. */
+  box-shadow:var(--sh), inset 0 1px 0 color-mix(in srgb,var(--token-white) 22%,transparent);
+}
+html[data-theme="dark"] :where(
+  .card,.song-card,.event-card,.settings-card,.member-card,.setlist-card,
+  .hero,.lyrics,.tg-wrap,.setlist-detail,.event-info-panel,.auth-card,
+  .modal-card,.sidebar,.bottom-nav,.dyn-chip,.dyn-scroll,.filter-pop,.accent-dropdown
+),
+html[data-theme="amoled"] :where(
+  .card,.song-card,.event-card,.settings-card,.member-card,.setlist-card,
+  .hero,.lyrics,.tg-wrap,.setlist-detail,.event-info-panel,.auth-card,
+  .modal-card,.sidebar,.bottom-nav,.dyn-chip,.dyn-scroll,.filter-pop,.accent-dropdown
+) {
+  box-shadow:var(--sh), inset 0 1px 0 rgba(255,255,255,.045);
+}
+html[data-theme] :where(.btn,.icon-btn,.settings-tab,.seg button,.sw,.lyrics-expand-btn,.fab):not(:disabled):not([aria-disabled="true"]) {
+  box-shadow:var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb,var(--token-white) 24%,transparent);
+}
+html[data-theme] :where(.btn,.icon-btn,.settings-tab,.seg button,.sw,.lyrics-expand-btn,.fab):not(:disabled):not([aria-disabled="true"]):active {
+  box-shadow:var(--dp-press);
+}
+html[data-theme="amoled"] :where(.btn,.icon-btn,.settings-tab,.seg button,.sw,.lyrics-expand-btn,.fab):not(:disabled):not([aria-disabled="true"]) {
+  box-shadow:var(--sh), inset 0 1px 0 rgba(255,255,255,.06);
+}
