@@ -317,7 +317,10 @@ html[data-theme] .bottom-nav a.active {
   background:var(--surface-2);
   box-shadow:var(--sh);
 }
-html[data-theme] .content { padding-bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
+/* WHY: reserve fixed bottom-navigation space only on compact layouts; desktop pages should not end with an artificial 110px gap. */
+@media (max-width:860px) {
+  html[data-theme] .content { padding-bottom:calc(110px + env(safe-area-inset-bottom,0px)); }
+}
 html[data-theme] .overlay {
   background:rgba(0,0,0,.60);
   backdrop-filter:none;
