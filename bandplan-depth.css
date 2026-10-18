@@ -604,3 +604,29 @@ html[data-theme] :where(.fab,.settings-tab,.seg button,.sw,.lyrics-expand-btn)[a
   html[data-theme] .sw,
   html[data-theme] .lyrics-expand-btn { transition:none; }
 }
+
+/* Participation states follow the user-selected accent while labels/icons
+   preserve meaning. Inactive states stay neutral until explicitly selected. */
+html[data-theme] body .event-card .part-switch .part-btn.on[data-v="yes"][aria-pressed="true"],
+html[data-theme] body .event-card .part-switch .part-btn.on[data-v="maybe"][aria-pressed="true"],
+html[data-theme] body .event-card .part-switch .part-btn.on[data-v="no"][aria-pressed="true"],
+html[data-theme] body .part-switch .part-btn.on[data-v="yes"][aria-pressed="true"],
+html[data-theme] body .part-switch .part-btn.on[data-v="maybe"][aria-pressed="true"],
+html[data-theme] body .part-switch .part-btn.on[data-v="no"][aria-pressed="true"] {
+  background:var(--a);
+  background-color:var(--a);
+  color:var(--on);
+  -webkit-text-fill-color:var(--on);
+  border-color:var(--a);
+  box-shadow:inset 1px 1px 2px color-mix(in srgb,var(--token-black) 12%,transparent);
+}
+html[data-theme] body .part-switch .part-btn[data-v="yes"]:not(.on):not([aria-pressed="true"]),
+html[data-theme] body .part-switch .part-btn[data-v="maybe"]:not(.on):not([aria-pressed="true"]),
+html[data-theme] body .part-switch .part-btn[data-v="no"]:not(.on):not([aria-pressed="true"]) {
+  background:var(--bg);
+  background-color:var(--bg);
+  color:var(--mu);
+  -webkit-text-fill-color:var(--mu);
+  border:1px solid var(--ln);
+  box-shadow:none;
+}
