@@ -11911,3 +11911,67 @@ html[data-theme="amoled"], body.theme-amoled {
     box-sizing: border-box !important;
   }
 }
+
+
+/* HARD MOBILE OVERRIDE: target #pageHead itself (it is not guaranteed to carry .page-head). */
+@media screen and (max-width: 640px) {
+  html body[data-route="setlist"] #app #pageHead,
+  html body[data-route="setlists"] #app #pageHead {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+  html body[data-route="setlist"] #app #pageHead > div:first-child,
+  html body[data-route="setlists"] #app #pageHead > div:first-child {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  html body[data-route="setlist"] #app #pageHead > .ph-acts,
+  html body[data-route="setlists"] #app #pageHead > .ph-acts {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body[data-route="setlist"] #app #pageHead > .ph-acts > button[data-act="scene-setlist"],
+  html body[data-route="setlists"] #app #pageHead > .ph-acts > button[data-act="scene-setlist"] {
+    display: flex !important;
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    text-align: center !important;
+  }
+  html body[data-route="setlist"] #app .sl-row-actions,
+  html body[data-route="setlists"] #app .sl-row-actions {
+    position: relative !important;
+    left: 4px !important;
+    width: calc(100% + 4px) !important;
+    margin-left: auto !important;
+    margin-right: -4px !important;
+    justify-content: flex-end !important;
+  }
+}
