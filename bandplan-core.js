@@ -2447,9 +2447,6 @@ function eventModal(evId, date) {
       return '<div class="event-participant' + (included ? ' is-in' : '') + '" data-member="' + esc(m.id) + '">' +
         '<div class="event-part-main"><span class="event-part-avatar">' + esc(m.name.charAt(0).toUpperCase()) + '<span class="participation-dot participation-dot-avatar status-' + (ps || 'unset') + '" title="' + esc(participantStatusLabel(ps)) + '" aria-label="' + esc(participantStatusLabel(ps)) + '"></span></span><div class="event-part-copy"><strong>' + esc(m.name) + '</strong><span>' + esc(rolesLabel(rolesOf(m))) + '</span></div></div></div>';
     }).join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
-    '<div class="field"><span class="field-label">Ваше участие</span><div id="f_my">' +
-      renderParticipationSwitch(d, {size:'lg', variant:'editor', draft:true, status:eventStatusFor(d) || (ev ? '' : state.profile.defaultParticipation || '')}) +
-    '</div></div>' +
     '<div class="field"><span class="field-label">Состав события</span><div class="row" id="f_members" style="gap:6px">' +
     (state.members.length ? state.members.map(m => '<button type="button" class="chip' + ((d.memberIds || []).indexOf(m.id) >= 0 ? ' on' : '') + '" data-m="' + m.id + '" aria-pressed="' + ((d.memberIds || []).indexOf(m.id) >= 0) + '">' + esc(m.name.split(' ')[0]) + ' · ' + esc(rolesLabel(rolesOf(m))) + '</button>').join('') : '<span class="t-sm t-muted">Участники не добавлены.</span>') + '</div></div>' +
     '<div class="field"><label class="field-label" for="f_notes">Заметки</label><textarea class="input" id="f_notes" rows="3" style="font-family:var(--font);min-height:80px" placeholder="Саундчек, райдер, договорённости">' + esc(d.notes || '') + '</textarea></div>';
