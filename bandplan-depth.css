@@ -785,3 +785,32 @@ html[data-theme] :where(.tb-search > svg,.tb-search > .icon,.tb-search > .search
     transition: none !important;
   }
 }
+
+
+/* WHY: Match song action buttons to the existing raised favorite-star control for a consistent card UI. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+  min-height: 48px !important;
+  height: 48px !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: var(--r-chip, 12px) !important;
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  color: var(--tx) !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
+  transform: none;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:hover {
+  border-color: color-mix(in srgb, var(--a) 30%, var(--ln)) !important;
+  background: var(--surface-2) !important;
+  box-shadow: var(--dp-raise), inset 0 1px 0 color-mix(in srgb, var(--token-white) 24%, transparent) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:active {
+  box-shadow: var(--dp-press) !important;
+  transform: translateY(1px);
+}
+@media (max-width: 640px) {
+  html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button {
+    padding-inline: 8px !important;
+  }
+}
