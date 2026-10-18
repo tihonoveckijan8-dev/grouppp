@@ -12410,11 +12410,12 @@ html[data-theme="amoled"], body.theme-amoled {
   .ev-date .d{font-size:20px}
   .ev-acts{
     grid-column:2;
+    position:relative;
+    z-index:2;
     justify-content:flex-end;
-    border-left:0;
-    border-top:1px solid var(--border);
-    padding:9px 0 0;
-    margin-top:1px;
+    border:0;
+    padding:0;
+    margin-top:0;
     width:100%;
   }
   .ev-acts .icon-btn{width:34px;height:34px;min-width:34px;flex-basis:34px;border-radius:11px}
