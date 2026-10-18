@@ -596,3 +596,56 @@ html[data-theme] .modal-card {
   html[data-theme] .bottom-nav a,
   html[data-theme] .nav-item { transition:none; }
 }
+
+/* ── Stage 7: high-contrast black stage mode ───────────────────────────── */
+html[data-theme] #scene,
+html[data-theme] #scene .scene-body,
+html[data-theme] #scene .scene-dyn {
+  background:#000000;
+  color:#f2f3f8;
+}
+html[data-theme] #scene .scene-top,
+html[data-theme] #scene .scene-ctrl {
+  background:#000000;
+  border-color:#20222b;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+html[data-theme] #scene .sbtn,
+html[data-theme] #scene .sctl {
+  background:#14151a;
+  color:#f2f3f8;
+  border:1px solid #20222b;
+  border-radius:14px;
+  box-shadow:0 10px 30px #000000,0 0 0 1px #1b1d25;
+}
+html[data-theme] #scene .sbtn { width:48px; height:48px; }
+html[data-theme] #scene .sbtn.act {
+  background:var(--a);
+  color:var(--on);
+  border-color:var(--a);
+  box-shadow:0 8px 22px color-mix(in srgb,var(--a) 40%,transparent);
+}
+html[data-theme] #scene .sctl button {
+  min-width:44px;
+  min-height:44px;
+  color:#f2f3f8;
+  border-radius:11px;
+}
+html[data-theme] #scene .scene-body b.ch,
+html[data-theme] #scene .scene-body b.ch.inl {
+  color:var(--a);
+  background:transparent;
+  border:0;
+  text-shadow:none;
+}
+html[data-theme] #scene .scene-body .sec { color:#aeb4c4; }
+html[data-theme] #scene .scene-bar { height:4px; background:#20222b; }
+html[data-theme] #scene .scene-bar i { background:var(--a); }
+html[data-theme] #scene :where(.sbtn,.sctl button):focus-visible {
+  outline:2px solid var(--a);
+  outline-offset:3px;
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] #scene :where(.sbtn,.sctl button) { transition:none; }
+}
