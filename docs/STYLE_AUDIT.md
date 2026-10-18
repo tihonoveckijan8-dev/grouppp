@@ -86,3 +86,10 @@ This document is a source-based audit, not a claim that the browser scenarios or
 - Bumped the stylesheet query versions in `index.html` after updating the visual layer: `bandplan.css?v=20261018-33` and `bandplan-depth.css?v=2`.
 - Updated the Service Worker shell entry for `bandplan-depth.css` to the same `?v=2` URL so installed/offline clients request the current design layer. The Service Worker cache-version token and install/update logic were not changed.
 - This addresses a deployment visibility risk: changing CSS contents without changing a versioned URL can leave browser HTTP caches serving the previous stylesheet. It does not prove that a live browser has already refreshed; verify after GitHub Pages deployment and normal PWA update activation.
+
+## Responsive content-bottom spacing — 2026-10-18
+
+- Scoped the supplemental 110px bottom-navigation reserve to viewports at or below 860px, where the floating bottom navigation is shown.
+- Tablet layouts from 861–900px keep their existing compact desktop spacing rule; wider desktop layouts no longer inherit mobile-only blank space at the end of content.
+- WHY: fixed navigation padding should follow the breakpoint that displays that navigation, rather than adding a large empty tail on desktop.
+- This changes only content-bottom spacing; calendar day geometry, routing, interaction logic, and PWA/service-worker behavior are unchanged. CI browser smoke, contrast, Lighthouse, and production-build checks are the next verification gate.
