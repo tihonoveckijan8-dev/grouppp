@@ -12715,3 +12715,35 @@ html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) 
   background: transparent !important;
   box-shadow: none !important;
 }
+
+
+/* WHY: Give song cards the same solid setlist surface, soft-clay depth and raised control colors across all themes. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
+  background: var(--surface-1) !important;
+  background-image: none !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: var(--r-card) !important;
+  box-shadow: var(--sh), inset 0 1px 0 color-mix(in srgb, var(--token-white) 18%, transparent) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button,
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav {
+  color: var(--tx) !important;
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: var(--r-chip, 12px) !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts > button:active,
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav:active {
+  box-shadow: var(--dp-press) !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav[aria-pressed="true"],
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .fav.active {
+  color: var(--a) !important;
+}
