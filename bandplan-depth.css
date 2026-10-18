@@ -364,3 +364,69 @@ html[data-theme] :where(input,select,textarea,.input,.select)::placeholder {
 @media (prefers-reduced-motion:reduce) {
   html[data-theme] :where(input,select,textarea,.input,.select) { transition:none; }
 }
+
+/* ── Stage 4: unified raised surfaces, cards and chips ─────────────────── */
+html[data-theme] .card,
+html[data-theme] .song-card,
+html[data-theme] .event-card,
+html[data-theme] .settings-card,
+html[data-theme] .member-card,
+html[data-theme] .setlist-card {
+  background-color:var(--s1);
+  border:1px solid var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .card { padding:18px; }
+html[data-theme] .card-flat { box-shadow:none; }
+html[data-theme] .ev-row,
+html[data-theme] .sl-item,
+html[data-theme] .dyn-row,
+html[data-theme] .trans-box,
+html[data-theme] .stat-mini,
+html[data-theme] .hero-metric,
+html[data-theme] .hv-card,
+html[data-theme] .event-info-my {
+  background-color:var(--s1);
+  border-color:var(--ln);
+  box-shadow:var(--sh);
+}
+html[data-theme] .hero {
+  background-color:var(--s1);
+  background-image:none;
+  border-color:var(--ln);
+  border-radius:var(--r-card);
+  box-shadow:var(--sh);
+}
+html[data-theme] .hero-metric,
+html[data-theme] .hv-card,
+html[data-theme] .stat-mini { border-radius:var(--r-card); }
+html[data-theme] .card-interactive:active,
+html[data-theme] .ev-row:active,
+html[data-theme] .sl-item:active {
+  box-shadow:inset 2px 2px 5px color-mix(in srgb,#000000 16%,transparent),
+             inset -2px -2px 5px color-mix(in srgb,#ffffff 35%,transparent);
+}
+html[data-theme] :where(.badge,.b-brand,.b-ok,.b-warn,.b-danger,.b-info,.b-muted,.chip,.tag,.active-chips .chip) {
+  border-radius:var(--r-chip);
+  font-size:12px;
+  font-weight:700;
+}
+html[data-theme] :where(.b-brand,.chip,.tag,.active-chips .chip) {
+  background:color-mix(in srgb,var(--a) 18%,transparent);
+  color:var(--a);
+  border-color:transparent;
+}
+@media (hover:hover) and (pointer:fine) {
+  html[data-theme] .card-interactive:hover,
+  html[data-theme] .ev-row:hover,
+  html[data-theme] .sl-item:hover {
+    box-shadow:16px 16px 34px color-mix(in srgb,#000000 12%,transparent),
+               -10px -10px 24px color-mix(in srgb,#ffffff 70%,transparent);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-theme] .card-interactive,
+  html[data-theme] .ev-row,
+  html[data-theme] .sl-item { transition:none; }
+}
