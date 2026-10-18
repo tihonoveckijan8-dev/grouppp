@@ -643,3 +643,41 @@ html[data-theme] .custom-color-preview {
 }
 html[data-theme] .hero { border-color:var(--ln); }
 html[data-theme] .settings-tab::before { background:none; }
+
+/* Final parity fixes: remove remaining decorative logo/avatar gradients and
+   make light/dark/AMOLED navigation use the same semantic surface tokens. */
+html[data-theme] .brand-mark {
+  background:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] .side-profile .av {
+  background:color-mix(in srgb,var(--a) 18%,var(--s1));
+  color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme="dark"] .bottom-nav,
+html[data-theme="amoled"] .bottom-nav {
+  background:var(--s1);
+  border-color:var(--ln);
+  box-shadow:var(--sh);
+}
+html[data-theme="dark"] .bottom-nav a.active,
+html[data-theme="amoled"] .bottom-nav a.active {
+  background:var(--s2);
+  color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] .card.is-selected,
+html[data-theme] .song-card.is-selected,
+html[data-theme] .ev-row.is-selected,
+html[data-theme] .set-item.is-selected {
+  background:var(--s1);
+  background-image:none;
+  border-color:var(--a);
+  box-shadow:var(--sh);
+}
+html[data-theme] #scene,
+html[data-theme] #scene .scene-top,
+html[data-theme] #scene .scene-ctrl,
+html[data-theme] #scene .scene-body,
+html[data-theme] #scene .scene-dyn { background:var(--scene-bg); }
