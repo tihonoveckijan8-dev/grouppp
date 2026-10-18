@@ -655,3 +655,52 @@ html[data-theme] :where(.btn,.icon-btn,.settings-tab,.seg button,.sw,.lyrics-exp
 html[data-theme="amoled"] :where(.btn,.icon-btn,.settings-tab,.seg button,.sw,.lyrics-expand-btn,.fab):not(:disabled):not([aria-disabled="true"]) {
   box-shadow:var(--sh), inset 0 1px 0 rgba(255,255,255,.06);
 }
+
+
+/* ── Global card and control parity ────────────────────────────────
+   WHY: one shared surface, radius and tactile depth for cards and controls across
+   every route/theme; semantic primary, danger and participation states keep their colors. */
+html[data-theme] :where(
+  .card,.song-card,.event-card,.ev-row,.setlist-card,.setlist-detail,
+  .settings-card,.member-card,.event-info-panel,.lyrics,.tg-wrap,
+  .auth-card,.modal-card,.hero,.sl-item,.song-row,.member-row
+) {
+  background-color: var(--surface-1) !important;
+  background-image: none !important;
+  border: 1px solid var(--ln) !important;
+  border-radius: var(--r-card, 16px) !important;
+  box-shadow: var(--sh), inset 0 1px 0 color-mix(in srgb, var(--token-white) 18%, transparent) !important;
+}
+html[data-theme] :where(
+  .card,.song-card,.event-card,.ev-row,.setlist-card,.settings-card,
+  .member-card,.event-info-panel,.lyrics,.tg-wrap,.sl-item,.song-row,.member-row
+):hover {
+  border-color: color-mix(in srgb, var(--a) 22%, var(--ln)) !important;
+}
+html[data-theme] :where(
+  button,.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,
+  .lyrics-expand-btn,.fab,[role="button"]
+):not(:disabled):not([aria-disabled="true"]) {
+  border-radius: 12px;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, var(--token-white) 20%, transparent);
+  transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease;
+}
+html[data-theme] :where(
+  button,.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,
+  .lyrics-expand-btn,[role="button"]
+):not(:disabled):not([aria-disabled="true"]):active {
+  box-shadow: var(--dp-press) !important;
+  transform: translateY(1px);
+}
+html[data-theme] :where(.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,.lyrics-expand-btn):not(:disabled):not([aria-disabled="true"]) {
+  border: 1px solid var(--ln);
+}
+html[data-theme] :where(.icon-btn,.fav,.lyrics-expand-btn) {
+  min-width: 44px;
+  min-height: 44px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] :where(button,.btn,.icon-btn,.fav,.settings-tab,.seg button,.sw,.lyrics-expand-btn,[role="button"]) {
+    transition: none !important;
+  }
+}
