@@ -12697,3 +12697,21 @@ html[data-theme="amoled"] body[data-route="songs"] #view .songs-list:not(.setlis
   background: var(--surface-1, var(--surf-1)) !important;
   box-shadow: var(--sh, var(--shadow-2)) !important;
 }
+
+
+/* WHY: Remove the translucent backing plate behind repertoire-card action buttons; keep the buttons themselves unchanged. */
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts::before,
+html[data-theme] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card .song-acts::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
