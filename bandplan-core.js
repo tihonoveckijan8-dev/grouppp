@@ -1657,7 +1657,7 @@ function monthHTML(y, mo) {
     if (list.length) { cls.push('cal-has-events'); cls.push('cal-type-' + String(list[0].ev.type || 'other')); }
     const nearest = list.find(o => (o.ev.status || 'upcoming') === 'upcoming' && o.date >= today()) || list[0];
     const nearestStatus = nearest ? eventStatusFor(nearest.ev) : '';
-    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-act="cal-day" data-date="' + k + '">' +
+    h += '<div class="' + cls.join(' ') + '" role="gridcell" tabindex="0" aria-label="' + esc(d.getDate() + ' ' + MONF[d.getMonth()] + ', событий: ' + list.length) + '" data-event-count="' + list.length + '" data-act="cal-day" data-date="' + k + '">' +
       '<div class="cal-num">' + d.getDate() + (k === today() ? '<i class="cal-dot-today" aria-hidden="true"></i>' : '') +
       '</div>';
     if (list.length) {
