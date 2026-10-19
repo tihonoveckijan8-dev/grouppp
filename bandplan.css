@@ -13253,3 +13253,123 @@ body[data-route="settings"] #view .data-danger-row span { color: var(--muted); f
   body[data-route="settings"] #view .settings-data-page *::before,
   body[data-route="settings"] #view .settings-data-page *::after { transition-duration: 0s !important; animation-duration: 0s !important; }
 }
+
+
+/* WHY: Keep every offline setting inside its card on narrow screens; grid children and form controls must be allowed to shrink. */
+body[data-route="settings"] #view .settings-data-page,
+body[data-route="settings"] #view .settings-data-page * {
+  box-sizing: border-box;
+}
+body[data-route="settings"] #view .settings-data-page,
+body[data-route="settings"] #view .settings-data-sections,
+body[data-route="settings"] #view .data-section,
+body[data-route="settings"] #view .offline-song-settings {
+  min-width: 0;
+  max-width: 100%;
+}
+body[data-route="settings"] #view .offline-song-settings-grid {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+body[data-route="settings"] #view .offline-song-settings-grid > *,
+body[data-route="settings"] #view .offline-song-settings-grid .field,
+body[data-route="settings"] #view .offline-song-settings-grid .check {
+  min-width: 0;
+  max-width: 100%;
+}
+body[data-route="settings"] #view .offline-song-settings-grid .input,
+body[data-route="settings"] #view .offline-song-settings-grid input[type="number"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+body[data-route="settings"] #view .offline-song-settings-grid .check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+body[data-route="settings"] #view .offline-song-settings-grid .check input {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+body[data-route="settings"] #view .offline-song-settings-grid .check span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+body[data-route="settings"] #view .offline-song-settings .offline-song-storage {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+body[data-route="settings"] #view .data-section-footer {
+  min-width: 0;
+  width: 100%;
+}
+body[data-route="settings"] #view .data-section-footer .btn {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+}
+body[data-route="settings"] #view .data-danger-section {
+  border: 1px solid color-mix(in srgb, var(--danger, #dc2626) 52%, transparent);
+  background: color-mix(in srgb, var(--danger, #dc2626) 8%, var(--surface-2, var(--surf-2)));
+}
+body[data-route="settings"] #view .data-danger-section .data-section-heading h3,
+body[data-route="settings"] #view .data-danger-section .data-section-heading p,
+body[data-route="settings"] #view .data-danger-section .data-section-icon {
+  color: var(--danger, #dc2626);
+}
+body[data-route="settings"] #view .data-danger-section .data-section-icon {
+  border-color: color-mix(in srgb, var(--danger, #dc2626) 35%, var(--ln, var(--border)));
+  background: color-mix(in srgb, var(--danger, #dc2626) 12%, var(--surface-1, var(--surf-1)));
+}
+body[data-route="settings"] #view .data-danger-row {
+  min-width: 0;
+}
+body[data-route="settings"] #view .data-danger-row > div {
+  flex: 1 1 auto;
+}
+body[data-route="settings"] #view .data-danger-row .data-wipe-button {
+  flex: 0 0 auto;
+  min-width: 220px;
+  min-height: 46px;
+  justify-content: center;
+  padding-inline: 24px;
+  white-space: nowrap;
+  background: var(--danger, #dc2626);
+  border-color: var(--danger, #dc2626);
+  color: #fff;
+}
+body[data-route="settings"] #view .data-danger-row .data-wipe-button:hover {
+  filter: brightness(.94);
+}
+@media (max-width: 760px) {
+  body[data-route="settings"] #view .offline-song-settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body[data-route="settings"] #view .data-danger-row {
+    align-items: stretch;
+  }
+  body[data-route="settings"] #view .data-danger-row .data-wipe-button {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+}
+@media (max-width: 420px) {
+  body[data-route="settings"] #view .settings-data-page {
+    width: 100%;
+    overflow: hidden;
+  }
+  body[data-route="settings"] #view .data-section-footer {
+    flex-direction: column;
+  }
+  body[data-route="settings"] #view .data-section-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
