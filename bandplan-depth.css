@@ -1376,3 +1376,31 @@ html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2p
   }
 }
 @media (prefers-reduced-motion: reduce) { html body[data-route="calendar"] .band-overview-popover { animation: none !important; } }
+
+
+/* Desktop only: keep the event browser above surrounding calendar content without applying clay depth to its text or controls. */
+@media (min-width: 900px) {
+  html body[data-route="calendar"] .band-overview {
+    position: relative;
+    z-index: auto;
+    overflow: visible !important;
+  }
+  html body[data-route="calendar"] .band-overview.has-event-popover {
+    z-index: 10000;
+  }
+  html body[data-route="calendar"] .band-overview-popover {
+    z-index: 10001;
+    background: var(--surface-1, var(--surf-1));
+    border: 1px solid var(--ln, var(--border));
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
+  }
+  html body[data-route="calendar"] .band-overview-popover :where(h3, p, span, .band-overview-popover-count, .band-overview-popover-notes) {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transform: none;
+  }
+  html body[data-route="calendar"] .band-overview-popover :where(button, .badge) {
+    box-shadow: none;
+  }
+}
