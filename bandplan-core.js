@@ -1382,7 +1382,7 @@ function buildChrome() {
   $('#sideNav').innerHTML = TABS.map(n =>
     '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 19) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
-  $('#botNav').innerHTML = TABS.map(n =>
+  $('#botNav').innerHTML = '<span class="bottom-nav-indicator" aria-hidden="true"></span>' + TABS.map(n =>
     '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 21) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
 
@@ -1403,7 +1403,19 @@ function buildChrome() {
   $('[data-act="scene-fs"]').innerHTML = ic('fs', 19);
   $('[data-act="scene-auto"]').innerHTML = ic(scene.auto ? 'pause' : 'play', 19);
 }
-function updateNav(k) { $$('[data-nav]').forEach(a => a.classList.toggle('active', a.getAttribute('data-nav') === k)); }
+function updateNav(k) {
+  $('[data-nav]').forEach(a => a.classList.toggle('active', a.getAttribute('data-nav') === k));
+  /* WHY: One shared indicator slides between bottom tabs instead of each tab painting its own background. */
+  const nav = $('#botNav'), active = nav && nav.querySelector('[data-nav].active'), indicator = nav && nav.querySelector('.bottom-nav-indicator');
+  if (nav && active && indicator) {
+    const place = () => {
+      const navRect = nav.getBoundingClientRect(), tabRect = active.getBoundingClientRect();
+      indicator.style.width = tabRect.width + 'px';
+      indicator.style.transform = 'translateX(' + (tabRect.left - navRect.left) + 'px)';
+    };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(place); else place();
+  }
+}
 
 /* ═══ 10. RENDER ROOT + STATES ═══ */
 function stateHTML(kind, title, text, actions) {
