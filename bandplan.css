@@ -13004,3 +13004,10 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+
+/* Hide the in-content top titles on Repertoire and Setlists pages as requested. */
+#app #view .songs-head-row,
+#app #view .setlists-head-row {
+  display: none !important;
+}
