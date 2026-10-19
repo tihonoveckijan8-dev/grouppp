@@ -199,7 +199,8 @@ function navIc(n, size) {
     calendar: '<rect x="3.5" y="5.5" width="17" height="15" rx="2.8"/><path d="M8 3.5v4M16 3.5v4M3.5 10h17"/><circle cx="8" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r=".8" fill="currentColor" stroke="none"/><path d="M8 17h3"/>',
     music: '<path d="M14 17.5V5l7-1.5v12"/><path d="M14 8.2 21 6.7"/><ellipse cx="10" cy="18" rx="4" ry="2.7" transform="rotate(-18 10 18)"/><ellipse cx="17" cy="16" rx="3.5" ry="2.5" transform="rotate(-18 17 16)"/>',
     list: '<path d="M9 5.5h11M9 11.5h11M9 17.5h11"/><rect x="3.5" y="4" width="3" height="3" rx=".8"/><path d="m4.2 11.5.9.9 1.7-1.9"/><path d="M4 17.5h2"/>',
-    gear: '<path d="m10 3.8 4-.1.8 2.2 2 .9 2.1-1 2 3.4-1.5 1.7v2.2l1.5 1.7-2 3.4-2.1-1-2 .9-.8 2.2h-4l-.8-2.2-2-.9-2.1 1-2-3.4 1.5-1.7v-2.2L3.1 9.2l2-3.4 2.1 1 2-.9z"/><circle cx="12" cy="12" r="3"/>'
+    gear: '<path d="m10 3.8 4-.1.8 2.2 2 .9 2.1-1 2 3.4-1.5 1.7v2.2l1.5 1.7-2 3.4-2.1-1-2 .9-.8 2.2h-4l-.8-2.2-2-.9-2.1 1-2-3.4 1.5-1.7v-2.2L3.1 9.2l2-3.4 2.1 1 2-.9z"/><circle cx="12" cy="12" r="3"/>',
+    tools: '<path d="M4 7.5h5M15 7.5h5M9 7.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M4 16.5h2M12 16.5h8M6 16.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M12 3v1M18 20v1"/>'
   };
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" class="nav-icon-clay" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" focusable="false" aria-hidden="true">' + (paths[n] || '') + '</svg>';
 }
@@ -1321,7 +1322,7 @@ const TABS = [
   { k: 'calendar', t: 'Календарь', i: 'calendar', h: '#/calendar' },
   { k: 'songs', t: 'Песни', i: 'music', h: '#/songs' },
   { k: 'setlists', t: 'Сет-листы', i: 'list', h: '#/setlists' },
-  { k: 'tools', t: 'Инструменты', i: 'sliders', h: '#/tools' },
+  { k: 'tools', t: 'Инструменты', i: 'tools', h: '#/tools' },
   { k: 'settings', t: 'Настройки', i: 'gear', h: '#/settings' }
 ];
 const HEADERS = {
@@ -1544,14 +1545,24 @@ let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame =
 const TOOL_TABS = [
   ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
 ];
+function toolTabIcon(id) {
+  const glyphs = {
+    'guitar-tuner': '<path d="M5 4 19 20M8 7l-3 3m6 0-3 3m6 0-3 3m6-2 2-2"/><circle cx="16.5" cy="7.5" r="3.5"/>',
+    'violin-tuner': '<path d="M9 3c2 2 2 4 0 6l-2 2c-2 2-2 4 0 6l3 3c2 2 4 1 5-1l2-3c1-2 0-4-2-5l-2-1"/><path d="m8 8 8 8M12 5l3 3M6 14l3 3"/>',
+    metronome: '<path d="M8 21 11 4h2l3 17Z"/><path d="m12 14 5-7M9 17h6"/><circle cx="17" cy="7" r="1.5"/>',
+    'guitar-chords': '<path d="M6 3v18M10 3v18M14 3v18M18 3v18M3 7h18M3 11h18M3 15h18M3 19h18"/><circle cx="10" cy="11" r="1.4" fill="currentColor"/><circle cx="14" cy="15" r="1.4" fill="currentColor"/>',
+    'piano-chords': '<path d="M3 5h18v14H3zM7 5v8M11 5v8M15 5v8M19 5v8"/><path d="M5 5v6M9 5v6M17 5v6" stroke-width="2.8"/>'
+  };
+  return '<svg class="tool-tab-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(glyphs[id]||'')+'</svg>';
+}
 function vTools() {
   const tab = TOOL_TABS.some(x => x[0] === toolTab) ? toolTab : 'guitar-tuner';
-  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'">'+esc(label)+'</button>').join('') + '</div>';
+  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'">'+toolTabIcon(id)+'<span>'+esc(label)+'</span></button>').join('') + '</div>';
   let body = '';
   if (tab === 'guitar-tuner' || tab === 'violin-tuner') body = tunerHTML(tab);
   else if (tab === 'metronome') body = metroHTML();
   else body = chordLibraryHTML(tab);
-  return '<section class="tools-page">'+tabs+'<div class="tools-panel">'+body+'</div></section>';
+  return '<section class="tools-page"><header class="tools-hero"><div class="tools-hero-mark">'+navIc('tools',30)+'</div><div class="tools-hero-copy"><div class="tools-hero-kicker">BANDPLAN · MUSIC LAB</div><h2>Инструменты музыканта</h2><p>Настройка, ритм и аккорды — всё для репетиции в одном месте.</p></div><div class="tools-hero-badges"><span class="tools-badge"><i></i>Работают в браузере</span><span class="tools-badge tools-badge-muted">Аудио остаётся на устройстве</span></div></header>'+tabs+'<div class="tools-panel">'+body+'</div></section>';
 }
 function tunerHTML(tab) {
   const violin = tab === 'violin-tuner';
