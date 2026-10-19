@@ -264,6 +264,70 @@ try {
   assert.ok(lyricLayout.lineScrollWidth <= lyricLayout.lineWidth + 1, 'Long unbroken lyric line overflows its line box');
   assert.equal(lyricLayout.horizontalDocumentOverflow, false, 'Mobile lyric fixture causes horizontal page overflow');
 
+  // WHY: validate the shared responsive card rules with real browser layout, not only CSS source matching.
+  const compactCards = await page.evaluate(() => {
+    const previousRoute = document.body.dataset.route;
+    document.body.dataset.route = 'setlists';
+    const host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:0;top:0;width:calc(100vw - 24px);max-width:366px;visibility:hidden;pointer-events:none;overflow:hidden';
+    host.innerHTML = '<article class="setlist-card"><div class="setlist-name"></div><div class="event-actions"><button class="btn">Длинное действие</button><button class="btn">Ещё одно действие</button></div></article><article class="event-card"><div class="ev-name"></div><div class="event-actions"><button class="btn">Участвую</button><button class="btn">Под вопросом</button><button class="btn">Не участвую</button></div></article>';
+    host.querySelector('.setlist-name').textContent = 'ОченьДлинноеНазваниеСетЛистаБезПробелов'.repeat(3);
+    host.querySelector('.ev-name').textContent = 'ОченьДлинноеНазваниеСобытияБезПробелов'.repeat(3);
+    document.body.append(host);
+    const cards = [...host.querySelectorAll('.setlist-card,.event-card')].map(card => ({
+      width: card.getBoundingClientRect().width,
+      scrollWidth: card.scrollWidth,
+      title: card.querySelector('.setlist-name,.ev-name'),
+      actions: card.querySelector('.event-actions')
+    })).map(card => ({
+      width: card.width,
+      scrollWidth: card.scrollWidth,
+      titleWidth: card.title.getBoundingClientRect().width,
+      titleScrollWidth: card.title.scrollWidth,
+      actionsWidth: card.actions.getBoundingClientRect().width,
+      actionsScrollWidth: card.actions.scrollWidth
+    }));
+    host.remove();
+    document.body.dataset.route = previousRoute || 'calendar';
+    return {cards, documentOverflow: document.documentElement.scrollWidth > innerWidth + 1};
+  });
+  assert.equal(compactCards.documentOverflow, false, 'Long card titles cause horizontal page overflow on mobile');
+  compactCards.cards.forEach((card, index) => {
+    assert.ok(card.width <= 366, `Card ${index} exceeds compact mobile width`);
+    assert.ok(card.scrollWidth <= card.width + 1, `Card ${index} content overflows its card`);
+    assert.ok(card.titleWidth <= card.width + 1, `Card ${index} title exceeds its container`);
+    assert.ok(card.actionsWidth <= card.width + 1, `Card ${index} action row exceeds its container`);
+  });
+
+  // WHY: scene mode must wrap long lyrics too; it uses a separate DOM surface from the song editor.
+  const sceneLayout = await page.evaluate(() => {
+    const scene = document.querySelector('#scene');
+    const body = document.querySelector('#scBody');
+    const oldSceneClass = scene.className;
+    const oldHidden = scene.getAttribute('aria-hidden');
+    const oldBody = body.innerHTML;
+    scene.classList.add('on');
+    scene.setAttribute('aria-hidden', 'false');
+    body.innerHTML = '<span class="ln"></span>';
+    body.firstElementChild.textContent = 'СценическаяСтрокаБезПробелов'.repeat(20);
+    const line = body.firstElementChild;
+    const result = {
+      width: body.getBoundingClientRect().width,
+      scrollWidth: body.scrollWidth,
+      lineWidth: line.getBoundingClientRect().width,
+      lineScrollWidth: line.scrollWidth,
+      whiteSpace: getComputedStyle(body).whiteSpace,
+      overflowWrap: getComputedStyle(line).overflowWrap
+    };
+    scene.className = oldSceneClass;
+    if (oldHidden === null) scene.removeAttribute('aria-hidden'); else scene.setAttribute('aria-hidden', oldHidden);
+    body.innerHTML = oldBody;
+    return result;
+  });
+  assert.equal(sceneLayout.whiteSpace, 'pre-wrap', 'Stage mode must preserve line breaks while wrapping');
+  assert.ok(sceneLayout.lineScrollWidth <= sceneLayout.lineWidth + 1, 'Long stage-mode lyric line overflows its line box');
+  assert.ok(sceneLayout.scrollWidth <= sceneLayout.width + 1, 'Stage-mode lyrics overflow horizontally');
+
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
     glassTheme: !!document.querySelector('[data-theme="glass"]'),
