@@ -1599,7 +1599,7 @@ function enhanceChordLibrary() {
       else if (fret === '0') fingers.push([stringNo, 0]);
       else fingers.push([stringNo, Number(fret), String(chord.fingers[index] || '')]);
     });
-    new api.SVGuitarChord(current).configure({
+    new api.SVGuitarChord('#bpChordDiagram').configure({
       strings: 6, frets: 5, position: pos,
       color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#222',
       backgroundColor: 'transparent', strokeWidth: 1.5
