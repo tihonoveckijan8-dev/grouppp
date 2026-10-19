@@ -13471,3 +13471,65 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     -webkit-overflow-scrolling: touch;
   }
 }
+
+
+/* Musician tools — responsive, theme-token based, no external runtime dependencies. */
+@layer screens {
+  .tools-page{display:grid;gap:18px;min-width:0}
+  .tools-tabs{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;padding:4px 2px 8px;scrollbar-width:thin}
+  .tools-tab{flex:0 0 auto;min-height:42px;padding:10px 15px;border:1px solid var(--border);border-radius:14px;background:var(--surf-2);color:var(--text-2);font-size:13px;font-weight:700;transition:background .18s,border-color .18s,transform .18s}
+  .tools-tab.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast)}
+  .tools-panel{min-width:0;padding:clamp(16px,3vw,30px);border:1px solid var(--border);border-radius:24px;background:var(--surf-1);box-shadow:var(--shadow-card,0 8px 28px rgba(15,23,42,.05))}
+  .tools-panel h2{font-size:clamp(23px,3vw,32px);letter-spacing:-.035em;margin:4px 0 6px}
+  .tool-eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+  .tool-subtitle{color:var(--muted);font-size:14px;line-height:1.6;max-width:620px;margin-bottom:22px}
+  .tuner-readout,.metro-display{display:grid;justify-items:center;text-align:center;padding:20px 12px 24px;border-radius:20px;background:var(--surf-3);border:1px solid var(--border)}
+  .tuner-note{font-size:clamp(52px,10vw,84px);font-weight:800;letter-spacing:-.06em;line-height:1.1}
+  .tuner-frequency{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;margin-top:4px}
+  .tuner-meter{position:relative;width:min(100%,520px);height:12px;border-radius:999px;background:linear-gradient(90deg,var(--danger-bg),var(--warn-bg) 36%,var(--ok-bg) 48%,var(--ok-bg) 52%,var(--warn-bg) 64%,var(--danger-bg));margin-top:25px}
+  .tuner-meter:after{content:"";position:absolute;left:50%;top:-4px;height:20px;width:2px;background:var(--text);opacity:.65}
+  .tuner-meter i{position:absolute;left:50%;top:-5px;width:4px;height:22px;border-radius:4px;background:var(--accent);transform:translateX(-50%);transition:left .08s linear}
+  .tuner-meter-labels{width:min(100%,520px);display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:7px}
+  .tuner-cents{font-size:13px;font-weight:800;margin-top:12px;font-variant-numeric:tabular-nums}
+  .tuner-strings{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:16px 0}
+  .tuner-string{display:grid;justify-items:center;gap:3px;min-width:0;padding:12px 4px;border:1px solid var(--border);border-radius:14px;background:var(--surf-2)}
+  .tuner-string b{font-size:20px}.tuner-string span,.tuner-string small{font-size:11px;color:var(--muted)}.tuner-string small{font-variant-numeric:tabular-nums}
+  .tool-actions{display:flex;flex-wrap:wrap;gap:8px}.tool-actions button{min-height:44px}.tool-status{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+  .metro-bpm{font-size:clamp(60px,11vw,92px);font-weight:800;letter-spacing:-.07em;line-height:1.1;font-variant-numeric:tabular-nums}
+  .metro-unit{font-size:13px;color:var(--muted);margin-top:4px}
+  .metro-pulse{width:18px;height:18px;margin-top:18px;border-radius:50%;background:var(--border-2);transition:transform .08s,background .08s}
+  .metro-pulse.on{background:var(--accent);transform:scale(1.45);box-shadow:0 0 0 8px color-mix(in srgb,var(--accent) 14%,transparent)}
+  .metro-controls{display:grid;grid-template-columns:auto minmax(80px,1fr) auto;align-items:center;gap:12px;margin:18px 0}
+  .metro-controls input{width:100%;accent-color:var(--accent)}
+  .metro-presets{display:flex;flex-wrap:wrap;gap:7px}.metro-presets .btn{min-height:38px;padding-inline:14px}
+  .metro-options{display:flex;gap:14px;flex-wrap:wrap;margin:20px 0}
+  .metro-options label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:700}
+  .metro-options select{min-width:145px;min-height:42px;border:1px solid var(--border);border-radius:12px;background:var(--surf-2);padding:8px 12px;color:var(--text)}
+  .metro-start{min-height:48px;min-width:180px}
+  .chord-picker{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 22px}
+  .chord-pick{min-width:48px;min-height:42px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surf-2);font-weight:800}
+  .chord-pick.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast)}
+  .chord-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,280px);gap:24px;align-items:center;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--surf-3)}
+  .chord-detail h3{font-size:42px;letter-spacing:-.05em}.chord-detail p{margin-top:8px;color:var(--text-2);font-size:14px}
+  .guitar-diagram{min-width:0;max-width:260px;width:100%;justify-self:center}.guitar-fret-labels{display:flex;justify-content:space-around;font-size:11px;color:var(--muted);margin-bottom:6px}
+  .guitar-strings{display:grid;grid-template-columns:repeat(6,1fr);gap:0;min-height:140px;border-top:2px solid var(--border-2);border-bottom:1px solid var(--border-2);background:repeating-linear-gradient(to bottom,transparent 0,transparent 26px,var(--border) 27px,var(--border) 28px)}
+  .guitar-string{position:relative;display:grid;grid-template-rows:repeat(5,1fr);justify-items:center;border-left:1px solid var(--border-2)}
+  .guitar-string:last-child{border-right:1px solid var(--border-2)}
+  .guitar-open{position:absolute;top:-22px;font-size:15px;color:var(--muted)}
+  .guitar-dot{z-index:1;align-self:center;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-contrast);font-size:11px;font-weight:800}
+  .guitar-diagram>small{display:block;text-align:center;color:var(--muted);font-size:10px;margin-top:12px}
+  .piano-diagram{min-width:0;width:100%}.piano-keys{height:150px;position:relative;display:flex;border:1px solid var(--border-2);border-radius:0 0 8px 8px;overflow:hidden;background:var(--surf-2)}
+  .piano-white-key{position:relative;display:flex;align-items:flex-end;justify-content:center;flex:1;border-right:1px solid var(--border-2);padding-bottom:8px;background:var(--surf-2);font-size:11px;color:var(--muted)}
+  .piano-white-key.chord-note{background:color-mix(in srgb,var(--accent) 22%,var(--surf-2));color:var(--text);font-weight:800}
+  .piano-black-key{position:absolute;top:0;height:60%;width:9%;display:flex;justify-content:center;align-items:flex-end;padding-bottom:5px;border-radius:0 0 4px 4px;background:var(--text);color:var(--inverse);font-size:9px;z-index:2}
+  .piano-black-key.chord-note{background:var(--accent);color:var(--accent-contrast)}
+  .piano-diagram>p{font-size:11px;color:var(--muted);margin-top:10px}
+  @media(max-width:600px){
+    .tools-panel{padding:15px;border-radius:18px}.tools-tab{padding:9px 12px;font-size:12px}
+    .tuner-strings{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .chord-detail{grid-template-columns:minmax(0,1fr);padding:16px;gap:20px}
+    .guitar-diagram{margin-top:12px}
+    .metro-controls{gap:7px}.metro-controls .btn{padding:8px 10px}
+  }
+  @media(prefers-reduced-motion:reduce){.tools-tab,.tuner-meter i,.metro-pulse{transition:none}}
+}
