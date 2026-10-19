@@ -65,7 +65,8 @@ document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setA
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" href="vendor/supabase.min.js" as="script">
 
-<link rel="modulepreload" href="bandplan-core.js">
+<!-- WHY: preload the same URL as the dynamic import to avoid fetching the large core twice while authentication initializes. -->
+<link rel="modulepreload" href="bandplan-core.js?v=20261019-yin-tuner-startup-v1">
 
 </head>
 <body data-route="calendar">
