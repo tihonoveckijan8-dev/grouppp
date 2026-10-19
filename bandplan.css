@@ -12587,18 +12587,18 @@ body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
   border: 1px solid var(--border);
   background: linear-gradient(145deg, var(--surf-1), color-mix(in srgb, var(--surf-1) 94%, var(--accent) 6%));
   box-shadow:
-    5px 5px 12px color-mix(in srgb, var(--shadow, #000) 8%, transparent),
-    -3px -3px 9px color-mix(in srgb, var(--surface-2, #fff) 48%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--surface-2, #fff) 52%, transparent);
+    5px 5px 12px color-mix(in srgb, var(--shadow, var(--token-black)) 8%, transparent),
+    -3px -3px 9px color-mix(in srgb, var(--surface-2, var(--token-white)) 48%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--surface-2, var(--token-white)) 52%, transparent);
   transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
 }
 body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hover {
   transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
   box-shadow:
-    7px 8px 16px color-mix(in srgb, var(--shadow, #000) 10%, transparent),
-    -3px -3px 9px color-mix(in srgb, var(--surface-2, #fff) 42%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--surface-2, #fff) 56%, transparent);
+    7px 8px 16px color-mix(in srgb, var(--shadow, var(--token-black)) 10%, transparent),
+    -3px -3px 9px color-mix(in srgb, var(--surface-2, var(--token-white)) 42%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--surface-2, var(--token-white)) 56%, transparent);
 }
 @media (prefers-reduced-motion: reduce) {
   body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
@@ -12611,37 +12611,37 @@ body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hove
 
 /* WHY: Make the restored song-card clay depth visibly distinct while preserving its original layout. */
 body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
-  background: var(--surf-1, #fff) !important;
+  background: var(--surf-1, var(--token-white)) !important;
   border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border)) !important;
   border-radius: 18px !important;
   box-shadow:
-    9px 10px 20px rgba(25, 35, 55, .12),
-    -5px -5px 12px rgba(255, 255, 255, .78),
-    inset 0 1px 0 rgba(255, 255, 255, .92) !important;
+    9px 10px 20px color-mix(in srgb, var(--token-black) 12%, transparent),
+    -5px -5px 12px color-mix(in srgb, var(--token-white) 78%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 92%, transparent) !important;
   transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease !important;
 }
 html[data-theme="dark"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card,
 html[data-theme="amoled"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card {
-  background: var(--surf-1, #171923) !important;
+  background: var(--surf-1, var(--bg-deep)) !important;
   box-shadow:
-    8px 9px 20px rgba(0, 0, 0, .34),
-    -4px -4px 10px rgba(255, 255, 255, .035),
-    inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+    8px 9px 20px color-mix(in srgb, var(--token-black) 34%, transparent),
+    -4px -4px 10px color-mix(in srgb, var(--token-white) 3.5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 7%, transparent) !important;
 }
 body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hover {
   transform: translateY(-2px) !important;
   border-color: color-mix(in srgb, var(--accent) 30%, var(--border)) !important;
   box-shadow:
-    12px 14px 26px rgba(25, 35, 55, .16),
-    -5px -5px 12px rgba(255, 255, 255, .82),
-    inset 0 1px 0 rgba(255, 255, 255, .96) !important;
+    12px 14px 26px color-mix(in srgb, var(--token-black) 16%, transparent),
+    -5px -5px 12px color-mix(in srgb, var(--token-white) 82%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 96%, transparent) !important;
 }
 html[data-theme="dark"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hover,
 html[data-theme="amoled"] body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card:hover {
   box-shadow:
-    11px 13px 25px rgba(0, 0, 0, .44),
-    -4px -4px 10px rgba(255, 255, 255, .045),
-    inset 0 1px 0 rgba(255, 255, 255, .085) !important;
+    11px 13px 25px color-mix(in srgb, var(--token-black) 44%, transparent),
+    -4px -4px 10px color-mix(in srgb, var(--token-white) 4.5%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--token-white) 8.5%, transparent) !important;
 }
 @media (prefers-reduced-motion: reduce) {
   body[data-route="songs"] #view .songs-list:not(.setlists-list) > .song-card { transition: none !important; }
@@ -13221,17 +13221,17 @@ body[data-route="settings"] #view .offline-song-settings .offline-song-storage {
 }
 body[data-route="settings"] #view .data-danger-section {
   grid-column: 1 / -1;
-  border-color: color-mix(in srgb, var(--danger, #d94848) 35%, var(--ln, var(--border)));
-  background: color-mix(in srgb, var(--danger, #d94848) 4%, var(--surface-2, var(--surf-2)));
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--ln, var(--border)));
+  background: color-mix(in srgb, var(--danger) 4%, var(--surface-2, var(--surf-2)));
 }
-body[data-route="settings"] #view .data-danger-section .data-section-icon { color: var(--danger, #d94848); }
+body[data-route="settings"] #view .data-danger-section .data-section-icon { color: var(--danger); }
 body[data-route="settings"] #view .data-danger-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding-top: 14px;
-  border-top: 1px solid color-mix(in srgb, var(--danger, #d94848) 20%, var(--ln, var(--border)));
+  border-top: 1px solid color-mix(in srgb, var(--danger) 20%, var(--ln, var(--border)));
 }
 body[data-route="settings"] #view .data-danger-row > div {
   display: flex;
@@ -13324,17 +13324,17 @@ body[data-route="settings"] #view .data-section-footer .btn {
   white-space: normal;
 }
 body[data-route="settings"] #view .data-danger-section {
-  border: 1px solid color-mix(in srgb, var(--danger, #dc2626) 52%, transparent);
-  background: color-mix(in srgb, var(--danger, #dc2626) 8%, var(--surface-2, var(--surf-2)));
+  border: 1px solid color-mix(in srgb, var(--danger) 52%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface-2, var(--surf-2)));
 }
 body[data-route="settings"] #view .data-danger-section .data-section-heading h3,
 body[data-route="settings"] #view .data-danger-section .data-section-heading p,
 body[data-route="settings"] #view .data-danger-section .data-section-icon {
-  color: var(--danger, #dc2626);
+  color: var(--danger);
 }
 body[data-route="settings"] #view .data-danger-section .data-section-icon {
-  border-color: color-mix(in srgb, var(--danger, #dc2626) 35%, var(--ln, var(--border)));
-  background: color-mix(in srgb, var(--danger, #dc2626) 12%, var(--surface-1, var(--surf-1)));
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--ln, var(--border)));
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface-1, var(--surf-1)));
 }
 body[data-route="settings"] #view .data-danger-row {
   min-width: 0;
@@ -13349,9 +13349,9 @@ body[data-route="settings"] #view .data-danger-row .data-wipe-button {
   justify-content: center;
   padding-inline: 24px;
   white-space: nowrap;
-  background: var(--danger, #dc2626);
-  border-color: var(--danger, #dc2626);
-  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--token-white);
 }
 body[data-route="settings"] #view .data-danger-row .data-wipe-button:hover {
   filter: brightness(.94);
