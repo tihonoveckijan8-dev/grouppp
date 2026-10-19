@@ -328,6 +328,46 @@ try {
   assert.ok(sceneLayout.lineScrollWidth <= sceneLayout.lineWidth + 1, 'Long stage-mode lyric line overflows its line box');
   assert.ok(sceneLayout.scrollWidth <= sceneLayout.width + 1, 'Stage-mode lyrics overflow horizontally');
 
+  // WHY: the calendar's event actions need to remain reachable on narrow screens with realistic long event names.
+  await page.setViewportSize({width: 390, height: 844});
+  const calendarLayout = await page.evaluate(() => {
+    const previousRoute = document.body.dataset.route;
+    document.body.dataset.route = 'calendar';
+    const host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:0;top:0;width:calc(100vw - 24px);max-width:366px;visibility:hidden;pointer-events:none;overflow:hidden';
+    host.innerHTML = '<article class="event-card"><div class="ev-name"></div><div class="event-actions"><button class="btn" type="button">✓</button><button class="btn" type="button">?</button><button class="btn" type="button">×</button></div></article>';
+    host.querySelector('.ev-name').textContent = 'ДлинноеНазваниеРепетицииИлиКонцертаБезПробелов'.repeat(3);
+    document.body.append(host);
+    const card = host.querySelector('.event-card');
+    const title = card.querySelector('.ev-name');
+    const actions = card.querySelector('.event-actions');
+    const buttons = [...actions.querySelectorAll('button')];
+    const result = {
+      viewport: innerWidth,
+      hostWidth: host.getBoundingClientRect().width,
+      cardWidth: card.getBoundingClientRect().width,
+      cardScrollWidth: card.scrollWidth,
+      titleWidth: title.getBoundingClientRect().width,
+      titleScrollWidth: title.scrollWidth,
+      titleOverflowWrap: getComputedStyle(title).overflowWrap,
+      actionWidth: actions.getBoundingClientRect().width,
+      actionScrollWidth: actions.scrollWidth,
+      buttons: buttons.map(button => ({width: button.getBoundingClientRect().width, height: button.getBoundingClientRect().height})),
+      documentOverflow: document.documentElement.scrollWidth > innerWidth + 1
+    };
+    host.remove();
+    document.body.dataset.route = previousRoute || 'calendar';
+    return result;
+  });
+  assert.ok(calendarLayout.hostWidth <= 366, 'Calendar fixture exceeds available phone width');
+  assert.ok(calendarLayout.cardWidth <= calendarLayout.hostWidth + 1, 'Calendar event card exceeds its container');
+  assert.ok(calendarLayout.cardScrollWidth <= calendarLayout.cardWidth + 1, 'Calendar event content overflows its card');
+  assert.ok(calendarLayout.titleWidth <= calendarLayout.cardWidth + 1, 'Calendar event title exceeds its card');
+  assert.equal(calendarLayout.titleOverflowWrap, 'anywhere', 'Long calendar event names must wrap');
+  assert.ok(calendarLayout.actionWidth <= calendarLayout.cardWidth + 1, 'Calendar participation actions exceed event card');
+  assert.ok(calendarLayout.buttons.every(button => button.width >= 24 && button.height >= 24), 'Calendar participation controls are too small to interact with');
+  assert.equal(calendarLayout.documentOverflow, false, 'Calendar event fixture causes horizontal page overflow');
+
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
     glassTheme: !!document.querySelector('[data-theme="glass"]'),
