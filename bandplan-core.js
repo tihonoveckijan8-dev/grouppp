@@ -1534,89 +1534,18 @@ function renderViewOnly() {
     // scroll the calendar time-grid back to "now".
     if (r.name === 'setlist' && r.id) bindDnD(r.id);
     if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
-    if (r.name === 'tools' && (toolTab === 'guitar-chords' || toolTab === 'piano-chords')) enhanceChordLibrary();
+
     scheduleOfflineSongSync(1400);
   } catch (err) {
     console.warn('BandPlan partial view render failed:', err);
     render();
   }
 }
-let bpSvguitarPromise = null, bpPianoChartPromise = null, bpPianoChartInstance = null;
-function loadSvguitar() {
-  if (window.svguitar?.SVGuitarChord) return Promise.resolve(window.svguitar);
-  if (bpSvguitarPromise) return bpSvguitarPromise;
-  bpSvguitarPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = 'https://omnibrain.github.io/svguitar/js/svguitar.umd.js';
-    script.async = true;
-    script.onload = () => window.svguitar?.SVGuitarChord ? resolve(window.svguitar) : reject(new Error('SVGuitar API unavailable'));
-    script.onerror = () => reject(new Error('SVGuitar could not load'));
-    document.head.appendChild(script);
-  });
-  return bpSvguitarPromise;
-}
-function loadPianoChart() {
-  if (bpPianoChartPromise) return bpPianoChartPromise;
-  bpPianoChartPromise = import('https://cdn.jsdelivr.net/npm/piano-chart@1.5.0/+esm').then(mod => {
-    if (!mod.Instrument) throw new Error('piano-chart API unavailable');
-    return mod;
-  });
-  return bpPianoChartPromise;
-}
-function enhanceChordLibrary() {
-  const host = $('#bpChordDiagram');
-  if (!host) return;
-  const chordName = host.getAttribute('data-chord') || 'C';
-  const chord = CHORDS[chordName];
-  if (!chord) return;
-  const piano = host.getAttribute('data-instrument') === 'piano';
-  const setStatus = message => { const node = $('#chordLibraryStatus'); if (node) node.textContent = message; };
-  (piano ? loadPianoChart() : loadSvguitar()).then(api => {
-    const current = $('#bpChordDiagram');
-    if (!current || current.getAttribute('data-chord') !== chordName || (current.getAttribute('data-instrument') === 'piano') !== piano) return;
-    current.replaceChildren();
-    if (piano) {
-      if (bpPianoChartInstance?.destroy) bpPianoChartInstance.destroy();
-      const root = chordName.match(/^[A-G](?:#|b)?/)?.[0] || 'C';
-      const enharmonic = {Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
-      const highlighted = chord.notes.map(note => enharmonic[note] || note);
-      bpPianoChartInstance = new api.Instrument(current, {
-        startOctave: 3, endOctave: 5, highlightedNotes: highlighted,
-        specialHighlightedNotes: [{note: enharmonic[root] || root}],
-        showNoteNames: 'onhighlight', keyPressStyle: 'subtle'
-      });
-      bpPianoChartInstance.create();
-      // WHY: piano-chart deliberately leaves mouse-note state under application control, so route touch/mouse events back through its public key methods.
-      bpPianoChartInstance.addKeyMouseDownListener(note => bpPianoChartInstance?.keyDown(note));
-      bpPianoChartInstance.addKeyMouseUpListener(note => bpPianoChartInstance?.keyUp(note));
-      setStatus('Визуализация piano-chart · нажимайте клавиши для выделения нот.');
-      return;
-    }
-    const frets = chord.guitar.split('');
-    const played = frets.filter(v => v !== 'x' && v !== '0').map(Number).filter(Number.isFinite);
-    const pos = played.length ? Math.max(1, Math.min(...played)) : 1;
-    const fingers = [];
-    frets.forEach((fret, index) => {
-      const stringNo = 6 - index;
-      if (fret === 'x') fingers.push([stringNo, 'x']);
-      else if (fret === '0') fingers.push([stringNo, 0]);
-      else fingers.push([stringNo, Number(fret), String(chord.fingers[index] || '')]);
-    });
-    new api.SVGuitarChord('#bpChordDiagram').configure({
-      strings: 6, frets: 5, position: pos,
-      color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#222',
-      backgroundColor: 'transparent', strokeWidth: 1.5
-    }).chord({title: chordName, fingers, position: pos}).draw();
-    setStatus('Аппликатура SVGuitar · расширенная библиотека аккордов.');
-  }).catch(() => {
-    setStatus(navigator.onLine === false ? 'Офлайн-режим: используется встроенная схема аккорда.' : 'Используется встроенная схема аккорда.');
-  });
-}
 function afterRender(r) {
   if (r.name === 'setlist' && r.id) bindDnD(r.id);
   if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
   if (r.name === 'calendar') scrollTimeGrid();
-  if (r.name === 'tools' && (toolTab === 'guitar-chords' || toolTab === 'piano-chords')) enhanceChordLibrary();
+
 }
 function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new Date(); sc.scrollTop = clamp((n.getHours() - 8) * 48, 0, 800); } }
 
@@ -1668,18 +1597,60 @@ function chordLibraryHTML(tab) {
   const piano = tab === 'piano-chords';
   const names = chordNames();
   const selected = CHORDS[window.__bpSelectedChord] ? window.__bpSelectedChord : 'C';
-  return '<div class="tool-eyebrow">СПРАВОЧНИК</div><h2>'+(piano?'Библиотека аккордов · пианино':'Библиотека аккордов · гитара')+'</h2><p class="tool-subtitle">Выберите аккорд, чтобы посмотреть состав и аппликатуру. Библиотека включает базовые и расширенные формы.</p><div class="chord-picker">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div><h3>'+selected+'</h3><p>Ноты: '+CHORDS[selected].notes.join(' · ')+'</p><p class="tool-status">'+(piano?'Подсвечены ноты аккорда на клавиатуре.':'Аппликатура построена на SVGuitar. Номера пальцев: 1 — указательный, 2 — средний, 3 — безымянный, 4 — мизинец.')+'</p><p class="chord-lib-note" id="chordLibraryStatus" aria-live="polite">Загружается визуализация…</p></div><div id="bpChordDiagram" class="chord-lib-canvas" data-instrument="'+(piano?'piano':'guitar')+'" data-chord="'+selected+'">'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div></div>';
+  return '<div class="tool-eyebrow">СПРАВОЧНИК АККОРДОВ</div><h2>'+(piano?'Аккорды для пианино':'Аккорды для гитары')+'</h2><p class="tool-subtitle">Выберите аккорд — схема строится прямо в BandPlan и работает без сторонних библиотек.</p><div class="chord-picker" aria-label="Выбор аккорда">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div class="chord-detail-copy"><div class="chord-selected-label">ВЫБРАННЫЙ АККОРД</div><h3>'+selected+'</h3><p class="chord-notes-line">Ноты <strong>'+CHORDS[selected].notes.join(' · ')+'</strong></p><p class="tool-status">'+(piano?'Цветом отмечены клавиши, входящие в аккорд.':'Кружки показывают пальцы; × — не играть струну, ○ — открытая струна.')+'</p></div><div class="chord-lib-canvas" aria-label="'+(piano?'Клавиатура пианино':'Схема аппликатуры гитары')+'">'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div></div>';
 }
 function guitarDiagram(chord) {
-  const strings = chord.guitar.split('');
-  return '<div class="guitar-diagram" aria-label="Аппликатура аккорда"><div class="guitar-fret-labels"><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div><div class="guitar-strings">'+strings.map((v,i)=>'<div class="guitar-string"><span class="guitar-open">'+(v==='x'?'×':v==='0'?'○':'')+'</span><span class="guitar-dot" style="grid-row:'+(v>0?Math.min(5,Number(v)+1):1)+'">'+(v>0?(chord.fingers[i]||'•'):'')+'</span></div>').join('')+'</div><small>Струны от 6-й (толстой) к 1-й</small></div>';
+  const frets = chord.guitar.split('');
+  const played = frets.map(v => v === 'x' || v === '0' ? 0 : Number(v)).filter(v => v > 0);
+  const minFret = played.length ? Math.min(...played) : 1;
+  const maxFret = played.length ? Math.max(...played) : 4;
+  const firstFret = minFret > 4 && maxFret - minFret < 4 ? minFret : 1;
+  const xs = [36, 78, 120, 162, 204, 246];
+  const top = 42, fretH = 31, stringEnd = xs[xs.length-1];
+  const labels = ['E','A','D','G','B','E'];
+  let svg = '<svg class="guitar-chord-svg" viewBox="0 0 278 218" role="img" aria-label="Аппликатура аккорда"><text x="8" y="17" class="chord-svg-muted">Струна</text>';
+  xs.forEach((x,i)=>{svg+='<text x="'+x+'" y="17" text-anchor="middle" class="chord-svg-string-label">'+labels[i]+'</text>';});
+  frets.forEach((v,i)=>{const x=xs[i];svg+='<text x="'+x+'" y="34" text-anchor="middle" class="chord-svg-muted">'+(v==='x'?'×':v==='0'?'○':'')+'</text>';});
+  for(let f=0;f<=4;f++){
+    const y=top+f*fretH;
+    svg+='<line x1="'+xs[0]+'" y1="'+y+'" x2="'+stringEnd+'" y2="'+y+'" class="'+(f===0&&firstFret===1?'chord-svg-nut':'chord-svg-fret')+'"/>';
+    if(f<4) svg+='<text x="15" y="'+(y+fretH/2+4)+'" class="chord-svg-fret-label">'+(firstFret+f)+'</text>';
+  }
+  xs.forEach((x,i)=>{
+    svg+='<line x1="'+x+'" y1="'+top+'" x2="'+x+'" y2="'+(top+4*fretH)+'" class="chord-svg-string" style="stroke-width:'+(i===0?2.4:i===5?1:1.5)+'"/>';
+    const value=frets[i];
+    if(value!=='x'&&value!=='0'){
+      const fret=Number(value), row=fret-firstFret;
+      if(row>=0&&row<4){
+        const y=top+(row+.5)*fretH;
+        svg+='<circle cx="'+x+'" cy="'+y+'" r="10.5" class="chord-svg-finger"/><text x="'+x+'" y="'+(y+3.7)+'" text-anchor="middle" class="chord-svg-finger-number">'+(chord.fingers[i]||'•')+'</text>';
+      }
+    }
+  });
+  if(firstFret>1) svg+='<text x="140" y="207" text-anchor="middle" class="chord-svg-muted">Позиция '+firstFret+' лада</text>';
+  svg+='</svg><div class="chord-diagram-legend"><span><b>×</b> не играть</span><span><b>○</b> открытая</span><span><b>1–4</b> пальцы</span></div>';
+  return '<div class="guitar-diagram">'+svg+'</div>';
 }
 function pianoDiagram(notes) {
-  const keys = ['C','D','E','F','G','A','B'];
-  // WHY: flat spellings (Eb, Bb, Ab, etc.) must highlight the same physical piano keys as their sharp enharmonics.
-  const enharmonic = { Db:'C#', Eb:'D#', Gb:'F#', Ab:'G#', Bb:'A#' };
+  // WHY: use native SVG instead of a CDN package so the keyboard is visible instantly, on mobile, and offline.
+  const enharmonic = {Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
   const active = new Set(notes.map(note => enharmonic[note] || note));
-  return '<div class="piano-diagram" aria-label="Клавиатура пианино"><div class="piano-keys">'+keys.map((n,i)=>'<div class="piano-white-key'+(active.has(n)?' chord-note':'')+'"><span>'+n+'</span></div>').join('')+['C#','D#',null,'F#','G#','A#'].map((n,i)=>n?'<div class="piano-black-key'+(active.has(n)?' chord-note':'')+'" style="left:calc('+(i<2?i:i+1)+' * 14.2857% - 5%)"><span>'+n+'</span></div>':'').join('')+'</div><p>Подсвечены ноты аккорда в одной октаве.</p></div>';
+  const whiteNotes = ['C','D','E','F','G','A','B'];
+  const blackNotes = [{note:'C#',after:0},{note:'D#',after:1},{note:'F#',after:3},{note:'G#',after:4},{note:'A#',after:5}];
+  const keyW=26, keyH=145, startX=10, whiteCount=14;
+  let svg='<svg class="piano-chord-svg" viewBox="0 0 '+(startX*2+keyW*whiteCount)+' 178" role="img" aria-label="Ноты аккорда на клавиатуре пианино">';
+  for(let i=0;i<whiteCount;i++){
+    const note=whiteNotes[i%7], x=startX+i*keyW, isActive=active.has(note);
+    svg+='<rect x="'+x+'" y="8" width="'+keyW+'" height="'+keyH+'" rx="2" class="'+(isActive?'piano-svg-white active':'piano-svg-white')+'"/>';
+    svg+='<text x="'+(x+keyW/2)+'" y="142" text-anchor="middle" class="'+(isActive?'piano-svg-label active':'piano-svg-label')+'">'+note+'</text>';
+  }
+  for(let oct=0;oct<2;oct++) blackNotes.forEach(({note,after})=>{
+    const x=startX+(oct*7+after+1)*keyW-7.5, isActive=active.has(note);
+    svg+='<rect x="'+x+'" y="8" width="15" height="86" rx="2" class="'+(isActive?'piano-svg-black active':'piano-svg-black')+'"/>';
+    if(isActive) svg+='<text x="'+(x+7.5)+'" y="84" text-anchor="middle" class="piano-svg-black-label">'+note+'</text>';
+  });
+  svg+='<text x="'+startX+'" y="170" class="piano-svg-octave">2 октавы · подсвечены ноты аккорда</text></svg>';
+  return '<div class="piano-diagram">'+svg+'</div>';
 }
 function stopTuner() {
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
