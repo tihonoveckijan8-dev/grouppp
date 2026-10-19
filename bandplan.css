@@ -792,12 +792,7 @@ html[data-reduced="true"] .skel::after{display:none}
   border-radius:var(--r-14);color:var(--muted);font-size:10.5px;font-weight:var(--fw-med);transition:all var(--t-btn);
   position:relative;min-height:52px}
 .bottom-nav a:active{transform:scale(.95)}
-.bottom-nav{position:fixed;isolation:isolate}
-.bottom-nav-indicator{position:absolute;z-index:0;left:0;top:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));
-  border-radius:var(--r-14);background:var(--accent-soft);pointer-events:none;
-  transform:translateX(0);transition:transform 280ms cubic-bezier(.22,.8,.25,1),width 280ms cubic-bezier(.22,.8,.25,1)}
-.bottom-nav a{z-index:1;background:transparent!important;transition:color var(--t-btn),transform var(--t-btn)}
-.bottom-nav a.active{color:var(--accent);background:transparent!important}
+.bottom-nav a.active{color:var(--accent);background:var(--accent-soft)}
 .bottom-nav .nb{position:absolute;top:3px;right:calc(50% - 24px);min-width:17px;height:17px;border-radius:var(--r-pill);
   background:var(--danger);color:var(--on-accent);font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:var(--fw-bold)}
 .actionbar{display:none}
