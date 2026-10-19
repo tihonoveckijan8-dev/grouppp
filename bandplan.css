@@ -13653,7 +13653,6 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 
 
 /* WHY: keep the guitar illustration responsive and give pressed strings clear feedback on touch devices. */
-.tuner-guitar-art{display:grid;justify-items:center;gap:2px;margin:0 auto 16px;max-width:420px;width:100%;padding:8px 12px 4px;border-radius:20px;background:linear-gradient(145deg,var(--surf-2),var(--surf-3));border:1px solid var(--border);overflow:hidden}
 .tuner-guitar-art svg{display:block;width:100%;max-height:170px}
 .tuner-guitar-art span{font-size:9px;letter-spacing:.16em;font-weight:800;color:var(--muted);text-align:center}
 .tuner-string.is-playing{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 13%,var(--surf-2))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}
