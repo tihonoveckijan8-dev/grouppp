@@ -12983,9 +12983,15 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
 }
 
 
-/* Navigation icon-only mode: hide tab captions without affecting page headings or controls. */
-#app .sidebar .nav-item .nav-label,
-#app .sidebar .nav-item > span:not(.nb),
+/* WHY: Keep navigation captions visible in the desktop sidebar; only the compact mobile bottom bar uses icon-only tabs. */
+@media (min-width: 641px) {
+  #app .sidebar .nav-item .nav-label,
+  #app .sidebar .nav-item > span:not(.nb) {
+    display: inline !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
 #app .bottom-nav > a > span:not(.nb) {
   display: none !important;
 }
