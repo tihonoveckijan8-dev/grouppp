@@ -1576,6 +1576,15 @@ function overviewPopupHTML() {
   const ev = item.ev, type = evType(ev.type);
   const date = pdateFull(item.date);
   const meta = [date, ev.time ? ev.time + (ev.end ? '–' + ev.end : '') : '', ev.location || ''].filter(Boolean).join(' · ');
+  /* WHY: Desktop hover preview is intentionally informational only; navigation controls remain available on touch/mobile. */
+  if (window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches) {
+    return '<div class="band-overview-hover-text">' +
+      '<div class="band-overview-hover-kind">' + esc(overviewKindLabel(s.kind)) + ' · ' + (s.index + 1) + ' из ' + s.events.length + '</div>' +
+      '<div class="band-overview-hover-title">' + esc(ev.title || 'Без названия') + '</div>' +
+      '<div class="band-overview-hover-meta">' + esc(meta) + '</div>' +
+      (ev.notes ? '<div class="band-overview-hover-notes">' + esc(ev.notes) + '</div>' : '') +
+      '</div>';
+  }
   return '<div class="band-overview-popover-head"><span>' + esc(overviewKindLabel(s.kind)) + '</span><button type="button" data-act="overview-close" aria-label="Закрыть список">' + ic('x', 15) + '</button></div>' +
     '<div class="band-overview-popover-count">' + (s.index + 1) + ' из ' + s.events.length + '</div>' +
     '<div class="band-overview-popover-event"><span class="badge ' + esc(type.cls) + '">' + ic(type.ic, 12) + esc(type.label) + '</span>' +
