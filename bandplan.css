@@ -13406,64 +13406,10 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 }
 
 
-/* WHY: Keep the hero aligned with the search controls, and let the calendar and upcoming events scroll independently within the desktop viewport. */
+/* WHY: Preserve the original hero and search-row layout; only the calendar and upcoming-events panels get their own scroll areas on desktop. */
 @media (min-width: 900px) {
-  html body[data-route="calendar"] #app #view {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
-    grid-template-rows: auto auto minmax(280px, calc(100dvh - 300px));
-    align-content: start;
-    align-items: stretch;
-    column-gap: 22px;
-    row-gap: 16px;
-  }
-  html body[data-route="calendar"] #app #view > .hero {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    min-width: 0;
-    align-self: stretch;
-  }
-  html body[data-route="calendar"] #app #view > section.card:has(.cal-head) {
-    grid-column: 1;
-    grid-row: 3;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    min-width: 0;
-    min-height: 0;
-    max-height: calc(100dvh - 300px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-    -webkit-overflow-scrolling: touch;
-  }
-  html body[data-route="calendar"] #app #view > .calendar-search-row {
-    grid-column: 2;
-    grid-row: 1;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    min-width: 0;
-    align-self: stretch;
-  }
-  html body[data-route="calendar"] #app #view > .active-chips {
-    grid-column: 2;
-    grid-row: 2;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    align-self: end;
-  }
+  html body[data-route="calendar"] #app #view > section.card:has(.cal-head),
   html body[data-route="calendar"] #app #view > section.card:has(#upH) {
-    grid-column: 2;
-    grid-row: 3;
-    width: 100%;
-    max-width: none;
-    margin: 0;
-    min-width: 0;
     min-height: 0;
     max-height: calc(100dvh - 300px);
     overflow-y: auto;
