@@ -1109,6 +1109,7 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
 @media (min-width: 900px) {
   html body[data-route="calendar"] #app #view > section.nearest-event.band-overview {
     position: relative !important;
+    overflow: visible !important;
     display: grid !important;
     grid-column: 1 / -1 !important;
     grid-row: 1 !important;
