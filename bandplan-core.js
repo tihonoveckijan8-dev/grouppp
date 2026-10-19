@@ -1586,6 +1586,9 @@ function enhanceChordLibrary() {
         showNoteNames: 'onhighlight', keyPressStyle: 'subtle'
       });
       bpPianoChartInstance.create();
+      // WHY: piano-chart deliberately leaves mouse-note state under application control, so route touch/mouse events back through its public key methods.
+      bpPianoChartInstance.addKeyMouseDownListener(note => bpPianoChartInstance?.keyDown(note));
+      bpPianoChartInstance.addKeyMouseUpListener(note => bpPianoChartInstance?.keyUp(note));
       setStatus('Визуализация piano-chart · нажимайте клавиши для выделения нот.');
       return;
     }
