@@ -1184,10 +1184,35 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
 }
 @media (max-width: 899px) {
   html body[data-route="calendar"] .band-overview-main,
-  html body[data-route="calendar"] .band-overview-metrics,
   html body[data-route="calendar"] .band-overview-actions {
     display: none !important;
   }
+  /* WHY: Keep the three event counters available on touch screens, below the existing mobile hero content. */
+  html body[data-route="calendar"] .band-overview-metrics {
+    display: flex !important;
+    width: 100%;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--ln) 80%, transparent);
+    justify-content: space-between;
+    gap: 0;
+  }
+  html body[data-route="calendar"] .band-overview-metric {
+    display: grid !important;
+    flex: 1 1 0;
+    min-width: 0;
+    align-content: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 10px;
+  }
+  html body[data-route="calendar"] .band-overview-metric + .band-overview-metric {
+    border-left: 1px solid color-mix(in srgb, var(--ln) 80%, transparent);
+    border-radius: 0 10px 10px 0;
+  }
+  html body[data-route="calendar"] .band-overview-metric strong { font-size: 19px; }
+  html body[data-route="calendar"] .band-overview-metric span { font-size: 10px; white-space: normal; }
 }
 
 
