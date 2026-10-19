@@ -1099,6 +1099,6 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
   html body[data-route="calendar"] #app #view > section.card:has(#upH) {
     grid-column: 2 !important;
     grid-row: 3 !important;
-    margin-top: -54px !important;
+    margin-top: -52px !important;
   }
 }
