@@ -2313,27 +2313,27 @@ function vSettings() {
     '<div class="field settings-inline-field"><span class="field-label">Уведомления о действиях</span><div class="seg settings-one-line">' + [['off', 'Выключены'], ['important', 'Только важные'], ['all', 'Все действия']].map(o => '<button type="button" data-act="toast-mode" data-v="' + o[0] + '" class="' + ((s.toastMode || 'off') === o[0] ? 'on' : '') + '" aria-pressed="' + ((s.toastMode || 'off') === o[0]) + '" data-accent="1">' + o[1] + '</button>').join('') + '</div></div></div></div></section>';
 
   if (!isStandalone()) h += '<section class="card rise settings-card" data-settings-panel="app"><div class="card-h"><div><h2>Установка на устройство</h2></div></div><button class="btn btn-primary btn-block" type="button" id="pwaBtn" data-act="pwa-install">' + ic('dl', 16) + 'Установить приложение</button></section>';
-  h += '<section class="card rise settings-card" data-settings-panel="data" style="animation-delay:.1s"><div class="card-h"><div><h2>Данные</h2></div></div>' +
+  h += '<section class="settings-card settings-data-page" data-settings-panel="data" style="animation-delay:.1s">' +
+    '<div class="settings-data-hero"><div><span class="settings-data-eyebrow">ХРАНИЛИЩЕ И РЕЗЕРВНЫЕ КОПИИ</span><h2>Данные BandPlan</h2><p>Управляйте содержимым группы, офлайн-доступом и резервными копиями.</p></div><div class="settings-data-size"><span>Размер данных</span><strong>' + kb() + ' КБ</strong><small>' + esc(s.lastBackup ? 'Копия: ' + pdate(s.lastBackup) : 'Резервная копия ещё не создавалась') + '</small></div></div>' +
     '<div class="data-stats-grid">' +
-      '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><strong>' + state.songs.length + '</strong><span>Песен</span></div>' +
-      '<div class="data-stat"><span class="data-stat-icon">' + ic('calendar', 17) + '</span><strong>' + state.events.length + '</strong><span>Событий</span></div>' +
-      '<div class="data-stat"><span class="data-stat-icon">' + ic('list', 17) + '</span><strong>' + state.setlists.length + '</strong><span>Сет-листов</span></div>' +
-      '<div class="data-stat"><span class="data-stat-icon">' + ic('users', 17) + '</span><strong>' + state.members.length + '</strong><span>Участников</span></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('music', 17) + '</span><div><strong>' + state.songs.length + '</strong><span>Песен</span></div></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('calendar', 17) + '</span><div><strong>' + state.events.length + '</strong><span>Событий</span></div></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('list', 17) + '</span><div><strong>' + state.setlists.length + '</strong><span>Сет-листов</span></div></div>' +
+      '<div class="data-stat"><span class="data-stat-icon">' + ic('users', 17) + '</span><div><strong>' + state.members.length + '</strong><span>Участников</span></div></div>' +
     '</div>' +
-    '<div class="data-actions">' +
-      '<div class="data-action-group"><div class="data-action-title">Резервная копия</div><div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 16) + 'Скачать JSON</button><button class="btn btn-secondary" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить файл</button></div><div class="data-meta">Объём: <span class="num">' + kb() + ' КБ</span> · последняя копия: ' + esc(s.lastBackup ? pdate(s.lastBackup) : 'не создавалась') + '</div></div>' +
-      '<div class="data-action-group offline-song-settings"><div class="data-action-title">Песни ближайших событий офлайн</div>' +
-        '<div class="data-meta">Песни сет-листов сохраняются на устройстве для работы без сети. Очистка не затрагивает облако.</div>' +
+    '<div class="settings-data-sections">' +
+      '<section class="data-section data-backup-section"><div class="data-section-heading"><span class="data-section-icon">' + ic('copy', 18) + '</span><div><h3>Резервная копия</h3><p>Сохраните данные в файл или восстановите их из ранее созданной копии.</p></div></div><div class="data-section-content"><div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 16) + 'Скачать JSON</button><button class="btn btn-secondary" type="button" data-act="import">' + ic('ul', 16) + 'Загрузить файл</button></div><div class="data-meta">Формат JSON · размер хранилища: <strong>' + kb() + ' КБ</strong></div></div></section>' +
+      '<section class="data-section offline-song-settings"><div class="data-section-heading"><span class="data-section-icon">' + ic('music', 18) + '</span><div><h3>Офлайн-доступ к песням</h3><p>Песни сет-листов ближайших событий будут доступны без подключения к интернету.</p></div></div>' +
         '<div class="offline-song-settings-grid">' +
           '<label class="check"><input type="checkbox" id="offlineSongAuto" ' + (s.offlineSongsAutoSave !== false ? 'checked' : '') + '><span>Автосохранение</span></label>' +
-          '<label class="field compact"><span class="field-label">Окно, дней</span><input class="input" id="offlineSongDays" type="number" min="1" max="90" inputmode="numeric" value="' + esc(String(s.offlineSongsDays || 30)) + '"></label>' +
-          '<label class="field compact"><span class="field-label">Ближайших событий</span><input class="input" id="offlineSongCount" type="number" min="1" max="10" inputmode="numeric" value="' + esc(String(s.offlineSongsNearestCount || 3)) + '"></label>' +
-          '<label class="check"><input type="checkbox" id="offlineSongMaybe" ' + (s.offlineSongsSaveMaybe === true ? 'checked' : '') + '><span>Сохранять при «Под вопросом»</span></label>' +
+          '<label class="field compact"><span class="field-label">Период, дней</span><input class="input" id="offlineSongDays" type="number" min="1" max="90" inputmode="numeric" value="' + esc(String(s.offlineSongsDays || 30)) + '"></label>' +
+          '<label class="field compact"><span class="field-label">Событий вперёд</span><input class="input" id="offlineSongCount" type="number" min="1" max="10" inputmode="numeric" value="' + esc(String(s.offlineSongsNearestCount || 3)) + '"></label>' +
+          '<label class="check"><input type="checkbox" id="offlineSongMaybe" ' + (s.offlineSongsSaveMaybe === true ? 'checked' : '') + '><span>Сохранять при статусе «Под вопросом»</span></label>' +
         '</div>' +
         '<div class="offline-song-storage"><span>Занято на устройстве: <strong id="offlineSongBytes">—</strong></span><span>По умолчанию: 3 события / 30 дней</span></div>' +
-        '<div class="data-action-buttons"><button class="btn btn-secondary" type="button" data-act="offline-song-refresh-all">' + ic('refresh', 16) + 'Обновить сейчас</button><button class="btn btn-danger" type="button" data-act="offline-song-clear-all">' + ic('trash', 16) + 'Очистить всё</button></div>' +
-      '</div>' +
-      '<div class="data-action-danger"><div><strong>Удаление данных</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><div class="data-action-buttons"><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button></div></div>' +
+        '<div class="data-section-footer"><button class="btn btn-secondary" type="button" data-act="offline-song-refresh-all">' + ic('refresh', 16) + 'Обновить офлайн-копии</button><button class="btn btn-danger" type="button" data-act="offline-song-clear-all">' + ic('trash', 16) + 'Очистить офлайн-копии</button></div>' +
+      '</section>' +
+      '<section class="data-section data-danger-section"><div class="data-section-heading"><span class="data-section-icon">' + ic('alert', 18) + '</span><div><h3>Опасная зона</h3><p>Необратимые действия, которые могут привести к потере данных.</p></div></div><div class="data-danger-row"><div><strong>Удалить данные аккаунта</strong><span>Удаляет данные аккаунта и доступ к BandPlan без возможности восстановления.</span></div><button class="btn btn-danger" type="button" data-act="wipe">' + ic('trash', 16) + 'Удалить данные</button></div></section>' +
     '</div></section>';
 
   h += '<section class="card rise settings-card" data-settings-panel="app" style="animation-delay:.13s"><div class="card-h"><div><h2>О BandPlan</h2></div></div>' +
