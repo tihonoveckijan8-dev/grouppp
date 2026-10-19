@@ -13425,9 +13425,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     margin: 0;
     min-width: 0;
   }
-  body[data-route="calendar"] #view > section.card:has(.cal-grid),
-  body[data-route="calendar"] #view > section.card:has(.cal-week),
-  body[data-route="calendar"] #view > section.card:has(.cal-day) {
+  body[data-route="calendar"] #view > section.card:has(.cal-head) {
     grid-column: 1;
     grid-row: 2;
     width: 100%;
