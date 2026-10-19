@@ -1577,7 +1577,10 @@ function guitarDiagram(chord) {
 }
 function pianoDiagram(notes) {
   const keys = ['C','D','E','F','G','A','B'];
-  return '<div class="piano-diagram" aria-label="Клавиатура пианино"><div class="piano-keys">'+keys.map((n,i)=>'<div class="piano-white-key'+(notes.includes(n)?' chord-note':'')+'"><span>'+n+'</span></div>').join('')+['C#','D#',null,'F#','G#','A#'].map((n,i)=>n?'<div class="piano-black-key'+(notes.includes(n)?' chord-note':'')+'" style="left:calc('+(i<2?i:i+1)+' * 14.2857% - 5%)"><span>'+n+'</span></div>':'').join('')+'</div><p>Подсвечены ноты аккорда в одной октаве.</p></div>';
+  // WHY: flat spellings (Eb, Bb, Ab, etc.) must highlight the same physical piano keys as their sharp enharmonics.
+  const enharmonic = { Db:'C#', Eb:'D#', Gb:'F#', Ab:'G#', Bb:'A#' };
+  const active = new Set(notes.map(note => enharmonic[note] || note));
+  return '<div class="piano-diagram" aria-label="Клавиатура пианино"><div class="piano-keys">'+keys.map((n,i)=>'<div class="piano-white-key'+(active.has(n)?' chord-note':'')+'"><span>'+n+'</span></div>').join('')+['C#','D#',null,'F#','G#','A#'].map((n,i)=>n?'<div class="piano-black-key'+(active.has(n)?' chord-note':'')+'" style="left:calc('+(i<2?i:i+1)+' * 14.2857% - 5%)"><span>'+n+'</span></div>':'').join('')+'</div><p>Подсвечены ноты аккорда в одной октаве.</p></div>';
 }
 function stopTuner() {
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
