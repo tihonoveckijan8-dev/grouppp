@@ -6,6 +6,8 @@ import path from 'node:path';
 
 const root = process.cwd();
 const out = path.join(root, 'dist');
+// WHY: stamp every published visual entry point from one build ID so browsers and installed PWAs request fresh assets automatically.
+const assetVersion = `${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
 
 await rm(out, {recursive:true, force:true});
 await mkdir(out, {recursive:true});
@@ -24,7 +26,14 @@ const staticFiles = [
 
 for (const file of staticFiles) {
   const source = path.join(root, file);
-  if (existsSync(source)) await cp(source, path.join(out, file));
+  if (existsSync(source)) {
+    await cp(source, path.join(out, file));
+    if (file === 'index.html' || file === 'manifest.webmanifest') {
+      const target = path.join(out, file);
+      const content = await readFile(target, 'utf8');
+      await writeFile(target, content.replaceAll('__BANDPLAN_ASSET_VERSION__', assetVersion));
+    }
+  }
 }
 
 
@@ -45,9 +54,9 @@ for (const file of ['bandplan.js','bandplan-core.js','config.js','supabase.js','
   // WHY: generate a fresh shell cache namespace on every build instead of relying on manual SW edits.
   if (file === 'sw.js') {
     const source = await readFile(path.join(root, file), 'utf8');
-    const version = `${new Date().toISOString().slice(0,10).replaceAll('-', '')}-${Date.now()}`;
+    const version = assetVersion;
     await build({
-      stdin: { contents: source.replaceAll('__BANDPLAN_CACHE_VERSION__', version), resolveDir: root, sourcefile: file, loader: 'js' },
+      stdin: { contents: source.replaceAll('__BANDPLAN_CACHE_VERSION__', version).replaceAll('__BANDPLAN_ASSET_VERSION__', version), resolveDir: root, sourcefile: file, loader: 'js' },
       outfile: path.join(out, file), bundle: false, minify: true,
       target: ['es2020', 'safari15'], legalComments: 'none', charset: 'utf8'
     });
