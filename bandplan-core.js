@@ -3198,7 +3198,30 @@ document.addEventListener('click', function (e) {
     case 'tuner-stop': stop(); stopTuner(); const ts=$('#tunerStatus'); if(ts)ts.textContent='Тюнер остановлен'; const tstart=$('#tunerStart'),tstop=$('#tunerStop');if(tstart)tstart.disabled=false;if(tstop)tstop.disabled=true;break;
     case 'tuner-reference': {
       stop(); const freq=Number(el.getAttribute('data-freq')), note=el.getAttribute('data-note');
-      try { const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)throw new Error('Web Audio недоступен'); const ctx=new Ctx();ctx.resume().then(()=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=freq;gain.gain.value=.08;osc.connect(gain);gain.connect(ctx.destination);osc.start();setTimeout(()=>{osc.stop();ctx.close();},900);}); } catch(err){toast(err.message,'err');}
+      try {
+        const Ctx=window.AudioContext||window.webkitAudioContext;
+        if(!Ctx)throw new Error('Web Audio не поддерживается этим браузером');
+        // WHY: synthesize a plucked string with harmonics and a natural decay; a sine beep sounds unlike a guitar string.
+        const ctx=new Ctx();
+        ctx.resume().then(()=>{
+          const now=ctx.currentTime, master=ctx.createGain();
+          master.gain.setValueAtTime(0.0001,now);
+          master.gain.exponentialRampToValueAtTime(0.24,now+0.012);
+          master.gain.exponentialRampToValueAtTime(0.0001,now+1.35);
+          master.connect(ctx.destination);
+          // A guitar string has a fundamental plus quieter harmonics; all partials are derived from the selected string's exact frequency.
+          for(let harmonic=1;harmonic<=8;harmonic++){
+            const osc=ctx.createOscillator(), partial=ctx.createGain();
+            osc.type='triangle';
+            osc.frequency.setValueAtTime(freq*harmonic,now);
+            partial.gain.setValueAtTime((1/(harmonic*harmonic))*((harmonic%2)?1:0.58),now);
+            osc.connect(partial);partial.connect(master);
+            osc.start(now);osc.stop(now+1.38);
+          }
+          setTimeout(()=>ctx.close().catch(()=>{}),1500);
+          const status=$('#tunerStatus');if(status)status.textContent='Звучит эталонная струна '+note+' · '+freq.toFixed(2)+' Hz';
+        });
+      } catch(err){toast(err.message,'err');}
       break;
     }
     case 'metro-bpm': stop(); setMetroBpm(Number($('#metroRange')?.value||120)+Number(el.getAttribute('data-d')||0)); break;
