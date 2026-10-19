@@ -793,6 +793,26 @@ html[data-reduced="true"] .skel::after{display:none}
   position:relative;min-height:52px}
 .bottom-nav a:active{transform:scale(.95)}
 .bottom-nav a.active{color:var(--accent);background:var(--accent-soft)}
+/* Mobile overflow navigation keeps secondary destinations off the main tab row. */
+.bottom-nav .bottom-nav-more{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:7px 2px;border:0;border-radius:var(--r-14);background:transparent;color:var(--muted);
+  font:inherit;font-size:10.5px;font-weight:var(--fw-med);transition:background var(--t-btn),color var(--t-btn),transform var(--t-btn);
+  position:relative;min-width:0;min-height:52px;cursor:pointer}
+.bottom-nav .bottom-nav-more:active{transform:scale(.95)}
+.bottom-nav .bottom-nav-more.active,.bottom-nav .bottom-nav-more[aria-expanded="true"]{color:var(--accent);background:var(--accent-soft)}
+.bottom-nav .bottom-more-menu{position:absolute;right:10px;bottom:calc(100% + 10px);z-index:calc(var(--z-nav) + 1);
+  display:flex;flex-direction:column;gap:4px;min-width:190px;padding:7px;
+  border:1px solid var(--border);border-radius:18px;background:var(--surf-1);
+  box-shadow:0 12px 36px var(--raw-color-122);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  transform-origin:bottom right;animation:bottom-more-in 150ms ease-out}
+.bottom-nav .bottom-more-menu[hidden]{display:none}
+.bottom-nav .bottom-more-menu a{flex:none;min-height:48px;display:flex;flex-direction:row;justify-content:flex-start;
+  gap:12px;padding:10px 12px;border-radius:12px;font-size:13px;color:var(--text-2)}
+.bottom-nav .bottom-more-menu a[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+.bottom-nav .bottom-more-menu a span{flex:1;text-align:left}
+.bottom-nav .more-current-mark{flex:none;margin-left:auto}
+@keyframes bottom-more-in{from{opacity:0;transform:translateY(5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.bottom-nav .bottom-more-menu{animation:none}}
 .bottom-nav .nb{position:absolute;top:3px;right:calc(50% - 24px);min-width:17px;height:17px;border-radius:var(--r-pill);
   background:var(--danger);color:var(--on-accent);font-size:9.5px;display:grid;place-items:center;padding:0 4px;font-weight:var(--fw-bold)}
 .actionbar{display:none}
@@ -824,7 +844,7 @@ html[data-reduced="true"] .skel::after{display:none}
   .dyn-row{grid-template-columns:minmax(0,1fr)}.sl-item{padding:var(--s3);gap:var(--s2);flex-wrap:wrap}.sl-item .sl-info{flex:1 1 52%}
   .song-card{padding:var(--s4)}.lyrics{padding:var(--s4);font-size:calc(var(--lsize) - 1px)}
   .scene-body{padding:var(--s5) 5%}.scene-ctrl{gap:6px}.scene-ctrl .sbtn{width:var(--tap);height:var(--tap)}
-  .bottom-nav a{font-size:10px}.state{padding:var(--s10) var(--s4)}
+  .bottom-nav a,.bottom-nav .bottom-nav-more{font-size:10px}.state{padding:var(--s10) var(--s4)}
   .actionbar{padding:var(--s2) var(--s3)}.actionbar .btn{height:48px}.settings-card{padding:var(--s4)}
 }
 @media(max-width:480px){.offline-song-settings-grid{grid-template-columns:minmax(0,1fr)}.offline-event-songs{align-items:flex-start}.offline-song-actions{width:100%}.offline-song-actions .btn{flex:1}}
@@ -834,7 +854,7 @@ html[data-reduced="true"] .skel::after{display:none}
   .cal-cell{aspect-ratio:1/1;min-height:0}.cal-wd{font-size:9.5px}
   .cal-ev{font-size:0;width:7px;height:7px;min-width:7px;padding:0;border:0;border-radius:50%;background:var(--cal-dot-color,var(--accent));box-shadow:none}
   .cal-more{font-size:9px;padding-left:0}
-  .bottom-nav a{min-height:50px;font-size:9.5px}.tb-tools{gap:6px}.icon-btn{width:var(--tap);height:var(--tap)}.avatar-btn{width:var(--tap);height:var(--tap)}.tb-search{height:46px}
+  .bottom-nav a,.bottom-nav .bottom-nav-more{min-height:50px;font-size:9.5px}.tb-tools{gap:6px}.icon-btn{width:var(--tap);height:var(--tap)}.avatar-btn{width:var(--tap);height:var(--tap)}.tb-search{height:46px}
   .card{padding:var(--s4)}.hero{padding:var(--s5) var(--s4)}.hero h1{font-size:26px}
   .ev-row{grid-template-columns:48px minmax(0,1fr)}.ev-date{width:48px;min-width:48px}.event-my-state{font-size:10px}
   .btn,.icon-btn,.avatar-btn,.input,.select,.textarea{min-height:var(--tap)}
