@@ -1555,75 +1555,15 @@ function heroHTML() {
     '<h2>' + esc(p.bandName || 'Моя группа') + '</h2>' +
     '<p>' + esc(monthLabel.charAt(0).toLocaleUpperCase('ru-RU') + monthLabel.slice(1)) + ' · расписание группы</p></div>' +
     '<div class="band-overview-metrics" aria-label="События за выбранный месяц">' +
-    '<button class="band-overview-metric" type="button" data-act="overview-events" data-kind="rehearsal" aria-label="Показать репетиции за выбранный месяц"><strong>' + rehearsals + '</strong><span>Репетиции</span></button>' +
-    '<button class="band-overview-metric" type="button" data-act="overview-events" data-kind="gig" aria-label="Показать выступления за выбранный месяц"><strong>' + gigs + '</strong><span>Выступления</span></button>' +
-    '<button class="band-overview-metric" type="button" data-act="overview-events" data-kind="all" aria-label="Показать все события за выбранный месяц"><strong>' + monthEvents.length + '</strong><span>Всего событий</span></button>' +
+    '<div class="band-overview-metric"><strong>' + rehearsals + '</strong><span>Репетиции</span></div>' +
+    '<div class="band-overview-metric"><strong>' + gigs + '</strong><span>Выступления</span></div>' +
+    '<div class="band-overview-metric"><strong>' + monthEvents.length + '</strong><span>Всего событий</span></div>' +
     '</div>' +
     '<div class="band-overview-actions"><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 16) + 'Событие</button>' +
     '<button class="btn btn-tertiary" type="button" data-act="scene-quick">' + ic('monitor', 16) + 'Сцена</button></div>' +
     '</section>';
 }
 /* WHY: The overview counters are entry points into the selected month's events on both pointer and touch devices. */
-let overviewPopupState = { kind: '', events: [], index: 0, closeTimer: 0 };
-function overviewKindLabel(kind) {
-  if (kind === 'rehearsal') return 'Репетиции';
-  if (kind === 'gig') return 'Выступления';
-  return 'Все события';
-}
-function overviewPopupHTML() {
-  const s = overviewPopupState, item = s.events[s.index];
-  if (!item) return '<div class="band-overview-popover-empty">В этом месяце таких событий нет.</div>';
-  const ev = item.ev, type = evType(ev.type);
-  const date = pdateFull(item.date);
-  const meta = [date, ev.time ? ev.time + (ev.end ? '–' + ev.end : '') : '', ev.location || ''].filter(Boolean).join(' · ');
-  return '<div class="band-overview-popover-head"><span>' + esc(overviewKindLabel(s.kind)) + '</span><button type="button" data-act="overview-close" aria-label="Закрыть список">' + ic('x', 15) + '</button></div>' +
-    '<div class="band-overview-popover-count">' + (s.index + 1) + ' из ' + s.events.length + '</div>' +
-    '<div class="band-overview-popover-event"><span class="badge ' + esc(type.cls) + '">' + ic(type.ic, 12) + esc(type.label) + '</span>' +
-    '<h3>' + esc(ev.title || 'Без названия') + '</h3><p>' + esc(meta) + '</p>' +
-    (ev.notes ? '<div class="band-overview-popover-notes">' + esc(ev.notes) + '</div>' : '') +
-    '<button type="button" class="btn btn-primary" data-act="overview-open-event" data-id="' + esc(ev.id) + '" data-date="' + esc(item.date) + '">' + ic('calendar', 15) + 'Открыть событие</button></div>' +
-    '<div class="band-overview-popover-nav"><button type="button" data-act="overview-prev" aria-label="Предыдущее событие" ' + (s.index <= 0 ? 'disabled' : '') + '>' + ic('left', 16) + 'Назад</button>' +
-    '<button type="button" data-act="overview-next" aria-label="Следующее событие" ' + (s.index >= s.events.length - 1 ? 'disabled' : '') + '>Далее' + ic('right', 16) + '</button></div>';
-}
-function overviewPopupNode() {
-  return document.querySelector('.band-overview .band-overview-popover');
-}
-function renderOverviewPopup() {
-  const host = document.querySelector('.band-overview');
-  if (!host) return;
-  let popup = overviewPopupNode();
-  if (!popup) {
-    popup = document.createElement('div');
-    popup.className = 'band-overview-popover';
-    popup.setAttribute('role', 'dialog');
-    popup.setAttribute('aria-label', 'События выбранного типа');
-    host.appendChild(popup);
-  }
-  popup.innerHTML = overviewPopupHTML();
-  popup.hidden = false;
-  host.classList.add('has-event-popover');
-}
-function openOverviewPopup(kind) {
-  clearTimeout(overviewPopupState.closeTimer);
-  const from = iso(new Date(ui.month.getFullYear(), ui.month.getMonth(), 1));
-  const to = iso(new Date(ui.month.getFullYear(), ui.month.getMonth() + 1, 0));
-  const events = expand(from, to).filter(item => kind === 'all' || item.ev.type === kind);
-  overviewPopupState = { kind, events, index: 0, closeTimer: 0 };
-  renderOverviewPopup();
-}
-function closeOverviewPopup() {
-  clearTimeout(overviewPopupState.closeTimer);
-  const host = document.querySelector('.band-overview');
-  const popup = overviewPopupNode();
-  if (popup) popup.hidden = true;
-  if (host) host.classList.remove('has-event-popover');
-}
-function moveOverviewPopup(delta) {
-  const next = overviewPopupState.index + delta;
-  if (next < 0 || next >= overviewPopupState.events.length) return;
-  overviewPopupState.index = next;
-  renderOverviewPopup();
-}
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
   const m = ui.month, y = m.getFullYear(), mo = m.getMonth();
@@ -3166,11 +3106,6 @@ document.addEventListener('click', function (e) {
     case 'tg-col': stop(); if (e.target.closest('.tg-ev')) break; ui.selDate = el.getAttribute('data-date'); eventModal(null, el.getAttribute('data-date')); break;
     case 'new-event': stop(); eventModal(null, el.getAttribute('data-date') || ui.selDate); break;
     case 'event-info': stop(); eventInfoModal(id, el.getAttribute('data-date') || ''); break;
-    case 'overview-events': stop(); openOverviewPopup(el.getAttribute('data-kind') || 'all'); break;
-    case 'overview-close': stop(); closeOverviewPopup(); break;
-    case 'overview-prev': stop(); moveOverviewPopup(-1); break;
-    case 'overview-next': stop(); moveOverviewPopup(1); break;
-    case 'overview-open-event': stop(); { const date = el.getAttribute('data-date') || ''; closeOverviewPopup(); eventInfoModal(id, date); } break;
     case 'event-edit': stop(); eventModal(id); break;
     case 'event-save': {
       stop();
