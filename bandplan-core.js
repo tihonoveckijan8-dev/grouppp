@@ -1534,9 +1534,15 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
-  const next = upcoming()[0], p = state.profile, my = next ? (eventStatusFor(next.ev) || '') : '';
+  const next = upcoming()[0], p = state.profile;
   const meta = next ? [pdateFull(next.date), next.ev.time ? next.ev.time + (next.ev.end ? '–' + next.ev.end : '') : '', next.ev.location || ''].filter(Boolean).join(' · ') : '';
-  return '<section class="nearest-event rise" aria-labelledby="nearestEventTitle">' +
+  const monthStart = iso(new Date(ui.month.getFullYear(), ui.month.getMonth(), 1));
+  const monthEnd = iso(new Date(ui.month.getFullYear(), ui.month.getMonth() + 1, 0));
+  const monthEvents = expand(monthStart, monthEnd);
+  const rehearsals = monthEvents.filter(o => o.ev.type === 'rehearsal').length;
+  const gigs = monthEvents.filter(o => o.ev.type === 'gig').length;
+  const monthLabel = new Intl.DateTimeFormat('ru-RU', { month: 'long', year: 'numeric' }).format(ui.month);
+  return '<section class="nearest-event band-overview rise" aria-label="Обзор группы">' +
     '<div class="nearest-event-main"><span class="eyebrow">Ближайшее событие</span>' +
     '<h1 id="nearestEventTitle">' + esc(next ? next.ev.title : 'Событий пока нет') + '</h1>' +
     (meta ? '<p class="nearest-event-meta">' + esc(meta) + '</p>' : '<p class="nearest-event-meta">Добавьте первое событие в календарь.</p>') +
@@ -1544,7 +1550,18 @@ function heroHTML() {
     '</div><div class="nearest-event-actions">' +
     (next ? '<button class="btn btn-primary" type="button" data-act="event-info" data-id="' + esc(next.ev.id) + '" data-date="' + esc(next.date) + '">' + ic('calendar', 17) + 'Открыть событие</button>' : '<button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 17) + 'Добавить событие</button>') +
     '<button class="btn btn-tertiary" type="button" data-act="scene-quick">' + ic('monitor', 17) + 'Сцена</button>' +
-    '</div></section>';
+    '</div>' +
+    '<div class="band-overview-main"><span class="eyebrow">План группы</span>' +
+    '<h2>' + esc(p.bandName || 'Моя группа') + '</h2>' +
+    '<p>' + esc(monthLabel.charAt(0).toLocaleUpperCase('ru-RU') + monthLabel.slice(1)) + ' · расписание группы</p></div>' +
+    '<div class="band-overview-metrics" aria-label="События за выбранный месяц">' +
+    '<div class="band-overview-metric"><strong>' + rehearsals + '</strong><span>Репетиции</span></div>' +
+    '<div class="band-overview-metric"><strong>' + gigs + '</strong><span>Выступления</span></div>' +
+    '<div class="band-overview-metric"><strong>' + monthEvents.length + '</strong><span>Всего событий</span></div>' +
+    '</div>' +
+    '<div class="band-overview-actions"><button class="btn btn-primary" type="button" data-act="new-event">' + ic('plus', 16) + 'Событие</button>' +
+    '<button class="btn btn-tertiary" type="button" data-act="scene-quick">' + ic('monitor', 16) + 'Сцена</button></div>' +
+    '</section>';
 }
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
