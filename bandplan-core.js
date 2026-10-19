@@ -1391,8 +1391,8 @@ function buildChrome() {
   $('#botNav').innerHTML = primaryMobileTabs.map(n =>
     '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 21) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('') +
-    '<button class="bottom-nav-more' + (moreActive ? ' active' : '') + '" type="button" data-act="more-menu-toggle" aria-expanded="false" aria-controls="bottomMoreMenu">' +
-    navIc('more', 21) + '<span>Ещё</span></button>' +
+    '<a href="#/tools" class="bottom-nav-more' + (moreActive ? ' active' : '') + '" data-act="more-menu-toggle" aria-expanded="false" aria-controls="bottomMoreMenu">' +
+    navIc('more', 21) + '<span>Ещё</span></a>' +
     '<div class="bottom-more-menu" id="bottomMoreMenu" hidden>' +
     TABS.filter(n => ['tools', 'settings'].includes(n.k)).map(n =>
       '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
