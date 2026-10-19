@@ -13406,12 +13406,12 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 }
 
 
-/* WHY: Keep the next-event hero in its own top row; place calendar search below it, alongside the calendar, while both content panels scroll independently. */
+/* WHY: Keep the next-event hero untouched; put the calendar on the left and search plus upcoming events in a vertical column on the right. */
 @media (min-width: 900px) {
   html body[data-route="calendar"] #app #view {
     display: grid !important;
     grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
-    grid-template-rows: auto minmax(280px, calc(100dvh - 300px));
+    grid-template-rows: auto auto auto minmax(280px, 1fr);
     align-content: start;
     align-items: stretch;
     column-gap: 22px;
@@ -13427,7 +13427,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   }
   html body[data-route="calendar"] #app #view > section.card:has(.cal-head) {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 2 / 5;
     width: 100%;
     max-width: none;
     margin: 0;
@@ -13450,18 +13450,18 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   }
   html body[data-route="calendar"] #app #view > .active-chips {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     width: 100%;
     max-width: none;
-    margin: 58px 0 0;
+    margin: 0;
     align-self: start;
   }
   html body[data-route="calendar"] #app #view > section.card:has(#upH) {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 4;
     width: 100%;
     max-width: none;
-    margin: 74px 0 0;
+    margin: 0;
     min-width: 0;
     min-height: 0;
     max-height: calc(100dvh - 374px);
