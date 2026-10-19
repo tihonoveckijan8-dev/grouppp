@@ -3198,41 +3198,57 @@ document.addEventListener('click', function (e) {
     case 'tuner-stop': stop(); stopTuner(); const ts=$('#tunerStatus'); if(ts)ts.textContent='Тюнер остановлен'; const tstart=$('#tunerStart'),tstop=$('#tunerStop');if(tstart)tstart.disabled=false;if(tstop)tstop.disabled=true;break;
     case 'tuner-reference': {
       const freq=Number(el.getAttribute('data-freq')), note=el.getAttribute('data-note');
+      const sampleBaseUrl='https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-acoustic/';
+      const sourceNotes=[['A2',110],['A3',220],['A4',440]];
       try {
         const Ctx=window.AudioContext||window.webkitAudioContext;
         if(!Ctx)throw new Error('Звук не поддерживается этим браузером');
         if(!Number.isFinite(freq)||freq<20||freq>2000)throw new Error('Не удалось определить частоту струны');
-        // WHY: a short, pre-rendered harmonic waveform avoids fragile oscillator-stop timing and sounds like a plucked string rather than an endless electronic beep.
+        // WHY: play a real recorded acoustic-guitar sample and pitch-shift it to the exact open-string frequency; keep a local synthesis fallback if the sample cannot be reached.
         const ctx=new Ctx();
-        const play=()=>{
-          const duration=1.8, rate=ctx.sampleRate, length=Math.floor(duration*rate);
-          const buffer=ctx.createBuffer(1,length,rate), data=buffer.getChannelData(0);
-          let peak=0;
-          for(let i=0;i<length;i++){
-            const t=i/rate;
-            let sample=0;
-            for(let h=1;h<=Math.min(32,Math.floor((rate*.45)/freq));h++){
-              const harmonicDecay=Math.exp(-t*(1.7+h*1.05));
-              sample+=(Math.sin(2*Math.PI*freq*h*t+0.17*h)/(Math.pow(h,1.22)))*harmonicDecay;
-            }
-            const attack=Math.min(1,t/0.004);
-            const body=Math.exp(-t*1.35);
-            data[i]=sample*attack*body;
-            peak=Math.max(peak,Math.abs(data[i]));
-          }
-          if(peak>0)for(let i=0;i<length;i++)data[i]*=0.82/peak;
+        const playBuffer=(buffer,sourceFreq,isRealSample)=>{
           const source=ctx.createBufferSource(), volume=ctx.createGain();
           source.buffer=buffer;
-          volume.gain.setValueAtTime(0.8,ctx.currentTime);
+          source.playbackRate.setValueAtTime(freq/sourceFreq,ctx.currentTime);
+          volume.gain.setValueAtTime(0.88,ctx.currentTime);
+          volume.gain.setTargetAtTime(0.0001,ctx.currentTime+Math.max(0.05,buffer.duration/(freq/sourceFreq)-0.12),0.045);
           source.connect(volume);volume.connect(ctx.destination);
           source.onended=()=>{source.disconnect();volume.disconnect();ctx.close().catch(()=>{});};
           source.start();
-          const status=$('#tunerStatus');if(status)status.textContent='Звучит струна '+note+' · '+freq.toFixed(2)+' Hz';
+          const status=$('#tunerStatus');if(status)status.textContent=(isRealSample?'Акустическая гитара':'Резервный звук')+' · '+note+' · '+freq.toFixed(2)+' Hz';
           const buttons=Array.from(document.querySelectorAll('.tuner-string'));
           buttons.forEach(b=>b.classList.toggle('is-playing',b===el));
           setTimeout(()=>el.classList.remove('is-playing'),350);
         };
-        ctx.resume().then(play).catch(err=>{ctx.close().catch(()=>{});toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');});
+        const playFallback=()=>{
+          const duration=1.8,rate=ctx.sampleRate,length=Math.floor(duration*rate);
+          const buffer=ctx.createBuffer(1,length,rate),data=buffer.getChannelData(0);
+          let peak=0;
+          for(let i=0;i<length;i++){
+            const t=i/rate;let sample=0;
+            for(let h=1;h<=Math.min(32,Math.floor((rate*.45)/freq));h++)sample+=Math.sin(2*Math.PI*freq*h*t+0.17*h)/Math.pow(h,1.22)*Math.exp(-t*(1.7+h*1.05));
+            data[i]=sample*Math.min(1,t/0.004)*Math.exp(-t*1.35);peak=Math.max(peak,Math.abs(data[i]));
+          }
+          if(peak>0)for(let i=0;i<length;i++)data[i]*=0.82/peak;
+          playBuffer(buffer,freq,false);
+        };
+        const playSample=async()=>{
+          try {
+            const cached=await caches.match(sampleBaseUrl+sourceNotes[0][0]+'.mp3');
+            const nearest=sourceNotes.reduce((best,item)=>Math.abs(12*Math.log2(freq/item[1]))<Math.abs(12*Math.log2(freq/best[1]))?item:best,sourceNotes[0]);
+            const url=sampleBaseUrl+nearest[0]+'.mp3';
+            const cachedSample=await caches.match(url);
+            const response=cachedSample||await fetch(url,{mode:'cors',cache:'force-cache'});
+            if(!response.ok)throw new Error('Аудиосэмпл недоступен');
+            const audioData=await response.arrayBuffer();
+            const buffer=await ctx.decodeAudioData(audioData.slice(0));
+            playBuffer(buffer,nearest[1],true);
+          } catch(err) {
+            // WHY: tuning remains usable if a third-party sample host is unavailable or the device is offline before its first cache fill.
+            playFallback();
+          }
+        };
+        ctx.resume().then(playSample).catch(err=>{ctx.close().catch(()=>{});toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');});
       } catch(err){toast(err.message,'err');}
       break;
     }
