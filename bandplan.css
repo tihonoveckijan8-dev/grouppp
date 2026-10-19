@@ -13373,3 +13373,7 @@ body[data-route="settings"] #view .data-danger-row .data-wipe-button:hover {
     justify-content: center;
   }
 }
+
+
+/* Settings now has four tabs: profile, group, interface, app. */
+body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
