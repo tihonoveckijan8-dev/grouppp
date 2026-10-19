@@ -13550,6 +13550,10 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   .chord-pick.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast)}
   .chord-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,280px);gap:24px;align-items:center;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--surf-3)}
   .chord-detail h3{font-size:42px;letter-spacing:-.05em}.chord-detail p{margin-top:8px;color:var(--text-2);font-size:14px}
+  .chord-lib-canvas{min-width:0;width:100%;max-width:320px;justify-self:center;overflow:hidden}
+  .chord-lib-canvas svg{display:block;max-width:100%;height:auto;margin-inline:auto}
+  .chord-lib-note{font-size:11px!important;color:var(--muted)!important;margin-top:12px!important;line-height:1.5}
+  .chord-lib-canvas .piano{max-width:100%}
   .guitar-diagram{min-width:0;max-width:260px;width:100%;justify-self:center}.guitar-fret-labels{display:flex;justify-content:space-around;font-size:11px;color:var(--muted);margin-bottom:6px}
   .guitar-strings{display:grid;grid-template-columns:repeat(6,1fr);gap:0;min-height:140px;border-top:2px solid var(--border-2);border-bottom:1px solid var(--border-2);background:repeating-linear-gradient(to bottom,transparent 0,transparent 26px,var(--border) 27px,var(--border) 28px)}
   .guitar-string{position:relative;display:grid;grid-template-rows:repeat(5,1fr);justify-items:center;border-left:1px solid var(--border-2)}
