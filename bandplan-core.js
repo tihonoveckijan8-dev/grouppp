@@ -1576,15 +1576,6 @@ function overviewPopupHTML() {
   const ev = item.ev, type = evType(ev.type);
   const date = pdateFull(item.date);
   const meta = [date, ev.time ? ev.time + (ev.end ? '–' + ev.end : '') : '', ev.location || ''].filter(Boolean).join(' · ');
-  /* WHY: Desktop hover preview is intentionally informational only; navigation controls remain available on touch/mobile. */
-  if (window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches) {
-    return '<div class="band-overview-hover-text">' +
-      '<div class="band-overview-hover-kind">' + esc(overviewKindLabel(s.kind)) + ' · ' + (s.index + 1) + ' из ' + s.events.length + '</div>' +
-      '<div class="band-overview-hover-title">' + esc(ev.title || 'Без названия') + '</div>' +
-      '<div class="band-overview-hover-meta">' + esc(meta) + '</div>' +
-      (ev.notes ? '<div class="band-overview-hover-notes">' + esc(ev.notes) + '</div>' : '') +
-      '</div>';
-  }
   return '<div class="band-overview-popover-head"><span>' + esc(overviewKindLabel(s.kind)) + '</span><button type="button" data-act="overview-close" aria-label="Закрыть список">' + ic('x', 15) + '</button></div>' +
     '<div class="band-overview-popover-count">' + (s.index + 1) + ' из ' + s.events.length + '</div>' +
     '<div class="band-overview-popover-event"><span class="badge ' + esc(type.cls) + '">' + ic(type.ic, 12) + esc(type.label) + '</span>' +
@@ -1595,81 +1586,22 @@ function overviewPopupHTML() {
     '<button type="button" data-act="overview-next" aria-label="Следующее событие" ' + (s.index >= s.events.length - 1 ? 'disabled' : '') + '>Далее' + ic('right', 16) + '</button></div>';
 }
 function overviewPopupNode() {
-  return document.querySelector('body > .band-overview-popover[data-overview-portal="desktop"]') ||
-    document.querySelector('.band-overview .band-overview-popover');
-}
-function positionOverviewPopup() {
-  if (!window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches) return;
-  const metric = document.querySelector('.band-overview-metric[data-kind="' + overviewPopupState.kind + '"]');
-  const popup = overviewPopupNode();
-  if (!metric || !popup || popup.hidden) return;
-  const r = metric.getBoundingClientRect();
-  const width = Math.min(360, window.innerWidth - 32);
-  let left = Math.max(16, Math.min(r.left, window.innerWidth - width - 16));
-  let top = r.bottom + 8;
-  popup.style.position = 'fixed';
-  popup.style.width = width + 'px';
-  popup.style.left = left + 'px';
-  popup.style.right = 'auto';
-  popup.style.top = top + 'px';
-  popup.style.bottom = 'auto';
-  popup.style.zIndex = '2147483000';
-  const pr = popup.getBoundingClientRect();
-  if (pr.bottom > window.innerHeight - 12) {
-    top = Math.max(12, r.top - pr.height - 8);
-    popup.style.top = top + 'px';
-  }
+  return document.querySelector('.band-overview .band-overview-popover');
 }
 function renderOverviewPopup() {
   const host = document.querySelector('.band-overview');
   if (!host) return;
-  const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches;
   let popup = overviewPopupNode();
   if (!popup) {
     popup = document.createElement('div');
     popup.className = 'band-overview-popover';
     popup.setAttribute('role', 'dialog');
     popup.setAttribute('aria-label', 'События выбранного типа');
+    host.appendChild(popup);
   }
-  if (desktop) {
-    popup.dataset.overviewPortal = 'desktop';
-    if (popup.parentElement !== document.body) document.body.appendChild(popup);
-  } else {
-    delete popup.dataset.overviewPortal;
-    if (popup.parentElement !== host) host.appendChild(popup);
-  }
-  if (desktop) {
-    // WHY: Build a genuinely text-only hover tooltip in the DOM; CSS hiding controls is not reliable
-    // when cached styles or legacy popup markup are present.
-    const s = overviewPopupState;
-    const item = s.events[s.index];
-    popup.replaceChildren();
-    popup.removeAttribute('role');
-    popup.setAttribute('aria-label', 'Предпросмотр событий');
-    const addText = (className, value) => {
-      if (!value) return;
-      const node = document.createElement('div');
-      node.className = className;
-      node.textContent = value;
-      popup.appendChild(node);
-    };
-    if (!item) {
-      addText('band-overview-hover-title', 'В этом месяце таких событий нет.');
-    } else {
-      const ev = item.ev;
-      const meta = [pdateFull(item.date), ev.time ? ev.time + (ev.end ? '–' + ev.end : '') : '', ev.location || ''].filter(Boolean).join(' · ');
-      addText('band-overview-hover-kind', overviewKindLabel(s.kind) + ' · ' + (s.index + 1) + ' из ' + s.events.length);
-      addText('band-overview-hover-title', ev.title || 'Без названия');
-      addText('band-overview-hover-meta', meta);
-      addText('band-overview-hover-notes', ev.notes || '');
-    }
-  } else {
-    popup.innerHTML = overviewPopupHTML();
-    popup.setAttribute('role', 'dialog');
-  }
+  popup.innerHTML = overviewPopupHTML();
   popup.hidden = false;
   host.classList.add('has-event-popover');
-  positionOverviewPopup();
 }
 function openOverviewPopup(kind) {
   clearTimeout(overviewPopupState.closeTimer);
@@ -1692,25 +1624,6 @@ function moveOverviewPopup(delta) {
   overviewPopupState.index = next;
   renderOverviewPopup();
 }
-document.addEventListener('pointerover', function (e) {
-  const metric = e.target.closest && e.target.closest('.band-overview-metric[data-kind]');
-  if (!metric || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  if (metric.contains(e.relatedTarget)) return;
-  openOverviewPopup(metric.getAttribute('data-kind'));
-});
-document.addEventListener('pointerout', function (e) {
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  const host = e.target.closest && e.target.closest('.band-overview');
-  const popup = e.target.closest && e.target.closest('.band-overview-popover');
-  const related = e.relatedTarget;
-  if (host && (host.contains(related) || (related && related.closest && related.closest('.band-overview-popover')))) return;
-  if (popup && (popup.contains(related) || (related && related.closest && related.closest('.band-overview')))) return;
-  if (!host && !popup) return;
-  clearTimeout(overviewPopupState.closeTimer);
-  overviewPopupState.closeTimer = setTimeout(closeOverviewPopup, 220);
-});
-window.addEventListener('resize', positionOverviewPopup, { passive: true });
-window.addEventListener('scroll', positionOverviewPopup, { passive: true, capture: true });
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
   const m = ui.month, y = m.getFullYear(), mo = m.getMonth();
