@@ -4,7 +4,7 @@
 
   const loadCore = () => {
     if (window.__bandplanCorePromise) return window.__bandplanCorePromise;
-    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261019-popover-portal-mobile-card-v2').catch(error => {
+    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261019-plain-text-event-hover-v3').catch(error => {
       console.error('BandPlan core failed to load:', error);
       const boot = document.getElementById('boot');
       if (boot) {
