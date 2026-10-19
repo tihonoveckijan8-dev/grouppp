@@ -13404,3 +13404,61 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     overflow-x: hidden !important;
   }
 }
+
+
+/* WHY: On desktop, keep the calendar and its overview beside the sidebar while the upcoming-events list occupies a separate right column. Mobile/tablet flow stays unchanged. */
+@media (min-width: 1100px) {
+  body[data-route="calendar"] #view {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(340px, .88fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    column-gap: 24px;
+    row-gap: 16px;
+  }
+  body[data-route="calendar"] #view > .hero {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    min-width: 0;
+  }
+  body[data-route="calendar"] #view > section.card:has(.cal-grid),
+  body[data-route="calendar"] #view > section.card:has(.cal-week),
+  body[data-route="calendar"] #view > section.card:has(.cal-day) {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    min-width: 0;
+  }
+  body[data-route="calendar"] #view > .calendar-search-row {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    min-width: 0;
+    align-self: end;
+  }
+  body[data-route="calendar"] #view > .active-chips {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    align-self: end;
+  }
+  body[data-route="calendar"] #view > section.card:has(#upH) {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    min-width: 0;
+    align-self: stretch;
+  }
+}
