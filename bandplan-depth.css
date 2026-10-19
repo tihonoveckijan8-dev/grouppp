@@ -1189,3 +1189,97 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
     display: none !important;
   }
 }
+
+
+/* WHY: Overview metrics behave like lightweight event browsers; the popover works with hover on desktop and tap on touch screens. */
+@media (min-width: 900px) {
+  html body[data-route="calendar"] .band-overview-metric {
+    appearance: none;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+    transition: background .16s ease, transform .16s ease;
+    border-radius: 10px;
+  }
+  html body[data-route="calendar"] .band-overview-metric:hover,
+  html body[data-route="calendar"] .band-overview-metric:focus-visible {
+    background: color-mix(in srgb, var(--a) 9%, transparent);
+    outline: none;
+  }
+}
+html body[data-route="calendar"] .band-overview-metric:focus-visible {
+  outline: 2px solid var(--a);
+  outline-offset: 2px;
+}
+html body[data-route="calendar"] .band-overview-popover[hidden] { display: none !important; }
+html body[data-route="calendar"] .band-overview-popover {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% - 2px);
+  right: 110px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 15px;
+  border: 1px solid color-mix(in srgb, var(--ln) 78%, transparent);
+  border-radius: 17px;
+  background: var(--surface-1);
+  color: var(--tx);
+  box-shadow: var(--dp-raise-md, 0 18px 48px rgba(0,0,0,.22));
+  animation: band-overview-pop-in .16s ease-out both;
+}
+html body[data-route="calendar"] .band-overview-popover-head,
+html body[data-route="calendar"] .band-overview-popover-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+html body[data-route="calendar"] .band-overview-popover-head > span {
+  color: var(--mu);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+html body[data-route="calendar"] .band-overview-popover-head button,
+html body[data-route="calendar"] .band-overview-popover-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid var(--ln);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--tx);
+  cursor: pointer;
+}
+html body[data-route="calendar"] .band-overview-popover-nav button:disabled { opacity: .38; cursor: default; }
+html body[data-route="calendar"] .band-overview-popover-count { margin-top: 10px; color: var(--mu); font-size: 11px; }
+html body[data-route="calendar"] .band-overview-popover-event { padding: 7px 0 12px; }
+html body[data-route="calendar"] .band-overview-popover-event h3 { margin: 9px 0 5px; font-size: 17px; line-height: 1.3; overflow-wrap: anywhere; }
+html body[data-route="calendar"] .band-overview-popover-event p { margin: 0; color: var(--mu); font-size: 12px; line-height: 1.5; }
+html body[data-route="calendar"] .band-overview-popover-notes { margin-top: 9px; color: var(--mu); font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+html body[data-route="calendar"] .band-overview-popover-event .btn { margin-top: 12px; min-height: 38px; }
+html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2px 4px; color: var(--mu); font-size: 13px; }
+@keyframes band-overview-pop-in { from { opacity: 0; transform: translateY(-4px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 899px) {
+  html body[data-route="calendar"] .band-overview-metrics { width: 100%; }
+  html body[data-route="calendar"] .band-overview-metric { appearance: none; font: inherit; text-align: left; color: inherit; background: transparent; cursor: pointer; }
+  html body[data-route="calendar"] .band-overview-popover {
+    position: fixed;
+    z-index: 1000;
+    top: auto;
+    right: 12px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    left: 12px;
+    width: auto;
+    max-height: min(65dvh, 520px);
+    overflow: auto;
+    padding: 16px;
+    border-radius: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) { html body[data-route="calendar"] .band-overview-popover { animation: none !important; } }
