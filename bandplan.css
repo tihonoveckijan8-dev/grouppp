@@ -12933,27 +12933,6 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   transform: translateY(1px) !important;
 }
 
-/* BandPlan primary navigation — custom soft-clay music icons.
-   WHY: These four icons are the recognizable navigation set; keep them free of icon tiles
-   so their sculpted silhouettes sit directly on the existing sidebar/bottom-bar surface. */
-.nav-icon-clay {
-  display: block;
-  flex: 0 0 auto;
-  overflow: visible;
-  transform: translateY(0) scale(1);
-  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--accent) 12%, transparent));
-  transition: transform 180ms cubic-bezier(.2,.8,.2,1), filter 180ms ease;
-}
-.nav-item.active .nav-icon-clay,
-.bottom-nav a.active .nav-icon-clay {
-  transform: translateY(-1px) scale(1.04);
-  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--accent) 32%, transparent));
-}
-.nav-item:hover .nav-icon-clay,
-.bottom-nav a:hover .nav-icon-clay {
-  transform: translateY(-1px);
-}
-@media (prefers-reduced-motion: reduce) {
-  .nav-icon-clay { transition: none; }
-}
+/* WHY: Custom navigation SVGs intentionally inherit the same color and sizing as the original icons. */
+.nav-icon-clay { display: block; flex: 0 0 auto; overflow: visible; }
 
