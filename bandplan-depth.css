@@ -1075,3 +1075,29 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
   }
 }
 
+
+/* WHY: Apply the calendar desktop layout in the final-loaded stylesheet so cached/legacy layout rules cannot leave the event list below the calendar. */
+@media (min-width: 900px) {
+  html body[data-route="calendar"] #app #view {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr) !important;
+    column-gap: 22px !important;
+  }
+  html body[data-route="calendar"] #app #view > section.card:has(.cal-head) {
+    grid-column: 1 !important;
+    grid-row: 2 / 4 !important;
+  }
+  html body[data-route="calendar"] #app #view > .calendar-search-row {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    transform: translateY(-50px) !important;
+  }
+  html body[data-route="calendar"] #app #view > .active-chips {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+  }
+  html body[data-route="calendar"] #app #view > section.card:has(#upH) {
+    grid-column: 2 !important;
+    grid-row: 3 !important;
+  }
+}
