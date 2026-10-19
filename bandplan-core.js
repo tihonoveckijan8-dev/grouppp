@@ -1461,9 +1461,7 @@ function render() {
     acts = '<button class="btn btn-primary" type="button" data-act="scene-setlist" data-id="' + esc(r.id) + '">' + ic('monitor', 17) + 'Открыть на сцене</button>';
     actionBarHTML = '';
   } else if (r.name === 'settings') acts = '<button class="btn btn-secondary" type="button" data-act="export">' + ic('dl', 17) + 'Скачать копию</button>';
-  $('#pageHead').innerHTML = (r.name === 'songs' || r.name === 'setlists') ? '' :
-    '<div style="min-width:0;flex:1">' + crumb + '<h1>' + esc(hd[0]) + '</h1></div>' +
-    (acts ? '<div class="ph-acts">' + acts + '</div>' : '');
+  $('#pageHead').innerHTML = acts ? '<div class="ph-acts">' + acts + '</div>' : '';
   document.body.setAttribute('data-actionbar', actionBarHTML ? '1' : '0');
 
   const v = $('#view');
@@ -1796,10 +1794,7 @@ function filteredSongs() {
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
 function vSongs() {
   const list = filteredSongs(), tags = allTags();
-  let h = '<div class="songs-head-row">' +
-    '<h1>Репертуар</h1>' +
-  '</div>' +
-  '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -2063,10 +2058,7 @@ function filteredSetlists() {
 }
 function vSetlists() {
   const list = filteredSetlists();
-  let h = '<div class="songs-head-row setlists-head-row">' +
-    '<h1>Сет-листы</h1>' +
-  '</div>' +
-  '<div class="toolbar songs-search-row setlists-search-row">' +
+  let h = '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
