@@ -1632,24 +1632,24 @@ function guitarDiagram(chord) {
   return '<div class="guitar-diagram">'+svg+'</div>';
 }
 function pianoDiagram(notes) {
-  // WHY: use native SVG instead of a CDN package so the keyboard is visible instantly, on mobile, and offline.
+  // WHY: render one octave only; repeating C–B twice made the chord diagram look duplicated and harder to read.
   const enharmonic = {Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
   const active = new Set(notes.map(note => enharmonic[note] || note));
   const whiteNotes = ['C','D','E','F','G','A','B'];
   const blackNotes = [{note:'C#',after:0},{note:'D#',after:1},{note:'F#',after:3},{note:'G#',after:4},{note:'A#',after:5}];
-  const keyW=26, keyH=145, startX=10, whiteCount=14;
-  let svg='<svg class="piano-chord-svg" viewBox="0 0 '+(startX*2+keyW*whiteCount)+' 178" role="img" aria-label="Ноты аккорда на клавиатуре пианино">';
+  const keyW=26, keyH=145, startX=10, whiteCount=7;
+  let svg='<svg class="piano-chord-svg" viewBox="0 0 '+(startX*2+keyW*whiteCount)+' 178" role="img" aria-label="Одна октава клавиатуры пианино с подсвеченными нотами аккорда">';
   for(let i=0;i<whiteCount;i++){
-    const note=whiteNotes[i%7], x=startX+i*keyW, isActive=active.has(note);
+    const note=whiteNotes[i], x=startX+i*keyW, isActive=active.has(note);
     svg+='<rect x="'+x+'" y="8" width="'+keyW+'" height="'+keyH+'" rx="2" class="'+(isActive?'piano-svg-white active':'piano-svg-white')+'"/>';
     svg+='<text x="'+(x+keyW/2)+'" y="142" text-anchor="middle" class="'+(isActive?'piano-svg-label active':'piano-svg-label')+'">'+note+'</text>';
   }
-  for(let oct=0;oct<2;oct++) blackNotes.forEach(({note,after})=>{
-    const x=startX+(oct*7+after+1)*keyW-7.5, isActive=active.has(note);
+  blackNotes.forEach(({note,after})=>{
+    const x=startX+(after+1)*keyW-7.5, isActive=active.has(note);
     svg+='<rect x="'+x+'" y="8" width="15" height="86" rx="2" class="'+(isActive?'piano-svg-black active':'piano-svg-black')+'"/>';
     if(isActive) svg+='<text x="'+(x+7.5)+'" y="84" text-anchor="middle" class="piano-svg-black-label">'+note+'</text>';
   });
-  svg+='<text x="'+startX+'" y="170" class="piano-svg-octave">2 октавы · подсвечены ноты аккорда</text></svg>';
+  svg+='<text x="'+startX+'" y="170" class="piano-svg-octave">Одна октава · подсвечены ноты аккорда</text></svg>';
   return '<div class="piano-diagram">'+svg+'</div>';
 }
 function stopTuner() {
