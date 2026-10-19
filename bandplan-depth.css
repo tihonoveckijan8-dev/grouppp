@@ -1525,3 +1525,22 @@ html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2p
     display: none !important;
   }
 }
+
+
+/* WHY: Group overview counters are informational text, not interactive controls. Keep them visually static and suppress legacy popover affordances. */
+html body[data-route="calendar"] .band-overview-metric,
+html body[data-route="calendar"] .band-overview-metric:hover,
+html body[data-route="calendar"] .band-overview-metric:focus,
+html body[data-route="calendar"] .band-overview-metric:focus-visible {
+  cursor: default !important;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+html body[data-route="calendar"] .band-overview-popover {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
