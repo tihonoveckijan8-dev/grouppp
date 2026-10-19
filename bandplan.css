@@ -13011,3 +13011,91 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
 #app #view .setlists-head-row {
   display: none !important;
 }
+
+
+/* Calendar search: match the premium search treatment used in Repertoire and Setlists. */
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search{
+  position:relative;
+  display:flex;
+  align-items:center;
+  height:50px;
+  min-height:50px;
+  padding:0 10px 0 15px;
+  gap:10px;
+  border:1px solid var(--border)!important;
+  border-radius:14px!important;
+  background:var(--surf-2)!important;
+  box-shadow:var(--shadow-1)!important;
+  overflow:hidden;
+  transition:border-color var(--t-btn),box-shadow var(--t-btn),background-color var(--t-btn),transform var(--t-btn);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search::after{
+  content:"";
+  position:absolute;
+  left:15px;
+  right:15px;
+  bottom:0;
+  height:2px;
+  border-radius:2px 2px 0 0;
+  background:var(--accent);
+  opacity:0;
+  transform:scaleX(.45);
+  transform-origin:center;
+  transition:opacity var(--t-btn),transform var(--t-btn);
+  pointer-events:none;
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search:hover{
+  border-color:var(--accent-ring)!important;
+  background:var(--surf-3)!important;
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search:focus-within{
+  border-color:var(--accent)!important;
+  background:var(--surf-2)!important;
+  box-shadow:0 0 0 3px var(--accent-soft),var(--shadow-1)!important;
+  transform:translateY(-1px);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search:focus-within::after{
+  opacity:1;
+  transform:scaleX(1);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search > svg{
+  width:20px;
+  height:20px;
+  flex:none;
+  color:var(--muted);
+  transition:color var(--t-btn),transform var(--t-btn);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search:focus-within > svg{
+  color:var(--accent);
+  transform:scale(1.08);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search #evQ{
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  height:100%;
+  padding-inline:0;
+  font-size:14px;
+  line-height:1;
+  color:var(--text);
+  font-weight:var(--fw-med);
+}
+body[data-route="calendar"] .toolbar:has(#evQ) .tb-search #evQ::placeholder{
+  color:var(--muted);
+  opacity:.9;
+  font-weight:var(--fw-reg);
+}
+@media(max-width:640px){
+  body[data-route="calendar"] .toolbar:has(#evQ) .tb-search{
+    height:50px;
+    min-height:50px;
+    padding-left:13px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-route="calendar"] .toolbar:has(#evQ) .tb-search,
+  body[data-route="calendar"] .toolbar:has(#evQ) .tb-search::after,
+  body[data-route="calendar"] .toolbar:has(#evQ) .tb-search > svg{
+    transition:none;
+  }
+}
