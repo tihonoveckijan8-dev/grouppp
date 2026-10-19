@@ -1321,6 +1321,7 @@ const TABS = [
   { k: 'calendar', t: 'Календарь', i: 'calendar', h: '#/calendar' },
   { k: 'songs', t: 'Песни', i: 'music', h: '#/songs' },
   { k: 'setlists', t: 'Сет-листы', i: 'list', h: '#/setlists' },
+  { k: 'tools', t: 'Инструменты', i: 'sliders', h: '#/tools' },
   { k: 'settings', t: 'Настройки', i: 'gear', h: '#/settings' }
 ];
 const HEADERS = {
@@ -1329,7 +1330,8 @@ const HEADERS = {
   song: ['Песня', 'Текст с аккордами, транспонирование и динамика вашей партии'],
   setlists: ['Сет-листы', 'Программы выступлений: порядок песен, тональности, переходы и заметки'],
   setlist: ['Сет-лист', 'Перетащите песни в нужном порядке и задайте параметры каждого номера'],
-  settings: ['Настройки', 'Профиль, состав группы, оформление интерфейса и данные']
+  settings: ['Настройки', 'Профиль, состав группы, оформление интерфейса и данные'],
+  tools: ['Инструменты', 'Тюнеры, метроном и библиотека аккордов']
 };
 function parseHash() {
   const h = (location.hash || '#/calendar').replace(/^#\/?/, '');
@@ -1489,6 +1491,7 @@ function render() {
     else if (r.name === 'setlists') html = vSetlists();
     else if (r.name === 'setlist') html = vSetlist(r.id);
     else if (r.name === 'settings') html = vSettings();
+    else if (r.name === 'tools') html = vTools();
     else html = '<div class="card">' + stateHTML('err', 'Раздел не найден', 'Проверьте адрес или вернитесь в расписание.', '<a class="btn btn-primary" href="#/calendar">Открыть расписание</a>') + '</div>';
     v.innerHTML = html + (actionBarHTML || '');
     v.setAttribute('aria-busy', 'false');
@@ -1512,6 +1515,7 @@ function renderViewOnly() {
     else if (r.name === 'setlists') html = vSetlists();
     else if (r.name === 'setlist') html = vSetlist(r.id);
     else if (r.name === 'settings') html = vSettings();
+    else if (r.name === 'tools') html = vTools();
     else return;
     v.innerHTML = html + (actionBarHTML || '');
     v.setAttribute('aria-busy', 'false');
@@ -1531,6 +1535,82 @@ function afterRender(r) {
   if (r.name === 'calendar') scrollTimeGrid();
 }
 function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new Date(); sc.scrollTop = clamp((n.getHours() - 8) * 48, 0, 800); } }
+
+
+/* ═══ MUSICIAN TOOLS ═══
+   WHY: microphone access is opt-in and Web Audio is created only after a user gesture;
+   the tuner and metronome work locally without uploading audio or requiring a third-party service. */
+let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0, metroTimer = 0, metroCtx = null, metroBeat = 0;
+const TOOL_TABS = [
+  ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
+];
+function vTools() {
+  const tab = TOOL_TABS.some(x => x[0] === toolTab) ? toolTab : 'guitar-tuner';
+  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'">'+esc(label)+'</button>').join('') + '</div>';
+  let body = '';
+  if (tab === 'guitar-tuner' || tab === 'violin-tuner') body = tunerHTML(tab);
+  else if (tab === 'metronome') body = metroHTML();
+  else body = chordLibraryHTML(tab);
+  return '<section class="tools-page">'+tabs+'<div class="tools-panel">'+body+'</div></section>';
+}
+function tunerHTML(tab) {
+  const violin = tab === 'violin-tuner';
+  const strings = violin ? [['E5','Ми','659.25'],['A4','Ля','440.00'],['D4','Ре','293.66'],['G3','Соль','196.00']] : [['E4','Ми','329.63'],['B3','Си','246.94'],['G3','Соль','196.00'],['D3','Ре','146.83'],['A2','Ля','110.00'],['E2','Ми','82.41']];
+  return '<div class="tool-eyebrow">ХРОМАТИЧЕСКИЙ ТЮНЕР</div><h2>'+(violin?'Тюнер для скрипки':'Тюнер для гитары')+'</h2><p class="tool-subtitle">Разрешите доступ к микрофону. Звук анализируется прямо в браузере.</p><div class="tuner-readout"><div class="tuner-note" id="tunerNote">—</div><div class="tuner-frequency" id="tunerFrequency">Ожидание сигнала</div><div class="tuner-meter" aria-label="Точность настройки"><i id="tunerNeedle"></i></div><div class="tuner-meter-labels"><span>♭ Ниже</span><span>В строе</span><span>Выше ♯</span></div><div class="tuner-cents" id="tunerCents">0 cents</div></div><div class="tuner-strings">'+strings.map(s=>'<button type="button" class="tuner-string" data-act="tuner-reference" data-note="'+s[0]+'" data-freq="'+s[2]+'"><b>'+s[0]+'</b><span>'+s[1]+'</span><small>'+s[2]+' Hz</small></button>').join('')+'</div><div class="tool-actions"><button class="btn btn-primary" type="button" data-act="tuner-start" id="tunerStart">Включить микрофон</button><button class="btn btn-secondary" type="button" data-act="tuner-stop" id="tunerStop" disabled>Остановить</button></div><p class="tool-status" id="tunerStatus" aria-live="polite">Стандартный строй · A4 = 440 Hz</p>';
+}
+function metroHTML() {
+  return '<div class="tool-eyebrow">РИТМ И ТЕМП</div><h2>Метроном</h2><p class="tool-subtitle">Точный ритм через Web Audio. Работает локально, даже без сети.</p><div class="metro-display"><div class="metro-bpm" id="metroBpm">120</div><div class="metro-unit">ударов в минуту</div><div class="metro-pulse" id="metroPulse" aria-hidden="true"></div></div><div class="metro-controls"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="-5">−5</button><input id="metroRange" type="range" min="30" max="240" value="120" aria-label="Темп в ударах в минуту"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="5">+5</button></div><div class="metro-presets">'+[60,80,100,120,140,160,180].map(n=>'<button type="button" class="btn btn-secondary" data-act="metro-preset" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="metro-options"><label>Размер<select id="metroBeats"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option></select></label><label>Акцент<select id="metroAccent"><option value="on">Первый удар</option><option value="off">Без акцента</option></select></label></div><button type="button" class="btn btn-primary metro-start" id="metroToggle" data-act="metro-toggle">▶ Запустить</button><p class="tool-status" id="metroStatus" aria-live="polite">30–240 BPM · регулируемый размер</p>';
+}
+const CHORDS = {
+ C:{notes:['C','E','G'],guitar:'x32010',fingers:[0,3,2,0,1,0]},Cm:{notes:['C','Eb','G'],guitar:'x3101x',fingers:[0,3,1,0,1,0]},D:{notes:['D','F#','A'],guitar:'xx0232',fingers:[0,0,0,2,3,2]},Dm:{notes:['D','F','A'],guitar:'xx0231',fingers:[0,0,0,2,3,1]},E:{notes:['E','G#','B'],guitar:'022100',fingers:[0,2,3,1,0,0]},Em:{notes:['E','G','B'],guitar:'022000',fingers:[0,2,3,0,0,0]},F:{notes:['F','A','C'],guitar:'133211',fingers:[1,3,4,2,1,1]},G:{notes:['G','B','D'],guitar:'320003',fingers:[3,2,0,0,0,4]},A:{notes:['A','C#','E'],guitar:'x02220',fingers:[0,0,2,3,4,0]},Am:{notes:['A','C','E'],guitar:'x02210',fingers:[0,0,2,3,1,0]},B:{notes:['B','D#','F#'],guitar:'x24442',fingers:[0,1,3,4,2,1]},Bm:{notes:['B','D','F#'],guitar:'x24432',fingers:[0,1,3,4,2,1]},'C7':{notes:['C','E','G','Bb'],guitar:'x32310',fingers:[0,3,2,4,1,0]},'D7':{notes:['D','F#','A','C'],guitar:'xx0212',fingers:[0,0,0,2,1,3]},'E7':{notes:['E','G#','B','D'],guitar:'020100',fingers:[0,2,0,1,0,0]},'G7':{notes:['G','B','D','F'],guitar:'320001',fingers:[3,2,0,0,0,1]},'Am7':{notes:['A','C','E','G'],guitar:'x02010',fingers:[0,0,2,0,1,0]},'Fmaj7':{notes:['F','A','C','E'],guitar:'xx3210',fingers:[0,0,3,2,1,0]}
+};
+function chordNames() { return Object.keys(CHORDS); }
+function chordLibraryHTML(tab) {
+  const piano = tab === 'piano-chords';
+  const names = chordNames();
+  const selected = CHORDS[window.__bpSelectedChord] ? window.__bpSelectedChord : 'C';
+  return '<div class="tool-eyebrow">СПРАВОЧНИК</div><h2>'+(piano?'Библиотека аккордов · пианино':'Библиотека аккордов · гитара')+'</h2><p class="tool-subtitle">Выберите аккорд, чтобы посмотреть состав и аппликатуру.</p><div class="chord-picker">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div><h3>'+selected+'</h3><p>Ноты: '+CHORDS[selected].notes.join(' · ')+'</p><p class="tool-status">'+(piano?'Нажмите клавиши на схеме, чтобы увидеть расположение нот.':'Номера пальцев: 1 — указательный, 2 — средний, 3 — безымянный, 4 — мизинец.')+'</p></div>'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div>';
+}
+function guitarDiagram(chord) {
+  const strings = chord.guitar.split('');
+  return '<div class="guitar-diagram" aria-label="Аппликатура аккорда"><div class="guitar-fret-labels"><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div><div class="guitar-strings">'+strings.map((v,i)=>'<div class="guitar-string"><span class="guitar-open">'+(v==='x'?'×':v==='0'?'○':'')+'</span><span class="guitar-dot" style="grid-row:'+(v>0?Math.min(5,Number(v)+1):1)+'">'+(v>0?(chord.fingers[i]||'•'):'')+'</span></div>').join('')+'</div><small>Струны от 6-й (толстой) к 1-й</small></div>';
+}
+function pianoDiagram(notes) {
+  const keys = ['C','D','E','F','G','A','B'];
+  return '<div class="piano-diagram" aria-label="Клавиатура пианино"><div class="piano-keys">'+keys.map((n,i)=>'<div class="piano-white-key'+(notes.includes(n)?' chord-note':'')+'"><span>'+n+'</span></div>').join('')+['C#','D#',null,'F#','G#','A#'].map((n,i)=>n?'<div class="piano-black-key'+(notes.includes(n)?' chord-note':'')+'" style="left:calc('+(i<2?i:i+1)+' * 14.2857% - 5%)"><span>'+n+'</span></div>':'').join('')+'</div><p>Подсвечены ноты аккорда в одной октаве.</p></div>';
+}
+function stopTuner() {
+  if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
+  if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null; toolAudio = null;
+}
+function pitchFromBuffer(buf, sampleRate) {
+  let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
+  if(rms<0.012) return null;
+  let best=-1, bestCorr=0, minLag=Math.floor(sampleRate/1000), maxLag=Math.floor(sampleRate/55);
+  for(let lag=minLag;lag<=maxLag;lag++){let corr=0;for(let i=0;i<buf.length-lag;i++)corr+=buf[i]*buf[i+lag];corr/=buf.length-lag;if(corr>bestCorr){bestCorr=corr;best=lag;}}
+  if(best<1||bestCorr<0.12)return null;
+  return sampleRate/best;
+}
+async function startTuner() {
+  if(!navigator.mediaDevices?.getUserMedia){toast('Браузер не поддерживает доступ к микрофону','err');return;}
+  try {
+    stopTuner();
+    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    const Ctx=window.AudioContext||window.webkitAudioContext; toolAudio=new Ctx();
+    const source=toolAudio.createMediaStreamSource(tunerStream), analyser=toolAudio.createAnalyser(); analyser.fftSize=4096; analyser.smoothingTimeConstant=0.15; source.connect(analyser);
+    const buf=new Float32Array(analyser.fftSize), noteNames=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+    const tick=()=>{ if(!toolAudio||!tunerStream)return; analyser.getFloatTimeDomainData(buf); const hz=pitchFromBuffer(buf,toolAudio.sampleRate); if(hz&&hz>45&&hz<1200){const midi=Math.round(69+12*Math.log2(hz/440)),ideal=440*Math.pow(2,(midi-69)/12),cents=1200*Math.log2(hz/ideal),note=noteNames[(midi%12+12)%12]+(Math.floor(midi/12)-1);const n=$('#tunerNote'),f=$('#tunerFrequency'),needle=$('#tunerNeedle'),cent=$('#tunerCents');if(n)n.textContent=note;if(f)f.textContent=hz.toFixed(1)+' Hz';if(needle)needle.style.left=(50+Math.max(-50,Math.min(50,cents))*0.9)+'%';if(cent)cent.textContent=(cents>0?'+':'')+Math.round(cents)+' cents';} tunerFrame=requestAnimationFrame(tick);};
+    $('#tunerStatus').textContent='Микрофон активен · сыграйте одну струну';$('#tunerStart').disabled=true;$('#tunerStop').disabled=false; await toolAudio.resume(); tick();
+  } catch(err){stopTuner();const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');}
+}
+function stopMetro() { if(metroTimer)clearTimeout(metroTimer);metroTimer=0;const b=$('#metroToggle');if(b){b.textContent='▶ Запустить';b.classList.remove('is-running');} }
+function setMetroBpm(value) { const bpm=clamp(Number(value)||120,30,240);const range=$('#metroRange'),label=$('#metroBpm');if(range)range.value=bpm;if(label)label.textContent=bpm;if(metroTimer){stopMetro();startMetro();} }
+async function startMetro() {
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){toast('Web Audio не поддерживается этим браузером','err');return;}
+  metroCtx=metroCtx||new Ctx();await metroCtx.resume();metroBeat=0;
+  const tick=()=>{if(!metroCtx)return;const now=metroCtx.currentTime,beats=Number($('#metroBeats')?.value||4),accent=$('#metroAccent')?.value!=='off',osc=metroCtx.createOscillator(),gain=metroCtx.createGain();osc.frequency.value=metroBeat===0&&accent?1400:950;gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(.22,now+.004);gain.gain.exponentialRampToValueAtTime(.0001,now+.055);osc.connect(gain);gain.connect(metroCtx.destination);osc.start(now);osc.stop(now+.06);const pulse=$('#metroPulse');if(pulse){pulse.classList.toggle('on');pulse.dataset.beat=String(metroBeat+1);}metroBeat=(metroBeat+1)%beats;metroTimer=setTimeout(tick,60000/(Number($('#metroRange')?.value||120)));};
+  const b=$('#metroToggle');if(b){b.textContent='Ⅱ Остановить';b.classList.add('is-running');}tick();
+}
 
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
@@ -3015,6 +3095,23 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
+    case 'tool-tab': {
+      stop(); stopTuner(); stopMetro();
+      toolTab = el.getAttribute('data-v') || 'guitar-tuner';
+      render();
+      break;
+    }
+    case 'tuner-start': stop(); startTuner(); break;
+    case 'tuner-stop': stop(); stopTuner(); const ts=$('#tunerStatus'); if(ts)ts.textContent='Тюнер остановлен'; const tstart=$('#tunerStart'),tstop=$('#tunerStop');if(tstart)tstart.disabled=false;if(tstop)tstop.disabled=true;break;
+    case 'tuner-reference': {
+      stop(); const freq=Number(el.getAttribute('data-freq')), note=el.getAttribute('data-note');
+      try { const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)throw new Error('Web Audio недоступен'); const ctx=new Ctx();ctx.resume().then(()=>{const osc=ctx.createOscillator(),gain=ctx.createGain();osc.frequency.value=freq;gain.gain.value=.08;osc.connect(gain);gain.connect(ctx.destination);osc.start();setTimeout(()=>{osc.stop();ctx.close();},900);}); } catch(err){toast(err.message,'err');}
+      break;
+    }
+    case 'metro-bpm': stop(); setMetroBpm(Number($('#metroRange')?.value||120)+Number(el.getAttribute('data-d')||0)); break;
+    case 'metro-preset': stop(); setMetroBpm(el.getAttribute('data-v')); break;
+    case 'metro-toggle': stop(); if(metroTimer)stopMetro();else startMetro(); break;
+    case 'chord-pick': stop(); window.__bpSelectedChord=el.getAttribute('data-v')||'C'; render(); break;
     case 'settings-tab': {
       stop();
       const tabs = el.closest('.settings-tabs');
