@@ -1639,7 +1639,7 @@ async function startTuner() {
     const source=toolAudio.createMediaStreamSource(tunerStream),analyser=toolAudio.createAnalyser();
     analyser.fftSize=4096;analyser.smoothingTimeConstant=0;source.connect(analyser);
     const buf=new Float32Array(analyser.fftSize),noteNames=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-    let lastPitchTick=0,smoothedHz=0,lastNote='',stableCount=0;
+    let lastPitchTick=0,smoothedHz=0,lastNote='',lastSignalAt=performance.now();
     const tick=()=>{
       if(!toolAudio||!tunerStream)return;
       const now=performance.now();
@@ -1649,11 +1649,12 @@ async function startTuner() {
       if(detected&&detected.frequency>55&&detected.frequency<1000){
         // WHY: exponential smoothing stabilizes microphone noise while retaining a quick response to a newly plucked string.
         const rawHz=detected.frequency;
-        if(!smoothedHz||Math.abs(1200*Math.log2(rawHz/smoothedHz))>450){smoothedHz=rawHz;stableCount=0;}
+        if(!smoothedHz||Math.abs(1200*Math.log2(rawHz/smoothedHz))>450){smoothedHz=rawHz;}
         else smoothedHz=smoothedHz*0.62+rawHz*0.38;
         const midi=Math.round(69+12*Math.log2(smoothedHz/440)),ideal=440*Math.pow(2,(midi-69)/12);
         const cents=1200*Math.log2(smoothedHz/ideal),note=noteNames[(midi%12+12)%12]+(Math.floor(midi/12)-1);
-        if(note===lastNote)stableCount++;else{lastNote=note;stableCount=0;}
+        if(note!==lastNote)lastNote=note;
+        lastSignalAt=now;
         const n=$('#tunerNote'),f=$('#tunerFrequency'),needle=$('#tunerNeedle'),cent=$('#tunerCents');
         if(n)n.textContent=note;
         if(f)f.textContent=smoothedHz.toFixed(2)+' Hz';
@@ -1661,7 +1662,7 @@ async function startTuner() {
         if(cent)cent.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents';
       } else {
         // WHY: don't snap the needle to zero during the short silent gap between plucks; keep the last reading visible.
-        const status=$('#tunerStatus');if(status&&now-lastPitchTick>1400)status.textContent='Сигнал не найден · сыграйте одну струну ближе к микрофону';
+        const status=$('#tunerStatus');if(status&&now-lastSignalAt>1400)status.textContent='Сигнал не найден · сыграйте одну струну ближе к микрофону';
       }
       tunerFrame=requestAnimationFrame(tick);
     };
