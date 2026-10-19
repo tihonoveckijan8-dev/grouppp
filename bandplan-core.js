@@ -1404,7 +1404,7 @@ function buildChrome() {
   $('[data-act="scene-auto"]').innerHTML = ic(scene.auto ? 'pause' : 'play', 19);
 }
 function updateNav(k) {
-  $('[data-nav]').forEach(a => a.classList.toggle('active', a.getAttribute('data-nav') === k));
+  $$('[data-nav]').forEach(a => a.classList.toggle('active', a.getAttribute('data-nav') === k));
   /* WHY: One shared indicator slides between bottom tabs instead of each tab painting its own background. */
   const nav = $('#botNav'), active = nav && nav.querySelector('[data-nav].active'), indicator = nav && nav.querySelector('.bottom-nav-indicator');
   if (nav && active && indicator) {
