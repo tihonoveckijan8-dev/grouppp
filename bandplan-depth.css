@@ -1090,7 +1090,7 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
   html body[data-route="calendar"] #app #view > .calendar-search-row {
     grid-column: 2 !important;
     grid-row: 2 !important;
-    transform: translateY(-30.5px) !important;
+    transform: translateY(-31px) !important;
   }
   html body[data-route="calendar"] #app #view > .active-chips {
     grid-column: 2 !important;
