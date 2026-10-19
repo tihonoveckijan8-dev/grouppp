@@ -1534,16 +1534,86 @@ function renderViewOnly() {
     // scroll the calendar time-grid back to "now".
     if (r.name === 'setlist' && r.id) bindDnD(r.id);
     if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
+    if (r.name === 'tools' && (toolTab === 'guitar-chords' || toolTab === 'piano-chords')) enhanceChordLibrary();
     scheduleOfflineSongSync(1400);
   } catch (err) {
     console.warn('BandPlan partial view render failed:', err);
     render();
   }
 }
+let bpSvguitarPromise = null, bpPianoChartPromise = null, bpPianoChartInstance = null;
+function loadSvguitar() {
+  if (window.svguitar?.SVGuitarChord) return Promise.resolve(window.svguitar);
+  if (bpSvguitarPromise) return bpSvguitarPromise;
+  bpSvguitarPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://omnibrain.github.io/svguitar/js/svguitar.umd.js';
+    script.async = true;
+    script.onload = () => window.svguitar?.SVGuitarChord ? resolve(window.svguitar) : reject(new Error('SVGuitar API unavailable'));
+    script.onerror = () => reject(new Error('SVGuitar could not load'));
+    document.head.appendChild(script);
+  });
+  return bpSvguitarPromise;
+}
+function loadPianoChart() {
+  if (bpPianoChartPromise) return bpPianoChartPromise;
+  bpPianoChartPromise = import('https://cdn.jsdelivr.net/npm/piano-chart@1.5.0/+esm').then(mod => {
+    if (!mod.Instrument) throw new Error('piano-chart API unavailable');
+    return mod;
+  });
+  return bpPianoChartPromise;
+}
+function enhanceChordLibrary() {
+  const host = $('#bpChordDiagram');
+  if (!host) return;
+  const chordName = host.getAttribute('data-chord') || 'C';
+  const chord = CHORDS[chordName];
+  if (!chord) return;
+  const piano = host.getAttribute('data-instrument') === 'piano';
+  const setStatus = message => { const node = $('#chordLibraryStatus'); if (node) node.textContent = message; };
+  (piano ? loadPianoChart() : loadSvguitar()).then(api => {
+    const current = $('#bpChordDiagram');
+    if (!current || current.getAttribute('data-chord') !== chordName || (current.getAttribute('data-instrument') === 'piano') !== piano) return;
+    current.replaceChildren();
+    if (piano) {
+      if (bpPianoChartInstance?.destroy) bpPianoChartInstance.destroy();
+      const root = chordName.match(/^[A-G](?:#|b)?/)?.[0] || 'C';
+      const enharmonic = {Db:'C#',Eb:'D#',Gb:'F#',Ab:'G#',Bb:'A#'};
+      const highlighted = chord.notes.map(note => enharmonic[note] || note);
+      bpPianoChartInstance = new api.Instrument(current, {
+        startOctave: 3, endOctave: 5, highlightedNotes: highlighted,
+        specialHighlightedNotes: [{note: enharmonic[root] || root}],
+        showNoteNames: 'onhighlight', keyPressStyle: 'subtle'
+      });
+      bpPianoChartInstance.create();
+      setStatus('Визуализация piano-chart · нажимайте клавиши для выделения нот.');
+      return;
+    }
+    const frets = chord.guitar.split('');
+    const played = frets.filter(v => v !== 'x' && v !== '0').map(Number).filter(Number.isFinite);
+    const pos = played.length ? Math.max(1, Math.min(...played)) : 1;
+    const fingers = [];
+    frets.forEach((fret, index) => {
+      const stringNo = 6 - index;
+      if (fret === 'x') fingers.push([stringNo, 'x']);
+      else if (fret === '0') fingers.push([stringNo, 0]);
+      else fingers.push([stringNo, Number(fret), String(chord.fingers[index] || '')]);
+    });
+    new api.SVGuitarChord(current).configure({
+      strings: 6, frets: 5, position: pos,
+      color: getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#222',
+      backgroundColor: 'transparent', strokeWidth: 1.5
+    }).chord({title: chordName, fingers, position: pos}).draw();
+    setStatus('Аппликатура SVGuitar · расширенная библиотека аккордов.');
+  }).catch(() => {
+    setStatus(navigator.onLine === false ? 'Офлайн-режим: используется встроенная схема аккорда.' : 'Используется встроенная схема аккорда.');
+  });
+}
 function afterRender(r) {
   if (r.name === 'setlist' && r.id) bindDnD(r.id);
   if (r.name === 'settings') { bindSettings(); refreshOfflineSettingsUI(); }
   if (r.name === 'calendar') scrollTimeGrid();
+  if (r.name === 'tools' && (toolTab === 'guitar-chords' || toolTab === 'piano-chords')) enhanceChordLibrary();
 }
 function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new Date(); sc.scrollTop = clamp((n.getHours() - 8) * 48, 0, 800); } }
 
@@ -1583,14 +1653,19 @@ function metroHTML() {
   return '<div class="tool-eyebrow">РИТМ И ТЕМП</div><h2>Метроном</h2><p class="tool-subtitle">Точный ритм через Web Audio. Работает локально, даже без сети.</p><div class="metro-display"><div class="metro-bpm" id="metroBpm">120</div><div class="metro-unit">ударов в минуту</div><div class="metro-pulse" id="metroPulse" aria-hidden="true"></div></div><div class="metro-controls"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="-5">−5</button><input id="metroRange" type="range" min="30" max="240" value="120" aria-label="Темп в ударах в минуту"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="5">+5</button></div><div class="metro-presets">'+[60,80,100,120,140,160,180].map(n=>'<button type="button" class="btn btn-secondary" data-act="metro-preset" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="metro-options"><label>Размер<select id="metroBeats"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option></select></label><label>Акцент<select id="metroAccent"><option value="on">Первый удар</option><option value="off">Без акцента</option></select></label></div><button type="button" class="btn btn-primary metro-start" id="metroToggle" data-act="metro-toggle">▶ Запустить</button><p class="tool-status" id="metroStatus" aria-live="polite">30–240 BPM · регулируемый размер</p>';
 }
 const CHORDS = {
- C:{notes:['C','E','G'],guitar:'x32010',fingers:[0,3,2,0,1,0]},Cm:{notes:['C','Eb','G'],guitar:'x3101x',fingers:[0,3,1,0,1,0]},D:{notes:['D','F#','A'],guitar:'xx0232',fingers:[0,0,0,2,3,2]},Dm:{notes:['D','F','A'],guitar:'xx0231',fingers:[0,0,0,2,3,1]},E:{notes:['E','G#','B'],guitar:'022100',fingers:[0,2,3,1,0,0]},Em:{notes:['E','G','B'],guitar:'022000',fingers:[0,2,3,0,0,0]},F:{notes:['F','A','C'],guitar:'133211',fingers:[1,3,4,2,1,1]},G:{notes:['G','B','D'],guitar:'320003',fingers:[3,2,0,0,0,4]},A:{notes:['A','C#','E'],guitar:'x02220',fingers:[0,0,2,3,4,0]},Am:{notes:['A','C','E'],guitar:'x02210',fingers:[0,0,2,3,1,0]},B:{notes:['B','D#','F#'],guitar:'x24442',fingers:[0,1,3,4,2,1]},Bm:{notes:['B','D','F#'],guitar:'x24432',fingers:[0,1,3,4,2,1]},'C7':{notes:['C','E','G','Bb'],guitar:'x32310',fingers:[0,3,2,4,1,0]},'D7':{notes:['D','F#','A','C'],guitar:'xx0212',fingers:[0,0,0,2,1,3]},'E7':{notes:['E','G#','B','D'],guitar:'020100',fingers:[0,2,0,1,0,0]},'G7':{notes:['G','B','D','F'],guitar:'320001',fingers:[3,2,0,0,0,1]},'Am7':{notes:['A','C','E','G'],guitar:'x02010',fingers:[0,0,2,0,1,0]},'Fmaj7':{notes:['F','A','C','E'],guitar:'xx3210',fingers:[0,0,3,2,1,0]}
+ C:{notes:['C','E','G'],guitar:'x32010',fingers:[0,3,2,0,1,0]},Cm:{notes:['C','Eb','G'],guitar:'x3101x',fingers:[0,3,1,0,1,0]},D:{notes:['D','F#','A'],guitar:'xx0232',fingers:[0,0,0,2,3,2]},Dm:{notes:['D','F','A'],guitar:'xx0231',fingers:[0,0,0,2,3,1]},E:{notes:['E','G#','B'],guitar:'022100',fingers:[0,2,3,1,0,0]},Em:{notes:['E','G','B'],guitar:'022000',fingers:[0,2,3,0,0,0]},F:{notes:['F','A','C'],guitar:'133211',fingers:[1,3,4,2,1,1]},G:{notes:['G','B','D'],guitar:'320003',fingers:[3,2,0,0,0,4]},A:{notes:['A','C#','E'],guitar:'x02220',fingers:[0,0,2,3,4,0]},Am:{notes:['A','C','E'],guitar:'x02210',fingers:[0,0,2,3,1,0]},B:{notes:['B','D#','F#'],guitar:'x24442',fingers:[0,1,3,4,2,1]},Bm:{notes:['B','D','F#'],guitar:'x24432',fingers:[0,1,3,4,2,1]},'C7':{notes:['C','E','G','Bb'],guitar:'x32310',fingers:[0,3,2,4,1,0]},'D7':{notes:['D','F#','A','C'],guitar:'xx0212',fingers:[0,0,0,2,1,3]},'E7':{notes:['E','G#','B','D'],guitar:'020100',fingers:[0,2,0,1,0,0]},'G7':{notes:['G','B','D','F'],guitar:'320001',fingers:[3,2,0,0,0,1]},'Am7':{notes:['A','C','E','G'],guitar:'x02010',fingers:[0,0,2,0,1,0]},'Fmaj7':{notes:['F','A','C','E'],guitar:'xx3210',fingers:[0,0,3,2,1,0]},
+ 'Cmaj7':{notes:['C','E','G','B'],guitar:'x32000',fingers:[0,3,2,0,0,0]},'Cm7':{notes:['C','Eb','G','Bb'],guitar:'x3131x',fingers:[0,3,1,3,1,0]},'Cadd9':{notes:['C','D','E','G'],guitar:'x32030',fingers:[0,3,2,0,3,0]},'Csus2':{notes:['C','D','G'],guitar:'x30013',fingers:[0,0,0,0,1,3]},'Csus4':{notes:['C','F','G'],guitar:'x33011',fingers:[0,3,4,0,1,1]},
+ 'Dmaj7':{notes:['D','F#','A','C#'],guitar:'xx0222',fingers:[0,0,0,1,1,1]},'Dm7':{notes:['D','F','A','C'],guitar:'xx0211',fingers:[0,0,0,2,1,1]},'Dsus2':{notes:['D','E','A'],guitar:'xx0230',fingers:[0,0,0,2,3,0]},'Dsus4':{notes:['D','G','A'],guitar:'xx0233',fingers:[0,0,0,1,2,3]},
+ 'Em7':{notes:['E','G','B','D'],guitar:'020000',fingers:[0,2,0,0,0,0]},'Emaj7':{notes:['E','G#','B','D#'],guitar:'021100',fingers:[0,2,1,1,0,0]},'Esus4':{notes:['E','A','B'],guitar:'022200',fingers:[0,2,3,4,0,0]},
+ 'A7':{notes:['A','C#','E','G'],guitar:'x02020',fingers:[0,0,2,0,3,0]},'Amaj7':{notes:['A','C#','E','G#'],guitar:'x02120',fingers:[0,0,2,1,3,0]},'Asus2':{notes:['A','B','E'],guitar:'x02200',fingers:[0,0,2,3,0,0]},'Asus4':{notes:['A','D','E'],guitar:'x02230',fingers:[0,0,2,3,4,0]},
+ 'Bm7':{notes:['B','D','F#','A'],guitar:'x20202',fingers:[0,0,2,0,3,0]},'Bb':{notes:['Bb','D','F'],guitar:'x13331',fingers:[0,1,3,4,1,1]},'F#m':{notes:['F#','A','C#'],guitar:'244222',fingers:[2,4,3,1,1,1]},'Gm':{notes:['G','Bb','D'],guitar:'355333',fingers:[3,4,1,1,1,1]},'Gmaj7':{notes:['G','B','D','F#'],guitar:'320002',fingers:[3,2,0,0,0,1]},'Gm7':{notes:['G','Bb','D','F'],guitar:'353333',fingers:[1,3,1,1,1,1]},'F#m7':{notes:['F#','A','C#','E'],guitar:'242222',fingers:[1,3,1,1,1,1]},'F7':{notes:['F','A','C','Eb'],guitar:'131211',fingers:[1,3,1,2,1,1]},'Bbmaj7':{notes:['Bb','D','F','A'],guitar:'x13231',fingers:[0,1,3,2,4,1]},'Bdim':{notes:['B','D','F'],guitar:'x2343x',fingers:[0,2,3,4,1,0]}
 };
 function chordNames() { return Object.keys(CHORDS); }
 function chordLibraryHTML(tab) {
   const piano = tab === 'piano-chords';
   const names = chordNames();
   const selected = CHORDS[window.__bpSelectedChord] ? window.__bpSelectedChord : 'C';
-  return '<div class="tool-eyebrow">СПРАВОЧНИК</div><h2>'+(piano?'Библиотека аккордов · пианино':'Библиотека аккордов · гитара')+'</h2><p class="tool-subtitle">Выберите аккорд, чтобы посмотреть состав и аппликатуру.</p><div class="chord-picker">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div><h3>'+selected+'</h3><p>Ноты: '+CHORDS[selected].notes.join(' · ')+'</p><p class="tool-status">'+(piano?'Нажмите клавиши на схеме, чтобы увидеть расположение нот.':'Номера пальцев: 1 — указательный, 2 — средний, 3 — безымянный, 4 — мизинец.')+'</p></div>'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div>';
+  return '<div class="tool-eyebrow">СПРАВОЧНИК</div><h2>'+(piano?'Библиотека аккордов · пианино':'Библиотека аккордов · гитара')+'</h2><p class="tool-subtitle">Выберите аккорд, чтобы посмотреть состав и аппликатуру. Библиотека включает базовые и расширенные формы.</p><div class="chord-picker">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div><h3>'+selected+'</h3><p>Ноты: '+CHORDS[selected].notes.join(' · ')+'</p><p class="tool-status">'+(piano?'Подсвечены ноты аккорда на клавиатуре.':'Аппликатура построена на SVGuitar. Номера пальцев: 1 — указательный, 2 — средний, 3 — безымянный, 4 — мизинец.')+'</p><p class="chord-lib-note" id="chordLibraryStatus" aria-live="polite">Загружается визуализация…</p></div><div id="bpChordDiagram" class="chord-lib-canvas" data-instrument="'+(piano?'piano':'guitar')+'" data-chord="'+selected+'">'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div></div>';
 }
 function guitarDiagram(chord) {
   const strings = chord.guitar.split('');
