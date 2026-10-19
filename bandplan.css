@@ -12936,3 +12936,45 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
 /* WHY: Custom navigation SVGs intentionally inherit the same color and sizing as the original icons. */
 .nav-icon-clay { display: block; flex: 0 0 auto; overflow: visible; }
 
+
+
+/* BandPlan navigation labels — clearer, quieter typography across desktop and mobile. */
+#app .sidebar .nav-item .nav-label,
+#app .sidebar .nav-item > span:not(.nb) {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--text-2, var(--text));
+  transition: color 160ms ease, font-weight 160ms ease;
+}
+#app .sidebar .nav-item:is(.active,.is-active,[aria-current="page"]) .nav-label,
+#app .sidebar .nav-item:is(.active,.is-active,[aria-current="page"]) > span:not(.nb) {
+  color: var(--accent-on-bg, var(--accent));
+  font-weight: 750;
+}
+#app .bottom-nav > a > span:not(.nb) {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--muted);
+  transition: color 160ms ease, font-weight 160ms ease;
+}
+#app .bottom-nav > a:is(.active,[aria-current="page"]) > span:not(.nb) {
+  color: var(--accent-on-bg, var(--accent));
+  font-weight: 750;
+}
+@media (max-width: 380px) {
+  #app .bottom-nav > a > span:not(.nb) {
+    font-size: 10px;
+    letter-spacing: -0.025em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #app .sidebar .nav-item .nav-label,
+  #app .sidebar .nav-item > span:not(.nb),
+  #app .bottom-nav > a > span:not(.nb) { transition: none; }
+}
