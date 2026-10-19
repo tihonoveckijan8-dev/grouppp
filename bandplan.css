@@ -12991,3 +12991,16 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   justify-content: center;
   gap: 0 !important;
 }
+
+
+/* Hide section names in the top page header only; preserve header action buttons. */
+#app #pageHead > div:has(> h1) {
+  display: none !important;
+}
+#app #pageHead {
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
