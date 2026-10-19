@@ -13380,3 +13380,21 @@ body[data-route="settings"] #view .data-danger-row .data-wipe-button:hover {
 
 /* Settings now has four tabs: profile, group, interface, app. */
 body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+
+/* WHY: unlayered legacy rules can override the responsive rules above; enforce wrapping on song lyrics on phones. */
+@media (max-width: 640px) {
+  body[data-route="song"] #app .content .lyrics,
+  body[data-route="song"] #app .content .lyrics .ln {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+  body[data-route="song"] #app .content .lyrics {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}
