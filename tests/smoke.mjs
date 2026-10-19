@@ -231,6 +231,39 @@ try {
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
 
+  // WHY: exercise the real mobile lyric CSS against a long unbroken line; checking selectors alone misses overflow regressions.
+  await page.setViewportSize({width: 390, height: 844});
+  const lyricLayout = await page.evaluate(() => {
+    const previousRoute = document.body.dataset.route;
+    document.body.dataset.route = 'song';
+    const fixture = document.createElement('div');
+    fixture.id = 'bp-mobile-lyrics-test';
+    fixture.style.cssText = 'position:fixed;left:0;top:0;width:280px;max-width:calc(100vw - 32px);visibility:hidden;pointer-events:none;display:block';
+    fixture.innerHTML = '<div id="app" style="display:block;width:100%;min-width:0"><div class="content" style="width:100%;min-width:0"><div class="lyrics" style="width:100%;min-width:0"><div class="ln"></div></div></div></div>';
+    const line = fixture.querySelector('.ln');
+    line.textContent = 'ОченьДлиннаяСтрокаБезПробелов'.repeat(18);
+    document.body.append(fixture);
+    const lyrics = fixture.querySelector('.lyrics');
+    const metrics = {
+      viewport: innerWidth,
+      lyricsWidth: lyrics.getBoundingClientRect().width,
+      lyricsScrollWidth: lyrics.scrollWidth,
+      lineWidth: line.getBoundingClientRect().width,
+      lineScrollWidth: line.scrollWidth,
+      overflowWrap: getComputedStyle(line).overflowWrap,
+      whiteSpace: getComputedStyle(line).whiteSpace,
+      horizontalDocumentOverflow: document.documentElement.scrollWidth > innerWidth + 1
+    };
+    fixture.remove();
+    document.body.dataset.route = previousRoute || 'calendar';
+    return metrics;
+  });
+  assert.ok(lyricLayout.lyricsWidth <= 358, 'Mobile lyrics exceed the available viewport width');
+  assert.equal(lyricLayout.overflowWrap, 'anywhere', 'Mobile lyric lines must allow long unbroken words to wrap');
+  assert.equal(lyricLayout.whiteSpace, 'pre-wrap', 'Mobile lyrics must preserve intentional line breaks while wrapping');
+  assert.ok(lyricLayout.lineScrollWidth <= lyricLayout.lineWidth + 1, 'Long unbroken lyric line overflows its line box');
+  assert.equal(lyricLayout.horizontalDocumentOverflow, false, 'Mobile lyric fixture causes horizontal page overflow');
+
   const removedUi = await page.evaluate(() => ({
     globalSearch: !!document.querySelector('#globalSearch,#globalSearchbar'),
     glassTheme: !!document.querySelector('[data-theme="glass"]'),
