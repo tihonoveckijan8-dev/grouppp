@@ -1525,3 +1525,19 @@ html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2p
     display: none !important;
   }
 }
+
+
+/* Keep event popover typography completely flat: normal text, no clay/emboss effects. */
+@media (min-width: 900px) {
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"],
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] :where(*) {
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    filter: none !important;
+  }
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] :where(h1, h2, h3, h4, p, span, strong, small, label, a, button, .badge) {
+    text-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
