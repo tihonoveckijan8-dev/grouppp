@@ -200,6 +200,7 @@ function navIc(n, size) {
     music: '<path d="M14 17.5V5l7-1.5v12"/><path d="M14 8.2 21 6.7"/><ellipse cx="10" cy="18" rx="4" ry="2.7" transform="rotate(-18 10 18)"/><ellipse cx="17" cy="16" rx="3.5" ry="2.5" transform="rotate(-18 17 16)"/>',
     list: '<path d="M9 5.5h11M9 11.5h11M9 17.5h11"/><rect x="3.5" y="4" width="3" height="3" rx=".8"/><path d="m4.2 11.5.9.9 1.7-1.9"/><path d="M4 17.5h2"/>',
     gear: '<path d="m10 3.8 4-.1.8 2.2 2 .9 2.1-1 2 3.4-1.5 1.7v2.2l1.5 1.7-2 3.4-2.1-1-2 .9-.8 2.2h-4l-.8-2.2-2-.9-2.1 1-2-3.4 1.5-1.7v-2.2L3.1 9.2l2-3.4 2.1 1 2-.9z"/><circle cx="12" cy="12" r="3"/>',
+    more: '<circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
     tools: '<path d="M4 7.5h5M15 7.5h5M9 7.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M4 16.5h2M12 16.5h8M6 16.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M12 3v1M18 20v1"/>'
   };
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" class="nav-icon-clay" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" focusable="false" aria-hidden="true">' + (paths[n] || '') + '</svg>';
@@ -1385,9 +1386,18 @@ function buildChrome() {
   $('#sideNav').innerHTML = TABS.map(n =>
     '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 19) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
-  $('#botNav').innerHTML = TABS.map(n =>
+  const primaryMobileTabs = TABS.filter(n => ['calendar', 'songs', 'setlists'].includes(n.k));
+  const moreActive = ['tools', 'settings'].includes(cur);
+  $('#botNav').innerHTML = primaryMobileTabs.map(n =>
     '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 21) +
-    '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
+    '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('') +
+    '<button class="bottom-nav-more' + (moreActive ? ' active' : '') + '" type="button" data-act="more-menu-toggle" aria-expanded="false" aria-controls="bottomMoreMenu">' +
+    navIc('more', 21) + '<span>Ещё</span></button>' +
+    '<div class="bottom-more-menu" id="bottomMoreMenu" hidden>' +
+    TABS.filter(n => ['tools', 'settings'].includes(n.k)).map(n =>
+      '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
+      navIc(n.i, 20) + '<span>' + n.t + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
+    '</div>';
 
   const p = state.profile;
   $('#brandBand').textContent = p.bandName || 'Моя группа';
@@ -3149,11 +3159,23 @@ document.addEventListener('click', function (e) {
     }
     case 'confirm-yes': { stop(); const cb = confirmCb; hardClose(modalRoot); if (cb) cb(); break; }
     case 'reload-view': stop(); ui.skeleton = true; render(); break;
+    case 'more-menu-toggle': {
+      stop();
+      const menu = $('#bottomMoreMenu');
+      const open = !!menu && menu.hidden;
+      if (menu) menu.hidden = !open;
+      el.setAttribute('aria-expanded', String(open));
+      break;
+    }
     case 'nav': {
       /* Native anchor navigation is allowed, but the new route is rendered
          synchronously from the first click so no second click is ever needed. */
       e.preventDefault();
       e.stopPropagation();
+      const moreMenu = $('#bottomMoreMenu');
+      if (moreMenu) moreMenu.hidden = true;
+      const moreButton = $('[data-act="more-menu-toggle"]');
+      if (moreButton) moreButton.setAttribute('aria-expanded', 'false');
       const target = '#/' + el.getAttribute('data-to');
       ui.skeleton = false;
       if (location.hash === target) {
@@ -3939,6 +3961,14 @@ function wireSearch() {
 
 /* ═══ 24. KEYBOARD ═══ */
 document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    const moreMenu = $('#bottomMoreMenu');
+    const moreButton = $('[data-act="more-menu-toggle"]');
+    if (moreMenu && !moreMenu.hidden) {
+      moreMenu.hidden = true;
+      if (moreButton) { moreButton.setAttribute('aria-expanded', 'false'); moreButton.focus(); }
+    }
+  }
   const sceneOn = $('#scene').classList.contains('on');
   const modalOn = $('#modalOverlay').classList.contains('on');
   const typing = /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '');
