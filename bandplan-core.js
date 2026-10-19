@@ -1577,7 +1577,7 @@ function vTools() {
 function tunerHTML(tab) {
   const violin = tab === 'violin-tuner';
   const strings = violin ? [['E5','Ми','659.25'],['A4','Ля','440.00'],['D4','Ре','293.66'],['G3','Соль','196.00']] : [['E4','Ми','329.63'],['B3','Си','246.94'],['G3','Соль','196.00'],['D3','Ре','146.83'],['A2','Ля','110.00'],['E2','Ми','82.41']];
-  return '<div class="tool-eyebrow">ХРОМАТИЧЕСКИЙ ТЮНЕР</div><h2>'+(violin?'Тюнер для скрипки':'Тюнер для гитары')+'</h2><p class="tool-subtitle">Разрешите доступ к микрофону. Звук анализируется прямо в браузере.</p><div class="tuner-readout"><div class="tuner-note" id="tunerNote">—</div><div class="tuner-frequency" id="tunerFrequency">Ожидание сигнала</div><div class="tuner-meter" aria-label="Точность настройки"><i id="tunerNeedle"></i></div><div class="tuner-meter-labels"><span>♭ Ниже</span><span>В строе</span><span>Выше ♯</span></div><div class="tuner-cents" id="tunerCents">0 cents</div></div><div class="tuner-strings">'+strings.map(s=>'<button type="button" class="tuner-string" data-act="tuner-reference" data-note="'+s[0]+'" data-freq="'+s[2]+'"><b>'+s[0]+'</b><span>'+s[1]+'</span><small>'+s[2]+' Hz</small></button>').join('')+'</div><div class="tool-actions"><button class="btn btn-primary" type="button" data-act="tuner-start" id="tunerStart">Включить микрофон</button><button class="btn btn-secondary" type="button" data-act="tuner-stop" id="tunerStop" disabled>Остановить</button></div><p class="tool-status" id="tunerStatus" aria-live="polite">Стандартный строй · A4 = 440 Hz</p>';
+  return (violin?'':'<div class="tuner-guitar-art" aria-label="Иллюстрация акустической гитары"><svg viewBox="0 0 320 150" role="img" aria-hidden="true"><defs><linearGradient id="guitarWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dca56b"/><stop offset=".48" stop-color="#a96735"/><stop offset="1" stop-color="#744020"/></linearGradient><linearGradient id="guitarNeck" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#754a2b"/><stop offset=".5" stop-color="#b88a5a"/><stop offset="1" stop-color="#684124"/></linearGradient></defs><g transform="translate(4 4) rotate(-13 160 75)"><path d="M122 71 C100 49 72 57 66 82 C58 111 84 136 110 122 C130 112 131 94 145 92 L236 69 L230 48 L143 67 C136 69 130 72 122 71Z" fill="url(#guitarWood)" stroke="#e8bd83" stroke-width="2"/><path d="M132 77 L239 54 L244 68 L137 91Z" fill="url(#guitarNeck)" stroke="#56371f" stroke-width="1.5"/><path d="M232 50 L277 40 L281 54 L237 68Z" fill="#5a3923" stroke="#c79a66" stroke-width="1.5"/><path d="M242 51 L275 44 M244 57 L277 50 M246 63 L279 56" stroke="#d8c09b" stroke-width="1"/><ellipse cx="96" cy="91" rx="18" ry="20" fill="#442718" stroke="#f0c58c" stroke-width="3"/><ellipse cx="96" cy="91" rx="12" ry="14" fill="#201713"/><path d="M116 81 L128 85 L130 93 L117 96Z" fill="#f0d9ae"/><path d="M123 77 L238 53 M125 81 L239 57 M127 85 L240 61 M129 89 L241 65 M130 93 L242 69 M130 97 L243 73" stroke="#f4e4c7" stroke-width=".8"/><path d="M75 74 Q92 57 109 73" fill="none" stroke="#e8bd83" stroke-width="1.5"/></g></svg><span>ACOUSTIC GUITAR · STANDARD TUNING</span></div>')+'<div class="tool-eyebrow">ХРОМАТИЧЕСКИЙ ТЮНЕР</div><h2>'+(violin?'Тюнер для скрипки':'Тюнер для гитары')+'</h2><p class="tool-subtitle">Нажмите на струну, чтобы услышать её звук, или включите микрофон для настройки.</p><div class="tuner-readout"><div class="tuner-note" id="tunerNote">—</div><div class="tuner-frequency" id="tunerFrequency">Ожидание сигнала</div><div class="tuner-meter" aria-label="Точность настройки"><i id="tunerNeedle"></i></div><div class="tuner-meter-labels"><span>♭ Ниже</span><span>В строе</span><span>Выше ♯</span></div><div class="tuner-cents" id="tunerCents">0 cents</div></div><div class="tuner-strings">'+strings.map(s=>'<button type="button" class="tuner-string" data-act="tuner-reference" data-note="'+s[0]+'" data-freq="'+s[2]+'"><b>'+s[0]+'</b><span>'+s[1]+'</span><small>'+s[2]+' Hz</small></button>').join('')+'</div><div class="tool-actions"><button class="btn btn-primary" type="button" data-act="tuner-start" id="tunerStart">Включить микрофон</button><button class="btn btn-secondary" type="button" data-act="tuner-stop" id="tunerStop" disabled>Остановить</button></div><p class="tool-status" id="tunerStatus" aria-live="polite">Стандартный строй · A4 = 440 Hz</p>';
 }
 function metroHTML() {
   return '<div class="tool-eyebrow">РИТМ И ТЕМП</div><h2>Метроном</h2><p class="tool-subtitle">Точный ритм через Web Audio. Работает локально, даже без сети.</p><div class="metro-display"><div class="metro-bpm" id="metroBpm">120</div><div class="metro-unit">ударов в минуту</div><div class="metro-pulse" id="metroPulse" aria-hidden="true"></div></div><div class="metro-controls"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="-5">−5</button><input id="metroRange" type="range" min="30" max="240" value="120" aria-label="Темп в ударах в минуту"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="5">+5</button></div><div class="metro-presets">'+[60,80,100,120,140,160,180].map(n=>'<button type="button" class="btn btn-secondary" data-act="metro-preset" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="metro-options"><label>Размер<select id="metroBeats"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option></select></label><label>Акцент<select id="metroAccent"><option value="on">Первый удар</option><option value="off">Без акцента</option></select></label></div><button type="button" class="btn btn-primary metro-start" id="metroToggle" data-act="metro-toggle">▶ Запустить</button><p class="tool-status" id="metroStatus" aria-live="polite">30–240 BPM · регулируемый размер</p>';
@@ -3197,30 +3197,42 @@ document.addEventListener('click', function (e) {
     case 'tuner-start': stop(); startTuner(); break;
     case 'tuner-stop': stop(); stopTuner(); const ts=$('#tunerStatus'); if(ts)ts.textContent='Тюнер остановлен'; const tstart=$('#tunerStart'),tstop=$('#tunerStop');if(tstart)tstart.disabled=false;if(tstop)tstop.disabled=true;break;
     case 'tuner-reference': {
-      stop(); const freq=Number(el.getAttribute('data-freq')), note=el.getAttribute('data-note');
+      const freq=Number(el.getAttribute('data-freq')), note=el.getAttribute('data-note');
       try {
         const Ctx=window.AudioContext||window.webkitAudioContext;
-        if(!Ctx)throw new Error('Web Audio не поддерживается этим браузером');
-        // WHY: synthesize a plucked string with harmonics and a natural decay; a sine beep sounds unlike a guitar string.
+        if(!Ctx)throw new Error('Звук не поддерживается этим браузером');
+        if(!Number.isFinite(freq)||freq<20||freq>2000)throw new Error('Не удалось определить частоту струны');
+        // WHY: a short, pre-rendered harmonic waveform avoids fragile oscillator-stop timing and sounds like a plucked string rather than an endless electronic beep.
         const ctx=new Ctx();
-        ctx.resume().then(()=>{
-          const now=ctx.currentTime, master=ctx.createGain();
-          master.gain.setValueAtTime(0.0001,now);
-          master.gain.exponentialRampToValueAtTime(0.24,now+0.012);
-          master.gain.exponentialRampToValueAtTime(0.0001,now+1.35);
-          master.connect(ctx.destination);
-          // A guitar string has a fundamental plus quieter harmonics; all partials are derived from the selected string's exact frequency.
-          for(let harmonic=1;harmonic<=8;harmonic++){
-            const osc=ctx.createOscillator(), partial=ctx.createGain();
-            osc.type='triangle';
-            osc.frequency.setValueAtTime(freq*harmonic,now);
-            partial.gain.setValueAtTime((1/(harmonic*harmonic))*((harmonic%2)?1:0.58),now);
-            osc.connect(partial);partial.connect(master);
-            osc.start(now);osc.stop(now+1.38);
+        const play=()=>{
+          const duration=1.8, rate=ctx.sampleRate, length=Math.floor(duration*rate);
+          const buffer=ctx.createBuffer(1,length,rate), data=buffer.getChannelData(0);
+          let peak=0;
+          for(let i=0;i<length;i++){
+            const t=i/rate;
+            let sample=0;
+            for(let h=1;h<=Math.min(32,Math.floor((rate*.45)/freq));h++){
+              const harmonicDecay=Math.exp(-t*(1.7+h*1.05));
+              sample+=(Math.sin(2*Math.PI*freq*h*t+0.17*h)/(Math.pow(h,1.22)))*harmonicDecay;
+            }
+            const attack=Math.min(1,t/0.004);
+            const body=Math.exp(-t*1.35);
+            data[i]=sample*attack*body;
+            peak=Math.max(peak,Math.abs(data[i]));
           }
-          setTimeout(()=>ctx.close().catch(()=>{}),1500);
-          const status=$('#tunerStatus');if(status)status.textContent='Звучит эталонная струна '+note+' · '+freq.toFixed(2)+' Hz';
-        });
+          if(peak>0)for(let i=0;i<length;i++)data[i]*=0.82/peak;
+          const source=ctx.createBufferSource(), volume=ctx.createGain();
+          source.buffer=buffer;
+          volume.gain.setValueAtTime(0.8,ctx.currentTime);
+          source.connect(volume);volume.connect(ctx.destination);
+          source.onended=()=>{source.disconnect();volume.disconnect();ctx.close().catch(()=>{});};
+          source.start();
+          const status=$('#tunerStatus');if(status)status.textContent='Звучит струна '+note+' · '+freq.toFixed(2)+' Hz';
+          const buttons=Array.from(document.querySelectorAll('.tuner-string'));
+          buttons.forEach(b=>b.classList.toggle('is-playing',b===el));
+          setTimeout(()=>el.classList.remove('is-playing'),350);
+        };
+        ctx.resume().then(play).catch(err=>{ctx.close().catch(()=>{});toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');});
       } catch(err){toast(err.message,'err');}
       break;
     }
