@@ -414,6 +414,10 @@ html[data-theme="amoled"]{--skel-hi:var(--raw-color-083)}
 .skel-copy{display:grid;gap:8px;min-width:0}.skel-song-row>.skel-btn{width:104px}.skel-detail-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);gap:var(--s5);min-width:0}.skel-lyrics{display:grid;gap:14px;min-height:360px}.skel-metric{display:grid;gap:8px}.skel-actions{display:flex;gap:8px;flex-wrap:wrap}.skel-actions .skel-btn{width:140px}.skel-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-top:16px;border-top:1px solid var(--border)}.skel-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.skel-cell{min-height:72px}.skel-cell i{display:block;width:7px;height:7px;margin:30px auto 0;border-radius:50%;background:var(--accent);opacity:.5}
 @container (max-width:600px){.skel-detail-grid{grid-template-columns:minmax(0,1fr)}.skel-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.skel-month-grid{gap:4px}.skel-cell{min-height:52px}}
 @media(max-width:640px){
+  /* Keep long lyric lines inside the song card on narrow screens. */
+  .lyrics{box-sizing:border-box;max-width:100%;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:hidden}
+  .lyrics .ln{max-width:100%;overflow-wrap:anywhere}
+
   .settings-card[data-settings-panel="interface"] .split2{grid-template-columns:minmax(0,1fr);gap:14px}
   .settings-card[data-settings-panel="interface"] .settings-one-line{width:100%}
   .accent-dropdown{width:100%}
