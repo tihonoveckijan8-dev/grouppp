@@ -13653,11 +13653,8 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 
 
 /* WHY: keep the guitar illustration responsive and give pressed strings clear feedback on touch devices. */
-.tuner-guitar-art svg{display:block;width:100%;max-height:170px}
-.tuner-guitar-art span{font-size:9px;letter-spacing:.16em;font-weight:800;color:var(--muted);text-align:center}
 .tuner-string.is-playing{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 13%,var(--surf-2))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}
 .tuner-string.is-playing b{color:var(--accent)}
-@media(max-width:480px){.tuner-guitar-art{margin-bottom:12px}.tuner-guitar-art svg{max-height:135px}.tuner-guitar-art span{font-size:8px}}
 
 
 /* Precision tuner — analog needle, confidence feedback, and a clearer live state. */
