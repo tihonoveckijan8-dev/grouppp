@@ -1184,11 +1184,56 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
   }
 }
 @media (max-width: 899px) {
-  html body[data-route="calendar"] .band-overview-main,
-  html body[data-route="calendar"] .band-overview-actions {
+  /* WHY: Mobile uses one coherent group overview card, not the legacy next-event hero plus a second overview. */
+  html body[data-route="calendar"] #app #view > section.nearest-event.band-overview {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 18px !important;
+    margin: 0 0 18px !important;
+    border: 1px solid color-mix(in srgb, var(--ln) 72%, transparent) !important;
+    border-radius: 20px !important;
+    background: var(--surface-1) !important;
+    box-shadow: var(--dp-raise-sm) !important;
+    overflow: visible !important;
+  }
+  html body[data-route="calendar"] #app #view > section.nearest-event.band-overview > .nearest-event-main,
+  html body[data-route="calendar"] #app #view > section.nearest-event.band-overview > .nearest-event-actions {
     display: none !important;
   }
-  /* WHY: Keep the three event counters available on touch screens, below the existing mobile hero content. */
+  html body[data-route="calendar"] .band-overview-main {
+    display: block !important;
+    min-width: 0;
+    width: 100%;
+  }
+  html body[data-route="calendar"] .band-overview-main .eyebrow {
+    display: block;
+    margin: 0 0 5px;
+    color: var(--a);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+  }
+  html body[data-route="calendar"] .band-overview-main h2 {
+    margin: 0;
+    color: var(--tx);
+    font-size: 21px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  html body[data-route="calendar"] .band-overview-main p {
+    margin: 5px 0 0;
+    color: var(--mu);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  /* WHY: Keep the three event counters available on touch screens, below the group title. */
   html body[data-route="calendar"] .band-overview-metrics {
     display: flex !important;
     width: 100%;
@@ -1214,6 +1259,24 @@ html[data-theme] body[data-route="calendar"] .cal-legend {
   }
   html body[data-route="calendar"] .band-overview-metric strong { font-size: 19px; }
   html body[data-route="calendar"] .band-overview-metric span { font-size: 10px; white-space: normal; }
+  html body[data-route="calendar"] .band-overview-actions {
+    display: flex !important;
+    align-items: center;
+    justify-content: stretch;
+    gap: 8px;
+    width: 100%;
+    margin-top: 14px;
+  }
+  html body[data-route="calendar"] .band-overview-actions .btn {
+    display: inline-flex;
+    justify-content: center;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    padding-inline: 10px;
+    white-space: nowrap;
+  }
+  html body[data-route="calendar"] .band-overview-metric:first-child { border-left: 0; }
 }
 
 
