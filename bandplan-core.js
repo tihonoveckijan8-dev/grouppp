@@ -1581,7 +1581,9 @@ function pianoDiagram(notes) {
 }
 function stopTuner() {
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
-  if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null; toolAudio = null;
+  if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null;
+  const previousAudio = toolAudio; toolAudio = null;
+  if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(()=>{});
 }
 function pitchFromBuffer(buf, sampleRate) {
   let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
@@ -3032,6 +3034,9 @@ document.addEventListener('keydown', function (e) {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-act="open-song"],[data-act="open-setlist"]') && !e.target.closest('button,input,select,textarea,a')) {
     e.preventDefault(); e.target.click();
   }
+});
+document.addEventListener('input', function (e) {
+  if (e.target && e.target.id === 'metroRange') setMetroBpm(e.target.value);
 });
 document.addEventListener('click', function (e) {
   // Prefer an actionable button over the clickable card/article that contains it.
