@@ -3234,7 +3234,6 @@ document.addEventListener('click', function (e) {
         };
         const playSample=async()=>{
           try {
-            const cached=await caches.match(sampleBaseUrl+sourceNotes[0][0]+'.mp3');
             const nearest=sourceNotes.reduce((best,item)=>Math.abs(12*Math.log2(freq/item[1]))<Math.abs(12*Math.log2(freq/best[1]))?item:best,sourceNotes[0]);
             const url=sampleBaseUrl+nearest[0]+'.mp3';
             const cachedSample=await caches.match(url);
