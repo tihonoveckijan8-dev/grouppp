@@ -1585,14 +1585,54 @@ function overviewPopupHTML() {
     '<div class="band-overview-popover-nav"><button type="button" data-act="overview-prev" aria-label="Предыдущее событие" ' + (s.index <= 0 ? 'disabled' : '') + '>' + ic('left', 16) + 'Назад</button>' +
     '<button type="button" data-act="overview-next" aria-label="Следующее событие" ' + (s.index >= s.events.length - 1 ? 'disabled' : '') + '>Далее' + ic('right', 16) + '</button></div>';
 }
+function overviewPopupNode() {
+  return document.querySelector('body > .band-overview-popover[data-overview-portal="desktop"]') ||
+    document.querySelector('.band-overview .band-overview-popover');
+}
+function positionOverviewPopup() {
+  if (!window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches) return;
+  const metric = document.querySelector('.band-overview-metric[data-kind="' + overviewPopupState.kind + '"]');
+  const popup = overviewPopupNode();
+  if (!metric || !popup || popup.hidden) return;
+  const r = metric.getBoundingClientRect();
+  const width = Math.min(360, window.innerWidth - 32);
+  let left = Math.max(16, Math.min(r.left, window.innerWidth - width - 16));
+  let top = r.bottom + 8;
+  popup.style.position = 'fixed';
+  popup.style.width = width + 'px';
+  popup.style.left = left + 'px';
+  popup.style.right = 'auto';
+  popup.style.top = top + 'px';
+  popup.style.bottom = 'auto';
+  popup.style.zIndex = '2147483000';
+  const pr = popup.getBoundingClientRect();
+  if (pr.bottom > window.innerHeight - 12) {
+    top = Math.max(12, r.top - pr.height - 8);
+    popup.style.top = top + 'px';
+  }
+}
 function renderOverviewPopup() {
   const host = document.querySelector('.band-overview');
   if (!host) return;
-  let popup = host.querySelector('.band-overview-popover');
-  if (!popup) { popup = document.createElement('div'); popup.className = 'band-overview-popover'; popup.setAttribute('role', 'dialog'); popup.setAttribute('aria-label', 'События выбранного типа'); host.appendChild(popup); }
+  const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches;
+  let popup = overviewPopupNode();
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.className = 'band-overview-popover';
+    popup.setAttribute('role', 'dialog');
+    popup.setAttribute('aria-label', 'События выбранного типа');
+  }
+  if (desktop) {
+    popup.dataset.overviewPortal = 'desktop';
+    if (popup.parentElement !== document.body) document.body.appendChild(popup);
+  } else {
+    delete popup.dataset.overviewPortal;
+    if (popup.parentElement !== host) host.appendChild(popup);
+  }
   popup.innerHTML = overviewPopupHTML();
   popup.hidden = false;
   host.classList.add('has-event-popover');
+  positionOverviewPopup();
 }
 function openOverviewPopup(kind) {
   clearTimeout(overviewPopupState.closeTimer);
@@ -1605,7 +1645,7 @@ function openOverviewPopup(kind) {
 function closeOverviewPopup() {
   clearTimeout(overviewPopupState.closeTimer);
   const host = document.querySelector('.band-overview');
-  const popup = host && host.querySelector('.band-overview-popover');
+  const popup = overviewPopupNode();
   if (popup) popup.hidden = true;
   if (host) host.classList.remove('has-event-popover');
 }
@@ -1622,12 +1662,18 @@ document.addEventListener('pointerover', function (e) {
   openOverviewPopup(metric.getAttribute('data-kind'));
 });
 document.addEventListener('pointerout', function (e) {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
   const host = e.target.closest && e.target.closest('.band-overview');
-  if (!host || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-  if (host.contains(e.relatedTarget)) return;
+  const popup = e.target.closest && e.target.closest('.band-overview-popover');
+  const related = e.relatedTarget;
+  if (host && (host.contains(related) || (related && related.closest && related.closest('.band-overview-popover')))) return;
+  if (popup && (popup.contains(related) || (related && related.closest && related.closest('.band-overview')))) return;
+  if (!host && !popup) return;
   clearTimeout(overviewPopupState.closeTimer);
   overviewPopupState.closeTimer = setTimeout(closeOverviewPopup, 220);
 });
+window.addEventListener('resize', positionOverviewPopup, { passive: true });
+window.addEventListener('scroll', positionOverviewPopup, { passive: true, capture: true });
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
   const m = ui.month, y = m.getFullYear(), mo = m.getMonth();
