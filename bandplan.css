@@ -13411,7 +13411,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   html body[data-route="calendar"] #app #view {
     display: grid !important;
     grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
-    grid-template-rows: auto minmax(280px, calc(100dvh - 250px));
+    grid-template-rows: auto auto minmax(280px, calc(100dvh - 300px));
     align-content: start;
     align-items: stretch;
     column-gap: 22px;
@@ -13428,13 +13428,13 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   }
   html body[data-route="calendar"] #app #view > section.card:has(.cal-head) {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     width: 100%;
     max-width: none;
     margin: 0;
     min-width: 0;
     min-height: 0;
-    max-height: calc(100dvh - 250px);
+    max-height: calc(100dvh - 300px);
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
@@ -13451,7 +13451,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   }
   html body[data-route="calendar"] #app #view > .active-chips {
     grid-column: 2;
-    grid-row: 1;
+    grid-row: 2;
     width: 100%;
     max-width: none;
     margin: 0;
