@@ -13659,3 +13659,38 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 .tuner-string.is-playing{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 13%,var(--surf-2))!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 18%,transparent)}
 .tuner-string.is-playing b{color:var(--accent)}
 @media(max-width:480px){.tuner-guitar-art{margin-bottom:12px}.tuner-guitar-art svg{max-height:135px}.tuner-guitar-art span{font-size:8px}}
+
+
+/* Precision tuner — analog needle, confidence feedback, and a clearer live state. */
+@layer screens {
+  .tuner-readout-pro{position:relative;overflow:hidden;gap:0;padding:20px 12px 22px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--accent) 9%,var(--surf-3)),var(--surf-3) 72%)}
+  .tuner-live-row{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.14em}
+  .tuner-live-dot{width:7px;height:7px;border-radius:50%;background:var(--border-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--border-2) 20%,transparent)}
+  .tuner-note{margin-top:5px;font-size:clamp(54px,10vw,78px);font-variant-numeric:tabular-nums}
+  .tuner-frequency{min-height:22px}
+  .tuner-dial{position:relative;width:min(100%,390px);height:174px;margin:10px auto -3px}
+  .tuner-dial svg{display:block;width:100%;height:100%;overflow:visible}
+  .tuner-arc{fill:none;stroke-width:13;stroke-linecap:round}
+  .tuner-arc-low,.tuner-arc-high{stroke:var(--danger)}
+  .tuner-arc-low-mid,.tuner-arc-high-mid{stroke:var(--warning,var(--warn-bg))}
+  .tuner-arc-good{stroke:var(--success,var(--ok-bg))}
+  .tuner-ticks{fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;opacity:.7}
+  .tuner-dial #tunerNeedle{position:absolute;left:50%;bottom:30px;width:3px;height:87px;border-radius:4px 4px 1px 1px;background:var(--text);transform:translateX(-50%) rotate(0deg);transform-origin:50% 100%;box-shadow:0 0 12px color-mix(in srgb,var(--text) 22%,transparent);transition:transform .07s linear,background .12s;z-index:2}
+  .tuner-dial #tunerNeedle:before{content:"";position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:inherit;transform:translateX(-50%)}
+  .tuner-dial #tunerNeedle[data-tuning="in-tune"]{background:var(--success,var(--ok-bg))}
+  .tuner-dial #tunerNeedle[data-tuning="close"]{background:var(--warning,var(--warn-bg))}
+  .tuner-dial #tunerNeedle[data-tuning="flat"],.tuner-dial #tunerNeedle[data-tuning="sharp"]{background:var(--danger)}
+  .tuner-dial-center{position:absolute;left:50%;bottom:22px;width:19px;height:19px;border-radius:50%;background:var(--surf-2);border:4px solid var(--border-2);transform:translateX(-50%);z-index:3}
+  .tuner-dial-zero{position:absolute;left:50%;bottom:5px;transform:translateX(-50%);font-size:10px;font-weight:800;color:var(--muted)}
+  .tuner-dial-labels{display:flex;justify-content:space-between;width:min(100%,350px);margin:-1px auto 0;color:var(--muted);font-size:11px}
+  .tuner-cents{min-height:20px;margin-top:14px;font-size:14px;font-weight:850;font-variant-numeric:tabular-nums}
+  .tuner-accuracy-note{margin-top:4px;color:var(--muted);font-size:11px}
+  .tuner-strings{gap:9px}
+  .tuner-string{position:relative;overflow:hidden;min-height:82px;align-content:center;border-radius:16px}
+  .tuner-string:after{content:"";position:absolute;inset:auto 18% 7px;height:2px;border-radius:2px;background:var(--border-2)}
+  .tuner-string.is-playing:after{background:var(--accent)}
+  .tuner-string b{font-size:22px;letter-spacing:-.04em}
+  .tuner-string.is-playing{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 20%,transparent),0 4px 14px color-mix(in srgb,var(--accent) 10%,transparent)}
+  @media(max-width:480px){.tuner-dial{height:158px;max-width:330px}.tuner-dial #tunerNeedle{height:78px;bottom:28px}.tuner-readout-pro{padding:18px 8px 20px}.tuner-string{min-height:76px}}
+  @media(prefers-reduced-motion:reduce){.tuner-dial #tunerNeedle{transition:none}}
+}
