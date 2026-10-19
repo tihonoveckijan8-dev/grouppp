@@ -13406,14 +13406,14 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
 }
 
 
-/* WHY: Use a robust desktop grid at common laptop widths; the earlier 1100px breakpoint missed many desktop windows. */
+/* WHY: Keep the hero aligned with the search controls, and let the calendar and upcoming events scroll independently within the desktop viewport. */
 @media (min-width: 900px) {
   html body[data-route="calendar"] #app #view {
     display: grid !important;
     grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(280px, calc(100dvh - 250px));
     align-content: start;
-    align-items: start;
+    align-items: stretch;
     column-gap: 22px;
     row-gap: 16px;
   }
@@ -13424,6 +13424,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     max-width: none;
     margin: 0;
     min-width: 0;
+    align-self: stretch;
   }
   html body[data-route="calendar"] #app #view > section.card:has(.cal-head) {
     grid-column: 1;
@@ -13432,6 +13433,12 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     max-width: none;
     margin: 0;
     min-width: 0;
+    min-height: 0;
+    max-height: calc(100dvh - 250px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
   }
   html body[data-route="calendar"] #app #view > .calendar-search-row {
     grid-column: 2;
@@ -13440,7 +13447,7 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     max-width: none;
     margin: 0;
     min-width: 0;
-    align-self: end;
+    align-self: stretch;
   }
   html body[data-route="calendar"] #app #view > .active-chips {
     grid-column: 2;
@@ -13457,6 +13464,11 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
     max-width: none;
     margin: 0;
     min-width: 0;
-    align-self: stretch;
+    min-height: 0;
+    max-height: calc(100dvh - 250px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
   }
 }
