@@ -191,6 +191,27 @@ const ICONS = {
 };
 function ic(n, s) { s = s || 18; return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" focusable="false" aria-hidden="true">' + (ICONS[n] || '') + '</svg>'; }
 
+// WHY: The four primary navigation icons use a dedicated clay-rendered SVG treatment;
+// ordinary action icons stay on the existing lightweight outline system.
+let navIconSeq = 0;
+function navIc(n, size) {
+  size = size || 21;
+  const id = 'bp-clay-' + (++navIconSeq);
+  const common = ' width="' + size + '" height="' + size + '" viewBox="0 0 32 32" class="nav-icon-clay" aria-hidden="true" focusable="false"';
+  const defs = '<defs><linearGradient id="' + id + '-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#63e8ff"/><stop offset=".48" stop-color="#1678ff"/><stop offset="1" stop-color="#752cff"/></linearGradient><linearGradient id="' + id + '-h" x1="0" y1="0" x2=".15" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".7"/><stop offset=".45" stop-color="#ffffff" stop-opacity=".08"/><stop offset="1" stop-color="#050b22" stop-opacity=".35"/></linearGradient><filter id="' + id + '-s" x="-35%" y="-35%" width="170%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="1.4" flood-color="#147cff" flood-opacity=".28"/></filter></defs>';
+  let shape = '';
+  if (n === 'calendar') {
+    shape = '<g filter="url(#' + id + '-s)"><rect x="4" y="6" width="24" height="22" rx="5" fill="url(#' + id + '-g)"/><rect x="4" y="6" width="24" height="22" rx="5" fill="url(#' + id + '-h)"/><path d="M10 4v6M22 4v6" stroke="#7deaff" stroke-width="3.2" stroke-linecap="round"/><path d="M5 12h22" stroke="#091b52" stroke-opacity=".55" stroke-width="1.3"/><g fill="#081b50" fill-opacity=".52"><rect x="8" y="15" width="4" height="3.5" rx="1.2"/><rect x="14" y="15" width="4" height="3.5" rx="1.2"/><rect x="20" y="15" width="4" height="3.5" rx="1.2"/><rect x="8" y="21" width="4" height="3.5" rx="1.2"/><rect x="14" y="21" width="4" height="3.5" rx="1.2"/></g><rect x="20" y="21" width="4" height="3.5" rx="1.2" fill="#83f2ff"/></g>';
+  } else if (n === 'music') {
+    shape = '<g filter="url(#' + id + '-s)"><path d="M17 5.2v16.1a4.5 4.5 0 1 1-3.2-4.3V8.1L26 5.3v13.5a4.5 4.5 0 1 1-3.2-4.3V3.9z" fill="url(#' + id + '-g)"/><path d="M17 5.2v16.1a4.5 4.5 0 1 1-3.2-4.3V8.1L26 5.3v13.5a4.5 4.5 0 1 1-3.2-4.3V3.9z" fill="url(#' + id + '-h)"/><path d="M17 8.4 26 6.3" stroke="#e0fbff" stroke-opacity=".7" stroke-width="1.2" stroke-linecap="round"/></g>';
+  } else if (n === 'list') {
+    shape = '<g filter="url(#' + id + '-s)"><rect x="4" y="4" width="24" height="8" rx="3.5" fill="url(#' + id + '-g)"/><rect x="4" y="4" width="24" height="8" rx="3.5" fill="url(#' + id + '-h)"/><path d="M10 16h15a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3z" fill="url(#' + id + '-g)"/><path d="M10 16h15a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3v-1a3 3 0 0 1 3-3z" fill="url(#' + id + '-h)"/><path d="M10 26h15" stroke="#27dfff" stroke-width="4" stroke-linecap="round"/><path d="M6.2 6.1h4" stroke="#d7fbff" stroke-width="1.2" stroke-linecap="round"/><path d="m10.5 6.1 5 2.1-5 2.1z" fill="#e1fbff"/></g>';
+  } else if (n === 'gear') {
+    shape = '<g filter="url(#' + id + '-s)"><path d="M13 3.5h6l1 3.1 2.4 1.4 3.1-.8 3 5.2-2.2 2.4v2.8l2.2 2.4-3 5.2-3.1-.8-2.4 1.4-1 3.1h-6l-1-3.1-2.4-1.4-3.1.8-3-5.2 2.2-2.4v-2.8l-2.2-2.4 3-5.2 3.1.8L12 6.6z" transform="translate(0 -1.5) scale(.96)" fill="url(#' + id + '-g)"/><path d="M13 3.5h6l1 3.1 2.4 1.4 3.1-.8 3 5.2-2.2 2.4v2.8l2.2 2.4-3 5.2-3.1-.8-2.4 1.4-1 3.1h-6l-1-3.1-2.4-1.4-3.1.8-3-5.2 2.2-2.4v-2.8l-2.2-2.4 3-5.2 3.1.8L12 6.6z" transform="translate(0 -1.5) scale(.96)" fill="url(#' + id + '-h)"/><circle cx="16" cy="15.2" r="6.1" fill="#0a1641" fill-opacity=".72"/><circle cx="16" cy="15.2" r="4.1" fill="url(#' + id + '-g)"/><circle cx="14.6" cy="13.7" r="1.2" fill="#e4fcff" fill-opacity=".85"/></g>';
+  } else return ic(n, size);
+  return '<svg' + common + '>' + defs + shape + '</svg>';
+}
+
 /* ═══ 3. CHORDS ═══ */
 const NOTE_IDX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
 const SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -1367,10 +1388,10 @@ const navKey = n => n === 'song' ? 'songs' : n === 'setlist' ? 'setlists' : n;
 function buildChrome() {
   const up = upcoming().length, cur = navKey(parseHash().name);
   $('#sideNav').innerHTML = TABS.map(n =>
-    '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 19) +
+    '<a class="nav-item" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 19) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
   $('#botNav').innerHTML = TABS.map(n =>
-    '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + ic(n.i, 21) +
+    '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' + navIc(n.i, 21) +
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('');
 
   const p = state.profile;
