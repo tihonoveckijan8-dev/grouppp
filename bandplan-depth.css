@@ -1414,7 +1414,7 @@ html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2p
     z-index: 2147483000 !important;
     overflow: visible;
     isolation: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .16) !important;
+    box-shadow: none !important;
     text-shadow: none !important;
     transform: none;
   }
