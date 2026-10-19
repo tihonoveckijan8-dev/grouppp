@@ -1541,3 +1541,47 @@ html body[data-route="calendar"] .band-overview-popover-empty { padding: 12px 2p
     transform: none !important;
   }
 }
+
+
+/* Desktop hover preview: typography only, no interactive-looking controls or clay depth. */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] {
+    padding: 14px 16px !important;
+    border-radius: 10px !important;
+    background: var(--surface-1, var(--surf-1)) !important;
+    border: 1px solid var(--ln, var(--border)) !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-text,
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-text * {
+    text-shadow: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-kind {
+    margin-bottom: 7px;
+    color: var(--mu);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-title {
+    color: var(--tx);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-meta,
+  html body[data-route="calendar"] > .band-overview-popover[data-overview-portal="desktop"] .band-overview-hover-notes {
+    margin-top: 5px;
+    color: var(--mu);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+}
