@@ -13545,8 +13545,14 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   .metro-options label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:700}
   .metro-options select{min-width:145px;min-height:42px;border:1px solid var(--border);border-radius:12px;background:var(--surf-2);padding:8px 12px;color:var(--text)}
   .metro-start{min-height:48px;min-width:180px}
-  .chord-picker{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 22px}
-  .chord-pick{min-width:48px;min-height:42px;padding:8px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surf-2);font-weight:800}
+  /* WHY: root-note clusters form one touch-scrollable ribbon, keeping every chord in chromatic order without wrapping into a tall grid. */
+  .chord-picker{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x;margin:16px 0 22px;padding:2px 2px 8px;scroll-snap-type:x proximity}
+  .chord-picker::-webkit-scrollbar{display:none}
+  .chord-picker-track{display:flex;align-items:stretch;gap:10px;width:max-content;min-width:100%}
+  .chord-root-group{display:flex;flex:0 0 auto;flex-direction:column;align-items:flex-start;gap:7px;padding:9px;border:1px solid var(--border);border-radius:14px;background:var(--surf-2);scroll-snap-align:start}
+  .chord-root-label{font-size:11px;font-weight:800;line-height:1;color:var(--muted);letter-spacing:.06em;padding:0 3px}
+  .chord-root-chords{display:flex;align-items:center;gap:6px}
+  .chord-pick{flex:0 0 auto;min-width:44px;min-height:40px;padding:7px 11px;border:1px solid var(--border);border-radius:10px;background:var(--surf-3);font-weight:800;white-space:nowrap;transition:background var(--t-btn),border-color var(--t-btn),color var(--t-btn)}
   .chord-pick.active{background:var(--accent);border-color:var(--accent);color:var(--accent-contrast)}
   .chord-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,280px);gap:24px;align-items:center;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--surf-3)}
   .chord-detail h3{font-size:42px;letter-spacing:-.05em}.chord-detail p{margin-top:8px;color:var(--text-2);font-size:14px}
