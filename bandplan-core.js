@@ -1593,11 +1593,23 @@ const CHORDS = {
  'Bm7':{notes:['B','D','F#','A'],guitar:'x20202',fingers:[0,0,2,0,3,0]},'Bb':{notes:['Bb','D','F'],guitar:'x13331',fingers:[0,1,3,4,1,1]},'F#m':{notes:['F#','A','C#'],guitar:'244222',fingers:[2,4,3,1,1,1]},'Gm':{notes:['G','Bb','D'],guitar:'355333',fingers:[3,4,1,1,1,1]},'Gmaj7':{notes:['G','B','D','F#'],guitar:'320002',fingers:[3,2,0,0,0,1]},'Gm7':{notes:['G','Bb','D','F'],guitar:'353333',fingers:[1,3,1,1,1,1]},'F#m7':{notes:['F#','A','C#','E'],guitar:'242222',fingers:[1,3,1,1,1,1]},'F7':{notes:['F','A','C','Eb'],guitar:'131211',fingers:[1,3,1,2,1,1]},'Bbmaj7':{notes:['Bb','D','F','A'],guitar:'x13231',fingers:[0,1,3,2,4,1]},'Bdim':{notes:['B','D','F'],guitar:'x2343x',fingers:[0,2,3,4,1,0]}
 };
 function chordNames() { return Object.keys(CHORDS); }
+function chordRootIndex(name) {
+  const match = /^([A-G](?:#|b)?)/.exec(name);
+  return match && NOTE_IDX[match[1]] != null ? NOTE_IDX[match[1]] : 0;
+}
+function chordQualityRank(name) {
+  const suffix = name.replace(/^([A-G](?:#|b)?)/, '');
+  // WHY: within each root, familiar triads come first, then seventh and color chords.
+  const order = {'':0,'m':1,'7':2,'maj7':3,'m7':4,'dim':5,'aug':6,'sus2':7,'sus4':8,'add9':9};
+  return Object.prototype.hasOwnProperty.call(order, suffix) ? order[suffix] : 10;
+}
 function chordLibraryHTML(tab) {
   const piano = tab === 'piano-chords';
   const names = chordNames();
   const selected = CHORDS[window.__bpSelectedChord] ? window.__bpSelectedChord : 'C';
-  return '<div class="tool-eyebrow">СПРАВОЧНИК АККОРДОВ</div><h2>'+(piano?'Аккорды для пианино':'Аккорды для гитары')+'</h2><p class="tool-subtitle">Выберите аккорд — схема строится прямо в BandPlan и работает без сторонних библиотек.</p><div class="chord-picker" aria-label="Выбор аккорда">'+names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="chord-detail"><div class="chord-detail-copy"><div class="chord-selected-label">ВЫБРАННЫЙ АККОРД</div><h3>'+selected+'</h3><p class="chord-notes-line">Ноты <strong>'+CHORDS[selected].notes.join(' · ')+'</strong></p><p class="tool-status">'+(piano?'Цветом отмечены клавиши, входящие в аккорд.':'Кружки показывают пальцы; × — не играть струну, ○ — открытая струна.')+'</p></div><div class="chord-lib-canvas" aria-label="'+(piano?'Клавиатура пианино':'Схема аппликатуры гитары')+'">'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div></div>';
+  const groups = Array.from({length:12}, (_, index) => ({index, label:SHARP[index], names:names.filter(n => chordRootIndex(n) === index).sort((a,b) => chordQualityRank(a)-chordQualityRank(b) || a.localeCompare(b))})).filter(group => group.names.length);
+  const picker = groups.map(group => '<div class="chord-root-group"><span class="chord-root-label">'+group.label+'</span><div class="chord-root-chords">'+group.names.map(n=>'<button type="button" class="chord-pick'+(n===selected?' active':'')+'" data-act="chord-pick" data-v="'+n+'" aria-pressed="'+(n===selected)+'">'+n+'</button>').join('')+'</div></div>').join('');
+  return '<div class="tool-eyebrow">СПРАВОЧНИК АККОРДОВ</div><h2>'+(piano?'Аккорды для пианино':'Аккорды для гитары')+'</h2><p class="tool-subtitle">Выберите аккорд — схема строится прямо в BandPlan и работает без сторонних библиотек.</p><div class="chord-picker" aria-label="Аккорды по возрастанию тональности"><div class="chord-picker-track">'+picker+'</div></div><div class="chord-detail"><div class="chord-detail-copy"><div class="chord-selected-label">ВЫБРАННЫЙ АККОРД</div><h3>'+selected+'</h3><p class="chord-notes-line">Ноты <strong>'+CHORDS[selected].notes.join(' · ')+'</strong></p><p class="tool-status">'+(piano?'Цветом отмечены клавиши, входящие в аккорд.':'Кружки показывают пальцы; × — не играть струну, ○ — открытая струна.')+'</p></div><div class="chord-lib-canvas" aria-label="'+(piano?'Клавиатура пианино':'Схема аппликатуры гитары')+'">'+(piano?pianoDiagram(CHORDS[selected].notes):guitarDiagram(CHORDS[selected]))+'</div></div>';
 }
 function guitarDiagram(chord) {
   const frets = chord.guitar.split('');
