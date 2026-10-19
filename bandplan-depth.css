@@ -996,3 +996,82 @@ html[data-theme] #view .song-card .song-acts > button.icon-btn.song-quick-action
   box-shadow: var(--dp-press) !important;
   transform: translateY(1px) !important;
 }
+
+/* WHY: Premium Soft Clay calendar skin. Visual-only overrides keep the existing
+   date-cell geometry, event semantics, calendar interactions and responsive grid. */
+html[data-theme] body[data-route="calendar"] .cal-head .seg {
+  padding: 4px !important;
+  gap: 4px !important;
+  border: 1px solid color-mix(in srgb, var(--ln) 72%, transparent) !important;
+  border-radius: 14px !important;
+  background: var(--surface-1) !important;
+  box-shadow: var(--dp-press) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-head .seg button {
+  border-radius: 10px !important;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-head .seg button.on {
+  background: var(--surface-2) !important;
+  color: var(--a) !important;
+  border-color: color-mix(in srgb, var(--a) 18%, var(--ln)) !important;
+  box-shadow: var(--dp-raise-sm), inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid {
+  gap: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell {
+  border: 1px solid color-mix(in srgb, var(--ln) 78%, transparent) !important;
+  border-radius: var(--r-card, 16px) !important;
+  background: var(--surface-2) !important;
+  box-shadow: var(--dp-raise-sm) !important;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell:nth-child(7n),
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell:nth-child(7n - 1) {
+  background: color-mix(in srgb, var(--surface-1) 58%, var(--surface-2)) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell.out {
+  background: var(--surface-1) !important;
+  box-shadow: none !important;
+  opacity: .58;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell:hover {
+  border-color: color-mix(in srgb, var(--a) 38%, var(--ln)) !important;
+  box-shadow: var(--dp-raise-md) !important;
+  transform: none !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell.today {
+  border-color: color-mix(in srgb, var(--a) 55%, var(--ln)) !important;
+  background: color-mix(in srgb, var(--a) 7%, var(--surface-2)) !important;
+  box-shadow: var(--dp-raise-sm), inset 0 0 0 1px color-mix(in srgb, var(--a) 28%, transparent) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell.sel {
+  border-color: color-mix(in srgb, var(--a) 42%, var(--ln)) !important;
+  box-shadow: var(--dp-press) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-cell.sel .cal-num {
+  background: color-mix(in srgb, var(--a) 12%, var(--surface-2)) !important;
+  color: var(--a) !important;
+  border-color: color-mix(in srgb, var(--a) 24%, var(--ln)) !important;
+  box-shadow: none !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-ev {
+  border-radius: 8px !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent) !important;
+}
+html[data-theme] body[data-route="calendar"] .cal-legend {
+  border-top-color: color-mix(in srgb, var(--ln) 78%, transparent) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] body[data-route="calendar"] .cal-head .seg button,
+  html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell {
+    transition: none !important;
+  }
+}
+
