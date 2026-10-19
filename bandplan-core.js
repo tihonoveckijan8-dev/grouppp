@@ -1638,7 +1638,35 @@ function renderOverviewPopup() {
     delete popup.dataset.overviewPortal;
     if (popup.parentElement !== host) host.appendChild(popup);
   }
-  popup.innerHTML = overviewPopupHTML();
+  if (desktop) {
+    // WHY: Build a genuinely text-only hover tooltip in the DOM; CSS hiding controls is not reliable
+    // when cached styles or legacy popup markup are present.
+    const s = overviewPopupState;
+    const item = s.events[s.index];
+    popup.replaceChildren();
+    popup.removeAttribute('role');
+    popup.setAttribute('aria-label', 'Предпросмотр событий');
+    const addText = (className, value) => {
+      if (!value) return;
+      const node = document.createElement('div');
+      node.className = className;
+      node.textContent = value;
+      popup.appendChild(node);
+    };
+    if (!item) {
+      addText('band-overview-hover-title', 'В этом месяце таких событий нет.');
+    } else {
+      const ev = item.ev;
+      const meta = [pdateFull(item.date), ev.time ? ev.time + (ev.end ? '–' + ev.end : '') : '', ev.location || ''].filter(Boolean).join(' · ');
+      addText('band-overview-hover-kind', overviewKindLabel(s.kind) + ' · ' + (s.index + 1) + ' из ' + s.events.length);
+      addText('band-overview-hover-title', ev.title || 'Без названия');
+      addText('band-overview-hover-meta', meta);
+      addText('band-overview-hover-notes', ev.notes || '');
+    }
+  } else {
+    popup.innerHTML = overviewPopupHTML();
+    popup.setAttribute('role', 'dialog');
+  }
   popup.hidden = false;
   host.classList.add('has-event-popover');
   positionOverviewPopup();
