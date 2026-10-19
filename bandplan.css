@@ -4398,7 +4398,8 @@ body[data-route="songs"] .songs-head-row .btn:active{
 body[data-route="songs"] .songs-search-row{
   flex-wrap:nowrap;
 }
-body[data-route="songs"] .songs-search-row .tb-search{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
   min-width:0;
   width:100%;
 }
@@ -4459,7 +4460,8 @@ body[data-route="setlists"] .setlists-search-row{
   flex-wrap:nowrap;
   margin-bottom:var(--s4);
 }
-body[data-route="setlists"] .setlists-search-row .tb-search{
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
   min-width:0;
   width:100%;
 }
@@ -4475,7 +4477,8 @@ body[data-route="setlists"] .setlists-list > article.song-card{
 /* Keep the desktop search field the same width as the Songs search field;
    on mobile it returns to the full available width. */
 @media(min-width:641px){
-  body[data-route="setlists"] .setlists-search-row .tb-search{
+  body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
     width:calc(100% - var(--tap) - var(--s2));
   }
 }
@@ -4486,7 +4489,8 @@ body[data-route="setlists"] .setlists-list > article.song-card{
   body[data-route="setlists"] .setlists-list{
     max-width:none;
   }
-  body[data-route="setlists"] .setlists-search-row .tb-search{
+  body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
     width:100%;
     max-width:100%;
   }
@@ -4494,7 +4498,9 @@ body[data-route="setlists"] .setlists-list > article.song-card{
 
 /* PREMIUM COLLECTION SEARCH — Songs + Setlists */
 body[data-route="songs"] .songs-search-row .tb-search,
-body[data-route="setlists"] .setlists-search-row .tb-search{
+body[data-route="calendar"] .calendar-search-row .tb-search,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
   position:relative;
   display:flex;
   align-items:center;
@@ -4509,8 +4515,10 @@ body[data-route="setlists"] .setlists-search-row .tb-search{
   overflow:hidden;
   transition:border-color var(--t-btn),box-shadow var(--t-btn),background-color var(--t-btn),transform var(--t-btn);
 }
-body[data-route="songs"] .songs-search-row .tb-search::after,
-body[data-route="setlists"] .setlists-search-row .tb-search::after{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search::after,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search::after{
   content:"";
   position:absolute;
   left:15px;
@@ -4524,25 +4532,33 @@ body[data-route="setlists"] .setlists-search-row .tb-search::after{
   transform-origin:center;
   transition:opacity var(--t-btn),transform var(--t-btn);
 }
-body[data-route="songs"] .songs-search-row .tb-search:hover,
-body[data-route="setlists"] .setlists-search-row .tb-search:hover{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:hover,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:hover{
   border-color:var(--accent-ring);
   background:var(--surf-3);
 }
-body[data-route="songs"] .songs-search-row .tb-search:focus-within,
-body[data-route="setlists"] .setlists-search-row .tb-search:focus-within{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within{
   border-color:var(--accent);
   background:var(--surf-2);
   box-shadow:0 0 0 3px var(--accent-soft), var(--shadow-1);
   transform:translateY(-1px);
 }
-body[data-route="songs"] .songs-search-row .tb-search:focus-within::after,
-body[data-route="setlists"] .setlists-search-row .tb-search:focus-within::after{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within::after,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within::after{
   opacity:1;
   transform:scaleX(1);
 }
-body[data-route="songs"] .songs-search-row .tb-search .tb-search-ic,
-body[data-route="setlists"] .setlists-search-row .tb-search .tb-search-ic{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-search-ic,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-search-ic{
   width:20px;
   height:20px;
   display:flex;
@@ -4552,13 +4568,17 @@ body[data-route="setlists"] .setlists-search-row .tb-search .tb-search-ic{
   color:var(--muted);
   transition:color var(--t-btn),transform var(--t-btn);
 }
-body[data-route="songs"] .songs-search-row .tb-search:focus-within .tb-search-ic,
-body[data-route="setlists"] .setlists-search-row .tb-search:focus-within .tb-search-ic{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within .tb-search-ic,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within .tb-search-ic{
   color:var(--accent);
   transform:scale(1.08);
 }
-body[data-route="songs"] .songs-search-row .tb-search input,
-body[data-route="setlists"] .setlists-search-row .tb-search input{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search input,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search input{
   flex:1 1 auto;
   width:100%;
   min-width:0;
@@ -4568,14 +4588,18 @@ body[data-route="setlists"] .setlists-search-row .tb-search input{
   color:var(--text);
   font-weight:var(--fw-med);
 }
-body[data-route="songs"] .songs-search-row .tb-search input::placeholder,
-body[data-route="setlists"] .setlists-search-row .tb-search input::placeholder{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search input::placeholder,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search input::placeholder{
   color:var(--muted);
   opacity:.9;
   font-weight:var(--fw-reg);
 }
-body[data-route="songs"] .songs-search-row .tb-search .tb-clear,
-body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-clear,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-clear{
   width:34px!important;
   height:34px!important;
   min-width:34px;
@@ -4587,24 +4611,31 @@ body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear{
   border-radius:10px;
   background:transparent;
 }
-body[data-route="songs"] .songs-search-row .tb-search.has-q .tb-clear,
-body[data-route="setlists"] .setlists-search-row .tb-search.has-q .tb-clear{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search.has-q .tb-clear,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search.has-q .tb-clear{
   display:grid;
 }
-body[data-route="songs"] .songs-search-row .tb-search .tb-clear:hover,
-body[data-route="setlists"] .setlists-search-row .tb-search .tb-clear:hover{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-clear:hover,
+body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search .tb-clear:hover{
   color:var(--accent);
   border-color:var(--accent-ring);
   background:var(--accent-soft);
 }
 
 /* Search geometry: songs uses the space beside Filters; setlists gets a small right extension. */
-body[data-route="songs"] .songs-search-row .tb-search{
+body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
   width:100%;
 }
 @media(max-width:640px){
   body[data-route="songs"] .songs-search-row .tb-search,
-  body[data-route="setlists"] .setlists-search-row .tb-search{
+body[data-route="calendar"] .calendar-search-row .tb-search,
+  body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
     height:50px;
     min-height:50px;
     padding-left:13px;
@@ -4612,7 +4643,8 @@ body[data-route="songs"] .songs-search-row .tb-search{
   body[data-route="setlists"] .setlists-search-row{
     width:100%;
   }
-  body[data-route="setlists"] .setlists-search-row .tb-search{
+  body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search{
     width:100%;
     max-width:100%;
   }
@@ -10105,11 +10137,19 @@ body[data-route="settings"] #pageHead [data-act="export"]{display:none!important
 }
 
 /* Final shared search-field polish: consistent frame, no accent flash on focus. */
-.tb-search,.toolbar .tb-search,body[data-route="songs"] .songs-search-row .tb-search,body[data-route="setlists"] .setlists-search-row .tb-search,.setlist-detail .setlist-library-search>.tb-search{border:1px solid var(--border)!important;border-radius:14px!important;background:var(--surf-1)!important;box-shadow:var(--shadow-1)!important;color:var(--text)!important;outline:none!important}
-.tb-search:hover,.toolbar .tb-search:hover,body[data-route="songs"] .songs-search-row .tb-search:hover,body[data-route="setlists"] .setlists-search-row .tb-search:hover,.setlist-detail .setlist-library-search>.tb-search:hover{border-color:var(--border)!important;background:var(--surf-2)!important;box-shadow:var(--shadow-1)!important}
-.tb-search:focus-within,.toolbar .tb-search:focus-within,.toolbar:has(#evQ) .tb-search:focus-within,body[data-route="songs"] .songs-search-row .tb-search:focus-within,body[data-route="setlists"] .setlists-search-row .tb-search:focus-within,.setlist-detail .setlist-library-search>.tb-search:focus-within{border-color:var(--border)!important;background:var(--surf-1)!important;box-shadow:var(--shadow-1)!important;outline:none!important}
+.tb-search,.toolbar .tb-search,body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search,body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search,.setlist-detail .setlist-library-search>.tb-search{border:1px solid var(--border)!important;border-radius:14px!important;background:var(--surf-1)!important;box-shadow:var(--shadow-1)!important;color:var(--text)!important;outline:none!important}
+.tb-search:hover,.toolbar .tb-search:hover,body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:hover,body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:hover,.setlist-detail .setlist-library-search>.tb-search:hover{border-color:var(--border)!important;background:var(--surf-2)!important;box-shadow:var(--shadow-1)!important}
+.tb-search:focus-within,.toolbar .tb-search:focus-within,.toolbar:has(#evQ) .tb-search:focus-within,body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within,body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within,.setlist-detail .setlist-library-search>.tb-search:focus-within{border-color:var(--border)!important;background:var(--surf-1)!important;box-shadow:var(--shadow-1)!important;outline:none!important}
 .tb-search input,.tb-search input:focus,.tb-search input:focus-visible,.tb-search .bare-input,.tb-search .bare-input:focus,.tb-search .bare-input:focus-visible,.setlist-detail .setlist-library-search input#libQ,.setlist-detail .setlist-library-search input#libQ:focus,.setlist-detail .setlist-library-search input#libQ:focus-visible{outline:none!important;border-color:transparent!important;box-shadow:none!important}
-.tb-search:focus-within::before,.tb-search:focus-within::after,body[data-route="songs"] .songs-search-row .tb-search:focus-within::after,body[data-route="setlists"] .setlists-search-row .tb-search:focus-within::after{border-color:transparent!important;box-shadow:none!important;filter:none!important}
+.tb-search:focus-within::before,.tb-search:focus-within::after,body[data-route="songs"] .songs-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within::after,body[data-route="setlists"] .setlists-search-row .tb-search,
+body[data-route="calendar"] .calendar-search-row .tb-search:focus-within::after{border-color:transparent!important;box-shadow:none!important;filter:none!important}
 .tb-search input::placeholder,.tb-search .bare-input::placeholder{color:var(--muted)!important;opacity:.82}
 @media(prefers-reduced-motion:reduce){.tb-search,.tb-search::before,.tb-search::after{transition:none!important}}
 
@@ -13098,4 +13138,15 @@ body[data-route="calendar"] .toolbar:has(#evQ) .tb-search #evQ::placeholder{
   body[data-route="calendar"] .toolbar:has(#evQ) .tb-search > svg{
     transition:none;
   }
+}
+
+
+/* Calendar event search uses the same premium search field as Repertoire. */
+body[data-route="calendar"] .calendar-search-row { display:flex; align-items:center; gap:12px; }
+body[data-route="calendar"] .calendar-search-row > .tb-search { flex:1 1 auto; width:100%; min-width:0; }
+body[data-route="calendar"] .calendar-search-row > .btn { flex:none; }
+@media(max-width:640px){
+  body[data-route="calendar"] .calendar-search-row { width:100%; gap:8px; }
+  body[data-route="calendar"] .calendar-search-row > .tb-search { flex:1 1 0%; min-width:0; }
+  body[data-route="calendar"] .calendar-search-row > .btn { flex:none; }
 }
