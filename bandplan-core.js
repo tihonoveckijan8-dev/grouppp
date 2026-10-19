@@ -1599,24 +1599,75 @@ function stopTuner() {
   const previousAudio = toolAudio; toolAudio = null;
   if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(()=>{});
 }
-function pitchFromBuffer(buf, sampleRate) {
-  let rms=0; for(let i=0;i<buf.length;i++) rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/buf.length);
-  if(rms<0.012) return null;
-  let best=-1, bestCorr=0, minLag=Math.floor(sampleRate/1000), maxLag=Math.floor(sampleRate/55);
-  for(let lag=minLag;lag<=maxLag;lag++){let corr=0;for(let i=0;i<buf.length-lag;i++)corr+=buf[i]*buf[i+lag];corr/=buf.length-lag;if(corr>bestCorr){bestCorr=corr;best=lag;}}
-  if(best<1||bestCorr<0.12)return null;
-  return sampleRate/best;
+function pitchFromBuffer(buf, sampleRate, minHz=55, maxHz=900) {
+  // WHY: YIN/CMNDF is less likely than picking the strongest autocorrelation peak to mistake a guitar harmonic for the fundamental.
+  const length=buf.length, maxLag=Math.min(Math.floor(sampleRate/minHz),Math.floor(length*0.72)), minLag=Math.max(2,Math.floor(sampleRate/maxHz));
+  if(maxLag<=minLag+2)return null;
+  let mean=0;for(let i=0;i<length;i++)mean+=buf[i];mean/=length;
+  let energy=0;for(let i=0;i<length;i++){const v=buf[i]-mean;energy+=v*v;}
+  const rms=Math.sqrt(energy/length);if(rms<0.0055)return null;
+  const half=Math.min(Math.floor(length/2),length-maxLag),diff=new Float32Array(maxLag+1),cmndf=new Float32Array(maxLag+1);
+  let running=0;
+  for(let tau=1;tau<=maxLag;tau++){
+    let sum=0;
+    for(let i=0;i<half;i++){const a=buf[i]-mean,b=buf[i+tau]-mean,d=a-b;sum+=d*d;}
+    diff[tau]=sum;running+=sum;cmndf[tau]=running>0?sum*tau/running:1;
+  }
+  let candidate=-1;
+  for(let tau=minLag;tau<=maxLag;tau++){
+    if(cmndf[tau]<0.16){while(tau+1<=maxLag&&cmndf[tau+1]<cmndf[tau])tau++;candidate=tau;break;}
+  }
+  if(candidate<0){
+    let best=1;
+    for(let tau=minLag;tau<=maxLag;tau++)if(cmndf[tau]<cmndf[best]||best===1)best=tau;
+    if(cmndf[best]>0.30)return null;
+    candidate=best;
+  }
+  // WHY: parabolic interpolation resolves the fractional-sample period, preventing the needle from jumping in coarse whole-Hz steps.
+  const left=cmndf[Math.max(1,candidate-1)],center=cmndf[candidate],right=cmndf[Math.min(maxLag,candidate+1)];
+  const denom=left-2*center+right,shift=Math.abs(denom)>1e-9?0.5*(left-right)/denom:0;
+  const period=candidate+Math.max(-0.5,Math.min(0.5,shift)),frequency=sampleRate/period,clarity=1-center;
+  return Number.isFinite(frequency)&&clarity>0.65?{frequency,clarity}:null;
 }
 async function startTuner() {
   if(!navigator.mediaDevices?.getUserMedia){toast('Браузер не поддерживает доступ к микрофону','err');return;}
   try {
     stopTuner();
-    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-    const Ctx=window.AudioContext||window.webkitAudioContext; toolAudio=new Ctx();
-    const source=toolAudio.createMediaStreamSource(tunerStream), analyser=toolAudio.createAnalyser(); analyser.fftSize=4096; analyser.smoothingTimeConstant=0.15; source.connect(analyser);
-    const buf=new Float32Array(analyser.fftSize), noteNames=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B']; let lastPitchTick=0;
-    const tick=()=>{ if(!toolAudio||!tunerStream)return; if(performance.now()-lastPitchTick<45){tunerFrame=requestAnimationFrame(tick);return;} lastPitchTick=performance.now(); analyser.getFloatTimeDomainData(buf); const hz=pitchFromBuffer(buf,toolAudio.sampleRate); if(hz&&hz>45&&hz<1200){const midi=Math.round(69+12*Math.log2(hz/440)),ideal=440*Math.pow(2,(midi-69)/12),cents=1200*Math.log2(hz/ideal),note=noteNames[(midi%12+12)%12]+(Math.floor(midi/12)-1);const n=$('#tunerNote'),f=$('#tunerFrequency'),needle=$('#tunerNeedle'),cent=$('#tunerCents');if(n)n.textContent=note;if(f)f.textContent=hz.toFixed(1)+' Hz';if(needle)needle.style.left=(50+Math.max(-50,Math.min(50,cents))*0.9)+'%';if(cent)cent.textContent=(cents>0?'+':'')+Math.round(cents)+' cents';} tunerFrame=requestAnimationFrame(tick);};
-    $('#tunerStatus').textContent='Микрофон активен · сыграйте одну струну';$('#tunerStart').disabled=true;$('#tunerStop').disabled=false; await toolAudio.resume(); tick();
+    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio недоступен');
+    toolAudio=new Ctx({latencyHint:'interactive'});
+    const source=toolAudio.createMediaStreamSource(tunerStream),analyser=toolAudio.createAnalyser();
+    analyser.fftSize=4096;analyser.smoothingTimeConstant=0;source.connect(analyser);
+    const buf=new Float32Array(analyser.fftSize),noteNames=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+    let lastPitchTick=0,smoothedHz=0,lastNote='',stableCount=0;
+    const tick=()=>{
+      if(!toolAudio||!tunerStream)return;
+      const now=performance.now();
+      if(now-lastPitchTick<35){tunerFrame=requestAnimationFrame(tick);return;}
+      lastPitchTick=now;analyser.getFloatTimeDomainData(buf);
+      const detected=pitchFromBuffer(buf,toolAudio.sampleRate,60,Math.min(900,toolAudio.sampleRate/4));
+      if(detected&&detected.frequency>55&&detected.frequency<1000){
+        // WHY: exponential smoothing stabilizes microphone noise while retaining a quick response to a newly plucked string.
+        const rawHz=detected.frequency;
+        if(!smoothedHz||Math.abs(1200*Math.log2(rawHz/smoothedHz))>450){smoothedHz=rawHz;stableCount=0;}
+        else smoothedHz=smoothedHz*0.62+rawHz*0.38;
+        const midi=Math.round(69+12*Math.log2(smoothedHz/440)),ideal=440*Math.pow(2,(midi-69)/12);
+        const cents=1200*Math.log2(smoothedHz/ideal),note=noteNames[(midi%12+12)%12]+(Math.floor(midi/12)-1);
+        if(note===lastNote)stableCount++;else{lastNote=note;stableCount=0;}
+        const n=$('#tunerNote'),f=$('#tunerFrequency'),needle=$('#tunerNeedle'),cent=$('#tunerCents');
+        if(n)n.textContent=note;
+        if(f)f.textContent=smoothedHz.toFixed(2)+' Hz';
+        if(needle){needle.style.left=(50+Math.max(-50,Math.min(50,cents))*0.9)+'%';needle.dataset.tuning=Math.abs(cents)<=3?'in-tune':cents<0?'flat':'sharp';}
+        if(cent)cent.textContent=(cents>0?'+':'')+cents.toFixed(1)+' cents';
+      } else {
+        // WHY: don't snap the needle to zero during the short silent gap between plucks; keep the last reading visible.
+        const status=$('#tunerStatus');if(status&&now-lastPitchTick>1400)status.textContent='Сигнал не найден · сыграйте одну струну ближе к микрофону';
+      }
+      tunerFrame=requestAnimationFrame(tick);
+    };
+    const status=$('#tunerStatus');if(status)status.textContent='Микрофон активен · сыграйте одну струну по одной';
+    const start=$('#tunerStart'),stop=$('#tunerStop');if(start)start.disabled=true;if(stop)stop.disabled=false;
+    await toolAudio.resume();tick();
   } catch(err){stopTuner();const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');}
 }
 function stopMetro() { if(metroTimer)clearTimeout(metroTimer);metroTimer=0;const b=$('#metroToggle');if(b){b.textContent='▶ Запустить';b.classList.remove('is-running');} }
