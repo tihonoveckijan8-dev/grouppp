@@ -2091,23 +2091,24 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
   .bottom-more-backdrop[hidden] { display: none !important; }
   .bottom-more-menu {
     position: fixed !important;
-    inset: 0 0 auto 0 !important;
+    inset: 0 0 0 auto !important;
     z-index: 2 !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: min(84vh, 760px) !important;
-    max-height: min(84dvh, 760px) !important;
+    width: min(420px, 100vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
-    padding: calc(22px + env(safe-area-inset-top, 0px)) 18px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     border: 1px solid var(--border) !important;
-    border-top: 0 !important;
-    border-radius: 0 0 24px 24px !important;
+    border-right: 0 !important;
+    border-radius: 24px 0 0 24px !important;
     background: var(--surf-1) !important;
     color: var(--text) !important;
-    box-shadow: 0 18px 60px rgba(0,0,0,.24) !important;
-    animation: bp-more-drawer-in 240ms cubic-bezier(.2,.8,.2,1) both !important;
+    box-shadow: -18px 0 60px rgba(0,0,0,.24) !important;
+    animation: bp-more-drawer-in 260ms cubic-bezier(.2,.8,.2,1) both !important;
   }
   .bottom-more-menu[hidden] { display: none !important; }
   .bottom-more-header {
@@ -2196,8 +2197,8 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
   }
   body.more-menu-open { overflow: hidden !important; touch-action: none !important; }
   @keyframes bp-more-drawer-in {
-    from { opacity: .6; transform: translateY(-100%); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: .6; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
   }
 }
 @media (prefers-reduced-motion: reduce) {
