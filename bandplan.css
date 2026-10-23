@@ -13721,3 +13721,26 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   @media(max-width:480px){.tuner-dial{height:158px;max-width:330px}.tuner-dial #tunerNeedle{height:78px;bottom:28px}.tuner-readout-pro{padding:18px 8px 20px}.tuner-string{min-height:76px}}
   @media(prefers-reduced-motion:reduce){.tuner-dial #tunerNeedle{transition:none}}
 }
+
+
+/* Flat dropdown options: remove the raised/3D look from items inside dropdown lists. */
+.accent-dropdown-menu .accent-dropdown-option,
+.profile-role-options .profile-role-option,
+.dyn-instrument-dropdown button,
+[role="listbox"] [role="option"],
+[role="menu"] [role="menuitem"]{
+  box-shadow:none;
+  transform:none;
+}
+.accent-dropdown-menu .accent-dropdown-option,
+.profile-role-options .profile-role-option{
+  border:0;
+}
+.accent-dropdown-menu .accent-dropdown-option .accent-dot,
+.profile-role-options .profile-role-option-icon{
+  box-shadow:none;
+}
+.profile-role-options .profile-role-option-icon{
+  border-color:transparent;
+  background:transparent;
+}
