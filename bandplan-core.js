@@ -2732,13 +2732,13 @@ function renderDynBlock() {
   const selectedInstrument = dynDraft.instruments.includes(active) ? active : (dynDraft.instruments[0] || '');
   let html = '<div class="dyn-editor">';
   html += '<details class="dyn-instrument-dropdown"><summary><span class="dyn-instrument-summary-icon">' + ic('music', 16) + '</span><span><strong>Добавить инструмент</strong><small>Выбери инструмент из выпадающего списка, чтобы расписать его динамику</small></span><span class="dyn-dropdown-chevron" aria-hidden="true">⌄</span></summary>' +
-    '<div class="dyn-instrument-picker"><label class="field-label" for="dynInstrumentFocus">Настраиваемая партия</label>' +
-    '<div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentFocus">' +
-    (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<option value="' + esc(ins) + '"' + (ins === selectedInstrument ? ' selected' : '') + '>' + esc(dynamicsInstrumentLabel(ins)) + '</option>').join('') : '<option value="">Сначала добавь инструмент</option>') +
-    '</select><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-instrument-remove-active"' + (selectedInstrument ? '' : ' disabled') + ' title="Убрать выбранный инструмент">' + ic('x', 14) + 'Убрать</button></div>' +
-    '<label class="field-label dyn-add-label" for="dynInstrumentSelect">Добавить ещё инструмент</label><div class="dyn-instrument-add-row"><select class="select" id="dynInstrumentSelect">' +
-    available.map(r => '<option value="' + esc(r.k) + '">' + esc(r.label) + '</option>').join('') +
-    '</select><button class="btn btn-primary btn-sm" type="button" data-act="dyn-instrument-add"' + (available.length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить</button></div>' +
+    '<div class="dyn-instrument-picker"><label class="field-label">Настраиваемая партия</label>' +
+    '<div class="dyn-instrument-add-row"><div class="dyn-choice" id="dynInstrumentFocus"><button type="button" class="dyn-choice-current" data-act="dyn-choice-toggle" data-choice="focus" aria-expanded="false">' + esc(selectedInstrument ? dynamicsInstrumentLabel(selectedInstrument) : 'Сначала добавь инструмент') + '<span aria-hidden="true">⌄</span></button><div class="dyn-choice-menu" data-choice-menu="focus" hidden>' +
+    (dynDraft.instruments.length ? dynDraft.instruments.map(ins => '<button type="button" class="dyn-choice-option' + (ins === selectedInstrument ? ' on' : '') + '" data-act="dyn-choice-pick-focus" data-ins="' + esc(ins) + '"' + (ins === selectedInstrument ? ' aria-selected="true"' : '') + '>' + (ins === selectedInstrument ? '<span class="dyn-choice-check">✓</span>' : '<span class="dyn-choice-check"></span>') + esc(dynamicsInstrumentLabel(ins)) + '</button>').join('') : '<div class="dyn-choice-empty">Сначала добавь инструмент</div>') +
+    '</div></div><button class="btn btn-secondary btn-sm" type="button" data-act="dyn-instrument-remove-active"' + (selectedInstrument ? '' : ' disabled') + ' title="Убрать выбранный инструмент">' + ic('x', 14) + 'Убрать</button></div>' +
+    '<label class="field-label dyn-add-label">Добавить ещё инструмент</label><div class="dyn-instrument-add-row"><div class="dyn-choice" id="dynInstrumentSelect"><button type="button" class="dyn-choice-current" data-act="dyn-choice-toggle" data-choice="add" aria-expanded="false">' + esc(available.length ? available[0].label : 'Все инструменты добавлены') + '<span aria-hidden="true">⌄</span></button><div class="dyn-choice-menu" data-choice-menu="add" hidden>' +
+    available.map(r => '<button type="button" class="dyn-choice-option" data-act="dyn-choice-pick-add" data-ins="' + esc(r.k) + '">' + '<span class="dyn-choice-check"></span>' + esc(r.label) + '</button>').join('') +
+    '</div></div><button class="btn btn-primary btn-sm" type="button" data-act="dyn-instrument-add"' + (available.length ? '' : ' disabled') + '>' + ic('plus', 15) + 'Добавить</button></div>' +
     (!dynDraft.instruments.length ? '<p class="t-sm t-muted">Каждый инструмент хранит собственные указания по каждой части песни — переключение не перезаписывает другие партии.</p>' : '') +
     '</div></details>';
   if (!sections.length) {
@@ -3954,9 +3954,36 @@ document.addEventListener('change', function (e) {
   }
 });
 document.addEventListener('click', function (e) {
-  const button = e.target.closest && e.target.closest('[data-act="insert-song-section"],[data-act="dyn-instrument-add"],[data-act="dyn-instrument-remove"],[data-act="dyn-instrument-remove-active"]');
+  const button = e.target.closest && e.target.closest('[data-act="insert-song-section"],[data-act="dyn-instrument-add"],[data-act="dyn-instrument-remove"],[data-act="dyn-instrument-remove-active"],[data-act="dyn-choice-toggle"],[data-act="dyn-choice-pick-focus"],[data-act="dyn-choice-pick-add"]');
   if (!button || !dynDraft) return;
   const action = button.getAttribute('data-act');
+  if (action === 'dyn-choice-toggle') {
+    const kind = button.getAttribute('data-choice');
+    const root = $('#dynBlock .dyn-choice[data-active-choice="' + kind + '"]') || button.closest('.dyn-choice');
+    const menu = root && root.querySelector('[data-choice-menu]');
+    const wasOpen = menu && !menu.hidden;
+    $('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
+    $('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    if (menu && !wasOpen) { menu.hidden = false; button.setAttribute('aria-expanded', 'true'); }
+    return;
+  }
+  if (action === 'dyn-choice-pick-focus') {
+    dynDraft.activeInstrument = button.getAttribute('data-ins') || '';
+    renderDynBlock();
+    const details = $('#dynBlock .dyn-instrument-dropdown');
+    if (details) details.open = true;
+    return;
+  }
+  if (action === 'dyn-choice-pick-add') {
+    const root = button.closest('.dyn-choice');
+    const current = root && root.querySelector('.dyn-choice-current');
+    if (current) current.innerHTML = esc(button.textContent.trim()) + '<span aria-hidden="true">⌄</span>';
+    $('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
+    $('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    const selectRoot = $('#dynInstrumentSelect');
+    if (selectRoot) selectRoot.setAttribute('data-selected-ins', button.getAttribute('data-ins') || '');
+    return;
+  }
   if (action === 'insert-song-section') {
     const input = $('#f_slyr');
     if (!input) return;
@@ -3982,7 +4009,7 @@ document.addEventListener('click', function (e) {
   }
   if (action === 'dyn-instrument-add') {
     const select = $('#dynInstrumentSelect');
-    const ins = select && select.value;
+    const ins = select && select.getAttribute('data-selected-ins');
     if (!ins || dynDraft.instruments.includes(ins)) return;
     dynDraft.instruments.push(ins);
     dynDraft.activeInstrument = ins;
