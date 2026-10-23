@@ -1544,3 +1544,32 @@ html body[data-route="calendar"] .band-overview-popover {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+/* Dropdown rows must stay flat: override the global raised-button treatment above.
+   Keep the menu surface and selected-row color, but remove per-row depth. */
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option,
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option:hover,
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option:focus,
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option:focus-visible,
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option.on {
+  box-shadow: none !important;
+  background-image: none !important;
+  filter: none !important;
+  transform: none !important;
+  text-shadow: none !important;
+  border-color: transparent !important;
+}
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option {
+  background-color: transparent !important;
+}
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option:hover {
+  background-color: var(--accent-soft) !important;
+}
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option.on {
+  background-color: var(--accent-soft-2) !important;
+}
+html[data-theme] body[data-route="settings"] .profile-role-options .profile-role-option-icon {
+  box-shadow: none !important;
+  background-image: none !important;
+}
