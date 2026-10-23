@@ -13841,3 +13841,30 @@ body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-o
   filter: none !important;
   transform: none !important;
 }
+
+
+/* Flat role/instrument choices shown in Settings (the rows visible in the role picker). */
+body[data-route="settings"] .profile-role-options .profile-role-option,
+body[data-route="settings"] .profile-role-options .profile-role-option:hover,
+body[data-route="settings"] .profile-role-options .profile-role-option:focus-visible,
+body[data-route="settings"] .profile-role-options .profile-role-option.on {
+  box-shadow: none !important;
+  filter: none !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  transform: none !important;
+}
+body[data-route="settings"] .profile-role-options .profile-role-option {
+  background-color: transparent !important;
+  border: 0 !important;
+}
+body[data-route="settings"] .profile-role-options .profile-role-option:hover {
+  background-color: var(--accent-soft) !important;
+}
+body[data-route="settings"] .profile-role-options .profile-role-option.on {
+  background-color: var(--accent-soft-2) !important;
+}
+body[data-route="settings"] .profile-role-options .profile-role-option-icon {
+  box-shadow: none !important;
+  background-image: none !important;
+}
