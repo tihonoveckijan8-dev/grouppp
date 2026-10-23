@@ -20,6 +20,7 @@ const staticFiles = [
   'icon-maskable-512.png',
   'apple-touch-icon.png',
   'icon-bandplan.svg',
+  'logo-bandplan.svg',
   'icon-splash.svg',
   'icon-maskable-splash.svg'
 ];
