@@ -1573,3 +1573,75 @@ html[data-theme] body[data-route="settings"] .profile-role-options .profile-role
   box-shadow: none !important;
   background-image: none !important;
 }
+
+
+/* FLAT DROPDOWN ITEMS — remove the global clay/raised-button treatment from
+   every row inside dropdowns, while retaining the menu panel and selected state. */
+html[data-theme] :where(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :where(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+) {
+  box-shadow: none !important;
+  border: 0 !important;
+  transform: none !important;
+  filter: none !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  transition: background-color .12s ease, color .12s ease !important;
+}
+html[data-theme] :where(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :where(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+)::before,
+html[data-theme] :where(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :where(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+)::after {
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  background-image: none !important;
+}
+html[data-theme] .profile-role-options .profile-role-option-icon {
+  box-shadow: none !important;
+  border: 1px solid var(--accent-ring) !important;
+}
