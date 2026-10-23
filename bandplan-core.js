@@ -4021,7 +4021,7 @@ document.addEventListener('click', function (e) {
     return;
   }
   if (action === 'dyn-instrument-remove' || action === 'dyn-instrument-remove-active') {
-    const ins = action === 'dyn-instrument-remove-active' ? ($('#dynInstrumentFocus') && $('#dynInstrumentFocus').value) : button.getAttribute('data-ins');
+    const ins = action === 'dyn-instrument-remove-active' ? (dynDraft.activeInstrument || '') : button.getAttribute('data-ins');
     if (!ins) return;
     dynDraft.instruments = dynDraft.instruments.filter(key => key !== ins);
     if (dynDraft.activeInstrument === ins) dynDraft.activeInstrument = dynDraft.instruments[0] || '';
