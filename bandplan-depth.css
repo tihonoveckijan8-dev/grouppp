@@ -1884,3 +1884,72 @@ html[data-theme] .dyn-instrument-picker .dyn-choice-check {
 html[data-theme] .dyn-instrument-picker .dyn-choice-empty {
   padding:10px 8px; color:var(--muted); font-size:var(--fs-body-s);
 }
+
+
+/* FIX: keep the custom instrument option menu floating over the form,
+   rather than participating in the instrument rows' layout. */
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-instrument-add-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  overflow: visible !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice {
+  position: relative !important;
+  display: block !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu {
+  position: absolute !important;
+  display: block !important;
+  top: calc(100% + 5px) !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999 !important;
+  max-height: 240px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 6px !important;
+  gap: 2px !important;
+  background: var(--surf-1, #20242e) !important;
+  border: 1px solid var(--border, #343b49) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 28px rgba(0,0,0,.28) !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu[hidden] {
+  display: none !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu .dyn-choice-option {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 38px !important;
+  margin: 0 !important;
+  padding: 7px 9px !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  white-space: normal !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu .dyn-choice-option:hover,
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu .dyn-choice-option.on,
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu .dyn-choice-option:focus-visible {
+  background: var(--accent-soft) !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu .dyn-choice-check {
+  flex: 0 0 20px !important;
+  width: 20px !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-add-label {
+  display: block !important;
+  position: static !important;
+  margin-top: 12px !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker {
+  overflow: visible !important;
+}
