@@ -1393,11 +1393,16 @@ function buildChrome() {
     '<span>' + n.t + '</span>' + (n.k === 'calendar' && up ? '<span class="nb">' + up + '</span>' : '') + '</a>').join('') +
     '<a href="#/tools" class="bottom-nav-more' + (moreActive ? ' active' : '') + '" data-act="more-menu-toggle" aria-expanded="false" aria-controls="bottomMoreMenu">' +
     navIc('more', 21) + '<span>Ещё</span></a>' +
-    '<div class="bottom-more-menu" id="bottomMoreMenu" hidden>' +
+    '<div class="bottom-more-backdrop" data-act="more-menu-close" aria-hidden="true" hidden></div>' +
+    '<section class="bottom-more-menu" id="bottomMoreMenu" role="dialog" aria-modal="true" aria-labelledby="bottomMoreTitle" hidden>' +
+    '<header class="bottom-more-header"><div><span class="bottom-more-eyebrow">BANDPLAN</span><h2 id="bottomMoreTitle">Ещё</h2><p>Инструменты и настройки группы</p></div>' +
+    '<button class="bottom-more-close" type="button" data-act="more-menu-close" aria-label="Закрыть меню">' + navIc('x', 20) + '</button></header>' +
+    '<nav class="bottom-more-links" aria-label="Дополнительные разделы">' +
     TABS.filter(n => ['tools', 'settings'].includes(n.k)).map(n =>
-      '<a href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
-      navIc(n.i, 20) + '<span>' + n.t + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
-    '</div>';
+      '<a class="bottom-more-link" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
+      '<span class="bottom-more-link-icon">' + navIc(n.i, 21) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong><small>' + (n.k === 'tools' ? 'Метроном, тюнер и полезные инструменты' : 'Профиль, оформление и параметры приложения') + '</small></span>' +
+      '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
+    '</nav></section>';
 
   const p = state.profile;
   $('#brandBand').textContent = p.bandName || 'Моя группа';
@@ -3215,9 +3220,24 @@ document.addEventListener('click', function (e) {
     case 'more-menu-toggle': {
       stop();
       const menu = $('#bottomMoreMenu');
+      const backdrop = $('.bottom-more-backdrop');
       const open = !!menu && menu.hidden;
       if (menu) menu.hidden = !open;
+      if (backdrop) backdrop.hidden = !open;
+      document.body.classList.toggle('more-menu-open', open);
       el.setAttribute('aria-expanded', String(open));
+      if (open) $('#bottomMoreTitle')?.focus?.({ preventScroll: true });
+      break;
+    }
+    case 'more-menu-close': {
+      stop();
+      const menu = $('#bottomMoreMenu');
+      const backdrop = $('.bottom-more-backdrop');
+      if (menu) menu.hidden = true;
+      if (backdrop) backdrop.hidden = true;
+      document.body.classList.remove('more-menu-open');
+      const trigger = $('[data-act="more-menu-toggle"]');
+      if (trigger) { trigger.setAttribute('aria-expanded', 'false'); trigger.focus({ preventScroll: true }); }
       break;
     }
     case 'nav': {
@@ -3226,7 +3246,10 @@ document.addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
       const moreMenu = $('#bottomMoreMenu');
+      const moreBackdrop = $('.bottom-more-backdrop');
       if (moreMenu) moreMenu.hidden = true;
+      if (moreBackdrop) moreBackdrop.hidden = true;
+      document.body.classList.remove('more-menu-open');
       const moreButton = $('[data-act="more-menu-toggle"]');
       if (moreButton) moreButton.setAttribute('aria-expanded', 'false');
       const target = '#/' + el.getAttribute('data-to');
