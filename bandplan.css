@@ -13744,3 +13744,60 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   border-color:transparent;
   background:transparent;
 }
+
+
+/* Global dropdown flattening: apply to option rows in every dropdown, not just the profile/accent menus. */
+:is(
+  [class*="dropdown"],
+  [class*="select-menu"],
+  [class*="options"],
+  [class*="popover"],
+  [role="listbox"],
+  [role="menu"]
+) :is(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  label,
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+),
+:is(
+  [class*="dropdown"],
+  [class*="select-menu"],
+  [class*="options"],
+  [class*="popover"],
+  [role="listbox"],
+  [role="menu"]
+) :is(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  label,
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+)::before,
+:is(
+  [class*="dropdown"],
+  [class*="select-menu"],
+  [class*="options"],
+  [class*="popover"],
+  [role="listbox"],
+  [role="menu"]
+) :is(
+  button,
+  [role="option"],
+  [role="menuitem"],
+  label,
+  [class*="option"],
+  [class*="item"],
+  [class*="choice"]
+)::after {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  background-image: none !important;
+}
