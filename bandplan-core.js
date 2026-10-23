@@ -3962,8 +3962,8 @@ document.addEventListener('click', function (e) {
     const root = $('#dynBlock .dyn-choice[data-active-choice="' + kind + '"]') || button.closest('.dyn-choice');
     const menu = root && root.querySelector('[data-choice-menu]');
     const wasOpen = menu && !menu.hidden;
-    $('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
-    $('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    $$('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
+    $$('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
     if (menu && !wasOpen) { menu.hidden = false; button.setAttribute('aria-expanded', 'true'); }
     return;
   }
@@ -3978,8 +3978,8 @@ document.addEventListener('click', function (e) {
     const root = button.closest('.dyn-choice');
     const current = root && root.querySelector('.dyn-choice-current');
     if (current) { const label = button.cloneNode(true); const check = label.querySelector('.dyn-choice-check'); if (check) check.remove(); current.innerHTML = esc(label.textContent.trim()) + '<span aria-hidden="true">⌄</span>'; }
-    $('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
-    $('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    $$('#dynBlock .dyn-choice-menu').forEach(m => { m.hidden = true; });
+    $$('#dynBlock .dyn-choice-current').forEach(b => b.setAttribute('aria-expanded', 'false'));
     const selectRoot = $('#dynInstrumentSelect');
     if (selectRoot) selectRoot.setAttribute('data-selected-ins', button.getAttribute('data-ins') || '');
     return;
