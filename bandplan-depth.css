@@ -1715,3 +1715,23 @@ html[data-theme] .chord-picker::-webkit-scrollbar-thumb {
   background: var(--border-2) !important;
   border-radius: 999px !important;
 }
+
+
+/* Brand mark is now a real image asset; remove the old text-tile treatment. */
+html[data-theme] img.brand-mark {
+  display: block !important;
+  flex: 0 0 40px;
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: contain;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme] .auth-brand img.brand-mark {
+  width: 42px !important;
+  height: 42px !important;
+  flex-basis: 42px;
+}
