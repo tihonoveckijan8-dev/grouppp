@@ -1844,3 +1844,43 @@ html[data-theme] :is(
   transform: none !important;
   background-image: none !important;
 }
+
+/* Song dynamics instrument selectors use the same custom flat rows as Settings.
+   Custom HTML menus avoid the browser-native white option popup shown on desktop. */
+html[data-theme] .dyn-instrument-picker .dyn-choice { position:relative; flex:1 1 0; min-width:0; }
+html[data-theme] .dyn-instrument-picker .dyn-choice-current {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  width:100%; min-height:44px; padding:8px 12px;
+  border:1px solid var(--border-strong, var(--border)); border-radius:10px;
+  background:var(--surface-2, var(--surf-2)); color:var(--text);
+  box-shadow:none; text-align:left; font:inherit; cursor:pointer;
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-current:hover,
+html[data-theme] .dyn-instrument-picker .dyn-choice-current[aria-expanded="true"] {
+  border-color:var(--accent); background:var(--accent-soft);
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-menu {
+  position:absolute; z-index:100; top:calc(100% + 4px); left:0; right:0;
+  display:grid; gap:4px; max-height:240px; overflow-y:auto;
+  padding:7px; border:1px solid var(--border); border-radius:12px;
+  background:var(--surf-1); box-shadow:var(--shadow-2);
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-menu[hidden] { display:none !important; }
+html[data-theme] .dyn-instrument-picker .dyn-choice-option {
+  display:flex; align-items:center; gap:8px; width:100%; min-height:40px;
+  padding:6px 8px; border:0; border-radius:8px; background:transparent;
+  color:var(--text); box-shadow:none; filter:none; transform:none;
+  text-align:left; font:inherit; cursor:pointer;
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-option:hover,
+html[data-theme] .dyn-instrument-picker .dyn-choice-option.on,
+html[data-theme] .dyn-instrument-picker .dyn-choice-option:focus-visible {
+  background:var(--accent-soft); box-shadow:none; outline:none;
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-check {
+  display:inline-flex; justify-content:center; align-items:center;
+  flex:0 0 20px; width:20px; color:var(--accent); font-weight:800;
+}
+html[data-theme] .dyn-instrument-picker .dyn-choice-empty {
+  padding:10px 8px; color:var(--muted); font-size:var(--fs-body-s);
+}
