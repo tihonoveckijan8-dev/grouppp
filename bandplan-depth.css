@@ -2028,3 +2028,39 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
 @media (prefers-reduced-motion: reduce) {
   html[data-theme] .bottom-more-menu { animation: none !important; }
 }
+
+
+@media (max-width: 860px) {
+  /* Keep the drawer above the app even though it is rendered inside bottom-nav. */
+  body:has(#bottomMoreMenu:not([hidden])) .bottom-nav {
+    z-index: 12000 !important;
+  }
+  html[data-theme] .bottom-more-menu::before {
+    content: "";
+    position: fixed;
+    z-index: -1;
+    inset: 0 100% 0 auto;
+    width: 100vw;
+    background: rgba(0,0,0,.38);
+    pointer-events: none;
+  }
+  html[data-theme] .bottom-more-menu > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 13px !important;
+    min-height: 54px !important;
+    margin: 6px 0 !important;
+    padding: 12px 13px !important;
+    border: 1px solid var(--ln) !important;
+    border-radius: 15px !important;
+    background: var(--surface-2) !important;
+    color: var(--tx) !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+  }
+  html[data-theme] .bottom-more-menu > a[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--a) 55%, var(--ln)) !important;
+    background: color-mix(in srgb, var(--a) 10%, var(--surface-2)) !important;
+    color: var(--a) !important;
+  }
+}
