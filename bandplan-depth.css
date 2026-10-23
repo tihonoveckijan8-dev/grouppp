@@ -1735,3 +1735,112 @@ html[data-theme] .auth-brand img.brand-mark {
   height: 42px !important;
   flex-basis: 42px;
 }
+
+
+/* Unified dropdown item design: match the flat, compact rows in Settings.
+   Apply to all custom dropdowns and option lists, without flattening their outer panels. */
+html[data-theme] :is(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  .setlist-song-options,
+  .metro-options,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :is(
+  button,
+  a,
+  label,
+  [role="option"],
+  [role="menuitem"],
+  [class*="-option"],
+  [class*="-item"],
+  [class*="-choice"]
+) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  min-height: 40px;
+  padding: 6px 8px;
+  background-color: transparent;
+  color: var(--text);
+  transition: background-color .12s ease, color .12s ease !important;
+}
+html[data-theme] :is(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  .setlist-song-options,
+  .metro-options,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :is(
+  button,
+  a,
+  label,
+  [role="option"],
+  [role="menuitem"],
+  [class*="-option"],
+  [class*="-item"],
+  [class*="-choice"]
+):is(:hover, :focus-visible, .on, .active, [aria-selected="true"], [aria-checked="true"]) {
+  box-shadow: none !important;
+  background-color: var(--accent-soft) !important;
+}
+html[data-theme] :is(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  .setlist-song-options,
+  .metro-options,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :is(
+  button,
+  a,
+  label,
+  [role="option"],
+  [role="menuitem"],
+  [class*="-option"],
+  [class*="-item"],
+  [class*="-choice"]
+)::before,
+html[data-theme] :is(
+  .profile-role-options,
+  .accent-dropdown-menu,
+  .dyn-instrument-dropdown,
+  .setlist-song-options,
+  .metro-options,
+  [role="listbox"],
+  [role="menu"],
+  [class*="dropdown-menu"],
+  [class*="dropdown-options"],
+  [class*="select-options"]
+) :is(
+  button,
+  a,
+  label,
+  [role="option"],
+  [role="menuitem"],
+  [class*="-option"],
+  [class*="-item"],
+  [class*="-choice"]
+)::after {
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  background-image: none !important;
+}
