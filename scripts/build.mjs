@@ -20,6 +20,7 @@ const staticFiles = [
   'icon-maskable-512.png',
   'apple-touch-icon.png',
   'icon-bandplan.svg',
+  'icon-maskable.svg',
   'logo-bandplan.svg',
   'icon-splash.svg',
   'icon-maskable-splash.svg'
@@ -41,8 +42,9 @@ for (const file of staticFiles) {
  // WHY: generate matching raster icons from the single source-of-truth SVG so
  // installed browsers and iOS home-screen links never keep an older artwork.
  const iconSvg = await readFile(path.join(out, 'icon-bandplan.svg'), 'utf8');
- for (const [file, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['icon-maskable-512.png', 512], ['apple-touch-icon.png', 180]]) {
-   const png = new Resvg(iconSvg, { fitTo: { mode: 'width', value: size } }).render().asPng();
+ const maskableSvg = await readFile(path.join(out, 'icon-maskable.svg'), 'utf8');
+ for (const [file, size, sourceSvg] of [['icon-192.png', 192, iconSvg], ['icon-512.png', 512, iconSvg], ['icon-maskable-512.png', 512, maskableSvg], ['apple-touch-icon.png', 180, iconSvg]]) {
+   const png = new Resvg(sourceSvg, { fitTo: { mode: 'width', value: size } }).render().asPng();
    await writeFile(path.join(out, file), png);
  }
 
