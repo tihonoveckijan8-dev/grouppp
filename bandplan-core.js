@@ -1553,7 +1553,7 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 /* ═══ MUSICIAN TOOLS ═══
    WHY: microphone access is opt-in and Web Audio is created only after a user gesture;
    the tuner and metronome work locally without uploading audio or requiring a third-party service. */
-let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0, metroTimer = 0, metroCtx = null, metroBeat = 0;
+let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0;
 const TOOL_TABS = [
   ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
 ];
@@ -1572,7 +1572,7 @@ function vTools() {
   const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'">'+toolTabIcon(id)+'<span>'+esc(label)+'</span></button>').join('') + '</div>';
   let body = '';
   if (tab === 'guitar-tuner' || tab === 'violin-tuner') body = tunerHTML(tab);
-  else if (tab === 'metronome') body = metroHTML();
+  else if (tab === 'metronome') body = '<div data-bp-am-tool-host></div>';
   else body = chordLibraryHTML(tab);
   return '<section class="tools-page"><header class="tools-hero"><div class="tools-hero-mark">'+navIc('tools',30)+'</div><div class="tools-hero-copy"><div class="tools-hero-kicker">BANDPLAN · MUSIC LAB</div><h2>Инструменты музыканта</h2><p>Настройка, ритм и аккорды — всё для репетиции в одном месте.</p></div><div class="tools-hero-badges"><span class="tools-badge"><i></i>Работают в браузере</span><span class="tools-badge tools-badge-muted">Аудио остаётся на устройстве</span></div></header>'+tabs+'<div class="tools-panel">'+body+'</div></section>';
 }
@@ -1580,9 +1580,6 @@ function tunerHTML(tab) {
   const violin = tab === 'violin-tuner';
   const strings = violin ? [['E5','Ми','659.25'],['A4','Ля','440.00'],['D4','Ре','293.66'],['G3','Соль','196.00']] : [['E4','Ми','329.63'],['B3','Си','246.94'],['G3','Соль','196.00'],['D3','Ре','146.83'],['A2','Ля','110.00'],['E2','Ми','82.41']];
   return '<div class="tool-eyebrow">ХРОМАТИЧЕСКИЙ ТЮНЕР</div><h2>'+(violin?'Тюнер для скрипки':'Тюнер для гитары')+'</h2><p class="tool-subtitle">Нажмите на струну, чтобы услышать её звук, или включите микрофон для настройки.</p><div class="tuner-readout tuner-readout-pro"><div class="tuner-live-row"><span class="tuner-live-dot" aria-hidden="true"></span><span>ТОЧНОСТЬ НАСТРОЙКИ</span></div><div class="tuner-note" id="tunerNote">—</div><div class="tuner-frequency" id="tunerFrequency">Ожидание сигнала</div><div class="tuner-dial" role="img" aria-label="Стрелочный индикатор настройки"><svg viewBox="0 0 300 165" aria-hidden="true"><path class="tuner-arc tuner-arc-low" d="M30 132 A120 120 0 0 1 65 47"/><path class="tuner-arc tuner-arc-low-mid" d="M65 47 A120 120 0 0 1 112 15"/><path class="tuner-arc tuner-arc-good" d="M112 15 A120 120 0 0 1 188 15"/><path class="tuner-arc tuner-arc-high-mid" d="M188 15 A120 120 0 0 1 235 47"/><path class="tuner-arc tuner-arc-high" d="M235 47 A120 120 0 0 1 270 132"/><g class="tuner-ticks"><path d="M35 120l10 3M52 75l9 5M84 39l6 9M123 17l2 11M150 12v12M177 17l-2 11M216 39l-6 9M248 75l-9 5M265 120l-10 3"/></g></svg><i id="tunerNeedle" data-tuning="unknown"></i><span class="tuner-dial-center" aria-hidden="true"></span><span class="tuner-dial-zero">0</span></div><div class="tuner-dial-labels"><span>♭ Ниже</span><span>В строе</span><span>♯ Выше</span></div><div class="tuner-cents" id="tunerCents">Ожидает звук</div><div class="tuner-accuracy-note" id="tunerAccuracy">Сыграйте одну струну</div></div><div class="tuner-strings">'+strings.map(s=>'<button type="button" class="tuner-string" data-act="tuner-reference" data-note="'+s[0]+'" data-freq="'+s[2]+'"><b>'+s[0]+'</b><span>'+s[1]+'</span><small>'+s[2]+' Hz</small></button>').join('')+'</div><div class="tool-actions"><button class="btn btn-primary" type="button" data-act="tuner-start" id="tunerStart">Включить микрофон</button><button class="btn btn-secondary" type="button" data-act="tuner-stop" id="tunerStop" disabled>Остановить</button></div><p class="tool-status" id="tunerStatus" aria-live="polite">Стандартный строй · A4 = 440 Hz</p>';
-}
-function metroHTML() {
-  return '<div class="tool-eyebrow">РИТМ И ТЕМП</div><h2>Метроном</h2><p class="tool-subtitle">Точный ритм через Web Audio. Работает локально, даже без сети.</p><div class="metro-display"><div class="metro-bpm" id="metroBpm">120</div><div class="metro-unit">ударов в минуту</div><div class="metro-pulse" id="metroPulse" aria-hidden="true"></div></div><div class="metro-controls"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="-5">−5</button><input id="metroRange" type="range" min="30" max="240" value="120" aria-label="Темп в ударах в минуту"><button type="button" class="btn btn-secondary" data-act="metro-bpm" data-d="5">+5</button></div><div class="metro-presets">'+[60,80,100,120,140,160,180].map(n=>'<button type="button" class="btn btn-secondary" data-act="metro-preset" data-v="'+n+'">'+n+'</button>').join('')+'</div><div class="metro-options"><label>Размер<select id="metroBeats"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option></select></label><label>Акцент<select id="metroAccent"><option value="on">Первый удар</option><option value="off">Без акцента</option></select></label></div><button type="button" class="btn btn-primary metro-start" id="metroToggle" data-act="metro-toggle">▶ Запустить</button><p class="tool-status" id="metroStatus" aria-live="polite">30–240 BPM · регулируемый размер</p>';
 }
 const CHORDS = {
  C:{notes:['C','E','G'],guitar:'x32010',fingers:[0,3,2,0,1,0]},Cm:{notes:['C','Eb','G'],guitar:'x3101x',fingers:[0,3,1,0,1,0]},D:{notes:['D','F#','A'],guitar:'xx0232',fingers:[0,0,0,2,3,2]},Dm:{notes:['D','F','A'],guitar:'xx0231',fingers:[0,0,0,2,3,1]},E:{notes:['E','G#','B'],guitar:'022100',fingers:[0,2,3,1,0,0]},Em:{notes:['E','G','B'],guitar:'022000',fingers:[0,2,3,0,0,0]},F:{notes:['F','A','C'],guitar:'133211',fingers:[1,3,4,2,1,1]},G:{notes:['G','B','D'],guitar:'320003',fingers:[3,2,0,0,0,4]},A:{notes:['A','C#','E'],guitar:'x02220',fingers:[0,0,2,3,4,0]},Am:{notes:['A','C','E'],guitar:'x02210',fingers:[0,0,2,3,1,0]},B:{notes:['B','D#','F#'],guitar:'x24442',fingers:[0,1,3,4,2,1]},Bm:{notes:['B','D','F#'],guitar:'x24432',fingers:[0,1,3,4,2,1]},'C7':{notes:['C','E','G','Bb'],guitar:'x32310',fingers:[0,3,2,4,1,0]},'D7':{notes:['D','F#','A','C'],guitar:'xx0212',fingers:[0,0,0,2,1,3]},'E7':{notes:['E','G#','B','D'],guitar:'020100',fingers:[0,2,0,1,0,0]},'G7':{notes:['G','B','D','F'],guitar:'320001',fingers:[3,2,0,0,0,1]},'Am7':{notes:['A','C','E','G'],guitar:'x02010',fingers:[0,0,2,0,1,0]},'Fmaj7':{notes:['F','A','C','E'],guitar:'xx3210',fingers:[0,0,3,2,1,0]},
@@ -1747,15 +1744,6 @@ async function startTuner() {
     await toolAudio.resume();tick();
   } catch(err){stopTuner();const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');}
 }
-function stopMetro() { if(metroTimer)clearTimeout(metroTimer);metroTimer=0;const b=$('#metroToggle');if(b){b.textContent='▶ Запустить';b.classList.remove('is-running');} }
-function setMetroBpm(value) { const bpm=clamp(Number(value)||120,30,240);const range=$('#metroRange'),label=$('#metroBpm');if(range)range.value=bpm;if(label)label.textContent=bpm;if(metroTimer){stopMetro();startMetro();} }
-async function startMetro() {
-  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx){toast('Web Audio не поддерживается этим браузером','err');return;}
-  metroCtx=metroCtx||new Ctx();await metroCtx.resume();metroBeat=0;
-  const tick=()=>{if(!metroCtx)return;const now=metroCtx.currentTime,beats=Number($('#metroBeats')?.value||4),accent=$('#metroAccent')?.value!=='off',osc=metroCtx.createOscillator(),gain=metroCtx.createGain();osc.frequency.value=metroBeat===0&&accent?1400:950;gain.gain.setValueAtTime(0.0001,now);gain.gain.exponentialRampToValueAtTime(.22,now+.004);gain.gain.exponentialRampToValueAtTime(.0001,now+.055);osc.connect(gain);gain.connect(metroCtx.destination);osc.start(now);osc.stop(now+.06);const pulse=$('#metroPulse');if(pulse){pulse.classList.toggle('on');pulse.dataset.beat=String(metroBeat+1);}metroBeat=(metroBeat+1)%beats;metroTimer=setTimeout(tick,60000/(Number($('#metroRange')?.value||120)));};
-  const b=$('#metroToggle');if(b){b.textContent='Ⅱ Остановить';b.classList.add('is-running');}tick();
-}
-
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
   const next = upcoming()[0], p = state.profile;
@@ -3178,7 +3166,6 @@ document.addEventListener('keydown', function (e) {
   }
 });
 document.addEventListener('input', function (e) {
-  if (e.target && e.target.id === 'metroRange') setMetroBpm(e.target.value);
 });
 document.addEventListener('click', function (e) {
   // Prefer an actionable button over the clickable card/article that contains it.
@@ -3255,7 +3242,7 @@ document.addEventListener('click', function (e) {
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
     case 'tool-tab': {
-      stop(); stopTuner(); stopMetro();
+      stop(); stopTuner();
       toolTab = el.getAttribute('data-v') || 'guitar-tuner';
       render();
       break;
@@ -3317,9 +3304,6 @@ document.addEventListener('click', function (e) {
       } catch(err){toast(err.message,'err');}
       break;
     }
-    case 'metro-bpm': stop(); setMetroBpm(Number($('#metroRange')?.value||120)+Number(el.getAttribute('data-d')||0)); break;
-    case 'metro-preset': stop(); setMetroBpm(el.getAttribute('data-v')); break;
-    case 'metro-toggle': stop(); if(metroTimer)stopMetro();else startMetro(); break;
     case 'chord-pick': stop(); window.__bpSelectedChord=el.getAttribute('data-v')||'C'; render(); break;
     case 'settings-tab': {
       stop();
