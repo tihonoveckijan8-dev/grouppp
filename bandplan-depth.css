@@ -1984,3 +1984,47 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-cho
 html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-instrument-add-row {
   align-items: flex-start !important;
 }
+
+
+/* Mobile "Ещё" navigation opens as a right-side drawer, not a bottom sheet.
+   WHY: a side panel keeps the primary bottom navigation visible and makes
+   secondary destinations feel like a dedicated navigation surface. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu {
+    position: fixed !important;
+    inset: 0 0 0 auto !important;
+    left: auto !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 12001 !important;
+    width: min( min(88vw, 360px), calc(100vw - 44px) ) !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    padding: calc(22px + env(safe-area-inset-top, 0px)) 18px calc(22px + env(safe-area-inset-bottom, 0px)) !important;
+    border: 1px solid var(--ln) !important;
+    border-right: 0 !important;
+    border-radius: 24px 0 0 24px !important;
+    background: var(--surface-1) !important;
+    color: var(--tx) !important;
+    box-shadow: -18px 0 48px rgba(0,0,0,.22) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    animation: bp-more-drawer-in 220ms cubic-bezier(.2,.75,.25,1) both !important;
+  }
+  html[data-theme] .bottom-more-menu[hidden] {
+    display: none !important;
+  }
+  @keyframes bp-more-drawer-in {
+    from { opacity: .72; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] .bottom-more-menu { animation: none !important; }
+}
