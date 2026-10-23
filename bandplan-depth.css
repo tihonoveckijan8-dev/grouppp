@@ -1953,3 +1953,34 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-add
 html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker {
   overflow: visible !important;
 }
+
+
+/* Final layout fix: render instrument options in normal flow.
+   The dynamics editor is a scrollable panel; an absolutely positioned menu
+   was colliding with the next label and being clipped by that panel. */
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu {
+  position: static !important;
+  inset: auto !important;
+  display: grid !important;
+  width: 100% !important;
+  max-height: 220px !important;
+  margin-top: 5px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  gap: 3px !important;
+  padding: 6px !important;
+  background: var(--surf-1, #20242e) !important;
+  border: 1px solid var(--border, #343b49) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice-menu[hidden] {
+  display: none !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-choice {
+  overflow: visible !important;
+}
+html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-instrument-add-row {
+  align-items: flex-start !important;
+}
