@@ -105,7 +105,12 @@ async function analyzeFallback(file){
 }
 async function loadBeatEngine(){if(window.BandPlanBeat)return window.BandPlanBeat;if(!beatEnginePromise)beatEnginePromise=import('./vendor/audio-beat.bundle.js').then(function(){return window.BandPlanBeat||null}).catch(function(){return null});return beatEnginePromise}
 async function analyze(file){
-  var c=context(),buf=await file.arrayBuffer(),audio=await c.decodeAudioData(buf.slice(0));
+  // WHY: use the same resilient reader as upload/persistence; Android document-provider files may reject File.arrayBuffer().
+  var c=context(),buf=await readBytes(file),audio;
+  try{audio=await c.decodeAudioData(buf.slice(0))}catch(decodeError){
+    var type=file.type||'неизвестный формат';
+    throw Error('Файл прочитан ('+Math.round(buf.byteLength/1024)+' КБ), но браузер не смог декодировать аудио ('+type+'). Попробуй MP3 или WAV. Подробности: '+(decodeError&&decodeError.message||'формат не поддерживается'));
+  }
   if(audio.duration<8)throw Error('Для надёжного определения BPM выбери фрагмент песни не короче 8 секунд.');
   var engine=await loadBeatEngine();
   if(!engine||typeof engine.detect!=='function'||typeof engine.beatTrack!=='function')return analyzeFallback(file);
