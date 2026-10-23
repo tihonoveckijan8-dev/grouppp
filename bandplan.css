@@ -13801,3 +13801,43 @@ body[data-route="settings"] .settings-tabs{grid-template-columns:repeat(4,minmax
   transform: none !important;
   background-image: none !important;
 }
+
+
+/* Final override: settings dropdowns were re-styling their options later in the stylesheet.
+   Keep dropdown containers intact, but make every item inside them visually flat. */
+body[data-route="settings"] .accent-dropdown-menu,
+body[data-route="settings"] .profile-role-options,
+.settings-shell [class*="dropdown"] [class*="option"],
+.settings-shell [class*="dropdown"] [class*="item"],
+.settings-shell [class*="options"] > *,
+.settings-shell [role="listbox"] [role="option"],
+.settings-shell [role="menu"] [role="menuitem"],
+.accent-dropdown-menu .accent-dropdown-option,
+.profile-role-options .profile-role-option {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option,
+body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option:hover,
+body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option.on {
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  background-image: none !important;
+}
+body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option:hover,
+body[data-route="settings"] [data-settings-panel="interface"] .accent-dropdown-option.on {
+  background-color: var(--surf-3) !important;
+}
+.settings-shell [class*="dropdown"] [class*="option"]::before,
+.settings-shell [class*="dropdown"] [class*="option"]::after,
+.settings-shell [class*="dropdown"] [class*="item"]::before,
+.settings-shell [class*="dropdown"] [class*="item"]::after,
+.settings-shell [class*="options"] > *::before,
+.settings-shell [class*="options"] > *::after {
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
