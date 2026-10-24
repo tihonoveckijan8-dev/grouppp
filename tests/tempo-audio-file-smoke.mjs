@@ -1,6 +1,7 @@
 /**
- * Runtime smoke test for the real-WAV tempo analyzer.
- * WHY: syntax checks alone do not catch WAV parsing, decoding, or estimator runtime errors.
+ * Runtime smoke test for the real-WAV analyzer and batch corpus runner.
+ * WHY: syntax checks alone do not catch WAV parsing, decoding, estimator runtime,
+ * or the manifest-to-summary path used to compare real songs.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -35,6 +36,7 @@ header.write('data', 36);
 header.writeUInt32LE(pcm.length, 40);
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bandplan-tempo-'));
 const wavPath = path.join(dir, 'smoke.wav');
+const manifestPath = path.join(dir, 'corpus.json');
 try {
   fs.writeFileSync(wavPath, Buffer.concat([header, pcm]));
   const stdout = execFileSync(process.execPath, ['tests/tempo-audio-file.mjs', wavPath, '--expected=120'], { encoding: 'utf8', timeout: 120000 });
@@ -45,10 +47,18 @@ try {
   if (report.results.some(row => !row.algorithm || !row.engine)) {
     throw new Error('One or more BPM engine results are missing metadata.');
   }
+  fs.writeFileSync(manifestPath, JSON.stringify({ cases: [{ file: './smoke.wav', expectedBpm: 120 }] }));
+  const corpusStdout = execFileSync(process.execPath, ['tests/tempo-audio-corpus.mjs', manifestPath], { encoding: 'utf8', timeout: 120000 });
+  const corpus = JSON.parse(corpusStdout);
+  if (corpus.totalFiles !== 1 || corpus.successfulFiles !== 1 || corpus.failedFiles !== 0 || corpus.summary.length !== 5) {
+    throw new Error('Batch corpus runner did not summarize all five algorithm results.');
+  }
   console.log(JSON.stringify({
-    test: 'real-WAV analyzer runtime smoke test',
+    test: 'real-WAV analyzer and batch corpus runtime smoke test',
     inputDurationSeconds: report.input.durationSeconds,
     resultCount: report.results.length,
+    corpusFiles: corpus.totalFiles,
+    summaryCount: corpus.summary.length,
     engines: [...new Set(report.results.map(row => row.engine))],
     passed: true
   }, null, 2));
