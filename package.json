@@ -6,6 +6,7 @@
     "dev": "node server.js",
     "start": "node server.js",
     "build": "node scripts/build.mjs",
+    "test:tempo": "node tests/tempo-benchmark.mjs",
     "cap:sync": "npm run build && cap sync",
     "cap:android": "npm run build && cap sync android && cap open android",
     "cap:ios": "npm run build && cap sync ios && cap open ios"
