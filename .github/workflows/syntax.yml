@@ -24,6 +24,8 @@ jobs:
         run: npm run test:tempo
       - name: Compare Essentia.js BPM candidate (development-only)
         run: npm run test:tempo:essentia
+      - name: Smoke-test analysis of a generated WAV file
+        run: npm run test:tempo:file:smoke
       - name: Check JavaScript syntax
         run: |
           node --check supabase.js
