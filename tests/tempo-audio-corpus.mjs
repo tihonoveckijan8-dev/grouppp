@@ -57,12 +57,12 @@ for (const [index, item] of manifest.cases.entries()) {
 const metrics = new Map();
 for (const testCase of caseResults) {
   for (const result of testCase.results || []) {
-    if (!result.algorithm || !Number.isFinite(result.bpm)) continue;
+    if (!result.algorithm) continue;
     const key = `${result.engine} / ${result.algorithm}`;
     if (!metrics.has(key)) metrics.set(key, { algorithm: key, samples: 0, scored: 0, failures: 0, within2Bpm: 0, within5Bpm: 0, octaveAwareWithin2Bpm: 0, absoluteErrors: [], octaveAwareErrors: [], runtimes: [] });
     const metric = metrics.get(key);
     metric.samples++;
-    metric.runtimes.push(result.elapsedMs);
+    if (Number.isFinite(result.elapsedMs)) metric.runtimes.push(result.elapsedMs);
     if (result.error || !Number.isFinite(result.bpm)) { metric.failures++; continue; }
     if (Number.isFinite(result.absoluteErrorBpm)) {
       metric.scored++;
