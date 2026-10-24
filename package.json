@@ -10,7 +10,8 @@
     "cap:sync": "npm run build && cap sync",
     "cap:android": "npm run build && cap sync android && cap open android",
     "cap:ios": "npm run build && cap sync ios && cap open ios",
-    "test:tempo:essentia": "node tests/essentia-tempo-benchmark.mjs"
+    "test:tempo:essentia": "node tests/essentia-tempo-benchmark.mjs",
+    "test:tempo:file": "node tests/tempo-audio-file.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
