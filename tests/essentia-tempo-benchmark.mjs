@@ -50,7 +50,9 @@ for (const expectedBpm of BPMS) {
       expectedBpm,
       bpm: Number.isFinite(bpm) ? Number(bpm.toFixed(2)) : null,
       absError: Number.isFinite(bpm) ? Number(Math.abs(bpm - expectedBpm).toFixed(2)) : null,
+      octaveAwareError: Number.isFinite(bpm) ? Number(Math.min(...[expectedBpm / 2, expectedBpm, expectedBpm * 2].filter(v => v >= 40 && v <= 240).map(v => Math.abs(bpm - v))).toFixed(2)) : null,
       within2Bpm: Number.isFinite(bpm) && Math.abs(bpm - expectedBpm) <= 2,
+      octaveError: Number.isFinite(bpm) && Math.abs(bpm - expectedBpm) > 2 && Math.min(...[expectedBpm / 2, expectedBpm, expectedBpm * 2].filter(v => v >= 40 && v <= 240).map(v => Math.abs(bpm - v))) <= 2,
       confidence: Number.isFinite(Number(result?.confidence)) ? Number(result.confidence) : null,
       beatCount: result?.ticks ? essentia.vectorToArray(result.ticks).length : null,
       elapsedMs: Number((performance.now() - started).toFixed(1)),
@@ -58,7 +60,7 @@ for (const expectedBpm of BPMS) {
     });
   } catch (error) {
     rows.push({
-      expectedBpm, bpm: null, absError: null, within2Bpm: false,
+      expectedBpm, bpm: null, absError: null, octaveAwareError: null, within2Bpm: false, octaveError: false,
       confidence: null, beatCount: null,
       elapsedMs: Number((performance.now() - started).toFixed(1)),
       error: String(error?.message || error)
@@ -78,7 +80,9 @@ const summary = {
   successfulCases: valid.length,
   totalCases: rows.length,
   within2Bpm: valid.filter(row => row.within2Bpm).length,
+  octaveErrors: valid.filter(row => row.octaveError).length,
   medianAbsoluteErrorBpm: errors.length ? errors[Math.floor(errors.length / 2)] : null,
+  medianOctaveAwareErrorBpm: (() => { const values = valid.map(row => row.octaveAwareError).sort((a, b) => a - b); return values.length ? values[Math.floor(values.length / 2)] : null; })(),
   medianRuntimeMs: (() => {
     const times = valid.map(row => row.elapsedMs).sort((a, b) => a - b);
     return times.length ? times[Math.floor(times.length / 2)] : null;
