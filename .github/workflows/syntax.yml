@@ -22,6 +22,8 @@ jobs:
         run: npm run build
       - name: Benchmark BPM algorithms on synthetic audio
         run: npm run test:tempo
+      - name: Compare Essentia.js BPM candidate (development-only)
+        run: npm run test:tempo:essentia
       - name: Check JavaScript syntax
         run: |
           node --check supabase.js
