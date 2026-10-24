@@ -12,7 +12,8 @@
     "cap:ios": "npm run build && cap sync ios && cap open ios",
     "test:tempo:essentia": "node tests/essentia-tempo-benchmark.mjs",
     "test:tempo:file": "node tests/tempo-audio-file.mjs",
-    "test:tempo:file:smoke": "node tests/tempo-audio-file-smoke.mjs"
+    "test:tempo:file:smoke": "node tests/tempo-audio-file-smoke.mjs",
+    "test:tempo:corpus": "node tests/tempo-audio-corpus.mjs"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
