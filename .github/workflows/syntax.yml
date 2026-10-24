@@ -20,6 +20,8 @@ jobs:
         run: npm install --no-package-lock
       - name: Build production app and offline BPM analyzer
         run: npm run build
+      - name: Benchmark BPM algorithms on synthetic audio
+        run: npm run test:tempo
       - name: Check JavaScript syntax
         run: |
           node --check supabase.js
