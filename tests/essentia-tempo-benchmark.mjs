@@ -6,6 +6,7 @@
  */
 import { createRequire } from 'node:module';
 import { performance } from 'node:perf_hooks';
+import { detect, beatTrack, tempo, combTempo } from '@audio/beat';
 
 const require = createRequire(import.meta.url);
 const pkg = require('essentia.js');
@@ -15,21 +16,63 @@ const DURATION = 18;
 const BPMS = [55, 67, 80, 93, 110, 120, 137, 160, 180, 200];
 
 function makeClickTrack(bpm) {
+  // WHY: every engine receives exactly the same deterministic rhythm pattern.
+  // The pattern includes kick, snare, offbeat hats, accents and a quiet noise bed.
   const samples = new Float32Array(FS * DURATION);
-  const period = 60 * FS / bpm;
-  let seed = 0x12345678;
-  for (let start = Math.round(0.137 * FS); start < samples.length; start += Math.round(period)) {
-    const n = Math.min(Math.round(FS * 0.04), samples.length - start);
-    for (let i = 0; i < n; i++) {
+  const beatPeriod = 60 * FS / bpm;
+  const phase = 0.137;
+  function addTone(time, amplitude, frequency, decay, lengthSeconds = 0.07) {
+    const start = Math.round(time * FS);
+    if (start < 0 || start >= samples.length) return;
+    const length = Math.min(Math.round(FS * lengthSeconds), samples.length - start);
+    for (let i = 0; i < length; i++) {
       const t = i / FS;
-      samples[start + i] += Math.sin(2 * Math.PI * 1200 * t) * Math.exp(-t * 100);
+      samples[start + i] += amplitude * Math.sin(2 * Math.PI * frequency * t) * Math.exp(-t * decay);
     }
   }
+  for (let beat = 0, time = phase; time < DURATION; beat++, time = phase + beat * beatPeriod) {
+    const barBeat = beat % 4;
+    addTone(time, barBeat === 0 ? 1.0 : 0.72, barBeat === 0 ? 62 : 78, 35, 0.11); // kick
+    if (barBeat === 1 || barBeat === 3) addTone(time, 0.62, 185, 58, 0.075); // snare
+    addTone(time, 0.18, 2800, 75, 0.025); // closed hi-hat
+    addTone(time + beatPeriod * 0.5, 0.12, 3200, 90, 0.018); // offbeat hat
+  }
+  let seed = 0x12345678;
   for (let i = 0; i < samples.length; i++) {
     seed = (1664525 * seed + 1013904223) >>> 0;
-    samples[i] += ((seed / 0xffffffff) * 2 - 1) * 0.0002;
+    samples[i] += (((seed / 0xffffffff) * 2) - 1) * 0.0003;
   }
   return samples;
+}
+
+function runCurrentEngine(samples, expectedBpm) {
+  const opts = { fs: FS, minBpm: 40, maxBpm: 240, candidates: 5 };
+  return [
+    ['@audio/beat:detect', detect],
+    ['@audio/beat:beatTrack', beatTrack],
+    ['@audio/beat:tempo', tempo],
+    ['@audio/beat:combTempo', combTempo]
+  ].map(([algorithm, fn]) => {
+    const started = performance.now();
+    try {
+      const result = fn(samples, opts);
+      const bpm = Number(result?.bpm);
+      const valid = Number.isFinite(bpm);
+      const variants = [expectedBpm / 2, expectedBpm, expectedBpm * 2].filter(v => v >= 40 && v <= 240);
+      const octaveAwareError = valid ? Math.min(...variants.map(v => Math.abs(bpm - v))) : null;
+      return {
+        algorithm, bpm: valid ? Number(bpm.toFixed(2)) : null,
+        absError: valid ? Number(Math.abs(bpm - expectedBpm).toFixed(2)) : null,
+        octaveAwareError: valid ? Number(octaveAwareError.toFixed(2)) : null,
+        within2Bpm: valid && Math.abs(bpm - expectedBpm) <= 2,
+        octaveError: valid && Math.abs(bpm - expectedBpm) > 2 && octaveAwareError <= 2,
+        elapsedMs: Number((performance.now() - started).toFixed(1)),
+        error: null
+      };
+    } catch (error) {
+      return { algorithm, bpm: null, absError: null, octaveAwareError: null, within2Bpm: false, octaveError: false, elapsedMs: null, error: String(error?.message || error) };
+    }
+  });
 }
 
 function release(value) {
@@ -39,6 +82,7 @@ function release(value) {
 const rows = [];
 for (const expectedBpm of BPMS) {
   const samples = makeClickTrack(expectedBpm);
+  const currentEngineRows = runCurrentEngine(samples, expectedBpm).map(row => ({ ...row, expectedBpm }));
   let input = null;
   let result = null;
   const started = performance.now();
@@ -47,6 +91,7 @@ for (const expectedBpm of BPMS) {
     result = essentia.RhythmExtractor2013(input, 208, 'multifeature', 40);
     const bpm = Number(result?.bpm);
     rows.push({
+      engine: 'Essentia.js',
       expectedBpm,
       bpm: Number.isFinite(bpm) ? Number(bpm.toFixed(2)) : null,
       absError: Number.isFinite(bpm) ? Number(Math.abs(bpm - expectedBpm).toFixed(2)) : null,
@@ -60,6 +105,7 @@ for (const expectedBpm of BPMS) {
     });
   } catch (error) {
     rows.push({
+      engine: 'Essentia.js',
       expectedBpm, bpm: null, absError: null, octaveAwareError: null, within2Bpm: false, octaveError: false,
       confidence: null, beatCount: null,
       elapsedMs: Number((performance.now() - started).toFixed(1)),
@@ -71,29 +117,34 @@ for (const expectedBpm of BPMS) {
     release(result?.bpmIntervals);
     release(input);
   }
+  rows.push(...currentEngineRows.map(row => ({ engine: 'Current @audio/beat', ...row })));
 }
 
 const valid = rows.filter(row => Number.isFinite(row.absError));
 const errors = valid.map(row => row.absError).sort((a, b) => a - b);
 const summary = {
-  algorithm: 'Essentia.js RhythmExtractor2013 / multifeature',
-  successfulCases: valid.length,
-  totalCases: rows.length,
-  within2Bpm: valid.filter(row => row.within2Bpm).length,
-  octaveErrors: valid.filter(row => row.octaveError).length,
-  medianAbsoluteErrorBpm: errors.length ? errors[Math.floor(errors.length / 2)] : null,
-  medianOctaveAwareErrorBpm: (() => { const values = valid.map(row => row.octaveAwareError).sort((a, b) => a - b); return values.length ? values[Math.floor(values.length / 2)] : null; })(),
-  medianRuntimeMs: (() => {
-    const times = valid.map(row => row.elapsedMs).sort((a, b) => a - b);
-    return times.length ? times[Math.floor(times.length / 2)] : null;
-  })()
+  engines: Object.fromEntries([...new Set(rows.map(row => row.engine))].map(engine => {
+    const engineRows = rows.filter(row => row.engine === engine);
+    const engineValid = engineRows.filter(row => Number.isFinite(row.absError));
+    const engineErrors = engineValid.map(row => row.absError).sort((a, b) => a - b);
+    const engineOctaveErrors = engineValid.map(row => row.octaveAwareError).sort((a, b) => a - b);
+    const times = engineValid.map(row => row.elapsedMs).filter(Number.isFinite).sort((a, b) => a - b);
+    return [engine, {
+      successfulCases: engineValid.length, totalCases: engineRows.length,
+      within2Bpm: engineValid.filter(row => row.within2Bpm).length,
+      octaveErrors: engineValid.filter(row => row.octaveError).length,
+      medianAbsoluteErrorBpm: engineErrors.length ? engineErrors[Math.floor(engineErrors.length / 2)] : null,
+      medianOctaveAwareErrorBpm: engineOctaveErrors.length ? engineOctaveErrors[Math.floor(engineOctaveErrors.length / 2)] : null,
+      medianRuntimeMs: times.length ? times[Math.floor(times.length / 2)] : null
+    }];
+  }))
 };
 console.log(JSON.stringify({
-  benchmark: 'BandPlan Essentia.js synthetic BPM benchmark',
+  benchmark: 'BandPlan paired synthetic groove BPM benchmark',
   sampleRate: FS,
   durationSeconds: DURATION,
   license: 'AGPL-3.0; development benchmark only, not bundled into production.',
-  note: 'Synthetic click tracks are diagnostic only and do not establish accuracy on real songs.',
+  note: 'Both engines receive the same generated kick/snare/hi-hat patterns. Synthetic results are diagnostic only and do not establish accuracy on real songs.',
   summary,
   cases: rows
 }, null, 2));
