@@ -64,16 +64,13 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
 
           for (const [name, hash] of ROUTES) {
             if (name === 'tools') {
-              // WHY: delegated navigation can leave one hashchange intentionally skipped; use deterministic history navigation and dispatch twice to exercise the real route handler without reloading the fixture.
-              await page.evaluate(hash => {
-                history.replaceState(null, '', hash);
-                window.dispatchEvent(new HashChangeEvent('hashchange'));
-                window.dispatchEvent(new HashChangeEvent('hashchange'));
-              }, hash);
+              // WHY: tools is intentionally nested under the "Ещё" drawer on mobile; use the real navigation control so the test covers the same delegated route flow as users.
+              await page.locator('[data-act="more-menu-toggle"]').click();
+              await page.locator('#bottomMoreMenu [data-to="tools"]').click();
             } else {
               await page.evaluate(hash => { location.hash = hash; }, hash);
             }
-            await page.waitForTimeout(name === 'tools' ? 450 : 100);
+            await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'tools') {
               // WHY: tools can follow a skeleton-rendered route transition in the fixture, so wait for the route's deferred render before checking its UI.
