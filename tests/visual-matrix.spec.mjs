@@ -94,7 +94,8 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               });
               const tomorrowCell = page.locator('[data-act="cal-day"][data-date="' + tomorrow + '"]');
               await expect(tomorrowCell, 'Tomorrow must be selectable in the mobile month grid').toHaveCount(1);
-              await tomorrowCell.click();
+              // WHY: click the date number, not the event marker nested in the cell, so the test exercises date selection rather than event details.
+              await tomorrowCell.locator('.cal-num').click();
               await expect(selectedDay, 'Selected-day panel should show tomorrow\'s rehearsal').toContainText('Репетиция перед концертом', { timeout: 5000 });
 
               const today = await page.evaluate(() => {
@@ -102,7 +103,7 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
                 const pad = n => String(n).padStart(2, '0');
                 return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
               });
-              await page.locator('[data-act="cal-day"][data-date="' + today + '"]').click();
+              await page.locator('[data-act="cal-day"][data-date="' + today + '"] .cal-num').click();
               await expect(selectedDay, 'Returning to today should restore today\'s event').toContainText('Пятничное выступление', { timeout: 5000 });
             }
           }
