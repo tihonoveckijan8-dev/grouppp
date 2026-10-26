@@ -226,6 +226,18 @@ try {
 
   const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
   const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
+  const metronomeSource = await readFile(join(root, 'metronome-audio.js'), 'utf8');
+  // WHY: the old file-analysis flow failed on phones; lock in the replacement's manual controls and guard against accidentally shipping the upload/analyzer UI again.
+  assert.match(metronomeSource, /data-bp-metro/, 'Manual metronome panel is missing');
+  assert.match(metronomeSource, /min="30" max="260"/, 'Metronome BPM control must keep the supported 30–260 range');
+  assert.match(metronomeSource, /data-bpm-action="tap"/, 'Tap Tempo control is missing');
+  assert.match(metronomeSource, /data-bpm-action="start"/, 'Metronome start/stop control is missing');
+  assert.match(metronomeSource, /data-bpm-meter/, 'Time-signature control is missing');
+  assert.match(metronomeSource, /data-bpm-subdivision/, 'Subdivision control is missing');
+  assert.match(metronomeSource, /data-bpm-accent/, 'First-beat accent control is missing');
+  assert.match(metronomeSource, /bandplan\.metronome\.settings\.v2/, 'Metronome settings key is missing');
+  assert.match(metronomeSource, /AudioContext|webkitAudioContext/, 'Web Audio playback is missing');
+  assert.doesNotMatch(metronomeSource, /type=["']file["']|decodeAudioData|audio-beat\.bundle|Определить BPM/i, 'Obsolete audio-file BPM analysis UI or bundle reference has returned');
   assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
