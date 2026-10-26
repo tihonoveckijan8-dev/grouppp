@@ -3216,6 +3216,33 @@ document.addEventListener('keydown', function (e) {
 });
 document.addEventListener('input', function (e) {
 });
+/* WHY: One dismissal routine prevents the drawer, backdrop, scroll lock, and focus state from getting out of sync. */
+let moreDrawerCloseTimer = null;
+function closeMoreDrawer(restoreFocus = true) {
+  const menu = $('#bottomMoreMenu');
+  const backdrop = $('.bottom-more-backdrop');
+  const trigger = $('[data-act="more-menu-toggle"]');
+  if (moreDrawerCloseTimer) { clearTimeout(moreDrawerCloseTimer); moreDrawerCloseTimer = null; }
+  if (menu && !menu.hidden) {
+    menu.classList.add('is-closing');
+    moreDrawerCloseTimer = setTimeout(() => {
+      menu.hidden = true;
+      menu.classList.remove('is-closing');
+      if (backdrop) backdrop.hidden = true;
+      document.body.classList.remove('more-menu-open');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      if (restoreFocus && trigger) trigger.focus({ preventScroll: true });
+      moreDrawerCloseTimer = null;
+    }, 170);
+  } else {
+    if (menu) { menu.hidden = true; menu.classList.remove('is-closing'); }
+    if (backdrop) backdrop.hidden = true;
+    document.body.classList.remove('more-menu-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (restoreFocus && trigger) trigger.focus({ preventScroll: true });
+  }
+}
+
 document.addEventListener('click', function (e) {
   // Prefer an actionable button over the clickable card/article that contains it.
   // This prevents card-level navigation from swallowing delete, edit and participation clicks.
@@ -3266,7 +3293,8 @@ document.addEventListener('click', function (e) {
       const menu = $('#bottomMoreMenu');
       const backdrop = $('.bottom-more-backdrop');
       const open = !!menu && menu.hidden;
-      if (menu) menu.hidden = !open;
+      if (moreDrawerCloseTimer) { clearTimeout(moreDrawerCloseTimer); moreDrawerCloseTimer = null; }
+      if (menu) { menu.classList.remove('is-closing'); menu.hidden = !open; }
       if (backdrop) backdrop.hidden = !open;
       document.body.classList.toggle('more-menu-open', open);
       el.setAttribute('aria-expanded', String(open));
@@ -3275,13 +3303,7 @@ document.addEventListener('click', function (e) {
     }
     case 'more-menu-close': {
       stop();
-      const menu = $('#bottomMoreMenu');
-      const backdrop = $('.bottom-more-backdrop');
-      if (menu) menu.hidden = true;
-      if (backdrop) backdrop.hidden = true;
-      document.body.classList.remove('more-menu-open');
-      const trigger = $('[data-act="more-menu-toggle"]');
-      if (trigger) { trigger.setAttribute('aria-expanded', 'false'); trigger.focus({ preventScroll: true }); }
+      closeMoreDrawer(true);
       break;
     }
     case 'nav': {
@@ -3289,13 +3311,7 @@ document.addEventListener('click', function (e) {
          synchronously from the first click so no second click is ever needed. */
       e.preventDefault();
       e.stopPropagation();
-      const moreMenu = $('#bottomMoreMenu');
-      const moreBackdrop = $('.bottom-more-backdrop');
-      if (moreMenu) moreMenu.hidden = true;
-      if (moreBackdrop) moreBackdrop.hidden = true;
-      document.body.classList.remove('more-menu-open');
-      const moreButton = $('[data-act="more-menu-toggle"]');
-      if (moreButton) moreButton.setAttribute('aria-expanded', 'false');
+      closeMoreDrawer(false);
       const target = '#/' + el.getAttribute('data-to');
       ui.skeleton = false;
       if (location.hash === target) {
@@ -4158,14 +4174,9 @@ function wireSearch() {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     const moreMenu = $('#bottomMoreMenu');
-    const moreBackdrop = $('.bottom-more-backdrop');
-    const moreButton = $('[data-act="more-menu-toggle"]');
     if (moreMenu && !moreMenu.hidden) {
-      // WHY: Escape must perform the same full cleanup as the close button; otherwise the invisible drawer can leave the page dimmed and scrolling locked.
-      moreMenu.hidden = true;
-      if (moreBackdrop) moreBackdrop.hidden = true;
-      document.body.classList.remove('more-menu-open');
-      if (moreButton) { moreButton.setAttribute('aria-expanded', 'false'); moreButton.focus({ preventScroll: true }); }
+      // WHY: Escape shares the same animated dismissal and cleanup as the close button.
+      closeMoreDrawer(true);
     }
   }
   const sceneOn = $('#scene').classList.contains('on');
