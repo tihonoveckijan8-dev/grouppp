@@ -2509,31 +2509,3 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     font-size: 12px !important;
   }
 }
-
-
-/* WHY: Make the modal X a reliable, clearly visible touch target instead of a tiny decorative icon. */
-html body #modalOverlay .modal-head > button[data-act="modal-close"] {
-  position: relative !important;
-  z-index: 3 !important;
-  display: grid !important;
-  place-items: center !important;
-  flex: 0 0 44px !important;
-  width: 44px !important;
-  min-width: 44px !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  margin: 0 0 0 12px !important;
-  padding: 0 !important;
-  border-radius: 14px !important;
-  cursor: pointer !important;
-  pointer-events: auto !important;
-  touch-action: manipulation !important;
-}
-html body #modalOverlay .modal-head > button[data-act="modal-close"] svg,
-html body #modalOverlay .modal-head > button[data-act="modal-close"] i {
-  pointer-events: none !important;
-}
-html body #modalOverlay .modal-head > button[data-act="modal-close"]:focus-visible {
-  outline: 2px solid var(--accent) !important;
-  outline-offset: 3px !important;
-}
