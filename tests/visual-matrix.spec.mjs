@@ -77,7 +77,8 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'setlist' && width === 360 && theme === 'light' && accent === 'blue') {
               // WHY: stage mode is a separate full-screen surface; exercise its real open/close flow once to catch regressions without adding fullscreen churn to every matrix combination.
-              await page.locator('[data-act="scene-setlist"]').click();
+              // WHY: the fixture can render the same setlist action in multiple responsive surfaces; choose the first visible action to avoid Playwright strict-mode ambiguity.
+              await page.locator('[data-act="scene-setlist"]:visible').first().click();
               await expect(page.locator('#scene')).toHaveClass(/on/);
               await expect(page.locator('#scBody'), 'Stage lyrics must render when a setlist is opened on stage').toBeVisible();
               await expect(page.locator('[data-act="scene-prev"]')).toBeVisible();
