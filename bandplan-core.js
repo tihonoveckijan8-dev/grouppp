@@ -1253,6 +1253,16 @@ function openModal(o) {
   ov.classList.toggle('is-sheet', !!o.sheet);
   ov.classList.add('on');
   modalRoot = ov.firstElementChild;
+  /* WHY: Bind the close control directly to the modal instance so the X always closes this dialog, even if global action delegation is interrupted by nested icon/SVG markup. */
+  const modalCloseButton = modalRoot && modalRoot.querySelector('.modal-head [data-act="modal-close"]');
+  if (modalCloseButton) {
+    modalCloseButton.type = 'button';
+    modalCloseButton.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeModal();
+    });
+  }
   if (isFullscreen && modalRoot) {
     // Editor dialogs are true full-screen surfaces, independent of theme/mobile modal rules.
     ov.style.cssText += ';position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;padding:0!important;margin:0!important;display:flex!important;align-items:stretch!important;justify-content:stretch!important;';
