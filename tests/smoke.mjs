@@ -335,6 +335,8 @@ try {
   assert.match(sourceCore, /case 'event-open-setlist': \{ stop\(\); if \(!slById\(id\)\) break; hardClose\(modalRoot\); go\('\#\/setlist\/' \+ id\); break; \}/, 'Opening a linked setlist must close event details and navigate to the setlist');
   // WHY: show useful rehearsal prep at a glance so the band can confirm the linked program size and estimated runtime before opening it.
   assert.match(sourceCore, /plural\(\(sl\.items \|\| \[\]\)\.length, 'песня', 'песни', 'песен'\)[\s\S]*?fmtDur\(setlistDur\(sl\)\)/, 'Event details must show the linked setlist song count and estimated runtime');
+  // WHY: keep the schedule visible when users open the setlist itself, not only in the overview card.
+  assert.match(sourceCore, /esc\(linkedEvent\.title \+ \(linkedEvent\.date \? ' · ' \+ pdateShort\(linkedEvent\.date\) : ''\) \+ \(linkedEvent\.time \? ' · ' \+ linkedEvent\.time : ''\)\)/, 'Setlist detail must show the linked event date and start time when available');
   assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
