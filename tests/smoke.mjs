@@ -238,6 +238,62 @@ try {
   assert.match(metronomeSource, /bandplan\.metronome\.settings\.v2/, 'Metronome settings key is missing');
   assert.match(metronomeSource, /AudioContext|webkitAudioContext/, 'Web Audio playback is missing');
   assert.doesNotMatch(metronomeSource, /type=["']file["']|decodeAudioData|audio-beat\.bundle|Определить BPM/i, 'Obsolete audio-file BPM analysis UI or bundle reference has returned');
+
+
+  // WHY: source checks alone cannot prove the metronome controls reach Web Audio; exercise start/stop and Tap Tempo in the browser with a deterministic audio-clock stub.
+  await page.evaluate(() => {
+    window.__bpMetroTestAudio = { scheduled: 0 };
+    class TestAudioContext {
+      constructor() {
+        this.state = 'suspended';
+        this.destination = {};
+        this.startedAt = performance.now();
+      }
+      get currentTime() { return (performance.now() - this.startedAt) / 1000; }
+      resume() { this.state = 'running'; return Promise.resolve(); }
+      createOscillator() {
+        const state = window.__bpMetroTestAudio;
+        return {
+          type: '',
+          frequency: { setValueAtTime() {} },
+          connect() {},
+          start() { state.scheduled++; },
+          stop() {}
+        };
+      }
+      createGain() {
+        return {
+          gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} },
+          connect() {}
+        };
+      }
+    }
+    window.AudioContext = TestAudioContext;
+    const host = document.createElement('div');
+    host.setAttribute('data-bp-am-tool-host', '1');
+    document.querySelector('#view').append(host);
+  });
+  await page.waitForSelector('#view [data-bp-metro] [data-bpm-action="start"]', {timeout: 5000});
+  const metroStart = page.locator('#view [data-bp-metro] [data-bpm-action="start"]');
+  await metroStart.click();
+  await page.waitForFunction(() => window.__bpMetroTestAudio?.scheduled > 0, null, {timeout: 3000});
+  assert.equal(await metroStart.getAttribute('aria-pressed'), 'true', 'Start control did not enter the running state');
+  assert.match(await page.locator('#view [data-bp-metro] [data-bpm-status]').textContent(), /работает/i, 'Running status was not announced');
+  await metroStart.click();
+  assert.equal(await metroStart.getAttribute('aria-pressed'), 'false', 'Stop control did not return to the stopped state');
+  assert.match(await page.locator('#view [data-bp-metro] [data-bpm-status]').textContent(), /остановлен/i, 'Stopped status was not announced');
+  await page.locator('#view [data-bp-metro] [data-bpm-action="tap"]').click();
+  await page.waitForTimeout(600);
+  await page.locator('#view [data-bp-metro] [data-bpm-action="tap"]').click();
+  await page.waitForTimeout(600);
+  await page.locator('#view [data-bp-metro] [data-bpm-action="tap"]').click();
+  assert.equal(await page.locator('#view [data-bp-metro] [data-bpm-number]').textContent(), '100', 'Tap Tempo did not calculate a 100 BPM pulse from 600ms taps');
+  const metroSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('bandplan.metronome.settings.v2') || '{}'));
+  assert.equal(metroSettings.__tool__.bpm, 100, 'Tap Tempo result was not persisted');
+  await page.evaluate(() => {
+    document.querySelector('#view [data-bp-am-tool-host]')?.remove();
+    delete window.__bpMetroTestAudio;
+  });
   assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
