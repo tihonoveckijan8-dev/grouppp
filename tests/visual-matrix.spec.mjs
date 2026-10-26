@@ -36,6 +36,8 @@ async function auditViewport(page, label) {
 }
 
 test('BandPlan visual matrix: responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
+  // WHY: 27 viewport/theme/accent combinations intentionally run sequentially to keep CI stable.
+  test.setTimeout(20 * 60 * 1000);
   let screenshotIndex = 0;
   for (const [width, height] of SIZES) {
     for (const theme of THEMES) {
