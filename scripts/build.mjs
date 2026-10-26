@@ -76,19 +76,7 @@ for (const file of ['bandplan.js','bandplan-core.js','metronome-audio.js','confi
   });
 }
 
-// WHY: bundle the MIT-licensed beat detector locally so BPM analysis also works offline in the installed PWA.
-await mkdir(path.join(out, 'vendor'), {recursive:true});
-await build({
-  entryPoints:[path.join(root, 'scripts/audio-beat-entry.js')],
-  outfile:path.join(out, 'vendor/audio-beat.bundle.js'),
-  bundle:true,
-  format:'iife',
-  platform:'browser',
-  minify:true,
-  target:['es2020','safari15'],
-  legalComments:'none',
-  charset:'utf8'
-});
+// WHY: the app no longer ships a client-side audio analyzer; the manual metronome is smaller and works without file decoding.
 
 await writeFile(path.join(out, '.nojekyll'), '');
 console.log('BandPlan production build complete:', out);
