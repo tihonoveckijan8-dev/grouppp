@@ -2670,3 +2670,44 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   /* WHY: Close affordance responds immediately to pointer/touch and stays distinct from navigation rows. */
   html[data-theme] .bottom-more-close:active { transform: scale(.94) !important; }
 }
+
+/* WHY: Reduce both the primary mobile tab controls and the "Ещё" drawer actions; keep touch targets usable while removing oversized card-like buttons. */
+@media (max-width: 860px) {
+  html[data-theme] #botNav > a,
+  html[data-theme] .bottom-nav > a {
+    min-height: 48px !important;
+    padding: 6px 7px !important;
+    gap: 3px !important;
+    border-radius: 13px !important;
+  }
+  html[data-theme] #botNav > a > svg,
+  html[data-theme] .bottom-nav > a > svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+  html[data-theme] #botNav > a > span,
+  html[data-theme] .bottom-nav > a > span {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-link {
+    min-height: 54px !important;
+    padding: 8px 9px !important;
+  }
+  html[data-theme] .bottom-more-link-copy small { display: none !important; }
+  html[data-theme] .bottom-more-link-copy strong { font-size: 13px !important; }
+}
+/* WHY: Closing is a short slide-out rather than an instant hide; JS shares one cleanup path for close button, backdrop, Escape, and route changes. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu.is-closing {
+    animation: bp-more-drawer-out 170ms cubic-bezier(.4,0,1,1) both !important;
+    pointer-events: none !important;
+  }
+  @keyframes bp-more-drawer-out {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: .72; transform: translateX(100%); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] .bottom-more-menu.is-closing { animation: none !important; }
+}
