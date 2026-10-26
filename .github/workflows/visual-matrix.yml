@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   visual-matrix:
-    runs-on: ubuntu-latest
+    # WHY: Playwright is pinned to 1.56.1; keep CI on Ubuntu 24.04 while ubuntu-latest migrates to Ubuntu 26 and browser install compatibility is verified.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
