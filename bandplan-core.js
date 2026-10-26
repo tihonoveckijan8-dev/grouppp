@@ -2368,7 +2368,7 @@ function vSetlist(id) {
     '<div class="row mt" style="gap:6px">' +
     '<span class="badge b-brand num">' + count + ' ' + plural(count, 'песня', 'песни', 'песен') + '</span>' +
     '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
-    (linkedEvent ? '<span class="badge b-muted">' + ic('calendar', 11) + esc(linkedEvent.title) + '</span>' : '') +
+    (linkedEvent ? '<span class="badge b-muted" title="' + esc(linkedEvent.title + (linkedEvent.date ? ' · ' + pdateShort(linkedEvent.date) : '') + (linkedEvent.time ? ' · ' + linkedEvent.time : '')) + '">' + ic('calendar', 11) + esc(linkedEvent.title + (linkedEvent.date ? ' · ' + pdateShort(linkedEvent.date) : '') + (linkedEvent.time ? ' · ' + linkedEvent.time : '')) + '</span>' : '') +
     '</div>' +
     '<div class="card-h mt" style="align-items:end"><div><h3>Репертуар</h3><div class="sub">Ищите песню и выбирайте её из списка</div></div>' +
     '<span class="cap num">' + count + ' ' + plural(count, 'трек', 'трека', 'треков') + '</span></div>' +
