@@ -13882,7 +13882,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 /* WHY: the mobile month grid hides its selected-day detail panel via legacy !important rules.
    Restore that panel on phones so tapping a date reveals its events without requiring tiny event markers. */
 @media (max-width: 767px) {
-  body[data-route="calendar"] .cal-selected-day {
+  body[data-route="calendar"] #app #view .cal-selected-day {
     display: block !important;
   }
 }
