@@ -63,6 +63,15 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             await page.evaluate(hash => { location.hash = hash; }, hash);
             await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
+            if (name === 'calendar' && width <= 767) {
+              // WHY: a mobile date tap must reveal that date's events, not leave users with icon-only markers.
+              const selectedDay = await page.locator('.cal-selected-day').evaluate(el => ({
+                visible: getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0,
+                text: el.innerText
+              }));
+              expect(selectedDay.visible, 'Mobile calendar selected-day panel must be visible').toBe(true);
+              expect(selectedDay.text, 'Mobile selected-day panel should show the fixture event').toContain('Пятничное выступление');
+            }
           }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });
