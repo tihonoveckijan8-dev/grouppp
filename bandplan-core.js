@@ -4121,10 +4121,14 @@ function wireSearch() {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     const moreMenu = $('#bottomMoreMenu');
+    const moreBackdrop = $('.bottom-more-backdrop');
     const moreButton = $('[data-act="more-menu-toggle"]');
     if (moreMenu && !moreMenu.hidden) {
+      // WHY: Escape must perform the same full cleanup as the close button; otherwise the invisible drawer can leave the page dimmed and scrolling locked.
       moreMenu.hidden = true;
-      if (moreButton) { moreButton.setAttribute('aria-expanded', 'false'); moreButton.focus(); }
+      if (moreBackdrop) moreBackdrop.hidden = true;
+      document.body.classList.remove('more-menu-open');
+      if (moreButton) { moreButton.setAttribute('aria-expanded', 'false'); moreButton.focus({ preventScroll: true }); }
     }
   }
   const sceneOn = $('#scene').classList.contains('on');
