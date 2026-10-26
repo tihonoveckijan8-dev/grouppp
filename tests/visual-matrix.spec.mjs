@@ -55,6 +55,8 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
           await page.evaluate(() => window.__bandplanEnsureCore());
           await page.waitForFunction(() => typeof window.__bandplanTestHooks?.seedVisualState === 'function', { timeout: 15000 });
           await page.evaluate(({ theme, accent }) => {
+            // WHY: the deterministic visual fixture has no real signed-in account; release the production auth-visibility lock only inside this isolated test page.
+            document.documentElement.classList.remove('bp-auth-required');
             window.__bandplanTestHooks.seedVisualState();
             window.__bandplanTestHooks.visualPrefs(theme, accent);
           }, { theme, accent });
@@ -63,6 +65,27 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             await page.evaluate(hash => { location.hash = hash; }, hash);
             await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
+            if (name === 'calendar' && width <= 767) {
+              // WHY: a mobile date tap must reveal that date's events, not leave users with icon-only markers.
+              const selectedDay = page.locator('.cal-selected-day');
+              const panelDiagnostics = await selectedDay.evaluate(el => {
+                const ancestors = [];
+                for (let node = el; node && node !== document.body; node = node.parentElement) {
+                  const style = getComputedStyle(node);
+                  const rect = node.getBoundingClientRect();
+                  ancestors.push({ tag: node.tagName, id: node.id, className: typeof node.className === 'string' ? node.className : '', display: style.display, visibility: style.visibility, height: Math.round(rect.height) });
+                }
+                const stylesheets = Array.from(document.styleSheets).map(sheet => {
+                  try {
+                    return { href: sheet.href, rules: Array.from(sheet.cssRules).filter(rule => rule.cssText.includes('cal-selected-day')).map(rule => rule.cssText.slice(0, 260)) };
+                  } catch { return { href: sheet.href, rules: [] }; }
+                }).filter(sheet => sheet.rules.length);
+                return { ancestors, stylesheets };
+              });
+              await expect(selectedDay, 'Mobile calendar selected-day panel must be visible: ' + JSON.stringify(panelDiagnostics)).toBeVisible();
+              // Wait for route rendering to settle before asserting fixture content.
+              await expect(selectedDay, 'Mobile selected-day panel should show the fixture event').toContainText('Пятничное выступление', { timeout: 5000 });
+            }
           }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });

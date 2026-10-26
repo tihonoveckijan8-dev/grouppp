@@ -4678,10 +4678,13 @@ body[data-route="songs"] .songs-search-row .tb-search{
   border-radius:14px !important;
 }
 
-.cal-selected-day,
-section.cal-selected-day,
-div#app > main > div#view > section:nth-of-type(2) > section:nth-of-type(1) {
-  display: none !important;
+/* WHY: keep the selected-day panel hidden on desktop, but let the existing mobile layout reveal it. */
+@media (min-width: 768px) {
+  .cal-selected-day,
+  section.cal-selected-day,
+  div#app > main > div#view > section:nth-of-type(2) > section:nth-of-type(1) {
+    display: none !important;
+  }
 }
 
 /* Margin and spacing for search bar and filter button from surrounding elements */

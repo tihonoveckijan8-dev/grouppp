@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   visual-matrix:
-    runs-on: ubuntu-latest
+    # WHY: Playwright is pinned to 1.56.1; keep CI on Ubuntu 24.04 while ubuntu-latest migrates to Ubuntu 26 and browser install compatibility is verified.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -28,7 +29,8 @@ jobs:
       - name: Install pinned Playwright
         run: npm install --no-save --package-lock=false playwright@1.56.1
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        # WHY: GitHub-hosted Ubuntu runners already include the browser's system libraries; avoid a second apt/dependency install that can stall CI before visual tests start.
+        run: npx playwright install chromium
       - name: Start static server
         run: |
           python3 -m http.server 4174 --directory dist > /tmp/bandplan-visual.log 2>&1 &
