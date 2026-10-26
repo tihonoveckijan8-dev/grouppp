@@ -2354,9 +2354,15 @@ html body .topbar .tb-inner .avatar-btn {
   html body .topbar .tb-inner {
     column-gap: 8px;
   }
+  /* WHY: Keep search on the first row and place header action buttons underneath so they never collide on small screens. */
   html body .topbar .tb-search {
-    flex-basis: 100%;
-    order: 2;
+    flex: 1 1 100%;
+    order: -1;
+  }
+  html body .topbar .tb-inner > button,
+  html body .topbar .tb-inner > .icon-btn,
+  html body .topbar .tb-inner > .avatar-btn {
+    order: 1;
   }
 }
 
