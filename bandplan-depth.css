@@ -2567,3 +2567,12 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     margin-top: 64px !important;
   }
 }
+
+
+/* WHY: Move the visible group overview itself, not just its margin; this avoids parent layout rules cancelling the requested 10px shift. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .band-overview {
+    position: relative !important;
+    top: 10px !important;
+  }
+}
