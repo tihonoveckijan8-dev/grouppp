@@ -10,6 +10,7 @@ const ROUTES = [
   ['song', '#/song/visual-s1'],
   ['setlists', '#/setlists'],
   ['setlist', '#/setlist/visual-sl1'],
+  ['tools', '#/tools'],
   ['settings', '#/settings']
 ];
 
@@ -65,6 +66,14 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             await page.evaluate(hash => { location.hash = hash; }, hash);
             await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
+            if (name === 'tools') {
+              // WHY: the music-tools tab is a real mobile workflow, so keep its navigation and panel inside the same viewport/theme regression matrix.
+              await expect(page.locator('.tools-page'), 'Music tools page should render in the visual fixture').toBeVisible();
+              await expect(page.locator('[data-act="tool-tab"]'), 'All instrument-tool tabs should be available').toHaveCount(5);
+              await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
+              await expect(page.locator('[data-bp-am-tool-host]'), 'Metronome host should mount when its tab is selected').toBeVisible();
+              await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/tools-metronome');
+            }
             if (name === 'calendar' && width <= 767) {
               // WHY: a mobile date tap must reveal that date's events, not leave users with icon-only markers.
               const selectedDay = page.locator('.cal-selected-day');
