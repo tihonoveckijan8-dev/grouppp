@@ -2694,8 +2694,8 @@ function eventModal(evId, date) {
     title: ev ? 'Изменить событие' : 'Новое событие', sub: ev ? pdateFull(ev.date) : 'Заполните название, дату и время', size: 'lg', fullscreen: true, editor: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="evSaveBtn" data-bp-no-collapse="1" data-act="event-save" data-id="' + (ev ? ev.id : '') + '">' + ic('check', 16) + (ev ? 'Сохранить изменения' : 'Создать событие') + '</button>',
     onMount: function (w) {
-      $('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
-      $('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
+      $$('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $$('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
+      $$('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
       // WHY: keep the selected program's size visible without reopening the dropdown, especially useful on mobile.
       const setlistSelect = $('#f_sl', w), setlistSummary = $('#f_sl_summary', w);
       const updateSetlistSummary = () => {
