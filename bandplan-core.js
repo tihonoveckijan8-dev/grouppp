@@ -2654,7 +2654,7 @@ function eventModal(evId, date) {
     '<div class="f2"><div class="field"><label class="field-label" for="f_end">Окончание</label><input class="input" id="f_end" type="time" value="' + esc(d.end || '') + '"><span class="hint">Необязательно</span><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_loc">Место</label><input class="input" id="f_loc" maxlength="120" value="' + esc(d.location || '') + '" placeholder="Клуб, студия, адрес"></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_sl">Сет-лист</label><select class="select" id="f_sl"><option value="">— не выбран —</option>' +
-    state.setlists.map(s => '<option value="' + s.id + '"' + (d.setlistId === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select></div>' +
+    state.setlists.map(s => { const n = (s.items || []).length, duration = setlistDur(s); const label = s.name + ' · ' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + (duration ? ' · ' + fmtDur(duration) : ''); return '<option value="' + s.id + '"' + (d.setlistId === s.id ? ' selected' : '') + '>' + esc(label) + '</option>'; }).join('') + '</select></div>' +
     '<div class="field"><label class="field-label" for="f_status">Статус</label><select class="select" id="f_status">' +
     [['upcoming', 'Запланировано'], ['done', 'Проведено'], ['cancelled', 'Отменено']].map(o => '<option value="' + o[0] + '"' + (d.status === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_repeat">Повторение</label><select class="select" id="f_repeat">' +
