@@ -2528,3 +2528,16 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     margin-top: 24px !important;
   }
 }
+
+
+/* WHY: Move the entire group card farther below the header; preserve its internal spacing and all interactions. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 48px !important;
+  }
+}
+@media (max-width: 640px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 44px !important;
+  }
+}
