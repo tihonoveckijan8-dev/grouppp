@@ -2359,6 +2359,7 @@ function vSetlist(id) {
     '<div class="sub">' + count + ' ' + plural(count, 'песня', 'песни', 'песен') + (duration ? ' · ' + fmtDur(duration) : '') + '</div>' +
     (linkedEvent ? '<div class="setlist-my-position">' + renderMyPositionBadge(linkedEvent, {compact:false}) + '</div>' : '') +
     '</div><div class="row setlist-detail-actions">' +
+    (linkedEvent ? '<button class="icon-btn" type="button" data-act="event-info" data-id="' + esc(linkedEvent.id) + '" data-date="' + esc(linkedEvent.date || '') + '" aria-label="Открыть связанное событие" title="Открыть событие">' + ic('calendar', 16) + '</button>' : '') +
     '<button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки" title="Редактировать">' + ic('edit', 16) + '</button>' +
     '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить сет-лист">' + ic('trash', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
