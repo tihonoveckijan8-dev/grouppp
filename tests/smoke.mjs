@@ -323,9 +323,11 @@ try {
   // WHY: show runtime and the linked event in the setlist overview so users can compare programs without opening each one.
   assert.match(sourceCore, /class="song-meta setlist-meta"/, 'Setlist cards must expose planning metadata');
   assert.match(sourceCore, /setlistDur\(sl\)/, 'Setlist cards must calculate their runtime from existing song durations');
-  assert.match(sourceCore, /class="badge b-muted setlist-linked-event"/, 'Linked event metadata is missing from setlist cards');
+  assert.match(sourceCore, /class="badge b-muted setlist-linked-event(?:\\s|")/, 'Linked event metadata is missing from setlist cards');
   assert.match(sourceDepthCss, /\.setlists-list > \.song-card > \.setlist-meta/, 'Setlist card metadata layout styles are missing');
   assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
+  // WHY: include the scheduled date and start time with the linked event so the correct upcoming gig is identifiable from the setlist overview.
+  assert.match(sourceCore, /esc\(ev\.title \+ \(ev\.date \? ' · ' \+ pdateShort\(ev\.date\) : ''\) \+ \(ev\.time \? ' · ' \+ ev\.time : ''\)\)/, 'Linked event badge must include its available date and start time');
 
   // WHY: when a user starts "Add to setlist" with an empty setlist library, creating the first setlist must keep the song they chose.
   // WHY: event details should let the band open the linked setlist directly, not force them to close the modal and find it in another section.

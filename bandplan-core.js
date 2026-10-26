@@ -2331,7 +2331,7 @@ function vSetlists() {
       '<div class="song-meta setlist-meta">' +
       '<span class="badge b-muted num">' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + '</span>' +
       '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
-      (ev ? '<span class="badge b-muted setlist-linked-event">' + ic('calendar', 11) + esc(ev.title) + '</span>' : '') +
+      (ev ? '<span class="badge b-muted setlist-linked-event" title="' + esc(ev.title + (ev.date ? ' · ' + pdateShort(ev.date) : '') + (ev.time ? ' · ' + ev.time : '')) + '">' + ic('calendar', 11) + esc(ev.title + (ev.date ? ' · ' + pdateShort(ev.date) : '') + (ev.time ? ' · ' + ev.time : '')) + '</span>' : '') +
       '</div>' +
       '<div class="song-acts setlist-quick-actions">' +
       '<button class="icon-btn setlist-quick-action" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '<span class="btn-txt">Печать</span></button>' +
