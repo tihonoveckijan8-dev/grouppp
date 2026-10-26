@@ -2079,13 +2079,14 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
     position: relative;
     z-index: 0;
   }
+  /* WHY: use an opaque dimmer instead of backdrop blur to keep the mobile surface crisp and avoid extra compositing work. */
   .bottom-more-backdrop {
     position: fixed !important;
     inset: 0 !important;
     z-index: 1 !important;
-    background: rgba(8, 12, 20, .48) !important;
-    -webkit-backdrop-filter: blur(2px) !important;
-    backdrop-filter: blur(2px) !important;
+    background: rgba(8, 12, 20, .52) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
     opacity: 1 !important;
   }
   .bottom-more-backdrop[hidden] { display: none !important; }
@@ -2093,7 +2094,9 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
     position: fixed !important;
     inset: 0 0 0 auto !important;
     z-index: 2 !important;
-    width: min(420px, 100vw) !important;
+    /* WHY: leave part of the current screen visible so this reads as a side drawer, not a full-screen replacement. */
+    width: min(88vw, 360px) !important;
+    max-width: calc(100vw - 12px) !important;
     height: 100vh !important;
     height: 100dvh !important;
     max-height: 100vh !important;
@@ -2101,6 +2104,7 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+    overscroll-behavior: contain !important;
     padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     border: 1px solid var(--border) !important;
     border-right: 0 !important;
