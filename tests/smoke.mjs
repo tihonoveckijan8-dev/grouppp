@@ -272,7 +272,13 @@ try {
     const host = document.createElement('div');
     host.setAttribute('data-bp-am-tool-host', '1');
     document.querySelector('#view').append(host);
-    // WHY: the smoke test starts on the logged-out auth gate, so temporarily reveal the app view ancestors to exercise the tool panel itself.
+    // WHY: the smoke test starts on the logged-out auth gate; disable only its pointer interception while testing the underlying tool panel.
+    const authGate = document.querySelector('#bpAuthGate');
+    if (authGate) {
+      window.__bpMetroAuthGatePointerEvents = { value: authGate.style.getPropertyValue('pointer-events'), priority: authGate.style.getPropertyPriority('pointer-events') };
+      authGate.style.setProperty('pointer-events', 'none', 'important');
+    }
+    // WHY: the app view is hidden behind the auth gate in this unauthenticated smoke-test session.
     for (let node = host; node && node !== document.body; node = node.parentElement) {
       node.style.setProperty('display', 'block', 'important');
       node.style.setProperty('visibility', 'visible', 'important');
@@ -298,6 +304,13 @@ try {
   assert.equal(metroSettings.__tool__.bpm, tappedBpm, 'Tap Tempo result was not persisted');
   await page.evaluate(() => {
     document.querySelector('#view [data-bp-am-tool-host]')?.remove();
+    const authGate = document.querySelector('#bpAuthGate');
+    if (authGate && window.__bpMetroAuthGatePointerEvents) {
+      const previous = window.__bpMetroAuthGatePointerEvents;
+      if (previous.value) authGate.style.setProperty('pointer-events', previous.value, previous.priority);
+      else authGate.style.removeProperty('pointer-events');
+    }
+    delete window.__bpMetroAuthGatePointerEvents;
     delete window.__bpMetroTestAudio;
   });
   assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
