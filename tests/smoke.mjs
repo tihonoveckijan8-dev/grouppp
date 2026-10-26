@@ -296,9 +296,9 @@ try {
   assert.match(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-status]').textContent(), /остановлен/i, 'Stopped status was not announced');
   await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
   await page.waitForTimeout(600);
-  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').click();
+  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
   await page.waitForTimeout(600);
-  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').click();
+  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
   const tappedBpm = Number(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-number]').textContent());
   assert.ok(tappedBpm >= 85 && tappedBpm <= 115, `Tap Tempo result ${tappedBpm} BPM is outside the expected range for 600ms taps`);
   const metroSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('bandplan.metronome.settings.v2') || '{}'));
