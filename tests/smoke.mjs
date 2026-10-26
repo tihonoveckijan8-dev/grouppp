@@ -310,6 +310,7 @@ try {
     panelWidth: root.getBoundingClientRect().width,
     panelClientWidth: root.clientWidth,
     panelScrollWidth: root.scrollWidth,
+    overflowingChildren: Array.from(root.querySelectorAll('*')).map(el => ({selector: el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().replace(/\\s+/g, '.') : ''), width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth})).filter(el => el.scrollWidth > el.clientWidth + 1 || el.right > window.innerWidth + 1).slice(0, 12),
     actionRights: Array.from(root.querySelectorAll('.bp-metro-actions button')).map(button => button.getBoundingClientRect().right),
     controlsVisible: ['[data-bpm-range]', '[data-bpm-action="tap"]', '[data-bpm-action="start"]', '[data-bpm-meter]', '[data-bpm-subdivision]'].every(selector => {
       const control = root.querySelector(selector);
@@ -318,7 +319,7 @@ try {
     })
   }));
   assert.ok(mobileMetroLayout.panelRight <= mobileMetroLayout.viewportWidth + 1, 'Metronome panel overflows the 390px mobile viewport');
-  assert.ok(mobileMetroLayout.panelScrollWidth <= mobileMetroLayout.panelClientWidth + 1, 'Metronome panel has horizontal content overflow on mobile');
+  assert.ok(mobileMetroLayout.panelScrollWidth <= mobileMetroLayout.panelClientWidth + 1, 'Metronome panel has horizontal content overflow on mobile: ' + JSON.stringify(mobileMetroLayout.overflowingChildren));
   assert.ok(mobileMetroLayout.actionRights.every(right => right <= mobileMetroLayout.viewportWidth + 1), 'Metronome action button overflows the mobile viewport');
   assert.equal(mobileMetroLayout.controlsVisible, true, 'A core metronome control is hidden or clipped on mobile');
   await page.setViewportSize({ width: 1280, height: 900 });
