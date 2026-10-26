@@ -238,6 +238,82 @@ try {
   assert.match(metronomeSource, /bandplan\.metronome\.settings\.v2/, 'Metronome settings key is missing');
   assert.match(metronomeSource, /AudioContext|webkitAudioContext/, 'Web Audio playback is missing');
   assert.doesNotMatch(metronomeSource, /type=["']file["']|decodeAudioData|audio-beat\.bundle|Определить BPM/i, 'Obsolete audio-file BPM analysis UI or bundle reference has returned');
+
+
+  // WHY: source checks alone cannot prove the metronome controls reach Web Audio; exercise start/stop and Tap Tempo in the browser with a deterministic audio-clock stub.
+  await page.evaluate(() => {
+    window.__bpMetroTestAudio = { scheduled: 0 };
+    class TestAudioContext {
+      constructor() {
+        this.state = 'suspended';
+        this.destination = {};
+        this.startedAt = performance.now();
+      }
+      get currentTime() { return (performance.now() - this.startedAt) / 1000; }
+      resume() { this.state = 'running'; return Promise.resolve(); }
+      createOscillator() {
+        const state = window.__bpMetroTestAudio;
+        return {
+          type: '',
+          frequency: { setValueAtTime() {} },
+          connect() {},
+          start() { state.scheduled++; },
+          stop() {}
+        };
+      }
+      createGain() {
+        return {
+          gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} },
+          connect() {}
+        };
+      }
+    }
+    window.AudioContext = TestAudioContext;
+    const host = document.createElement('div');
+    host.setAttribute('data-bp-am-tool-host', '1');
+    document.querySelector('#view').append(host);
+    // WHY: the smoke test starts on the logged-out auth gate; disable only its pointer interception while testing the underlying tool panel.
+    const authGate = document.querySelector('#bpAuthGate');
+    if (authGate) {
+      window.__bpMetroAuthGatePointerEvents = { value: authGate.style.getPropertyValue('pointer-events'), priority: authGate.style.getPropertyPriority('pointer-events') };
+      authGate.style.setProperty('pointer-events', 'none', 'important');
+    }
+    // WHY: the app view is hidden behind the auth gate in this unauthenticated smoke-test session.
+    for (let node = host; node && node !== document.body; node = node.parentElement) {
+      node.style.setProperty('display', 'block', 'important');
+      node.style.setProperty('visibility', 'visible', 'important');
+    }
+  });
+  await page.waitForSelector('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]', {state:'visible', timeout: 5000});
+  const metroStart = page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]');
+  // WHY: Playwright's physical pointer hit-test is blocked by the auth gate; DOM click still exercises the actual control handler without changing production auth behavior.
+  await metroStart.evaluate(button => button.click());
+  await page.waitForFunction(() => window.__bpMetroTestAudio?.scheduled > 0, null, {timeout: 3000});
+  assert.equal(await metroStart.getAttribute('aria-pressed'), 'true', 'Start control did not enter the running state');
+  assert.match(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-status]').textContent(), /работает/i, 'Running status was not announced');
+  await metroStart.evaluate(button => button.click());
+  assert.equal(await metroStart.getAttribute('aria-pressed'), 'false', 'Stop control did not return to the stopped state');
+  assert.match(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-status]').textContent(), /остановлен/i, 'Stopped status was not announced');
+  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
+  await page.waitForTimeout(600);
+  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
+  await page.waitForTimeout(600);
+  await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
+  const tappedBpm = Number(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-number]').textContent());
+  assert.ok(tappedBpm >= 85 && tappedBpm <= 115, `Tap Tempo result ${tappedBpm} BPM is outside the expected range for 600ms taps`);
+  const metroSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('bandplan.metronome.settings.v2') || '{}'));
+  assert.equal(metroSettings.__tool__.bpm, tappedBpm, 'Tap Tempo result was not persisted');
+  await page.evaluate(() => {
+    document.querySelector('#view [data-bp-am-tool-host]')?.remove();
+    const authGate = document.querySelector('#bpAuthGate');
+    if (authGate && window.__bpMetroAuthGatePointerEvents) {
+      const previous = window.__bpMetroAuthGatePointerEvents;
+      if (previous.value) authGate.style.setProperty('pointer-events', previous.value, previous.priority);
+      else authGate.style.removeProperty('pointer-events');
+    }
+    delete window.__bpMetroAuthGatePointerEvents;
+    delete window.__bpMetroTestAudio;
+  });
   assert.match(sourceCore, /data-bp-no-collapse="1"/, 'Event type buttons must opt out of adaptive label collapsing');
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
