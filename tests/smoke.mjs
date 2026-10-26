@@ -226,6 +226,7 @@ try {
 
   const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
   const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
+  const sourceDepthCss = await readFile(join(root, 'bandplan-depth.css'), 'utf8');
   const metronomeSource = await readFile(join(root, 'metronome-audio.js'), 'utf8');
   // WHY: the old file-analysis flow failed on phones; lock in the replacement's manual controls and guard against accidentally shipping the upload/analyzer UI again.
   assert.match(metronomeSource, /data-bp-metro/, 'Manual metronome panel is missing');
@@ -318,6 +319,31 @@ try {
   assert.match(sourceCss, /#evTypeSeg button \.bp-btn-label\{display:inline!important/, 'Event type labels must remain visible');
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
+
+  // WHY: make calendar event density visible without requiring a tap, while keeping out-of-month dates visually quiet.
+  assert.match(sourceCore, /data-event-count=/, 'Calendar day event count attribute is missing');
+  assert.match(sourceDepthCss, /\.cal-cell\.cal-has-events::after/, 'Calendar event count badge styling is missing');
+  const eventCountBadge = await page.evaluate(() => {
+    const previousRoute = document.body.dataset.route;
+    document.body.dataset.route = 'calendar';
+    const host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:-9999px;top:0;width:320px;visibility:hidden;pointer-events:none';
+    host.innerHTML = '<div class="cal-grid"><div class="cal-cell cal-has-events" data-event-count="4"><div class="cal-num">12</div></div><div class="cal-cell out cal-has-events" data-event-count="2"><div class="cal-num">31</div></div></div>';
+    document.body.append(host);
+    const cells = [...host.querySelectorAll('.cal-cell')];
+    const result = {
+      countContent: getComputedStyle(cells[0], '::after').content,
+      countDisplay: getComputedStyle(cells[0], '::after').display,
+      outsideDisplay: getComputedStyle(cells[1], '::after').display
+    };
+    host.remove();
+    if (previousRoute) document.body.dataset.route = previousRoute;
+    else delete document.body.dataset.route;
+    return result;
+  });
+  assert.match(eventCountBadge.countContent, /4/, 'Calendar badge does not expose the day event count');
+  assert.equal(eventCountBadge.countDisplay, 'grid', 'Calendar event count badge is not visible');
+  assert.equal(eventCountBadge.outsideDisplay, 'none', 'Out-of-month cells should not show count badges');
 
   // WHY: exercise the real mobile lyric CSS against a long unbroken line; checking selectors alone misses overflow regressions.
   await page.setViewportSize({width: 390, height: 844});

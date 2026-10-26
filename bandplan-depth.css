@@ -2208,3 +2208,30 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
 @media (prefers-reduced-motion: reduce) {
   .bottom-more-menu, .bottom-more-menu .bottom-more-link { animation: none !important; transition: none !important; }
 }
+
+
+/* WHY: Show how many events a day contains at a glance, without changing the calendar cell's click target or hiding the accessible aria-label. */
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell {
+  position: relative;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events::after {
+  content: attr(data-event-count);
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surf-2));
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+html[data-theme] body[data-route="calendar"] .cal-grid > .cal-cell.out.cal-has-events::after {
+  display: none;
+}
