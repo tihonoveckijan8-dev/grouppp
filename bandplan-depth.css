@@ -2269,3 +2269,41 @@ html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card >
     width: 100%;
   }
 }
+
+
+/* WHY: On narrow screens the action buttons must occupy their own full-width grid row; otherwise the grid can squeeze them into the date column and push controls beyond the card. */
+@media (max-width: 640px) {
+  html[data-theme] .ev-row {
+    grid-template-columns: 52px minmax(0, 1fr);
+    column-gap: var(--s3);
+    row-gap: var(--s2);
+  }
+  html[data-theme] .ev-row > .ev-date {
+    grid-column: 1;
+    grid-row: 1;
+    width: 52px;
+    min-width: 0;
+  }
+  html[data-theme] .ev-row > .ev-body {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  html[data-theme] .ev-row > .ev-acts {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: var(--s1);
+  }
+}
+@media (max-width: 380px) {
+  html[data-theme] .ev-row {
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: var(--s2);
+  }
+  html[data-theme] .ev-row > .ev-date {
+    width: 44px;
+  }
+  html[data-theme] .ev-row > .ev-acts {
+    gap: 4px;
+  }
+}
