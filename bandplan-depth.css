@@ -2366,3 +2366,25 @@ html body .topbar .tb-inner .avatar-btn {
   }
 }
 
+
+
+/* WHY: Give the group-plan card breathing room below the app header and separate its actions from the statistics row. */
+html[data-theme] body[data-route="calendar"] #view > .band-overview {
+  margin-top: 20px !important;
+  padding-top: clamp(28px, 4vw, 44px) !important;
+}
+html[data-theme] body[data-route="calendar"] #view > .band-overview .band-overview-actions {
+  margin-top: 20px !important;
+  padding-top: 4px !important;
+  gap: 12px !important;
+}
+@media (max-width: 640px) {
+  html[data-theme] body[data-route="calendar"] #view > .band-overview {
+    margin-top: 16px !important;
+    padding-top: 24px !important;
+  }
+  html[data-theme] body[data-route="calendar"] #view > .band-overview .band-overview-actions {
+    margin-top: 18px !important;
+    gap: 10px !important;
+  }
+}
