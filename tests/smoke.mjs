@@ -327,6 +327,9 @@ try {
   assert.match(sourceDepthCss, /\.setlists-list > \.song-card > \.setlist-meta/, 'Setlist card metadata layout styles are missing');
   assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
 
+  // WHY: Escape must fully dismiss the More drawer, including its backdrop and scroll lock, not just hide the panel.
+  assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?moreBackdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'Escape must clear the More drawer backdrop and scroll lock');
+
   // WHY: at phone widths event actions need a dedicated full-width grid row so they stay inside the card and align to the right edge.
   assert.match(sourceDepthCss, /grid-column:\s*1\s*\/\s*-1;/, 'Mobile event actions must span the card instead of being squeezed into a grid column');
   assert.match(sourceDepthCss, /grid-template-columns:\s*44px\s+minmax\(0,\s*1fr\)/, 'Very narrow phones need a compact event date column');
