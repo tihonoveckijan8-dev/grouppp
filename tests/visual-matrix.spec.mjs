@@ -55,6 +55,8 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
           await page.evaluate(() => window.__bandplanEnsureCore());
           await page.waitForFunction(() => typeof window.__bandplanTestHooks?.seedVisualState === 'function', { timeout: 15000 });
           await page.evaluate(({ theme, accent }) => {
+            // WHY: the deterministic visual fixture has no real signed-in account; release the production auth-visibility lock only inside this isolated test page.
+            document.documentElement.classList.remove('bp-auth-required');
             window.__bandplanTestHooks.seedVisualState();
             window.__bandplanTestHooks.visualPrefs(theme, accent);
           }, { theme, accent });
