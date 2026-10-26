@@ -2388,3 +2388,34 @@ html[data-theme] body[data-route="calendar"] #view > .band-overview .band-overvi
     gap: 10px !important;
   }
 }
+
+
+/* WHY: The overview may be rendered inside a route wrapper, so target it anywhere inside #view rather than only as a direct child. */
+html[data-theme] body[data-route="calendar"] #view .band-overview {
+  margin-block-start: 28px !important;
+  padding-block-start: 42px !important;
+}
+html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  margin-block-start: 28px !important;
+  padding-block-start: 8px !important;
+  gap: 14px !important;
+}
+html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview-actions > button {
+  min-width: 0 !important;
+  min-height: 64px !important;
+}
+@media (max-width: 640px) {
+  html[data-theme] body[data-route="calendar"] #view .band-overview {
+    margin-block-start: 20px !important;
+    padding-block-start: 30px !important;
+  }
+  html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview-actions {
+    margin-block-start: 24px !important;
+    gap: 10px !important;
+  }
+  html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview-actions > button {
+    min-height: 58px !important;
+  }
+}
