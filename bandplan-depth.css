@@ -2609,3 +2609,64 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     gap: 6px !important;
   }
 }
+
+
+/* WHY: Make the mobile "Ещё" drawer compact and give its close controls a clear, predictable hit area without changing navigation hooks. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu {
+    width: min(82vw, 320px) !important;
+    max-width: calc(100vw - 48px) !important;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 20px 0 0 20px !important;
+    box-shadow: -12px 0 34px rgba(0,0,0,.2) !important;
+  }
+  html[data-theme] .bottom-more-header {
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 14px !important;
+  }
+  html[data-theme] .bottom-more-eyebrow {
+    margin-bottom: 5px !important;
+    font-size: 9px !important;
+  }
+  html[data-theme] .bottom-more-header h2 {
+    font-size: 23px !important;
+    letter-spacing: -.03em !important;
+  }
+  html[data-theme] .bottom-more-header p {
+    margin-top: 5px !important;
+    font-size: 11px !important;
+  }
+  /* WHY: A smaller close button sits consistently in the header; the 40px target remains comfortable on touch screens. */
+  html[data-theme] .bottom-more-close {
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    border: 0 !important;
+    background: var(--surf-2) !important;
+    color: var(--text) !important;
+  }
+  html[data-theme] .bottom-more-links { gap: 8px !important; }
+  html[data-theme] .bottom-more-menu .bottom-more-link {
+    min-height: 60px !important;
+    gap: 10px !important;
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+  html[data-theme] .bottom-more-link-icon {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border: 0 !important;
+    border-radius: 11px !important;
+  }
+  html[data-theme] .bottom-more-link-icon svg { width: 18px !important; height: 18px !important; }
+  html[data-theme] .bottom-more-link-copy { gap: 3px !important; }
+  html[data-theme] .bottom-more-link-copy strong { font-size: 13px !important; }
+  html[data-theme] .bottom-more-link-copy small { font-size: 10px !important; line-height: 1.35 !important; }
+  html[data-theme] .bottom-more-link-arrow svg { width: 15px !important; height: 15px !important; }
+  /* WHY: Close affordance responds immediately to pointer/touch and stays distinct from navigation rows. */
+  html[data-theme] .bottom-more-close:active { transform: scale(.94) !important; }
+}
