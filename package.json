@@ -26,6 +26,5 @@
     "@capacitor/core": "^8.0.0",
     "@capacitor/ios": "^8.0.0",
     "express": "^5.2.1",
-    "@audio/beat": "3.0.0"
   }
 }
