@@ -2623,7 +2623,7 @@ function eventInfoModal(evId, occurrenceDate) {
         '<div><span class="event-info-label">Дата</span><strong>' + esc(pdateFull(date)) + '</strong></div>' +
         (ev.time ? '<div><span class="event-info-label">Время</span><strong>' + esc(ev.time) + (ev.end ? '–' + esc(ev.end) : '') + '</strong></div>' : '') +
         (ev.location ? '<div><span class="event-info-label">Место</span><strong>' + esc(ev.location) + '</strong></div>' : '') +
-        (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong></div>' : '') +
+        (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong><span class="event-info-label">' + (sl.items || []).length + ' ' + plural((sl.items || []).length, 'песня', 'песни', 'песен') + (setlistDur(sl) ? ' · ' + fmtDur(setlistDur(sl)) : '') + '</span></div>' : '') +
       '</div>' +
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
       '<div class="offline-event-songs" data-offline-event-songs="' + esc(String(ev.id)) + '" hidden></div>' +
