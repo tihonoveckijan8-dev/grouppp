@@ -2323,3 +2323,40 @@ html body[data-route="calendar"] .band-overview-metrics {
 html body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events::after {
   display: none !important;
 }
+
+/* WHY: The top bar contains flexible search and fixed-size actions; allowing the row to wrap prevents them from overlapping on narrow screens. */
+html body .topbar,
+html body .topbar .tb-inner {
+  min-width: 0;
+  max-width: 100%;
+}
+html body .topbar .tb-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 8px;
+}
+html body .topbar .tb-inner > * {
+  min-width: 0;
+  max-width: 100%;
+}
+html body .topbar .tb-search {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 100%;
+}
+html body .topbar .tb-inner button,
+html body .topbar .tb-inner .icon-btn,
+html body .topbar .tb-inner .avatar-btn {
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  html body .topbar .tb-inner {
+    column-gap: 8px;
+  }
+  html body .topbar .tb-search {
+    flex-basis: 100%;
+    order: 2;
+  }
+}
+
