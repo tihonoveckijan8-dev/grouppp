@@ -2312,7 +2312,7 @@ html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card >
 /* WHY: this stylesheet loads after bandplan.css, so the mobile selected-day fix must live here
    to override the legacy high-specificity hide rule in the final cascade. */
 @media (max-width: 767px) {
-  body[data-route="calendar"] #app #view .cal-selected-day {
+  div#app > main > div#view > section:nth-of-type(2) > section.cal-selected-day {
     display: block !important;
   }
 }
