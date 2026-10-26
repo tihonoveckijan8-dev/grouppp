@@ -75,6 +75,18 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             }
             await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
+            if (name === 'setlist' && width === 360 && theme === 'light' && accent === 'blue') {
+              // WHY: stage mode is a separate full-screen surface; exercise its real open/close flow once to catch regressions without adding fullscreen churn to every matrix combination.
+              // WHY: the fixture can render the same setlist action in multiple responsive surfaces; choose the first visible action to avoid Playwright strict-mode ambiguity.
+              await page.locator('[data-act="scene-setlist"]:visible').first().click();
+              await expect(page.locator('#scene')).toHaveClass(/on/);
+              await expect(page.locator('#scBody'), 'Stage lyrics must render when a setlist is opened on stage').toBeVisible();
+              await expect(page.locator('[data-act="scene-prev"]')).toBeVisible();
+              await expect(page.locator('[data-act="scene-next"]')).toBeVisible();
+              await expect(page.locator('[data-act="scene-close"]')).toBeVisible();
+              await page.locator('[data-act="scene-close"]').click();
+              await expect(page.locator('#scene')).not.toHaveClass(/on/);
+            }
             if (name === 'tools') {
               // WHY: tools can follow a skeleton-rendered route transition in the fixture, so wait for the route's deferred render before checking its UI.
               await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
