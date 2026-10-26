@@ -4596,6 +4596,48 @@ if (location.search.includes('bandplan-test=1')) {
   };
 }
 
+// WHY: The visual matrix needs deterministic fixtures without touching real accounts or cloud data.
+if (location.search.includes('bandplan-test=visual')) {
+  window.__bandplanTestHooks = Object.assign(window.__bandplanTestHooks || {}, {
+    seedVisualState() {
+      state = defaults();
+      state.profile = {name:'Иван',role:'vocal',bandName:'BandPlan Demo',bandDesc:'Visual test fixture',defaultParticipation:'yes',roles:['vocal','guitar']};
+      state.members = [
+        {id:'visual-m1',accountId:'visual-m1',name:'Иван',role:'vocal',roles:['vocal'],note:''},
+        {id:'visual-m2',accountId:'visual-m2',name:'Ян',role:'guitar',roles:['guitar'],note:''},
+        {id:'visual-m3',accountId:'visual-m3',name:'Алекс',role:'keys',roles:['keys'],note:''}
+      ];
+      state.songs = [
+        {id:'visual-s1',title:'Midnight City',artist:'M83',author:'M83',key:'Am',bpm:105,duration:240,tags:['Synth','Live'],lyrics:'[Куплет]\\nAm  C  F\\nТестовый текст песни\\n\\n[Припев]\\nG  Am',chords:'Am C F G',fav:true},
+        {id:'visual-s2',title:'Very Long Song Name That Must Wrap Correctly On Narrow Screens',artist:'BandPlan Test',author:'BandPlan',key:'C',bpm:128,duration:315,tags:['Rock'],lyrics:'[Куплет]\\nC  G  Am  F',chords:'C G Am F',fav:false},
+        {id:'visual-s3',title:'Acoustic Session',artist:'BandPlan',key:'D',bpm:76,duration:185,tags:['Acoustic'],lyrics:'[Куплет]\\nD  G  A',chords:'D G A',fav:false}
+      ];
+      state.setlists = [
+        {id:'visual-sl1',name:'Friday Live — Main Set',notes:'Основная программа',eventId:'visual-e1',items:[{id:'visual-i1',songId:'visual-s1',shift:0,note:''},{id:'visual-i2',songId:'visual-s2',shift:2,note:''},{id:'visual-i3',songId:'visual-s3',shift:-1,note:''}]},
+        {id:'visual-sl2',name:'Acoustic Encore',notes:'',items:[{id:'visual-i4',songId:'visual-s3',shift:0,note:''}]}
+      ];
+      state.events = [
+        {id:'visual-e1',title:'Пятничное выступление',date:today(),time:'20:00',end:'22:30',location:'Main Hall',type:'gig',status:'upcoming',memberIds:state.members.map(m=>m.id),setlistId:'visual-sl1',notes:'Саундчек в 18:30'},
+        {id:'visual-e2',title:'Репетиция перед концертом',date:iso(new Date(Date.now()+86400000)),time:'18:30',end:'21:00',location:'Studio A',type:'rehearsal',status:'upcoming',memberIds:['visual-m1','visual-m2'],setlistId:'visual-sl1',notes:''}
+      ];
+      state.settings.onboardingDone=true;
+      state.settings.theme='light';
+      state.settings.accentPreset='blue';
+      state.settings.accent=presetAccentColor('blue','light');
+      ui.calView='month'; ui.selDate=today(); ui.month=new Date(); ui.songSelectedId='visual-s1'; ui.setlistSelectedId='visual-sl1';
+      const gate=document.getElementById('bpAuthGate'); if(gate) gate.hidden=true;
+      const app=document.getElementById('app'); if(app){app.removeAttribute('inert');app.setAttribute('aria-busy','false');}
+      applyTheme(); applyAccentVars(); render();
+    },
+    visualPrefs(theme,preset) {
+      state.settings.theme=theme;
+      state.settings.accentPreset=preset;
+      state.settings.accent=presetAccentColor(preset,theme);
+      applyTheme(); applyAccentVars(); render();
+    }
+  });
+}
+
 window.__bandplanHandleSignedOut = resetForLogout;
 
 function init() {
