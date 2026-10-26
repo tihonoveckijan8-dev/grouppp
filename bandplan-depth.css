@@ -2307,3 +2307,19 @@ html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card >
     gap: 4px;
   }
 }
+
+
+/* WHY: Keep the calendar focused on the month grid; the separate selected-day event panel below it duplicates the event list. */
+html body[data-route="calendar"] .cal-selected-day {
+  display: none !important;
+}
+
+/* WHY: Remove the participation/song/event summary counters from the calendar header so the schedule stays visually clean. */
+html body[data-route="calendar"] .band-overview-metrics {
+  display: none !important;
+}
+
+/* WHY: Day cells already show event markers/titles; the numeric badge is redundant and can be mistaken for a participation count. */
+html body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events::after {
+  display: none !important;
+}
