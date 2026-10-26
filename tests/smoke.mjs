@@ -328,6 +328,9 @@ try {
   assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
 
   // WHY: when a user starts "Add to setlist" with an empty setlist library, creating the first setlist must keep the song they chose.
+  // WHY: event details should let the band open the linked setlist directly, not force them to close the modal and find it in another section.
+  assert.match(sourceCore, /data-act="event-open-setlist" data-id="' \+ esc\(sl\.id\) \+ '"/, 'Event details must offer direct navigation to the linked setlist');
+  assert.match(sourceCore, /case 'event-open-setlist': \{ stop\(\); if \(!slById\(id\)\) break; hardClose\(modalRoot\); go\('\#\/setlist\/' \+ id\); break; \}/, 'Opening a linked setlist must close event details and navigate to the setlist');
   assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
