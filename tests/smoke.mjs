@@ -272,8 +272,13 @@ try {
     const host = document.createElement('div');
     host.setAttribute('data-bp-am-tool-host', '1');
     document.querySelector('#view').append(host);
+    // WHY: the smoke test starts on the logged-out auth gate, so temporarily reveal the app view ancestors to exercise the tool panel itself.
+    for (let node = host; node && node !== document.body; node = node.parentElement) {
+      node.style.setProperty('display', 'block', 'important');
+      node.style.setProperty('visibility', 'visible', 'important');
+    }
   });
-  await page.waitForSelector('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]', {timeout: 5000});
+  await page.waitForSelector('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]', {state:'visible', timeout: 5000});
   const metroStart = page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]');
   await metroStart.click();
   await page.waitForFunction(() => window.__bpMetroTestAudio?.scheduled > 0, null, {timeout: 3000});
