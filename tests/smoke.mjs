@@ -331,6 +331,8 @@ try {
 
   // WHY: when a user starts "Add to setlist" with an empty setlist library, creating the first setlist must keep the song they chose.
   // WHY: event details should let the band open the linked setlist directly, not force them to close the modal and find it in another section.
+  // WHY: show program size and known runtime in the event editor so users can choose the right setlist before saving.
+  assert.match(sourceCore, /const n = \(s\.items \|\| \[\]\)\.length, duration = setlistDur\(s\);[\s\S]*?fmtDur\(duration\)[\s\S]*?esc\(label\)/, 'Event setlist picker must show song count and known runtime');
   assert.match(sourceCore, /data-act="event-open-setlist" data-id="' \+ esc\(sl\.id\) \+ '"/, 'Event details must offer direct navigation to the linked setlist');
   assert.match(sourceCore, /case 'event-open-setlist': \{ stop\(\); if \(!slById\(id\)\) break; hardClose\(modalRoot\); go\('\#\/setlist\/' \+ id\); break; \}/, 'Opening a linked setlist must close event details and navigate to the setlist');
   // WHY: show useful rehearsal prep at a glance so the band can confirm the linked program size and estimated runtime before opening it.
