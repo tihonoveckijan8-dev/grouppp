@@ -63,10 +63,13 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
           }, { theme, accent });
 
           for (const [name, hash] of ROUTES) {
-            if (name === 'tools') {
+            if (name === 'tools' && width <= 767) {
               // WHY: tools is intentionally nested under the "Ещё" drawer on mobile; use the real navigation control so the test covers the same delegated route flow as users.
               await page.locator('[data-act="more-menu-toggle"]').click();
               await page.locator('#bottomMoreMenu [data-to="tools"]').click();
+            } else if (name === 'tools') {
+              // WHY: desktop users reach tools from the persistent side navigation; the mobile drawer is hidden at this viewport.
+              await page.locator('#sideNav [data-to="tools"]').click();
             } else {
               await page.evaluate(hash => { location.hash = hash; }, hash);
             }
