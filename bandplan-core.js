@@ -2599,6 +2599,26 @@ function eventInfoModal(evId, occurrenceDate) {
   const members = (ev.memberIds || []).map(memById).filter(Boolean);
   const my = eventStatusFor(ev) || '';
   const myLabel = participantStatusLabel(my);
+  // WHY: surface actionable setup gaps in the event itself so the band can prepare before rehearsal or showtime.
+  const setlistItems = sl ? (sl.items || []) : [];
+  const linkedSongs = setlistItems.map(item => songById(item.songId)).filter(Boolean);
+  const missingSongLinks = setlistItems.length - linkedSongs.length;
+  const missingDurations = linkedSongs.filter(song => !(song.duration > 0)).length;
+  const readinessChecks = [
+    { label: 'Время начала указано', ok: !!ev.time },
+    { label: 'Место проведения указано', ok: !!String(ev.location || '').trim() },
+    { label: 'Сет-лист привязан', ok: !!sl },
+    { label: 'В программе есть доступные песни', ok: linkedSongs.length > 0 }
+  ];
+  const readinessCount = readinessChecks.filter(item => item.ok).length;
+  const readinessHtml = '<div class="event-info-section event-readiness">' +
+    '<div class="event-info-section-head"><strong>Готовность события</strong><span>' + readinessCount + ' из ' + readinessChecks.length + '</span></div>' +
+    '<div class="event-readiness-list">' + readinessChecks.map(item =>
+      '<div class="event-readiness-item"><span class="event-readiness-icon ' + (item.ok ? 'is-ready' : 'is-missing') + '">' + ic(item.ok ? 'check' : 'alert', 14) + '</span><span>' + esc(item.label) + '</span><strong>' + (item.ok ? 'Готово' : 'Не указано') + '</strong></div>'
+    ).join('') + '</div>' +
+    (missingSongLinks ? '<p class="event-readiness-note">' + missingSongLinks + ' ' + plural(missingSongLinks, 'песня не найдена в репертуаре', 'песни не найдены в репертуаре', 'песен не найдено в репертуаре') + '. Проверь состав сет-листа.</p>' : '') +
+    (missingDurations ? '<p class="event-readiness-note">' + missingDurations + ' ' + plural(missingDurations, 'песня без длительности', 'песни без длительности', 'песен без длительности') + ' — итоговое время программы может быть неполным.</p>' : '') +
+    '</div>';
   const participants = members.length ? members.map(m => {
     const ps = participantStatusFor(ev, m);
     return '<div class="event-info-person" data-participant-key="' + esc(String(m.accountId || m.id || '')) + '">' +
@@ -2625,6 +2645,7 @@ function eventInfoModal(evId, occurrenceDate) {
         (ev.location ? '<div><span class="event-info-label">Место</span><strong>' + esc(ev.location) + '</strong></div>' : '') +
         (sl ? '<div><span class="event-info-label">Сет-лист</span><strong>' + esc(sl.name) + '</strong><span class="event-info-label">' + (sl.items || []).length + ' ' + plural((sl.items || []).length, 'песня', 'песни', 'песен') + (setlistDur(sl) ? ' · ' + fmtDur(setlistDur(sl)) : '') + '</span></div>' : '') +
       '</div>' +
+      readinessHtml +
       (ev.notes ? '<div class="event-info-notes"><span class="event-info-label">Заметки</span><p>' + esc(ev.notes).replace(/\n/g, '<br>') + '</p></div>' : '') +
       '<div class="offline-event-songs" data-offline-event-songs="' + esc(String(ev.id)) + '" hidden></div>' +
       '<div class="event-info-section"><div class="event-info-section-head"><strong>Участники</strong><span>' + members.length + '</span></div><div class="event-info-people">' + participants + '</div></div>' +

@@ -341,6 +341,13 @@ try {
   assert.match(sourceCore, /case 'event-open-setlist': \{ stop\(\); if \(!slById\(id\)\) break; hardClose\(modalRoot\); go\('\#\/setlist\/' \+ id\); break; \}/, 'Opening a linked setlist must close event details and navigate to the setlist');
   // WHY: show useful rehearsal prep at a glance so the band can confirm the linked program size and estimated runtime before opening it.
   assert.match(sourceCore, /plural\(\(sl\.items \|\| \[\]\)\.length, 'песня', 'песни', 'песен'\)[\s\S]*?fmtDur\(setlistDur\(sl\)\)/, 'Event details must show the linked setlist song count and estimated runtime');
+  // WHY: event details must expose concrete setup gaps so the band can verify readiness before rehearsal or a show.
+  assert.match(sourceCore, /Готовность события[\s\S]*?readinessChecks\.length/, 'Event details must show a readiness checklist and completion count');
+  assert.match(sourceCore, /label: 'Время начала указано'[\s\S]*?label: 'Место проведения указано'[\s\S]*?label: 'Сет-лист привязан'[\s\S]*?label: 'В программе есть доступные песни'/, 'Readiness checklist must cover event time, location, and setlist');
+  assert.match(sourceCore, /missingDurations = linkedSongs\.filter\(song => !\(song\.duration > 0\)\)\.length/, 'Readiness checklist must warn when song durations are missing');
+  assert.match(sourceCore, /event-readiness-item[\s\S]*?event-readiness-icon/, 'Readiness checklist must render individual status rows');
+  assert.match(sourceCss, /\.event-readiness-list[\s\S]*?\.event-readiness-item[\s\S]*?@media\(max-width:420px\)/, 'Readiness checklist must have responsive styles');
+
   // WHY: keep the schedule visible when users open the setlist itself, not only in the overview card.
   assert.match(sourceCore, /esc\(linkedEvent\.title \+ \(linkedEvent\.date \? ' · ' \+ pdateShort\(linkedEvent\.date\) : ''\) \+ \(linkedEvent\.time \? ' · ' \+ linkedEvent\.time : ''\)\)/, 'Setlist detail must show the linked event date and start time when available');
   assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
