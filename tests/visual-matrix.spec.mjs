@@ -85,6 +85,26 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await expect(selectedDay, 'Mobile calendar selected-day panel must be visible: ' + JSON.stringify(panelDiagnostics)).toBeVisible();
               // Wait for route rendering to settle before asserting fixture content.
               await expect(selectedDay, 'Mobile selected-day panel should show the fixture event').toContainText('Пятничное выступление', { timeout: 5000 });
+              // WHY: verifying both directions catches stale selected-day content after a real calendar-cell tap.
+              const tomorrow = await page.evaluate(() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 1);
+                const pad = n => String(n).padStart(2, '0');
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+              });
+              const tomorrowCell = page.locator('[data-act="cal-day"][data-date="' + tomorrow + '"]');
+              await expect(tomorrowCell, 'Tomorrow must be selectable in the mobile month grid').toHaveCount(1);
+              await tomorrowCell.click();
+              await expect(selectedDay, 'Selected-day heading should update after tapping tomorrow').toContainText(tomorrow, { timeout: 5000 });
+              await expect(selectedDay, 'Selected-day panel should show tomorrow\'s rehearsal').toContainText('Репетиция перед концертом', { timeout: 5000 });
+
+              const today = await page.evaluate(() => {
+                const d = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+              });
+              await page.locator('[data-act="cal-day"][data-date="' + today + '"]').click();
+              await expect(selectedDay, 'Returning to today should restore today\'s event').toContainText('Пятничное выступление', { timeout: 5000 });
             }
           }
 
