@@ -2654,7 +2654,7 @@ function eventModal(evId, date) {
     '<div class="f2"><div class="field"><label class="field-label" for="f_end">Окончание</label><input class="input" id="f_end" type="time" value="' + esc(d.end || '') + '"><span class="hint">Необязательно</span><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_loc">Место</label><input class="input" id="f_loc" maxlength="120" value="' + esc(d.location || '') + '" placeholder="Клуб, студия, адрес"></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_sl">Сет-лист</label><select class="select" id="f_sl"><option value="">— не выбран —</option>' +
-    state.setlists.map(s => { const n = (s.items || []).length, duration = setlistDur(s); const label = s.name + ' · ' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + (duration ? ' · ' + fmtDur(duration) : ''); return '<option value="' + s.id + '"' + (d.setlistId === s.id ? ' selected' : '') + '>' + esc(label) + '</option>'; }).join('') + '</select></div>' +
+    state.setlists.map(s => { const n = (s.items || []).length, duration = setlistDur(s); const label = s.name + ' · ' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + (duration ? ' · ' + fmtDur(duration) : ''); return '<option value="' + s.id + '"' + (d.setlistId === s.id ? ' selected' : '') + '>' + esc(label) + '</option>'; }).join('') + '</select><span class="hint" id="f_sl_summary" aria-live="polite"></span></div>' +
     '<div class="field"><label class="field-label" for="f_status">Статус</label><select class="select" id="f_status">' +
     [['upcoming', 'Запланировано'], ['done', 'Проведено'], ['cancelled', 'Отменено']].map(o => '<option value="' + o[0] + '"' + (d.status === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div></div>' +
     '<div class="f2"><div class="field"><label class="field-label" for="f_repeat">Повторение</label><select class="select" id="f_repeat">' +
@@ -2673,8 +2673,22 @@ function eventModal(evId, date) {
     title: ev ? 'Изменить событие' : 'Новое событие', sub: ev ? pdateFull(ev.date) : 'Заполните название, дату и время', size: 'lg', fullscreen: true, editor: true, body: body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="evSaveBtn" data-bp-no-collapse="1" data-act="event-save" data-id="' + (ev ? ev.id : '') + '">' + ic('check', 16) + (ev ? 'Сохранить изменения' : 'Создать событие') + '</button>',
     onMount: function (w) {
-      $$('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $$('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
-      $$('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
+      $('#evTypeSeg button', w).forEach(b => b.addEventListener('click', () => $('#evTypeSeg button', w).forEach(x => x.classList.toggle('on', x === b))));
+      $('#f_members .chip', w).forEach(b => b.addEventListener('click', () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); }));
+      // WHY: keep the selected program's size visible without reopening the dropdown, especially useful on mobile.
+      const setlistSelect = $('#f_sl', w), setlistSummary = $('#f_sl_summary', w);
+      const updateSetlistSummary = () => {
+        if (!setlistSummary) return;
+        const selected = setlistSelect && setlistSelect.value ? slById(setlistSelect.value) : null;
+        if (!selected) {
+          setlistSummary.textContent = state.setlists.length ? 'Выбери сет-лист, чтобы увидеть состав и длительность программы.' : 'Сначала создай сет-лист в разделе «Сет-листы».';
+          return;
+        }
+        const count = (selected.items || []).length, duration = setlistDur(selected);
+        setlistSummary.textContent = count + ' ' + plural(count, 'песня', 'песни', 'песен') + (duration ? ' · Примерно ' + fmtDur(duration) : ' · Длительность пока неизвестна');
+      };
+      if (setlistSelect) setlistSelect.addEventListener('change', updateSetlistSummary);
+      updateSetlistSummary();
     }
   });
 }
