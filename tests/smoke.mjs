@@ -371,6 +371,8 @@ try {
 
   // WHY: keep the schedule visible when users open the setlist itself, not only in the overview card.
   assert.match(sourceCore, /esc\(linkedEvent\.title \+ \(linkedEvent\.date \? ' · ' \+ pdateShort\(linkedEvent\.date\) : ''\) \+ \(linkedEvent\.time \? ' · ' \+ linkedEvent\.time : ''\)\)/, 'Setlist detail must show the linked event date and start time when available');
+  // WHY: let users move back from a concert program to its event details without returning to the calendar and searching again.
+  assert.match(sourceCore, /data-act="event-info" data-id="' \+ esc\(linkedEvent\.id\) \+ '" data-date="' \+ esc\(linkedEvent\.date \|\| ''\) \+ '" aria-label="Открыть связанное событие"/, 'Setlist details must offer direct navigation to the linked event');
   assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
