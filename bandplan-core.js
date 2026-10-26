@@ -2636,7 +2636,7 @@ function eventInfoModal(evId, occurrenceDate) {
     guard: false,
     body: body,
     footer:
-      (sl ? '<button class="btn btn-secondary" type="button" data-act="scene-setlist" data-id="' + esc(sl.id) + '">' + ic('monitor', 16) + 'Сцена</button>' : '') +
+      (sl ? '<button class="btn btn-secondary" type="button" data-act="event-open-setlist" data-id="' + esc(sl.id) + '">' + ic('list', 16) + 'Сет-лист</button><button class="btn btn-secondary" type="button" data-act="scene-setlist" data-id="' + esc(sl.id) + '">' + ic('monitor', 16) + 'Сцена</button>' : '') +
       '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button>' +
       '<button class="btn btn-primary" type="button" data-act="event-edit" data-id="' + esc(ev.id) + '">' + ic('edit', 16) + 'Изменить</button>'
   });
@@ -3690,6 +3690,7 @@ document.addEventListener('click', function (e) {
       renderDynBlock(); break;
     }
     case 'new-setlist': stop(); setlistModal(null, el.getAttribute('data-song') || ''); break;
+    case 'event-open-setlist': { stop(); if (!slById(id)) break; hardClose(modalRoot); go('#/setlist/' + id); break; }
     case 'open-setlist': { stop(); if (parseHash().name === 'setlists' && window.matchMedia && window.matchMedia('(min-width:1100px)').matches) { ui.setlistSelectedId = id; render(); } else go('#/setlist/' + id); break; }
     case 'sl-rename': stop(); setlistModal(id); break;
     case 'sl-save': {
