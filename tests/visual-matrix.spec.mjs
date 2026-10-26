@@ -10,6 +10,7 @@ const ROUTES = [
   ['song', '#/song/visual-s1'],
   ['setlists', '#/setlists'],
   ['setlist', '#/setlist/visual-sl1'],
+  ['tools', '#/tools'],
   ['settings', '#/settings']
 ];
 
@@ -62,9 +63,27 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
           }, { theme, accent });
 
           for (const [name, hash] of ROUTES) {
-            await page.evaluate(hash => { location.hash = hash; }, hash);
+            if (name === 'tools' && width <= 767) {
+              // WHY: tools is intentionally nested under the "Ещё" drawer on mobile; use the real navigation control so the test covers the same delegated route flow as users.
+              await page.locator('[data-act="more-menu-toggle"]').click();
+              await page.locator('#bottomMoreMenu [data-to="tools"]').click();
+            } else if (name === 'tools') {
+              // WHY: desktop users reach tools from the persistent side navigation; the mobile drawer is hidden at this viewport.
+              await page.locator('#sideNav [data-to="tools"]').click();
+            } else {
+              await page.evaluate(hash => { location.hash = hash; }, hash);
+            }
             await page.waitForTimeout(100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
+            if (name === 'tools') {
+              // WHY: tools can follow a skeleton-rendered route transition in the fixture, so wait for the route's deferred render before checking its UI.
+              await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
+              await expect(page.locator('.tools-page'), 'Music tools page should render in the visual fixture').toBeVisible();
+              await expect(page.locator('[data-act="tool-tab"]'), 'All instrument-tool tabs should be available').toHaveCount(5);
+              await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
+              await expect(page.locator('[data-bp-am-tool-host]'), 'Metronome host should mount when its tab is selected').toBeVisible();
+              await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/tools-metronome');
+            }
             if (name === 'calendar' && width <= 767) {
               // WHY: a mobile date tap must reveal that date's events, not leave users with icon-only markers.
               const selectedDay = page.locator('.cal-selected-day');
