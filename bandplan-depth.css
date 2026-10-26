@@ -2419,3 +2419,93 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     min-height: 58px !important;
   }
 }
+
+
+/* WHY: Redesign the group overview as one clear, compact panel; the previous spacing-only overrides made it taller without improving hierarchy. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    box-sizing: border-box !important;
+    margin: 18px 0 22px !important;
+    padding: 24px 20px 20px !important;
+    gap: 18px !important;
+    border: 1px solid color-mix(in srgb, var(--accent) 13%, var(--ln)) !important;
+    border-radius: 26px !important;
+    background: var(--surface-1) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, .10) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-main {
+    padding: 0 0 16px !important;
+    border-bottom: 1px solid var(--ln) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-main .eyebrow {
+    margin-bottom: 10px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    letter-spacing: .14em !important;
+    color: var(--accent) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-main h2 {
+    margin: 0 0 8px !important;
+    font-size: clamp(25px, 6vw, 32px) !important;
+    line-height: 1.12 !important;
+    letter-spacing: -.045em !important;
+    font-weight: 800 !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-main p {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    color: var(--muted) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metrics {
+    gap: 9px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric {
+    min-height: 76px !important;
+    padding: 12px 11px !important;
+    border: 1px solid var(--ln) !important;
+    border-radius: 17px !important;
+    background: var(--surface-2) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric strong {
+    font-size: 25px !important;
+    line-height: 1 !important;
+    letter-spacing: -.04em !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric span {
+    margin-top: 7px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    color: var(--muted) !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr) !important;
+    gap: 10px !important;
+    margin: 2px 0 0 !important;
+    padding: 0 !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-actions > button {
+    min-height: 58px !important;
+    padding: 12px 10px !important;
+    border-radius: 17px !important;
+    font-size: 14px !important;
+    font-weight: 750 !important;
+    white-space: nowrap !important;
+  }
+}
+@media (max-width: 380px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    padding: 20px 14px 16px !important;
+    border-radius: 22px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric {
+    min-height: 68px !important;
+    padding: 10px 8px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric span {
+    font-size: 9px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-actions > button {
+    font-size: 12px !important;
+  }
+}
