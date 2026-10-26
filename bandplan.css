@@ -13877,3 +13877,12 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   box-shadow: none !important;
   background-image: none !important;
 }
+
+
+/* WHY: the mobile month grid hides its selected-day detail panel via legacy !important rules.
+   Restore that panel on phones so tapping a date reveals its events without requiring tiny event markers. */
+@media (max-width: 767px) {
+  body[data-route="calendar"] .cal-selected-day {
+    display: block !important;
+  }
+}
