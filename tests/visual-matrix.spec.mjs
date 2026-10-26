@@ -96,27 +96,15 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await expect(page.locator('[data-bp-am-tool-host]'), 'Metronome host should mount when its tab is selected').toBeVisible();
               await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/tools-metronome');
             }
-            if (name === 'calendar' && width <= 767) {
-              // WHY: a mobile date tap must reveal that date's events, not leave users with icon-only markers.
-              const selectedDay = page.locator('.cal-selected-day');
-              const panelDiagnostics = await selectedDay.evaluate(el => {
-                const ancestors = [];
-                for (let node = el; node && node !== document.body; node = node.parentElement) {
-                  const style = getComputedStyle(node);
-                  const rect = node.getBoundingClientRect();
-                  ancestors.push({ tag: node.tagName, id: node.id, className: typeof node.className === 'string' ? node.className : '', display: style.display, visibility: style.visibility, height: Math.round(rect.height) });
-                }
-                const stylesheets = Array.from(document.styleSheets).map(sheet => {
-                  try {
-                    return { href: sheet.href, rules: Array.from(sheet.cssRules).filter(rule => rule.cssText.includes('cal-selected-day')).map(rule => rule.cssText.slice(0, 260)) };
-                  } catch { return { href: sheet.href, rules: [] }; }
-                }).filter(sheet => sheet.rules.length);
-                return { ancestors, stylesheets };
-              });
-              await expect(selectedDay, 'Mobile calendar selected-day panel must be visible: ' + JSON.stringify(panelDiagnostics)).toBeVisible();
-              // Wait for route rendering to settle before asserting fixture content.
-              await expect(selectedDay, 'Mobile selected-day panel should show the fixture event').toContainText('Пятничное выступление', { timeout: 5000 });
-              // WHY: verifying both directions catches stale selected-day content after a real calendar-cell tap.
+            if (name === 'calendar') {
+              // WHY: The calendar no longer duplicates the schedule in a selected-day panel; day selection must still work in the month grid.
+              await expect(page.locator('.cal-selected-day')).toBeHidden();
+              await expect(page.locator('.band-overview-metrics')).toBeHidden();
+              const dayWithEvents = page.locator('.cal-grid > .cal-cell.cal-has-events').first();
+              if (await dayWithEvents.count()) {
+                const badgeDisplay = await dayWithEvents.evaluate(el => getComputedStyle(el, '::after').display);
+                expect(badgeDisplay, 'Calendar day count badge should be hidden').toBe('none');
+              }
               const tomorrow = await page.evaluate(() => {
                 const d = new Date();
                 d.setDate(d.getDate() + 1);
@@ -124,20 +112,10 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
                 return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
               });
               const tomorrowCell = page.locator('[data-act="cal-day"][data-date="' + tomorrow + '"]');
-              await expect(tomorrowCell, 'Tomorrow must be selectable in the mobile month grid').toHaveCount(1);
-              // WHY: click the date number, not the event marker nested in the cell, so the test exercises date selection rather than event details.
+              await expect(tomorrowCell, 'Tomorrow must remain selectable in the calendar grid').toHaveCount(1);
               await tomorrowCell.locator('.cal-num').click();
-              await expect(selectedDay, 'Selected-day panel should show tomorrow\'s rehearsal').toContainText('Репетиция перед концертом', { timeout: 5000 });
-
-              const today = await page.evaluate(() => {
-                const d = new Date();
-                const pad = n => String(n).padStart(2, '0');
-                return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-              });
-              await page.locator('[data-act="cal-day"][data-date="' + today + '"] .cal-num').click();
-              await expect(selectedDay, 'Returning to today should restore today\'s event').toContainText('Пятничное выступление', { timeout: 5000 });
+              await expect(page.locator('.cal-selected-day')).toBeHidden();
             }
-          }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });
           await page.waitForTimeout(100);
