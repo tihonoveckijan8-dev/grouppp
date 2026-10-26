@@ -327,6 +327,10 @@ try {
   assert.match(sourceDepthCss, /\.setlists-list > \.song-card > \.setlist-meta/, 'Setlist card metadata layout styles are missing');
   assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
 
+  // WHY: at phone widths event actions need a dedicated full-width grid row so they stay inside the card and align to the right edge.
+  assert.match(sourceDepthCss, /@media \\(max-width:\\s*640px\\)[\\s\\S]*?\.ev-row > \.ev-acts[\\s\\S]*?grid-column:\\s*1\\s*\\/\\s*-1/, 'Mobile event actions must span the card instead of being squeezed into a grid column');
+  assert.match(sourceDepthCss, /@media \\(max-width:\\s*380px\\)[\\s\\S]*?grid-template-columns:\\s*44px\\s+minmax\\(0,\\s*1fr\\)/, 'Very narrow phones need a compact event date column');
+
   // WHY: make calendar event density visible without requiring a tap, while keeping out-of-month dates visually quiet.
   assert.match(sourceCore, /data-event-count=/, 'Calendar day event count attribute is missing');
   assert.match(sourceDepthCss, /\.cal-cell\.cal-has-events::after/, 'Calendar event count badge styling is missing');
