@@ -18,7 +18,7 @@ jobs:
           node-version: 22
       - name: Install build dependencies
         run: npm install --no-package-lock
-      - name: Build production app and offline BPM analyzer
+      - name: Build production app
         run: npm run build
       - name: Benchmark BPM algorithms on synthetic audio
         run: npm run test:tempo
@@ -31,6 +31,5 @@ jobs:
           node --check supabase.js
           node --check bandplan.js
           node --check metronome-audio.js
-          node --check scripts/audio-beat-entry.js
           node --check sw.js
           node --check bandplan-core.js
