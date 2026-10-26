@@ -2208,3 +2208,37 @@ html[data-theme] details.dyn-instrument-dropdown .dyn-instrument-picker .dyn-ins
 @media (prefers-reduced-motion: reduce) {
   .bottom-more-menu, .bottom-more-menu .bottom-more-link { animation: none !important; transition: none !important; }
 }
+
+
+/* WHY: Put the two most useful planning facts directly on each setlist card, while keeping long event names from widening the list on phones. */
+html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card > .setlist-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+}
+html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card > .setlist-meta > .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  line-height: 1.35;
+}
+html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card > .setlist-meta > .setlist-linked-event {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card > .setlist-meta {
+    gap: 5px;
+  }
+  html[data-theme] body[data-route="setlists"] #view .setlists-list > .song-card > .setlist-meta > .setlist-linked-event {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
