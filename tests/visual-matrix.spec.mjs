@@ -64,10 +64,11 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
 
           for (const [name, hash] of ROUTES) {
             await page.evaluate(hash => { location.hash = hash; }, hash);
-            await page.waitForTimeout(100);
+            await page.waitForTimeout(name === 'tools' ? 450 : 100);
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'tools') {
-              // WHY: the music-tools tab is a real mobile workflow, so keep its navigation and panel inside the same viewport/theme regression matrix.
+              // WHY: tools can follow a skeleton-rendered route transition in the fixture, so wait for the route's deferred render before checking its UI.
+              await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
               await expect(page.locator('.tools-page'), 'Music tools page should render in the visual fixture').toBeVisible();
               await expect(page.locator('[data-act="tool-tab"]'), 'All instrument-tool tabs should be available').toHaveCount(5);
               await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
