@@ -101,12 +101,11 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await expect(page.locator('.cal-selected-day')).toBeHidden();
               await expect(page.locator('body[data-route="calendar"] .band-overview-metrics')).toBeHidden();
               // WHY: Day-cell number badges were visually confused with participation totals; event markers remain visible without them.
-              await expect(page.locator('body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events')).toHaveCount(0).catch(async () => {
-                const badge = page.locator('body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events::after');
-                // Pseudo-elements are not locatable; verify the computed display instead.
-                const display = await page.locator('body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events').first().evaluate(el => getComputedStyle(el, '::after').display);
-                expect(display, 'Calendar day count badge should be hidden').toBe('none');
-              });
+              const dayWithEvents = page.locator('body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events').first();
+              if (await dayWithEvents.count()) {
+                const badgeDisplay = await dayWithEvents.evaluate(el => getComputedStyle(el, '::after').display);
+                expect(badgeDisplay, 'Calendar day count badge should be hidden').toBe('none');
+              }
               // Date cells remain selectable even though the duplicate selected-day panel is removed.
               const tomorrow = await page.evaluate(() => {
                 const d = new Date();
