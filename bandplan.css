@@ -1119,8 +1119,8 @@ body[data-route="setlist"] .page-head{background:var(--bg);backdrop-filter:none;
 .event-readiness-list{display:grid;gap:7px}
 .event-readiness-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:9px;min-width:0;padding:8px 9px;border-radius:12px;background:var(--surf-1)}
 .event-readiness-icon{display:grid;place-items:center;width:24px;height:24px;border-radius:8px}
-.event-readiness-icon.is-ready{color:var(--ok,var(--success,#21865b));background:color-mix(in srgb,var(--ok,var(--success,#21865b)) 12%,transparent)}
-.event-readiness-icon.is-missing{color:var(--warn,var(--warning,#b7791f));background:color-mix(in srgb,var(--warn,var(--warning,#b7791f)) 13%,transparent)}
+.event-readiness-icon.is-ready{color:var(--ok);background:var(--ok-bg)}
+.event-readiness-icon.is-missing{color:var(--warn);background:var(--warn-bg)}
 .event-readiness-item>span:nth-child(2){min-width:0;font-size:12px;color:var(--text-2);overflow-wrap:anywhere}
 .event-readiness-item>strong{font-size:10px;font-weight:var(--fw-semi);color:var(--muted);white-space:nowrap}
 .event-readiness-note{margin:9px 0 0;font-size:11px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
