@@ -46,7 +46,8 @@ jobs:
         run: npm run build
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        # WHY: The smoke test launches headless Chromium; avoid the extra apt dependency install that can stall CI.
+        run: npx playwright install chromium
 
       - name: Run browser smoke test
         run: node tests/smoke.mjs
