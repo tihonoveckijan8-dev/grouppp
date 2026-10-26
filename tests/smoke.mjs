@@ -302,6 +302,27 @@ try {
   await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="tap"]').evaluate(button => button.click());
   const tappedBpm = Number(await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-number]').textContent());
   assert.ok(tappedBpm >= 85 && tappedBpm <= 115, `Tap Tempo result ${tappedBpm} BPM is outside the expected range for 600ms taps`);
+  // WHY: the previous metronome file flow failed on phones; assert the rebuilt manual controls remain inside a narrow mobile viewport.
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileMetroLayout = await page.locator('#view [data-bp-metro][data-metronome-id="__tool__"]').evaluate(root => ({
+    viewportWidth: window.innerWidth,
+    panelRight: root.getBoundingClientRect().right,
+    panelWidth: root.getBoundingClientRect().width,
+    panelClientWidth: root.clientWidth,
+    panelScrollWidth: root.scrollWidth,
+    overflowingChildren: Array.from(root.querySelectorAll('*')).map(el => ({selector: el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.trim().replace(/\\s+/g, '.') : ''), width: el.getBoundingClientRect().width, right: el.getBoundingClientRect().right, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth})).filter(el => el.scrollWidth > el.clientWidth + 1 || el.right > window.innerWidth + 1).slice(0, 12),
+    actionRights: Array.from(root.querySelectorAll('.bp-metro-actions button')).map(button => button.getBoundingClientRect().right),
+    controlsVisible: ['[data-bpm-range]', '[data-bpm-action="tap"]', '[data-bpm-action="start"]', '[data-bpm-meter]', '[data-bpm-subdivision]'].every(selector => {
+      const control = root.querySelector(selector);
+      const rect = control?.getBoundingClientRect();
+      return !!control && rect.width > 0 && rect.height > 0 && rect.right <= window.innerWidth + 1;
+    })
+  }));
+  assert.ok(mobileMetroLayout.panelRight <= mobileMetroLayout.viewportWidth + 1, 'Metronome panel overflows the 390px mobile viewport');
+  assert.ok(mobileMetroLayout.panelScrollWidth <= mobileMetroLayout.panelClientWidth + 1, 'Metronome panel has horizontal content overflow on mobile: ' + JSON.stringify(mobileMetroLayout.overflowingChildren));
+  assert.ok(mobileMetroLayout.actionRights.every(right => right <= mobileMetroLayout.viewportWidth + 1), 'Metronome action button overflows the mobile viewport');
+  assert.equal(mobileMetroLayout.controlsVisible, true, 'A core metronome control is hidden or clipped on mobile');
+  await page.setViewportSize({ width: 1280, height: 900 });
   const metroSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('bandplan.metronome.settings.v2') || '{}'));
   assert.equal(metroSettings.__tool__.bpm, tappedBpm, 'Tap Tempo result was not persisted');
   await page.evaluate(() => {
