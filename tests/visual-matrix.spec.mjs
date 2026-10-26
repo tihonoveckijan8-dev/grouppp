@@ -17,7 +17,7 @@ async function auditViewport(page, label) {
   const metrics = await page.evaluate(() => {
     const width = innerWidth;
     const visibleOutside = [];
-    for (const el of document.querySelectorAll('button:visible, input:visible, select:visible, textarea:visible, .card, .song-card, .sl-item, .ev-row, .page-head, .toolbar')) {
+    for (const el of document.querySelectorAll('button, input, select, textarea, .card, .song-card, .sl-item, .ev-row, .page-head, .toolbar')) {
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) continue;
       if (rect.left < -1 || rect.right > width + 1) {
