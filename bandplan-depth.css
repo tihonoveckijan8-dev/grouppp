@@ -2318,3 +2318,9 @@ html body[data-route="calendar"] .cal-selected-day {
 html body[data-route="calendar"] .band-overview-metrics {
   display: none !important;
 }
+
+
+/* WHY: Day cells already show event markers/titles; the numeric badge is redundant and can be mistaken for a participation count. */
+html body[data-route="calendar"] .cal-grid > .cal-cell.cal-has-events::after {
+  display: none !important;
+}
