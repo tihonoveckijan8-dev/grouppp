@@ -2576,3 +2576,36 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     top: 10px !important;
   }
 }
+
+
+/* WHY: Compact the group overview card on mobile by reducing its padding, metric height, and gaps while keeping all controls usable. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    padding: 14px !important;
+    border-radius: 20px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-main {
+    gap: 8px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric {
+    min-height: 56px !important;
+    padding: 8px 7px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-actions {
+    margin-top: 12px !important;
+    gap: 8px !important;
+  }
+}
+@media (max-width: 640px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    padding: 12px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview .band-overview-metric {
+    min-height: 50px !important;
+    padding: 7px 6px !important;
+  }
+  html body[data-route="calendar"] #view .nearest-event.band-overview > .band-overview-actions {
+    margin-top: 10px !important;
+    gap: 6px !important;
+  }
+}
