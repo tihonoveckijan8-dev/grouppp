@@ -2769,12 +2769,12 @@ function readSongForm(id) {
     dynamics: dynDraft ? cloneValue(dynDraft) : (old ? old.dynamics : null)
   };
 }
-function setlistModal(id) {
+function setlistModal(id, preselectedSongId) {
   const sl = id ? slById(id) : null;
   const body = '<div class="field"><label class="field-label" for="f_slname">Название *</label><input class="input" id="f_slname" maxlength="80" value="' + esc(sl ? sl.name : '') + '" placeholder="Например: Основной сет · 45 минут"><span class="err"></span></div>' +
     '<div class="field"><label class="field-label" for="f_slnote">Заметки к программе</label><textarea class="input" id="f_slnote" rows="3" style="font-family:var(--font);min-height:84px" placeholder="Динамика программы, переходы, финал">' + esc(sl ? sl.note || '' : '') + '</textarea></div>' +
     (!sl && state.songs.length ? '<div class="field"><span class="field-label">Добавить песни сразу</span><div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch">' +
-      state.songs.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru')).map(s => '<label class="check setlist-song-option"><input type="checkbox" class="f_slsong" value="' + s.id + '"><span class="grow nowrap">' + esc(s.title) + '</span><span class="badge b-muted mono">' + esc(s.key || '') + '</span></label>').join('') + '</div></div>'
+      state.songs.slice().sort((a, b) => a.title.localeCompare(b.title, 'ru')).map(s => '<label class="check setlist-song-option"><input type="checkbox" class="f_slsong" value="' + s.id + '"' + (s.id === preselectedSongId ? ' checked' : '') + '><span class="grow nowrap">' + esc(s.title) + '</span><span class="badge b-muted mono">' + esc(s.key || '') + '</span></label>').join('') + '</div></div>'
       : (!state.songs.length ? '<p class="t-sm t-muted">В репертуаре пока нет песен — их можно добавить позже.</p>' : ''));
   openModal({
     title: sl ? 'Название и заметки' : 'Новый сет-лист', fullscreen: true, editor: true, body: body,
@@ -2797,7 +2797,7 @@ function memberModal(id) {
 }
 function addToSetlistModal(songId) {
   const s = songById(songId);
-  if (!state.setlists.length) { confirmBox('Сет-листов пока нет', 'Чтобы добавить песню в программу, сначала создайте сет-лист. Создать сейчас?', () => setlistModal(null), 'Создать сет-лист'); return; }
+  if (!state.setlists.length) { confirmBox('Сет-листов пока нет', 'Чтобы добавить песню в программу, сначала создайте сет-лист. Создать сейчас?', () => setlistModal(null, songId), 'Создать сет-лист'); return; }
   openModal({
     title: 'Добавить в сет-лист', sub: s ? s.title : '', guard: false,
     body: '<div style="display:flex;flex-direction:column;gap:6px">' + state.setlists.map(sl => {
@@ -2805,7 +2805,7 @@ function addToSetlistModal(songId) {
       return '<button class="chip" style="justify-content:flex-start;border-radius:var(--r-14);padding:13px var(--s4);width:100%" type="button" data-act="sl-add-go" data-sl="' + sl.id + '" data-song="' + songId + '"' + (has ? ' disabled' : '') + '>' +
         ic('list', 16) + '<b class="grow nowrap" style="text-align:left;font-weight:600">' + esc(sl.name) + '</b><span class="badge b-muted num">' + (has ? 'уже добавлена' : (sl.items || []).length) + '</span></button>';
     }).join('') + '</div>',
-    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button><button class="btn btn-primary" type="button" data-act="new-setlist">' + ic('plus', 16) + 'Новый сет-лист</button>'
+    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Закрыть</button><button class="btn btn-primary" type="button" data-act="new-setlist" data-song="' + songId + '">' + ic('plus', 16) + 'Новый сет-лист</button>'
   });
 }
 
@@ -3689,7 +3689,7 @@ document.addEventListener('click', function (e) {
       const overall = $('#dynOverall', modalRoot); if (overall) overall.value = '';
       renderDynBlock(); break;
     }
-    case 'new-setlist': stop(); setlistModal(null); break;
+    case 'new-setlist': stop(); setlistModal(null, el.getAttribute('data-song') || ''); break;
     case 'open-setlist': { stop(); if (parseHash().name === 'setlists' && window.matchMedia && window.matchMedia('(min-width:1100px)').matches) { ui.setlistSelectedId = id; render(); } else go('#/setlist/' + id); break; }
     case 'sl-rename': stop(); setlistModal(id); break;
     case 'sl-save': {

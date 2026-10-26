@@ -327,6 +327,11 @@ try {
   assert.match(sourceDepthCss, /\.setlists-list > \.song-card > \.setlist-meta/, 'Setlist card metadata layout styles are missing');
   assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
 
+  // WHY: when a user starts "Add to setlist" with an empty setlist library, creating the first setlist must keep the song they chose.
+  assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
+  assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
+  assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
+
   // WHY: Escape must fully dismiss the More drawer, including its backdrop and scroll lock, not just hide the panel.
   assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?moreBackdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'Escape must clear the More drawer backdrop and scroll lock');
 
