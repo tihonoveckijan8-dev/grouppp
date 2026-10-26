@@ -331,6 +331,8 @@ try {
   // WHY: event details should let the band open the linked setlist directly, not force them to close the modal and find it in another section.
   assert.match(sourceCore, /data-act="event-open-setlist" data-id="' \+ esc\(sl\.id\) \+ '"/, 'Event details must offer direct navigation to the linked setlist');
   assert.match(sourceCore, /case 'event-open-setlist': \{ stop\(\); if \(!slById\(id\)\) break; hardClose\(modalRoot\); go\('\#\/setlist\/' \+ id\); break; \}/, 'Opening a linked setlist must close event details and navigate to the setlist');
+  // WHY: show useful rehearsal prep at a glance so the band can confirm the linked program size and estimated runtime before opening it.
+  assert.match(sourceCore, /plural\(\(sl\.items \|\| \[\]\)\.length, 'песня', 'песни', 'песен'\)[\s\S]*?fmtDur\(setlistDur\(sl\)\)/, 'Event details must show the linked setlist song count and estimated runtime');
   assert.match(sourceCore, /function setlistModal\(id, preselectedSongId\)/, 'Setlist creation must accept a preselected song');
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
