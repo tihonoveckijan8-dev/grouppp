@@ -2320,11 +2320,19 @@ function vSetlists() {
   if (selectedSetlist) ui.setlistSelectedId = selectedSetlist.id;
   h += '<div class="master-detail-shell' + (desktopMaster ? ' is-desktop' : '') + '"><div class="master-list"><div class="collection-grid collection-list songs-list setlists-list">';
   list.forEach(function (sl, i) {
-    const ev = sl.eventId ? evById(sl.eventId) : null, n = (sl.items || []).length;
+    // WHY: Surface the setlist's real runtime and linked event in the list, so users can choose the right concert program without opening every card.
+    const ev = sl.eventId ? evById(sl.eventId) : state.events.find(e => e.setlistId === sl.id && (e.status || 'upcoming') === 'upcoming');
+    const n = (sl.items || []).length;
+    const duration = setlistDur(sl);
     h += '<article class="song-card rise" style="animation-delay:' + Math.min(i * 30, 200) + 'ms" data-act="open-setlist" data-id="' + sl.id + '" role="link" tabindex="0" aria-label="Открыть сет-лист ' + esc(sl.name) + '">' +
       '<div class="song-top"><div class="key-badge" aria-hidden="true">' + n + '</div>' +
       '<div class="song-title-wrap"><h3 class="song-name">' + esc(sl.name) + '</h3></div>' +
       '<span class="card-chevron" aria-hidden="true">›</span></div>' +
+      '<div class="song-meta setlist-meta">' +
+      '<span class="badge b-muted num">' + n + ' ' + plural(n, 'песня', 'песни', 'песен') + '</span>' +
+      '<span class="badge b-muted num">' + ic('clock', 11) + fmtDur(duration) + '</span>' +
+      (ev ? '<span class="badge b-muted setlist-linked-event">' + ic('calendar', 11) + esc(ev.title) + '</span>' : '') +
+      '</div>' +
       '<div class="song-acts setlist-quick-actions">' +
       '<button class="icon-btn setlist-quick-action" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '<span class="btn-txt">Печать</span></button>' +
       '<button class="icon-btn setlist-quick-action" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '<span class="btn-txt">Дублировать</span></button>' +
