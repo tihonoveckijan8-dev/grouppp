@@ -2554,3 +2554,16 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     margin-top: 54px !important;
   }
 }
+
+
+/* WHY: Add exactly 10px to the current mobile card offset as requested; keep the card's inner layout untouched. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 68px !important;
+  }
+}
+@media (max-width: 640px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 64px !important;
+  }
+}
