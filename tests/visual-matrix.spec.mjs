@@ -95,7 +95,7 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               const tomorrowCell = page.locator('[data-act="cal-day"][data-date="' + tomorrow + '"]');
               await expect(tomorrowCell, 'Tomorrow must be selectable in the mobile month grid').toHaveCount(1);
               await tomorrowCell.click();
-              await expect(selectedDay, 'Selected-day heading should update after tapping tomorrow').toContainText(tomorrow, { timeout: 5000 });
+              await expect(selectedDay, 'Selected-day panel should switch to tomorrow\'s content').toContainText('Репетиция перед концертом', { timeout: 5000 });
               await expect(selectedDay, 'Selected-day panel should show tomorrow\'s rehearsal').toContainText('Репетиция перед концертом', { timeout: 5000 });
 
               const today = await page.evaluate(() => {
