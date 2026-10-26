@@ -320,6 +320,13 @@ try {
   assert.match(sourceCore, /if \(el\.getAttribute\('aria-pressed'\) === 'true'\) value=''/, 'Clicking an active participation state must clear it');
   assert.match(sourceCore, /setEventParticipation\(eventId,value,stamp\)/, 'Participation status must be sent to the cloud API');
 
+  // WHY: show runtime and the linked event in the setlist overview so users can compare programs without opening each one.
+  assert.match(sourceCore, /class="song-meta setlist-meta"/, 'Setlist cards must expose planning metadata');
+  assert.match(sourceCore, /setlistDur\(sl\)/, 'Setlist cards must calculate their runtime from existing song durations');
+  assert.match(sourceCore, /class="badge b-muted setlist-linked-event"/, 'Linked event metadata is missing from setlist cards');
+  assert.match(sourceDepthCss, /\.setlists-list > \.song-card > \.setlist-meta/, 'Setlist card metadata layout styles are missing');
+  assert.match(sourceDepthCss, /\.setlist-linked-event[\s\S]*?text-overflow:\s*ellipsis/, 'Long linked event names must not overflow setlist cards');
+
   // WHY: make calendar event density visible without requiring a tap, while keeping out-of-month dates visually quiet.
   assert.match(sourceCore, /data-event-count=/, 'Calendar day event count attribute is missing');
   assert.match(sourceDepthCss, /\.cal-cell\.cal-has-events::after/, 'Calendar event count badge styling is missing');
