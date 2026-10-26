@@ -2541,3 +2541,16 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     margin-top: 44px !important;
   }
 }
+
+
+/* WHY: Apply the requested precise 10px downward adjustment to the group card without changing its contents. */
+@media (max-width: 899px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 58px !important;
+  }
+}
+@media (max-width: 640px) {
+  html body[data-route="calendar"] #view .nearest-event.band-overview {
+    margin-top: 54px !important;
+  }
+}
