@@ -2764,12 +2764,12 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 @media (max-width: 640px) {
   /* WHY: Raise the action dock a little farther above Android's home indicator without changing its compact two-column layout. */
   #modalOverlay .event-detail-modal .modal-foot {
-    margin-top: 8px !important;
-    padding: 16px 0 calc(32px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
+    margin: 14px 0 10px !important;
+    padding: 16px 10px calc(24px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
     gap: 8px !important;
     align-items: stretch !important;
-    border-top: 1px solid var(--border) !important;
-    border-radius: 22px 22px 0 0 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 22px !important;
     overflow: hidden !important;
     background: var(--surf-4) !important;
   }
