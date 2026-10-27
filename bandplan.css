@@ -13985,3 +13985,56 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 @media (prefers-reduced-motion: reduce) {
   #scene .scene-ctrl button { transition: none !important; }
 }
+
+
+/* WHY: Override legacy glossy/outlined Stage Mode button rules with a matte, soft-clay surface while preserving the established two-row control layout. */
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]),
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"],
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  border: 1px solid transparent !important;
+  outline: 0 !important;
+  background-image: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  box-shadow: inset 2px 2px 5px color-mix(in srgb, #000 16%, transparent),
+              inset -2px -2px 5px color-mix(in srgb, var(--text) 4%, transparent) !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+  border: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  box-shadow: 4px 4px 9px color-mix(in srgb, #000 20%, transparent),
+              -3px -3px 8px color-mix(in srgb, var(--text) 5%, transparent) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 25%, transparent) !important;
+}
+#scene .scene-ctrl button:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 3px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl > .sbtn[data-act="scene-auto"],
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    width: 50px !important;
+    min-width: 50px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    border-radius: 15px !important;
+  }
+}
