@@ -2747,7 +2747,8 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 8px !important;
   margin: 0 !important;
-  padding: 12px 0 max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  /* WHY: Reserve a reliable physical gap for Android gesture navigation even when the WebView reports a zero safe-area inset. */
+  padding: 12px 0 calc(72px + env(safe-area-inset-bottom, 0px)) !important;
   background: var(--surf-4) !important;
   border-top: 1px solid var(--border) !important;
 }
@@ -2758,6 +2759,12 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   padding-inline: 10px !important;
   white-space: normal !important;
   line-height: 1.2 !important;
+}
+/* WHY: Keep the controls above the reserved navigation clearance; the footer itself retains enough height to prevent overlap. */
+@media (max-width: 640px) {
+  #modalOverlay .event-detail-modal .modal-foot > .btn {
+    transform: translateY(-40px) !important;
+  }
 }
 #modalOverlay .event-detail-modal .modal-foot > .btn svg {
   width: 16px !important;
