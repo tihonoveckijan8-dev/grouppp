@@ -14706,3 +14706,33 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     grid-template-columns: 44px 48px 44px !important;
   }
 }
+
+
+/* WHY: Widen the key/transpose control further while keeping it centered between previous/next song buttons. */
+#scene .scene-ctrl {
+  grid-template-columns: minmax(0,1fr) 176px minmax(0,1fr) !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  width: 176px !important;
+  max-width: 176px !important;
+  grid-template-columns: 52px 60px 52px !important;
+  gap: 2px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button[data-d="-1"],
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button[data-d="1"] {
+  width: 52px !important;
+  min-width: 52px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) #scTrans {
+  min-width: 60px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0,1fr) 176px minmax(0,1fr) !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+    width: 176px !important;
+    max-width: 176px !important;
+    grid-template-columns: 52px 60px 52px !important;
+  }
+}
