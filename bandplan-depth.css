@@ -2838,10 +2838,14 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 
 
-/* WHY: Paint the full-width action dock with the modal surface so the dark modal layer underneath cannot show through as a black slab. */
+/* WHY: Keep the full-width action dock opaque and remove the modal's dark shadow that can peek out behind its screen-wide edge. */
 @media (max-width: 640px) {
+  #modalOverlay .event-detail-modal {
+    box-shadow: none !important;
+  }
   #modalOverlay .event-detail-modal .modal-foot {
     background: var(--surf-4) !important;
     background-color: var(--surf-4) !important;
+    background-image: none !important;
   }
 }
