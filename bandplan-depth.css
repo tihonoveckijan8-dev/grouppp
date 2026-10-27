@@ -2762,15 +2762,18 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 /* WHY: Reserve physical space below the event actions for Android gesture navigation, then move the controls in normal layout flow so later transform rules cannot cancel the lift. */
 @media (max-width: 640px) {
-  /* WHY: Keep the action dock visually attached to the modal while extending it through the modal's side padding. */
+  /* WHY: Allow the action dock to reach the physical screen edges; the parent must not clip the full-viewport footer. */
+  #modalOverlay .event-detail-modal {
+    overflow: visible !important;
+  }
   #modalOverlay .event-detail-modal .modal-foot {
     position: relative !important;
-    left: auto !important;
-    width: calc(100% + 28px) !important;
-    max-width: none !important;
+    left: 50% !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
     box-sizing: border-box !important;
-    margin: 14px 0 0 -14px !important;
-    transform: none !important;
+    margin: 14px 0 0 !important;
+    transform: translateX(-50%) !important;
     padding: 16px max(14px, env(safe-area-inset-right, 0px)) calc(24px + max(8px, env(safe-area-inset-bottom, 0px))) max(14px, env(safe-area-inset-left, 0px)) !important;
     gap: 8px !important;
     align-items: stretch !important;
