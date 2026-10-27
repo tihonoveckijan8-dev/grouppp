@@ -2760,10 +2760,15 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   white-space: normal !important;
   line-height: 1.2 !important;
 }
-/* WHY: Keep the controls above the reserved navigation clearance; the footer itself retains enough height to prevent overlap. */
+/* WHY: Reserve physical space below the event actions for Android gesture navigation, then move the controls in normal layout flow so later transform rules cannot cancel the lift. */
 @media (max-width: 640px) {
+  #modalOverlay .event-detail-modal .modal-foot {
+    padding-bottom: calc(88px + max(24px, env(safe-area-inset-bottom, 0px))) !important;
+  }
   #modalOverlay .event-detail-modal .modal-foot > .btn {
-    transform: translateY(-40px) !important;
+    position: relative !important;
+    top: -48px !important;
+    transform: none !important;
   }
 }
 #modalOverlay .event-detail-modal .modal-foot > .btn svg {
