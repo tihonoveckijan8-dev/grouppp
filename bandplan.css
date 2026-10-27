@@ -14738,18 +14738,50 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 }
 
 
-/* WHY: Apply the transpose control's visible surface styling to speed and text-size controls; retain their current placement, widths, and heights. */
+/* WHY: Make speed and text-size steppers visibly match the transpose stepper's larger control dimensions, while preserving their existing grid positions. */
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  display: grid !important;
+  grid-template-columns: 52px 60px 52px !important;
+  gap: 2px !important;
+  width: 168px !important;
+  min-width: 168px !important;
+  max-width: 168px !important;
+  min-height: 50px !important;
+  height: 50px !important;
+  padding: 3px !important;
+  box-sizing: border-box !important;
   background: var(--raw-color-220) !important;
-  border: 1px solid var(--raw-color-223) !important;
+  border: 0 !important;
   border-radius: 12px !important;
   box-shadow: none !important;
 }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
   background: var(--raw-color-220) !important;
-  border-color: var(--raw-color-223) !important;
+  border: 0 !important;
   border-radius: 9px !important;
   box-shadow: none !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) span {
+  min-width: 60px !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+    width: 168px !important;
+    min-width: 168px !important;
+    max-width: 168px !important;
+    grid-template-columns: 52px 60px 52px !important;
+    height: 50px !important;
+    min-height: 50px !important;
+  }
 }
