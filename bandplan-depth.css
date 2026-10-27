@@ -2764,7 +2764,7 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 @media (max-width: 640px) {
   /* WHY: Raise the action dock a little farther above Android's home indicator without changing its compact two-column layout. */
   #modalOverlay .event-detail-modal .modal-foot {
-    padding: 16px 0 calc(24px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
+    padding: 16px 0 calc(32px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
     gap: 8px !important;
     align-items: stretch !important;
   }
@@ -2795,6 +2795,19 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 #modalOverlay .event-detail-modal .modal-foot > [data-act="event-edit"] {
   grid-column: 2 !important;
+}
+/* WHY: Action-specific button styles must not make the Edit button taller or wider than its neighboring footer action. */
+@media (max-width: 640px) {
+  #modalOverlay .event-detail-modal .modal-foot > [data-act="modal-close"],
+  #modalOverlay .event-detail-modal .modal-foot > [data-act="event-edit"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+  }
 }
 @media (max-width: 640px) {
   #modalOverlay .event-detail-modal {
