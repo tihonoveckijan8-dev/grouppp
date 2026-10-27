@@ -2917,3 +2917,110 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   }
 }
 
+
+
+
+/* WHY: Prevent Stage Mode controls from overlapping on narrow screens. Keep speed | play | text on row one and previous | transpose | next on row two, with every grid item constrained to its own track. */
+#scene .scene-ctrl {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 176px minmax(0, 1fr) !important;
+  grid-template-rows: 52px 52px !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  align-content: center !important;
+  justify-content: stretch !important;
+  gap: 8px 8px !important;
+  flex-wrap: initial !important;
+  overflow: visible !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  height: 48px !important;
+  min-height: 48px !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+  width: 176px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-fs"],
+#scene .scene-ctrl > #scChords {
+  display: none !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) button {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 0 !important;
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) span,
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) span {
+  width: auto !important;
+  min-width: 0 !important;
+  flex: 1 1 0 !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0, 1fr) 132px minmax(0, 1fr) !important;
+    grid-template-rows: 50px 50px !important;
+    gap: 8px 5px !important;
+    padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    width: 132px !important;
+    max-width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr) !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) button {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+}
