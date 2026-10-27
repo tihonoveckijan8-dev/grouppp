@@ -2760,6 +2760,12 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   white-space: normal !important;
   line-height: 1.2 !important;
 }
+/* WHY: Move the actual controls up inside the event modal, rather than only adding blank space below them; this keeps buttons clear of the phone's system navigation area. */
+@media (max-width: 640px) {
+  #modalOverlay .event-detail-modal .modal-foot > .btn {
+    transform: translateY(-15px) !important;
+  }
+}
 #modalOverlay .event-detail-modal .modal-foot > .btn svg {
   width: 16px !important;
   height: 16px !important;
