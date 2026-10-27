@@ -3223,13 +3223,13 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 
 
-/* WHY: Variant 1 — compact two-row Stage Mode controls. Explicitly size only the bottom navigation row so transpose and song buttons cannot overlap. */
+/* WHY: Variant 1 — compact two-row Stage Mode controls. Keep the transpose block narrow and the navigation buttons in separate side tracks. */
 @media (max-width: 640px) {
   #scene .scene-ctrl {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 156px minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr) 132px minmax(0, 1fr) !important;
     grid-template-rows: 60px 56px !important;
-    column-gap: 10px !important;
+    column-gap: 8px !important;
     row-gap: 10px !important;
     overflow: hidden !important;
   }
@@ -3250,23 +3250,23 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     grid-column: 1 !important; grid-row: 2 !important;
     justify-self: end !important;
     position: static !important; inset: auto !important;
-    width: 50px !important; min-width: 50px !important; max-width: 50px !important;
+    width: 44px !important; min-width: 44px !important; max-width: 44px !important;
     height: 52px !important; min-height: 52px !important;
-    margin: 0 4px 0 0 !important;
+    margin: 0 0 0 0 !important;
   }
   #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
     grid-column: 2 !important; grid-row: 2 !important;
     justify-self: center !important;
-    width: 156px !important; min-width: 156px !important; max-width: 156px !important;
+    width: 132px !important; min-width: 132px !important; max-width: 132px !important;
     box-sizing: border-box !important;
-    grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important;
+    grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr) !important;
   }
   #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
     grid-column: 3 !important; grid-row: 2 !important;
     justify-self: start !important;
     position: static !important; inset: auto !important;
-    width: 50px !important; min-width: 50px !important; max-width: 50px !important;
+    width: 44px !important; min-width: 44px !important; max-width: 44px !important;
     height: 52px !important; min-height: 52px !important;
-    margin: 0 0 0 4px !important;
+    margin: 0 !important;
   }
 }
