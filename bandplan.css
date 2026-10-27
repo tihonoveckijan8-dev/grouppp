@@ -14359,3 +14359,27 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     min-height: 48px !important;
   }
 }
+
+
+/* WHY: Remove the raised/pressed 3D effect from Stage controls; keep the clean surfaces, sizing, and alignment intact. */
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]),
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+#scene .scene-ctrl > .sbtn[data-act="scene-next"],
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+  box-shadow: none !important;
+}
+#scene .scene-ctrl .sctl button:active,
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"]:active,
+#scene .scene-ctrl > .sbtn[data-act="scene-next"]:active,
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"]:active {
+  box-shadow: none !important;
+  transform: none !important;
+}
