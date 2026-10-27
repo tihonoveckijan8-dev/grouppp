@@ -2748,7 +2748,7 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   gap: 8px !important;
   margin: 0 !important;
   /* WHY: Lift the action dock clear of Android/iOS system navigation areas so phone controls never overlap the event actions. */
-  padding: 12px 0 calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 12px 0 calc(74px + env(safe-area-inset-bottom, 0px)) !important;
   background: var(--surf-4) !important;
   border-top: 1px solid var(--border) !important;
 }
@@ -2763,7 +2763,7 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 /* WHY: Move the actual controls up inside the event modal, rather than only adding blank space below them; this keeps buttons clear of the phone's system navigation area. */
 @media (max-width: 640px) {
   #modalOverlay .event-detail-modal .modal-foot > .btn {
-    transform: translateY(-28px) !important;
+    transform: translateY(-44px) !important;
   }
 }
 #modalOverlay .event-detail-modal .modal-foot > .btn svg {
