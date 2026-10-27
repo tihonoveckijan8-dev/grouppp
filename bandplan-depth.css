@@ -3180,3 +3180,10 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   }
 }
 
+
+
+/* WHY: Move only the song navigation buttons outward within their own grid cells; keep every other control unchanged. */
+@media (max-width: 640px) {
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { justify-self: start !important; }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] { justify-self: end !important; }
+}
