@@ -14222,3 +14222,140 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     font-size: 13px !important;
   }
 }
+
+
+/* WHY: Replace the over-decorated nested shadows with one consistent, aligned Stage control system: raised outer trays, clean segmented actions, and a single strong play affordance. */
+#scene .scene-ctrl {
+  grid-template-columns: minmax(0,1fr) 52px minmax(0,1fr) !important;
+  grid-template-rows: 56px 52px !important;
+  gap: 12px 10px !important;
+  padding: 12px max(14px, env(safe-area-inset-right, 0px)) calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)) !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  box-sizing: border-box !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 3px !important;
+  padding: 5px !important;
+  border: 1px solid color-mix(in srgb, var(--text) 7%, transparent) !important;
+  border-radius: 17px !important;
+  background: var(--surf-2) !important;
+  box-shadow: 0 5px 0 color-mix(in srgb, #000 18%, transparent),
+              0 8px 16px color-mix(in srgb, #000 13%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent) !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr) !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button[data-d="-2"] { order: 0 !important; }
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) #scFont { order: 1 !important; }
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button[data-d="2"] { order: 2 !important; }
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
+  flex: 0 1 34px !important;
+  width: 34px !important;
+  min-width: 26px !important;
+  height: 40px !important;
+  padding: 0 3px !important;
+  border: 0 !important;
+  border-radius: 11px !important;
+  background: var(--surf-3) !important;
+  color: var(--text) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
+              0 2px 3px color-mix(in srgb, #000 16%, transparent) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  transform: none !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) span {
+  flex: 1 1 auto !important;
+  min-width: 18px !important;
+  padding: 0 2px !important;
+  text-align: center !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+  width: 100% !important;
+  flex: 1 1 0 !important;
+}
+#scene .scene-ctrl .sctl button:active {
+  background: var(--surf-1) !important;
+  box-shadow: inset 0 2px 5px color-mix(in srgb, #000 22%, transparent) !important;
+  transform: translateY(1px) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+#scene .scene-ctrl > .sbtn[data-act="scene-next"],
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  box-sizing: border-box !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--text) 8%, transparent) !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--surf-2) !important;
+  color: var(--text) !important;
+  box-shadow: 0 4px 0 color-mix(in srgb, #000 20%, transparent),
+              0 7px 13px color-mix(in srgb, #000 12%, transparent),
+              inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--accent) 75%, #fff) !important;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, #000),
+              0 7px 13px color-mix(in srgb, var(--accent) 25%, transparent) !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"]:active,
+#scene .scene-ctrl > .sbtn[data-act="scene-next"]:active,
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"]:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 2px 0 color-mix(in srgb, #000 18%, transparent) !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0,1fr) 48px minmax(0,1fr) !important;
+    grid-template-rows: 54px 50px !important;
+    gap: 10px 7px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+    height: 52px !important;
+    min-height: 52px !important;
+    padding: 4px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+    min-width: 22px !important;
+    height: 38px !important;
+    padding: 0 1px !important;
+    font-size: 13px !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"],
+  #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+    width: 48px !important;
+    min-width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+}
