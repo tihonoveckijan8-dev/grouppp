@@ -14738,15 +14738,18 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 }
 
 
-/* WHY: Match speed and text-size steppers to the transpose control's flat, rounded visual style without changing their existing layout or dimensions. */
+/* WHY: Apply the transpose control's visible surface styling to speed and text-size controls; retain their current placement, widths, and heights. */
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
-  border: 0 !important;
+  background: var(--raw-color-220) !important;
+  border: 1px solid var(--raw-color-223) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
 }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+  background: var(--raw-color-220) !important;
+  border-color: var(--raw-color-223) !important;
   border-radius: 9px !important;
   box-shadow: none !important;
 }
