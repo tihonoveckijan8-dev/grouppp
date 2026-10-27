@@ -2747,18 +2747,18 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 8px !important;
   margin: 0 !important;
-  padding: 12px 0 max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  /* WHY: Lift the action dock clear of Android/iOS system navigation areas so phone controls never overlap the event actions. */
+  padding: 12px 0 calc(28px + env(safe-area-inset-bottom, 0px)) !important;
   background: var(--surf-4) !important;
   border-top: 1px solid var(--border) !important;
 }
 #modalOverlay .event-detail-modal .modal-foot > .btn {
   width: 100% !important;
   min-width: 0 !important;
-  /* WHY: Taller action buttons are easier to tap on mobile and visually balance the fixed action dock. */
-  min-height: 56px !important;
-  padding: 14px 10px !important;
+  min-height: 44px !important;
+  padding: 10px !important;
   white-space: normal !important;
-  line-height: 1.25 !important;
+  line-height: 1.2 !important;
 }
 #modalOverlay .event-detail-modal .modal-foot > .btn svg {
   width: 16px !important;
