@@ -1241,7 +1241,7 @@ function openModal(o) {
   lastFocus = document.activeElement; modalDirty = false;
   const ov = $('#modalOverlay');
   const isFullscreen = o.fullscreen === true || o.editor === true;
-  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (isFullscreen ? ' modal-fullscreen' : '') + (o.sheet ? ' modal-sheet' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
+  ov.innerHTML = '<div class="modal-card ' + (o.size || '') + (isFullscreen ? ' modal-fullscreen' : '') + (o.eventDetails ? ' event-detail-modal' : '') + (o.sheet ? ' modal-sheet' : '') + '" role="dialog" aria-modal="true" aria-labelledby="mTitle">' +
     '<div class="modal-head"><div style="min-width:0"><h3 id="mTitle">' + esc(o.title || '') + '</h3>' +
     (o.sub ? '<div class="sub">' + esc(o.sub) + '</div>' : '') + '</div>' +
     '<button class="icon-btn" type="button" data-act="modal-close" aria-label="Закрыть окно">' + ic('x', 18) + '</button></div>' +
@@ -1271,7 +1271,7 @@ function openModal(o) {
   ov.onmousedown = e => { if (e.target === ov) closeModal(); };
   let modalTouchY = 0, modalTouchX = 0, modalTouching = false;
   modalRoot.addEventListener('touchstart', function (e) {
-    if (window.innerWidth > 640 || !e.touches[0]) return;
+    if (o.eventDetails || window.innerWidth > 640 || !e.touches[0]) return;
     const target = e.target;
     if (target.closest('button,input,textarea,select,a')) return;
     modalTouchY = e.touches[0].clientY; modalTouchX = e.touches[0].clientX; modalTouching = true;
@@ -2657,6 +2657,7 @@ function eventInfoModal(evId, occurrenceDate) {
     size: 'lg',
     // WHY: event details need their own scrollable viewport so fixed action buttons never block swiping on mobile.
     fullscreen: true,
+    eventDetails: true,
     guard: false,
     body: body,
     footer:
