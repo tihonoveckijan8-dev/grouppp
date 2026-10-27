@@ -3182,8 +3182,8 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 
 
 
-/* WHY: Move only the song navigation buttons outward within their own grid cells; keep every other control unchanged. */
+/* WHY: Visibly separate only previous/next song buttons from the transpose control without changing grid sizing or other controls. */
 @media (max-width: 640px) {
-  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { justify-self: start !important; }
-  #scene .scene-ctrl > .sbtn[data-act="scene-next"] { justify-self: end !important; }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { position: relative !important; left: -8px !important; }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] { position: relative !important; right: -8px !important; }
 }
