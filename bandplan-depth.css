@@ -2762,9 +2762,9 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 /* WHY: Reserve physical space below the event actions for Android gesture navigation, then move the controls in normal layout flow so later transform rules cannot cancel the lift. */
 @media (max-width: 640px) {
-  /* WHY: Lower the compact action dock while retaining a small clearance above Android's system navigation. */
+  /* WHY: Lift the action buttons slightly so they clear Android's home indicator while keeping the footer compact. */
   #modalOverlay .event-detail-modal .modal-foot {
-    padding: 22px 0 calc(8px + max(4px, env(safe-area-inset-bottom, 0px))) !important;
+    padding: 16px 0 calc(16px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
     gap: 8px !important;
   }
   #modalOverlay .event-detail-modal .modal-foot > .btn {
