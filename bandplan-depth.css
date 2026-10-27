@@ -3221,3 +3221,52 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     margin-left: 8px !important;
   }
 }
+
+
+/* WHY: Variant 1 — compact two-row Stage Mode controls. Explicitly size only the bottom navigation row so transpose and song buttons cannot overlap. */
+@media (max-width: 640px) {
+  #scene .scene-ctrl {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr) !important;
+    grid-template-rows: 60px 56px !important;
+    column-gap: 10px !important;
+    row-gap: 10px !important;
+    overflow: hidden !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) {
+    grid-column: 1 !important; grid-row: 1 !important;
+    width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+    grid-column: 2 !important; grid-row: 1 !important;
+    justify-self: center !important;
+    width: 58px !important; min-width: 58px !important; max-width: 58px !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) {
+    grid-column: 3 !important; grid-row: 1 !important;
+    width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+    grid-column: 1 !important; grid-row: 2 !important;
+    justify-self: end !important;
+    position: static !important; inset: auto !important;
+    width: 50px !important; min-width: 50px !important; max-width: 50px !important;
+    height: 52px !important; min-height: 52px !important;
+    margin: 0 4px 0 0 !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    grid-column: 2 !important; grid-row: 2 !important;
+    justify-self: center !important;
+    width: 156px !important; min-width: 156px !important; max-width: 156px !important;
+    box-sizing: border-box !important;
+    grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    grid-column: 3 !important; grid-row: 2 !important;
+    justify-self: start !important;
+    position: static !important; inset: auto !important;
+    width: 50px !important; min-width: 50px !important; max-width: 50px !important;
+    height: 52px !important; min-height: 52px !important;
+    margin: 0 0 0 4px !important;
+  }
+}
