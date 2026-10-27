@@ -3024,3 +3024,44 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     min-height: 46px !important;
   }
 }
+
+
+
+/* WHY: Final mobile spacing pass: the transpose control must stay fully inside the center track with a visible gap before previous/next buttons. */
+@media (max-width: 640px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0, 1fr) 112px minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+    overflow: hidden !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    grid-column: 2 !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+    padding: 2px !important;
+    gap: 2px !important;
+    grid-template-columns: 32px 36px 32px !important;
+    box-sizing: border-box !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) button[data-d="-1"],
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) button[data-d="1"] {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    padding: 0 !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) #scTrans {
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+    justify-self: end !important;
+    margin-right: 4px !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    justify-self: start !important;
+    margin-left: 4px !important;
+  }
+}
