@@ -2763,11 +2763,11 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 /* WHY: Reserve physical space below the event actions for Android gesture navigation, then move the controls in normal layout flow so later transform rules cannot cancel the lift. */
 @media (max-width: 640px) {
   #modalOverlay .event-detail-modal .modal-foot {
-    padding-bottom: calc(88px + max(24px, env(safe-area-inset-bottom, 0px))) !important;
+    padding-bottom: calc(64px + max(24px, env(safe-area-inset-bottom, 0px))) !important;
   }
   #modalOverlay .event-detail-modal .modal-foot > .btn {
     position: relative !important;
-    top: -48px !important;
+    top: -24px !important;
     transform: none !important;
   }
 }
