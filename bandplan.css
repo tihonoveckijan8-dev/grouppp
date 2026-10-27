@@ -14785,3 +14785,33 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     font-size: 13px !important;
   }
 }
+
+
+/* WHY: Restore the original speed and text-size controls placement and dimensions; leave the widened transpose control and song-navigation layout unchanged. */
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: center !important;
+  width: auto !important;
+  max-width: none !important;
+  height: 54px !important;
+  min-height: 54px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  align-self: center !important;
+  width: auto !important;
+  max-width: none !important;
+  height: 54px !important;
+  min-height: 54px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+    height: 52px !important;
+    min-height: 52px !important;
+  }
+}
