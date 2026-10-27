@@ -2711,3 +2711,72 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 @media (prefers-reduced-motion: reduce) {
   html[data-theme] .bottom-more-menu.is-closing { animation: none !important; }
 }
+
+/* WHY: Event details use a dedicated viewport: only the content region scrolls, while the header and compact action dock stay reachable. */
+#modalOverlay .event-detail-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: pan-y !important;
+}
+#modalOverlay .event-detail-modal .modal-head {
+  flex: 0 0 auto !important;
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 !important;
+  padding: max(14px, env(safe-area-inset-top, 0px)) 0 13px !important;
+  background: var(--surf-4) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+#modalOverlay .event-detail-modal .modal-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  padding: 16px 2px 20px !important;
+}
+#modalOverlay .event-detail-modal .modal-foot {
+  flex: 0 0 auto !important;
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 12px 0 max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  background: var(--surf-4) !important;
+  border-top: 1px solid var(--border) !important;
+}
+#modalOverlay .event-detail-modal .modal-foot > .btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  padding-inline: 10px !important;
+  white-space: normal !important;
+  line-height: 1.2 !important;
+}
+#modalOverlay .event-detail-modal .modal-foot > .btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex: 0 0 16px !important;
+}
+#modalOverlay .event-detail-modal .modal-foot > [data-act="modal-close"] {
+  grid-column: 1 !important;
+}
+#modalOverlay .event-detail-modal .modal-foot > [data-act="event-edit"] {
+  grid-column: 2 !important;
+}
+@media (max-width: 640px) {
+  #modalOverlay .event-detail-modal {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-right: max(14px, env(safe-area-inset-right, 0px)) !important;
+    padding-bottom: 0 !important;
+    padding-left: max(14px, env(safe-area-inset-left, 0px)) !important;
+  }
+  #modalOverlay .event-detail-modal .event-info-card { gap: 12px !important; }
+  #modalOverlay .event-detail-modal .event-info-title { font-size: 22px !important; }
+}
