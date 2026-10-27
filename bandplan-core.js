@@ -2655,6 +2655,8 @@ function eventInfoModal(evId, occurrenceDate) {
     title: 'Событие',
     sub: '',
     size: 'lg',
+    // WHY: event details need their own scrollable viewport so fixed action buttons never block swiping on mobile.
+    fullscreen: true,
     guard: false,
     body: body,
     footer:
