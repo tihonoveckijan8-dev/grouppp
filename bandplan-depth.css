@@ -2836,3 +2836,12 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   #modalOverlay .event-detail-modal .event-info-card { gap: 12px !important; }
   #modalOverlay .event-detail-modal .event-info-title { font-size: 22px !important; }
 }
+
+
+/* WHY: Paint the full-width action dock with the modal surface so the dark modal layer underneath cannot show through as a black slab. */
+@media (max-width: 640px) {
+  #modalOverlay .event-detail-modal .modal-foot {
+    background: var(--surf-4) !important;
+    background-color: var(--surf-4) !important;
+  }
+}
