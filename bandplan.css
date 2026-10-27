@@ -14581,3 +14581,59 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     column-gap: 4px !important;
   }
 }
+
+
+/* WHY: Keep the transpose control compact and centered exactly between previous/next song buttons; avoid the oversized fixed-width middle track. */
+#scene .scene-ctrl {
+  grid-template-columns: minmax(0,1fr) 96px minmax(0,1fr) !important;
+  grid-template-rows: 54px 50px !important;
+  column-gap: 6px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  width: 96px !important;
+  max-width: 96px !important;
+  min-width: 0 !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  grid-template-columns: 28px 28px 28px !important;
+  gap: 2px !important;
+  padding: 2px !important;
+  border-radius: 10px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button[data-d="-1"],
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button[data-d="1"] {
+  width: 28px !important;
+  min-width: 28px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  font-size: 18px !important;
+  border-radius: 8px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) #scTrans {
+  min-width: 28px !important;
+  font-size: 12px !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0,1fr) 96px minmax(0,1fr) !important;
+    grid-template-rows: 52px 48px !important;
+    column-gap: 4px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+    width: 96px !important;
+    max-width: 96px !important;
+    grid-template-columns: 28px 28px 28px !important;
+  }
+}
