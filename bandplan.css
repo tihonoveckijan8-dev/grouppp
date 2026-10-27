@@ -14550,3 +14550,34 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     grid-template-columns: 40px 36px 40px !important;
   }
 }
+
+
+/* WHY: Keep song navigation on the same row as the transpose stepper: previous song immediately to its left, next song immediately to its right. */
+#scene .scene-ctrl {
+  grid-template-columns: minmax(0,1fr) 132px minmax(0,1fr) !important;
+  grid-template-rows: 54px 54px !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: end !important;
+  margin-right: 0 !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: start !important;
+  margin-left: 0 !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0,1fr) 132px minmax(0,1fr) !important;
+    grid-template-rows: 52px 52px !important;
+    column-gap: 4px !important;
+  }
+}
