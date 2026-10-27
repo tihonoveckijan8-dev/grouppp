@@ -3187,3 +3187,37 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { position: relative !important; left: -8px !important; }
   #scene .scene-ctrl > .sbtn[data-act="scene-next"] { position: relative !important; right: -8px !important; }
 }
+
+
+/* WHY: Fix the actual mobile grid tracks: reserve enough center width for the transpose control and keep previous/next buttons in their own side tracks. */
+@media (max-width: 640px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0, 1fr) 156px minmax(0, 1fr) !important;
+    column-gap: 8px !important;
+    overflow: hidden !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    grid-column: 2 !important;
+    width: 156px !important;
+    min-width: 156px !important;
+    max-width: 156px !important;
+    justify-self: center !important;
+    box-sizing: border-box !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+    grid-column: 1 !important;
+    justify-self: end !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    margin-right: 8px !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    grid-column: 3 !important;
+    justify-self: start !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    margin-left: 8px !important;
+  }
+}
