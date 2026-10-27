@@ -2763,15 +2763,20 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 /* WHY: Reserve physical space below the event actions for Android gesture navigation, then move the controls in normal layout flow so later transform rules cannot cancel the lift. */
 @media (max-width: 640px) {
   /* WHY: Raise the action dock a little farther above Android's home indicator without changing its compact two-column layout. */
+  /* WHY: Let the action area span the full device width and blend into the modal instead of creating a separate dark card. */
   #modalOverlay .event-detail-modal .modal-foot {
-    margin: 14px 0 10px !important;
-    padding: 16px 10px calc(24px + max(8px, env(safe-area-inset-bottom, 0px))) !important;
+    width: calc(100% + 28px) !important;
+    box-sizing: border-box !important;
+    margin: 14px -14px 0 !important;
+    padding: 16px max(14px, env(safe-area-inset-right, 0px)) calc(24px + max(8px, env(safe-area-inset-bottom, 0px))) max(14px, env(safe-area-inset-left, 0px)) !important;
     gap: 8px !important;
     align-items: stretch !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 22px !important;
+    border: 0 !important;
+    border-top: 1px solid var(--border) !important;
+    border-radius: 22px 22px 0 0 !important;
     overflow: hidden !important;
-    background: var(--surf-4) !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
   /* WHY: Normalize both event actions to identical full-width button dimensions despite action-specific styles elsewhere. */
   #modalOverlay .event-detail-modal .modal-foot > .btn {
