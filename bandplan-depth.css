@@ -3181,8 +3181,8 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 
 
-/* WHY: Add only a small horizontal gap between song navigation and the transpose control, without changing control sizes or layout. */
+/* WHY: Increase the horizontal gap between song navigation and the transpose control, without changing control sizes or layout. */
 @media (max-width: 640px) {
-  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { transform: translateX(-6px) !important; }
-  #scene .scene-ctrl > .sbtn[data-act="scene-next"] { transform: translateX(6px) !important; }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] { transform: translateX(-12px) !important; }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] { transform: translateX(12px) !important; }
 }
