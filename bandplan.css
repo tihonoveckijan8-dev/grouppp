@@ -9649,10 +9649,11 @@ body[data-route="setlists"] .setlists-list > .song-card > .song-acts.setlist-qui
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) {
   grid-column: 1 !important; grid-row: 1 !important; order: initial !important;
 }
-#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+/* WHY: Keep the Start button centered on the top row and place text-size controls immediately to its right. */
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
   grid-column: 2 !important; grid-row: 1 !important; order: initial !important;
 }
-#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
   grid-column: 3 !important; grid-row: 1 !important; order: initial !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
