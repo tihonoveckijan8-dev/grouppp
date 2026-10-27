@@ -14038,3 +14038,96 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     border-radius: 15px !important;
   }
 }
+
+
+/* WHY: Rebuild the Stage toolbar grid explicitly; equal thirds pushed the play button off-center and let wide steppers overflow their cells. */
+#scene .scene-ctrl {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr) !important;
+  grid-template-rows: 54px 52px !important;
+  gap: 10px 10px !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  justify-self: center !important;
+  align-self: center !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+#scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+  justify-self: center !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 2px !important;
+  padding: 4px 6px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+  flex: 0 1 34px !important;
+  min-width: 26px !important;
+  width: 34px !important;
+}
+#scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) span,
+#scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) span {
+  flex: 1 1 auto !important;
+  min-width: 20px !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl {
+    grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr) !important;
+    grid-template-rows: 50px 50px !important;
+    gap: 9px 7px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
+    min-width: 0 !important;
+    padding: 3px !important;
+  }
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
+  #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button {
+    flex-basis: 28px !important;
+    min-width: 24px !important;
+    width: 28px !important;
+    padding: 0 1px !important;
+  }
+}
