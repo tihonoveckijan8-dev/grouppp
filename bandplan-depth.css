@@ -3179,3 +3179,43 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important;
   }
 }
+
+
+/* WHY: Keep song navigation visibly outside the key control: nudge previous/next outward and constrain the key block to its own center track on phones. */
+@media (max-width: 640px) {
+  #scene .scene-ctrl {
+    grid-template-columns: 56px minmax(0, 148px) 56px !important;
+    justify-content: center !important;
+    column-gap: 8px !important;
+    overflow: visible !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-prev"] {
+    grid-column: 1 !important;
+    justify-self: end !important;
+    margin: 0 4px 0 0 !important;
+    transform: translateX(-3px) !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    grid-column: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 148px !important;
+    box-sizing: border-box !important;
+  }
+  #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
+    grid-column: 3 !important;
+    justify-self: start !important;
+    margin: 0 0 0 4px !important;
+    transform: translateX(3px) !important;
+  }
+}
+@media (max-width: 340px) {
+  #scene .scene-ctrl {
+    grid-template-columns: 48px minmax(0, 124px) 48px !important;
+    column-gap: 5px !important;
+  }
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-trans"]) {
+    max-width: 124px !important;
+    grid-template-columns: minmax(0,1fr) 36px minmax(0,1fr) !important;
+  }
+}
