@@ -2864,3 +2864,55 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     padding-bottom: 150px !important;
   }
 }
+
+
+/* WHY: Use the same 176px control width as the transpose stepper, and version this stylesheet so installed PWAs cannot keep serving the previous cached layout. */
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]),
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) {
+  display: grid !important;
+  grid-template-columns: 52px 60px 52px !important;
+  gap: 2px !important;
+  box-sizing: border-box !important;
+  width: 176px !important;
+  min-width: 176px !important;
+  max-width: 176px !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  padding: 3px !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) > button,
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) > button {
+  box-sizing: border-box !important;
+  width: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+}
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]) > span,
+#scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) > span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 60px !important;
+  width: 60px !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+@media (max-width: 420px) {
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-speed"]),
+  #scene .scene-ctrl > .sctl:has(button[data-act="scene-font"]) {
+    width: 176px !important;
+    min-width: 176px !important;
+    max-width: 176px !important;
+    grid-template-columns: 52px 60px 52px !important;
+    height: 50px !important;
+  }
+}
