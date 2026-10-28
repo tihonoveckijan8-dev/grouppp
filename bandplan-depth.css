@@ -3516,11 +3516,13 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     align-items: center !important;
     justify-content: center !important;
     gap: 0 !important;
-    width: min(100%, 100%) !important;
+    width: min(100%, 204px) !important;
     min-width: 0 !important;
     min-height: 0 !important;
     height: auto !important;
     aspect-ratio: 1 / 1 !important;
+    justify-self: center !important;
+    align-self: start !important;
     padding: 24px !important;
     border: 0 !important;
     outline: 0 !important;
