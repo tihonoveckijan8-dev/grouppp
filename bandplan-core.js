@@ -2747,15 +2747,51 @@ let dynDraft = null;
 function songImportModal() {
   const keyOptions = '<option value="">Не определена</option>' + KEY_LIST.map(k => '<option value="' + k + '">' + k + '</option>').join('');
   const body =
-    '<p class="t-sm t-muted">Вставь ссылку на страницу с аккордами и нажми «Загрузить страницу». Если сайт запрещает чтение, скопируй текст песни с аккордами в поле ниже. Используй материалы, которые разрешено сохранять.</p>' +
+    '<div class="field"><label class="field-label" for="songImportSearch">Название песни или исполнитель</label><div class="row" style="gap:8px;align-items:stretch"><input class="input grow" id="songImportSearch" type="search" placeholder="Например, Numb Linkin Park" autocomplete="off"><button class="btn btn-primary" type="button" data-act="song-import-search">Найти</button></div><span class="hint">Поиск по музыкальному каталогу. Выбери найденную песню — BandPlan создаст карточку автоматически.</span></div><div id="songImportResults" class="stack gap-sm" aria-live="polite"></div>' +
+    '<details class="mt-3"><summary>Дополнить вручную текстом и аккордами</summary><p class="t-sm t-muted">Если у тебя есть текст и аккорды, можешь добавить их вручную или импортировать со страницы, доступной для чтения.</p>' +
+    '<div class="field"><label class="field-label" for="songImportUrl">Ссылка на источник с аккордами</label><div class="row" style="gap:8px;align-items:stretch"><input class="input grow" id="songImportUrl" type="url" inputmode="url" placeholder="https://..." autocomplete="url"><button class="btn btn-secondary" type="button" data-act="song-import-fetch">Загрузить</button></div><span class="hint" id="songImportStatus" role="status">Некоторые сайты блокируют загрузку из браузера.</span></div>' +
     '<div class="field"><label class="field-label" for="songImportUrl">Ссылка на источник</label><div class="row" style="gap:8px;align-items:stretch"><input class="input grow" id="songImportUrl" type="url" inputmode="url" placeholder="https://..." autocomplete="url"><button class="btn btn-secondary" type="button" data-act="song-import-fetch">' + ic('music', 16) + 'Загрузить</button></div><span class="hint" id="songImportStatus" role="status">Сайт должен разрешать чтение страницы из браузера; обход ограничений не выполняется.</span></div>' +
-    '<div class="field"><label class="field-label" for="songImportTitle">Название песни *</label><input class="input" id="songImportTitle" maxlength="90" placeholder="Название"></div>' +
+    '<div class="field"><label class="field-label" for="songImportTitle">Название песни</label><input class="input" id="songImportTitle" maxlength="90" placeholder="Название"></div>' +
     '<div class="field"><label class="field-label" for="songImportArtist">Исполнитель</label><input class="input" id="songImportArtist" maxlength="90" placeholder="Исполнитель / группа"></div>' +
     '<div class="row" style="gap:10px"><div class="field grow"><label class="field-label" for="songImportKey">Тональность</label><select class="select" id="songImportKey">' + keyOptions + '</select></div><div class="field grow"><label class="field-label" for="songImportBpm">BPM (если известно)</label><input class="input" id="songImportBpm" type="number" min="20" max="300" step="1" inputmode="numeric" placeholder="120"></div></div>' +
     '<div class="field"><label class="field-label" for="songImportText">Текст и аккорды *</label><textarea class="textarea" id="songImportText" rows="14" spellcheck="false" placeholder="Am       F        C        G&#10;Строка текста песни&#10;&#10;[Припев]&#10;F        G        Am"></textarea><span class="hint">Аккорды оставляй над соответствующими строками — так они сохранятся в карточке.</span></div>' +
-    '<div class="field"><button class="btn btn-secondary" type="button" data-act="song-import-analyze">' + ic('check', 16) + 'Проверить данные</button><span class="hint" id="songImportAnalysis" role="status"></span></div>';
+    '<div class="field"><button class="btn btn-secondary" type="button" data-act="song-import-analyze">' + ic('check', 16) + 'Проверить данные</button><span class="hint" id="songImportAnalysis" role="status"></span></div></details>';
   openModal({ title: 'Импорт песни', sub: 'Создать карточку из страницы или вставленного текста', size: 'lg', fullscreen: true, editor: true, body,
     footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="song-import-save">' + ic('check', 16) + 'Создать карточку</button>' });
+}
+/* WHY: Search a public music catalog by title so the user can create a song card from a name alone. Catalog APIs provide metadata, not licensed full lyrics/chords. */
+async function songImportSearch() {
+  const input = $('#songImportSearch', modalRoot), results = $('#songImportResults', modalRoot);
+  const query = (input?.value || '').trim();
+  if (!query) { if (results) results.textContent = 'Введи название песни или исполнителя.'; return; }
+  if (results) results.textContent = 'Ищу песню…';
+  try {
+    const endpoint = 'https://itunes.apple.com/search?entity=song&limit=8&term=' + encodeURIComponent(query);
+    const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit', signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
+    if (!response.ok) throw new Error('Каталог временно недоступен');
+    const data = await response.json();
+    const tracks = (data.results || []).filter(t => t.trackName && t.artistName);
+    if (!results) return;
+    if (!tracks.length) { results.textContent = 'Ничего не найдено. Попробуй название на английском или имя исполнителя.'; return; }
+    results.innerHTML = tracks.map((t, i) => '<div class="card row" style="gap:12px;align-items:center;padding:12px"><div class="grow"><strong>' + escapeHtml(t.trackName) + '</strong><div class="t-sm t-muted">' + escapeHtml(t.artistName) + (t.collectionName ? ' · ' + escapeHtml(t.collectionName) : '') + '</div></div><button class="btn btn-primary" type="button" data-act="song-import-create-result" data-index="' + i + '">Создать</button></div>').join('');
+    results._songImportTracks = tracks;
+  } catch (error) {
+    if (results) results.textContent = 'Не удалось выполнить поиск: ' + String(error?.message || error).slice(0, 100) + '. Проверь соединение и попробуй ещё раз.';
+  }
+}
+function songImportCreateResult(index) {
+  const tracks = $('#songImportResults', modalRoot)?._songImportTracks || [];
+  const track = tracks[index];
+  if (!track) { toast('Выбери песню из результатов поиска', 'warn'); return; }
+  const title = String(track.trackName || '').trim(), artist = String(track.artistName || '').trim();
+  const duplicate = state.songs.find(s => String(s.title || '').trim().toLocaleLowerCase() === title.toLocaleLowerCase() && String(s.artist || '').trim().toLocaleLowerCase() === artist.toLocaleLowerCase());
+  const create = () => {
+    state.songs.push({ id: uid('s'), title, artist, key: '', bpm: null, duration: 0, tags: ['импорт'], lyrics: '', fav: false, addedAt: today(), dynamics: null, sourceUrl: track.trackViewUrl || '' });
+    modalDirty = false; hardClose(modalRoot); save(); go('#/songs'); render();
+    toast('Карточка создана: ' + title, 'ok');
+  };
+  if (duplicate) confirmBox('Песня уже есть', '«' + title + '» уже есть у этого исполнителя. Создать ещё одну карточку?', create, 'Создать копию', false);
+  else create();
 }
 function songImportReadPageText(root) {
   const preferred = root.querySelector('[itemprop="lyrics"], .lyrics, .song-lyrics, .chords, .song-text, [class*="lyrics"], [class*="chord"]');
@@ -3798,6 +3834,8 @@ document.addEventListener('click', function (e) {
     case 'new-song': stop(); songModal(null); break;
     case 'edit-song': stop(); songModal(id); break;
     case 'song-import-open': stop(); songImportModal(); break;
+    case 'song-import-search': stop(); songImportSearch(); break;
+    case 'song-import-create-result': stop(); songImportCreateResult(Number(el?.dataset?.index)); break;
     case 'song-import-fetch': stop(); songImportFetchPage(); break;
     case 'song-import-analyze': stop(); songImportAnalyze(); break;
     case 'song-import-save': {
