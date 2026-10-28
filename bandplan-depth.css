@@ -3714,3 +3714,63 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     box-sizing: border-box !important;
   }
 }
+
+
+/* WHY: Earlier theme-button width/flex overrides made the middle option stretch and squeezed the side options. Force a true equal three-column layout inside the drawer. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu .bottom-more-theme {
+    left: 18px !important;
+    right: 18px !important;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-options {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 5px !important;
+    box-sizing: border-box !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-option {
+    display: flex !important;
+    flex: initial !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 112px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 10px 2px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    white-space: normal !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-option .bottom-more-theme-icon {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    margin: 0 !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-option > span,
+  html[data-theme] .bottom-more-menu .bottom-more-theme-option > strong {
+    max-width: 100% !important;
+    text-align: center !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+@media (max-width: 380px) {
+  html[data-theme] .bottom-more-menu .bottom-more-theme-options { gap: 5px !important; padding: 4px !important; }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-option { min-height: 96px !important; font-size: 10px !important; }
+}
