@@ -3775,14 +3775,21 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
   html[data-theme] .bottom-more-menu .bottom-more-theme-option { min-height: 96px !important; font-size: 10px !important; }
 }
 
-/* WHY: Enlarge the More-drawer shortcut buttons by 1.5x without changing their grid positions or column layout. */
+/* WHY: Keep enlarged More-drawer shortcuts visibly separated; two roomy grid columns prevent the 1.5x tiles from touching or overlapping. */
 @media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu .bottom-more-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    column-gap: 24px !important;
+    row-gap: 24px !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+  }
   html[data-theme] .bottom-more-menu .bottom-more-link {
-    transform: scale(1.5) !important;
+    transform: scale(1.15) !important;
     transform-origin: center center !important;
     z-index: 1 !important;
   }
   html[data-theme] .bottom-more-menu .bottom-more-link:active {
-    transform: scale(1.5) !important;
+    transform: scale(1.15) !important;
   }
 }
