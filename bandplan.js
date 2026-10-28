@@ -4,7 +4,7 @@
 
   const loadCore = () => {
     if (window.__bandplanCorePromise) return window.__bandplanCorePromise;
-    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261028-tools-square-row-v38').catch(error => {
+    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261028-tools-square-row-v39').catch(error => {
       console.error('BandPlan core failed to load:', error);
       const boot = document.getElementById('boot');
       if (boot) {
