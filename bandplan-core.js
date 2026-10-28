@@ -1580,7 +1580,7 @@ function toolTabIcon(id) {
 }
 function vTools() {
   const tab = TOOL_TABS.some(x => x[0] === toolTab) ? toolTab : 'guitar-tuner';
-  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'" style="box-sizing:border-box!important;display:flex!important;flex:0 0 auto!important;width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:1/1!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;padding:5px 3px!important;border-radius:12px!important;text-align:center!important;white-space:normal!important;line-height:1.1!important">'+toolTabIcon(id)+'<span style="display:block!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:10px!important">'+esc(label)+'</span></button>').join('') + '</div>';
+  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'">'+toolTabIcon(id)+'<span>'+esc(label)+'</span></button>').join('') + '</div>';
   let body = '';
   if (tab === 'guitar-tuner' || tab === 'violin-tuner') body = tunerHTML(tab);
   else if (tab === 'metronome') body = '<div data-bp-am-tool-host></div>';
