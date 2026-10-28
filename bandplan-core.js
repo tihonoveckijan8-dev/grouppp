@@ -2772,11 +2772,8 @@ async function songImportSearch() {
     const tracks = (data.results || []).filter(t => t.trackName && t.artistName);
     if (!results) return;
     if (!tracks.length) { results.textContent = 'Ничего не найдено. Попробуй название на английском или имя исполнителя.'; return; }
-    // WHY: offer a one-click chord/key lookup without scraping or copying copyrighted song text into the app.
-    results.innerHTML = tracks.map((t, i) => {
-      const chordSearch = 'https://www.google.com/search?q=' + encodeURIComponent('"' + t.trackName + '" "' + t.artistName + '" chords key');
-      return '<div class="card" style="padding:12px"><div class="row" style="gap:12px;align-items:center"><div class="grow"><strong>' + escapeHtml(t.trackName) + '</strong><div class="t-sm t-muted">' + escapeHtml(t.artistName) + (t.collectionName ? ' · ' + escapeHtml(t.collectionName) : '') + '</div></div><button class="btn btn-primary" type="button" data-act="song-import-create-result" data-index="' + i + '">Создать</button></div><div class="row mt-2" style="gap:8px;flex-wrap:wrap"><a class="btn btn-secondary" href="' + chordSearch + '" target="_blank" rel="noopener noreferrer">Найти аккорды и тональность ↗</a>' + (t.trackViewUrl ? '<a class="btn btn-secondary" href="' + escapeHtml(t.trackViewUrl) + '" target="_blank" rel="noopener noreferrer">Открыть источник ↗</a>' : '') + '</div></div>';
-    }).join('');
+    // WHY: keep the results focused on creating a song card; external chord lookup was removed at the user's request.
+    results.innerHTML = tracks.map((t, i) => '<div class="card row" style="gap:12px;align-items:center;padding:12px"><div class="grow"><strong>' + escapeHtml(t.trackName) + '</strong><div class="t-sm t-muted">' + escapeHtml(t.artistName) + (t.collectionName ? ' · ' + escapeHtml(t.collectionName) : '') + '</div></div><button class="btn btn-primary" type="button" data-act="song-import-create-result" data-index="' + i + '">Создать</button></div>').join('');
     results._songImportTracks = tracks;
   } catch (error) {
     if (results) results.textContent = 'Не удалось выполнить поиск: ' + String(error?.message || error).slice(0, 100) + '. Проверь соединение и попробуй ещё раз.';
