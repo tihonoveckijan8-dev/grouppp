@@ -3555,3 +3555,73 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     padding-top: 24px !important;
   }
 }
+
+
+/* WHY: The More drawer's navigation tiles must be true squares, not stretched rows.
+   Hide captions and arrows as requested; size every tile from its width so all three columns stay square on mobile. */
+@media (max-width: 860px) {
+  .bottom-more-menu .bottom-more-links {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 14px !important;
+  }
+  .bottom-more-menu .bottom-more-link {
+    box-sizing: border-box !important;
+    display: grid !important;
+    place-items: center !important;
+    align-content: center !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 8px !important;
+    margin: 0 !important;
+    gap: 0 !important;
+    border: 0 !important;
+    border-radius: 18px !important;
+    background: var(--surf-2) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+  .bottom-more-menu .bottom-more-link-copy,
+  .bottom-more-menu .bottom-more-link-arrow {
+    display: none !important;
+  }
+  .bottom-more-menu .bottom-more-link-icon {
+    flex: none !important;
+    width: 72px !important;
+    max-width: 100% !important;
+    height: 72px !important;
+    max-height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: transparent !important;
+  }
+  .bottom-more-menu .bottom-more-link-icon svg {
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  .bottom-more-menu .bottom-more-link[aria-current="page"] {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surf-2)) !important;
+    border: 0 !important;
+  }
+  .bottom-more-menu .bottom-more-link[aria-current="page"] .bottom-more-link-icon {
+    background: transparent !important;
+  }
+}
+@media (max-width: 360px) {
+  .bottom-more-menu .bottom-more-links { gap: 10px !important; }
+  .bottom-more-menu .bottom-more-link { border-radius: 14px !important; padding: 5px !important; }
+  .bottom-more-menu .bottom-more-link-icon { width: 58px !important; height: 58px !important; }
+  .bottom-more-menu .bottom-more-link-icon svg { width: 36px !important; height: 36px !important; }
+}
