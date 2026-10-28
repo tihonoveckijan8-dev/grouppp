@@ -4,7 +4,7 @@
 
   const loadCore = () => {
     if (window.__bandplanCorePromise) return window.__bandplanCorePromise;
-    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261028-title-search-v47').catch(error => {
+    window.__bandplanCorePromise = import('./bandplan-core.js?v=20261028-chord-lookup-v48').catch(error => {
       console.error('BandPlan core failed to load:', error);
       const boot = document.getElementById('boot');
       if (boot) {
