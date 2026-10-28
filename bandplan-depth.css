@@ -3433,3 +3433,41 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 @media (prefers-reduced-motion: reduce) {
   .bottom-more-theme-option, .bottom-more-menu .bottom-more-link { transition: none !important; }
 }
+
+
+/* WHY: The close control already exists in the drawer header; give its X icon a clear, reliable hit area and keep it visible at the top-right. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+  }
+  html[data-theme] .bottom-more-close {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    display: grid !important;
+    place-items: center !important;
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    border: 1px solid var(--ln) !important;
+    border-radius: 12px !important;
+    background: var(--surface-2) !important;
+    color: var(--tx) !important;
+    cursor: pointer !important;
+  }
+  html[data-theme] .bottom-more-close svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    stroke: currentColor !important;
+    stroke-width: 2.2 !important;
+  }
+}
