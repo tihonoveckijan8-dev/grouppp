@@ -1403,7 +1403,6 @@ function buildChrome() {
       '<a class="bottom-more-link" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
       '<span class="bottom-more-link-icon">' + navIc(n.i, 20) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong></span>' +
       '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
-    '<button class="bottom-more-link" type="button" data-act="song-import-open" aria-label="Импортировать песню" title="Импортировать песню"><span class="bottom-more-link-icon">' + navIc('music', 20) + '</span><span class="bottom-more-link-copy"><strong>Импорт песни</strong></span><span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span></button>' +
     '</nav>' +
     '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle" style="margin-top:160px!important;padding-top:24px!important">' +
       '<div class="bottom-more-section-heading"><div><h3 id="bottomMoreThemeTitle" class="sr-only">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
@@ -2743,122 +2742,7 @@ function readEventForm(id) {
     memberIds: Array.prototype.map.call(w.querySelectorAll('#f_members .chip.on'), b => b.getAttribute('data-m')), except: (old && old.except) || []  };
 }
 let dynDraft = null;
-/* WHY: Keep song importing inside BandPlan and reuse the existing song model/save pipeline. URL loading is best-effort because many sites intentionally block cross-origin browser reads. */
-function songImportModal() {
-  const keyOptions = '<option value="">Не определена</option>' + KEY_LIST.map(k => '<option value="' + k + '">' + k + '</option>').join('');
-  const body =
-    '<div class="field"><label class="field-label" for="songImportSearch">Название песни или исполнитель</label><div class="row" style="gap:8px;align-items:stretch"><input class="input grow" id="songImportSearch" type="search" placeholder="Например, Numb Linkin Park" autocomplete="off"><button class="btn btn-primary" type="button" data-act="song-import-search">Найти</button></div><span class="hint">Поиск по музыкальному каталогу. Выбери найденную песню — BandPlan создаст карточку автоматически.</span></div><div id="songImportResults" class="stack gap-sm" aria-live="polite"></div>' +
-    '<details class="mt-3"><summary>Дополнить вручную текстом и аккордами</summary><p class="t-sm t-muted">Если у тебя есть текст и аккорды, можешь добавить их вручную или импортировать со страницы, доступной для чтения.</p>' +
-    '<div class="field"><label class="field-label" for="songImportUrl">Ссылка на источник</label><div class="row" style="gap:8px;align-items:stretch"><input class="input grow" id="songImportUrl" type="url" inputmode="url" placeholder="https://..." autocomplete="url"><button class="btn btn-secondary" type="button" data-act="song-import-fetch">' + ic('music', 16) + 'Загрузить</button></div><span class="hint" id="songImportStatus" role="status">Сайт должен разрешать чтение страницы из браузера; обход ограничений не выполняется.</span></div>' +
-    '<div class="field"><label class="field-label" for="songImportTitle">Название песни</label><input class="input" id="songImportTitle" maxlength="90" placeholder="Название"></div>' +
-    '<div class="field"><label class="field-label" for="songImportArtist">Исполнитель</label><input class="input" id="songImportArtist" maxlength="90" placeholder="Исполнитель / группа"></div>' +
-    '<div class="row" style="gap:10px"><div class="field grow"><label class="field-label" for="songImportKey">Тональность</label><select class="select" id="songImportKey">' + keyOptions + '</select></div><div class="field grow"><label class="field-label" for="songImportBpm">BPM (если известно)</label><input class="input" id="songImportBpm" type="number" min="20" max="300" step="1" inputmode="numeric" placeholder="120"></div></div>' +
-    '<div class="field"><label class="field-label" for="songImportText">Текст и аккорды *</label><textarea class="textarea" id="songImportText" rows="14" spellcheck="false" placeholder="Am       F        C        G&#10;Строка текста песни&#10;&#10;[Припев]&#10;F        G        Am"></textarea><span class="hint">Аккорды оставляй над соответствующими строками — так они сохранятся в карточке.</span></div>' +
-    '<div class="field"><button class="btn btn-secondary" type="button" data-act="song-import-analyze">' + ic('check', 16) + 'Проверить данные</button><span class="hint" id="songImportAnalysis" role="status"></span></div></details>';
-  openModal({ title: 'Импорт песни', sub: 'Создать карточку из страницы или вставленного текста', size: 'lg', fullscreen: true, editor: true, body,
-    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="song-import-save">' + ic('check', 16) + 'Создать карточку</button>' });
-}
-/* WHY: Search a public music catalog by title so the user can create a song card from a name alone. Catalog APIs provide metadata, not licensed full lyrics/chords. */
-async function songImportSearch() {
-  const input = $('#songImportSearch', modalRoot), results = $('#songImportResults', modalRoot);
-  const query = (input?.value || '').trim();
-  if (!query) { if (results) results.textContent = 'Введи название песни или исполнителя.'; return; }
-  if (results) results.textContent = 'Ищу песню…';
-  try {
-    const endpoint = 'https://itunes.apple.com/search?entity=song&limit=8&term=' + encodeURIComponent(query);
-    const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit', signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined });
-    if (!response.ok) throw new Error('Каталог временно недоступен');
-    const data = await response.json();
-    const tracks = (data.results || []).filter(t => t.trackName && t.artistName);
-    if (!results) return;
-    if (!tracks.length) { results.textContent = 'Ничего не найдено. Попробуй название на английском или имя исполнителя.'; return; }
-    // WHY: keep the results focused on creating a song card; external chord lookup was removed at the user's request.
-    results.innerHTML = tracks.map((t, i) => '<div class="card row" style="gap:12px;align-items:center;padding:12px"><div class="grow"><strong>' + escapeHtml(t.trackName) + '</strong><div class="t-sm t-muted">' + escapeHtml(t.artistName) + (t.collectionName ? ' · ' + escapeHtml(t.collectionName) : '') + '</div></div><button class="btn btn-primary" type="button" data-act="song-import-create-result" data-index="' + i + '">Создать</button></div>').join('');
-    results._songImportTracks = tracks;
-  } catch (error) {
-    if (results) results.textContent = 'Не удалось выполнить поиск: ' + String(error?.message || error).slice(0, 100) + '. Проверь соединение и попробуй ещё раз.';
-  }
-}
-function songImportCreateResult(index) {
-  const tracks = $('#songImportResults', modalRoot)?._songImportTracks || [];
-  const track = tracks[index];
-  if (!track) { toast('Выбери песню из результатов поиска', 'warn'); return; }
-  const title = String(track.trackName || '').trim(), artist = String(track.artistName || '').trim();
-  const duplicate = state.songs.find(s => String(s.title || '').trim().toLocaleLowerCase() === title.toLocaleLowerCase() && String(s.artist || '').trim().toLocaleLowerCase() === artist.toLocaleLowerCase());
-  const create = () => {
-    state.songs.push({ id: uid('s'), title, artist, key: '', bpm: null, duration: 0, tags: ['импорт'], lyrics: '', fav: false, addedAt: today(), dynamics: null, sourceUrl: track.trackViewUrl || '' });
-    modalDirty = false; hardClose(modalRoot); save(); go('#/songs'); render();
-    toast('Карточка создана: ' + title, 'ok');
-  };
-  if (duplicate) confirmBox('Песня уже есть', '«' + title + '» уже есть у этого исполнителя. Создать ещё одну карточку?', create, 'Создать копию', false);
-  else create();
-}
-function songImportReadPageText(root) {
-  const preferred = root.querySelector('[itemprop="lyrics"], .lyrics, .song-lyrics, .chords, .song-text, [class*="lyrics"], [class*="chord"]');
-  const source = preferred && (preferred.innerText || preferred.textContent || '').trim().length > 80 ? preferred : root;
-  source.querySelectorAll('script,style,noscript,svg,nav,header,footer,aside,form,button,iframe').forEach(n => n.remove());
-  const blockTags = new Set(['BR','P','DIV','SECTION','ARTICLE','LI','PRE','H1','H2','H3','H4','TR']);
-  let out = '';
-  const walk = node => {
-    if (node.nodeType === 3) { out += node.nodeValue || ''; return; }
-    if (node.nodeType !== 1 && node.nodeType !== 9) return;
-    if (node.nodeType === 1 && ['SCRIPT','STYLE','NOSCRIPT','SVG','NAV','FOOTER','FORM','BUTTON','IFRAME'].includes(node.tagName)) return;
-    const block = node.nodeType === 1 && blockTags.has(node.tagName);
-    if (block && out && !out.endsWith('\n')) out += '\n';
-    if (node.nodeName === 'BR') { out += '\n'; return; }
-    Array.from(node.childNodes || []).forEach(walk);
-    if (block && !out.endsWith('\n')) out += '\n';
-  };
-  walk(source);
-  return out.split('\n').map(line => line.replace(/[\t\u00a0 ]+/g, ' ').trim()).filter((line, i, all) => line || (i > 0 && all[i - 1])).join('\n').trim();
-}
-function songImportAnalyze() {
-  const textValue = ($('#songImportText', modalRoot)?.value || '').trim();
-  const title = ($('#songImportTitle', modalRoot)?.value || '').trim();
-  const status = $('#songImportAnalysis', modalRoot);
-  if (!textValue) { if (status) status.textContent = 'Добавь текст страницы или песни, чтобы проверить импорт.'; return; }
-  const chordLines = textValue.split('\n').filter(line => /(?:^|\s)[A-G](?:#|b)?(?:m|min|maj|dim|aug|sus|add)?\d*(?:\/[A-G](?:#|b)?)?(?=\s|$)/.test(line));
-  const labels = textValue.match(/^\s*\[(?:куплет|припев|бридж|вступление|проигрыш|соло|финал)[^\]]*\]\s*$/gim) || [];
-  if (status) status.textContent = 'Проверка: ' + textValue.split('\n').filter(Boolean).length + ' строк, примерно ' + chordLines.length + ' строк с аккордами, ' + labels.length + ' структурных меток.' + (title ? ' Название заполнено.' : ' Добавь название перед сохранением.');
-}
-async function songImportFetchPage() {
-  const urlField = $('#songImportUrl', modalRoot), status = $('#songImportStatus', modalRoot);
-  const button = modalRoot.querySelector('[data-act="song-import-fetch"]');
-  const rawUrl = (urlField?.value || '').trim();
-  if (!rawUrl) { if (status) status.textContent = 'Сначала вставь ссылку на страницу.'; return; }
-  let url;
-  try { url = new URL(rawUrl); } catch (_) { if (status) status.textContent = 'Проверь формат ссылки.'; return; }
-  if (!['http:', 'https:'].includes(url.protocol) || ['localhost','127.0.0.1','::1'].includes(url.hostname) || /^10\.|^192\.168\.|^172\.(1[6-9]|2\d|3[01])\./.test(url.hostname)) {
-    if (status) status.textContent = 'Разрешены только публичные HTTP/HTTPS-ссылки.'; return;
-  }
-  if (button) { button.disabled = true; button.setAttribute('aria-busy', 'true'); }
-  if (status) status.textContent = 'Пробую загрузить страницу…';
-  try {
-    const response = await fetch(url.href, { method: 'GET', mode: 'cors', credentials: 'omit', redirect: 'follow', signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined, headers: { Accept: 'text/html,text/plain;q=0.9' } });
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const type = response.headers.get('content-type') || '', raw = await response.text();
-    let title = '', artist = '', lyrics = '';
-    if (type.includes('text/plain') || !/<html|<body|<div|<p[ >]/i.test(raw.slice(0, 2000))) lyrics = raw;
-    else {
-      const doc = new DOMParser().parseFromString(raw, 'text/html');
-      title = doc.querySelector('meta[property="og:title"]')?.content || doc.querySelector('h1')?.textContent?.trim() || doc.title || '';
-      artist = doc.querySelector('meta[name="author"]')?.content || doc.querySelector('[rel="author"]')?.textContent?.trim() || '';
-      lyrics = songImportReadPageText(doc.body || doc);
-      const description = doc.querySelector('meta[name="description"]')?.content || '';
-      if (lyrics.length < 40 && description) lyrics = description + '\n\n' + lyrics;
-    }
-    const titleField = $('#songImportTitle', modalRoot), artistField = $('#songImportArtist', modalRoot), textField = $('#songImportText', modalRoot);
-    if (titleField && !titleField.value.trim()) titleField.value = title.replace(/\s*[|—-]\s*(?:аккорды|текст|chords|lyrics).*$/i, '').trim().slice(0, 90);
-    if (artistField && !artistField.value.trim()) artistField.value = artist.trim().slice(0, 90);
-    if (textField && lyrics.trim()) textField.value = lyrics.slice(0, 60000);
-    if (status) status.textContent = lyrics.trim() ? 'Страница загружена. Проверь текст, аккорды и атрибуцию перед созданием карточки.' : 'Страница открылась, но подходящий текст не найден. Вставь текст вручную.';
-    songImportAnalyze();
-  } catch (error) {
-    if (status) status.textContent = 'Сайт не разрешил загрузку из браузера или недоступен (' + String(error?.message || error).slice(0, 100) + '). Открой источник, скопируй разрешённый текст с аккордами и вставь его ниже.';
-  } finally {
-    if (button) { button.disabled = false; button.removeAttribute('aria-busy'); }
-  }
-}
+/* WHY: The complete song importer was removed at the user's request; regular song creation/editing remains available. */
 function songModal(id) {
   const s = id ? songById(id) : null;
   const d = s || { title: '', artist: '', key: 'Am', bpm: '', duration: '', tags: [], lyrics: '', fav: false };
@@ -3833,32 +3717,6 @@ document.addEventListener('click', function (e) {
     case 'ev-reset': stop(); ui.evTypes = []; ui.evMine = false; ui.evMineMode = 'yes'; ui.evRepeat = false; ui.evQuery = ''; render(); if ($('#modalOverlay').classList.contains('on')) { const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'new-song': stop(); songModal(null); break;
     case 'edit-song': stop(); songModal(id); break;
-    case 'song-import-open': stop(); songImportModal(); break;
-    case 'song-import-search': stop(); songImportSearch(); break;
-    case 'song-import-create-result': stop(); songImportCreateResult(Number(el?.dataset?.index)); break;
-    case 'song-import-fetch': stop(); songImportFetchPage(); break;
-    case 'song-import-analyze': stop(); songImportAnalyze(); break;
-    case 'song-import-save': {
-      stop();
-      const title = ($('#songImportTitle', modalRoot)?.value || '').trim();
-      const lyrics = ($('#songImportText', modalRoot)?.value || '').trim();
-      const artist = ($('#songImportArtist', modalRoot)?.value || '').trim();
-      const key = $('#songImportKey', modalRoot)?.value || '';
-      const bpmValue = Number($('#songImportBpm', modalRoot)?.value || 0);
-      const sourceUrl = ($('#songImportUrl', modalRoot)?.value || '').trim();
-      if (!title) { toast('Укажи название песни', 'warn'); $('#songImportTitle', modalRoot)?.focus(); break; }
-      if (!lyrics) { toast('Добавь текст и аккорды песни', 'warn'); $('#songImportText', modalRoot)?.focus(); break; }
-      const duplicate = state.songs.find(s => String(s.title || '').trim().toLocaleLowerCase() === title.toLocaleLowerCase() && (!artist || !s.artist || String(s.artist).trim().toLocaleLowerCase() === artist.toLocaleLowerCase()));
-      const createImportedSong = () => {
-        const song = { id: uid('s'), title, artist, key, bpm: bpmValue >= 20 && bpmValue <= 300 ? Math.round(bpmValue) : null, duration: 0, tags: ['импорт'], lyrics, fav: false, addedAt: today(), dynamics: null, sourceUrl };
-        state.songs.push(song);
-        modalDirty = false; hardClose(modalRoot); save(); go('#/songs'); render();
-        toast('Карточка песни создана', 'ok');
-      };
-      if (duplicate) confirmBox('Песня уже есть', '«' + duplicate.title + '» уже есть в репертуаре. Всё равно создать ещё одну карточку?', createImportedSong, 'Создать копию', false);
-      else createImportedSong();
-      break;
-    }
     case 'song-save': {
       stop(); btnLoading(el);
       const data = readSongForm(id); if (!data) break;
