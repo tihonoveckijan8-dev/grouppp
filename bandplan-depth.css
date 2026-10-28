@@ -3516,9 +3516,10 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     align-items: center !important;
     justify-content: center !important;
     gap: 0 !important;
-    width: 100% !important;
+    width: min(100%, 100%) !important;
     min-width: 0 !important;
     min-height: 0 !important;
+    height: auto !important;
     aspect-ratio: 1 / 1 !important;
     padding: 24px !important;
     border: 0 !important;
