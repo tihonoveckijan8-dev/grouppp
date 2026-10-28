@@ -3471,3 +3471,18 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     stroke-width: 2.2 !important;
   }
 }
+
+
+/* WHY: Push the theme chooser lower in the drawer and tighten the navigation now that explanatory captions are removed. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-theme {
+    margin-top: 42px !important;
+    padding-top: 22px !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-link {
+    min-height: 58px !important;
+  }
+  html[data-theme] .bottom-more-link-copy {
+    gap: 0 !important;
+  }
+}
