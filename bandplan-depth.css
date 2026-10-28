@@ -3486,3 +3486,15 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     gap: 0 !important;
   }
 }
+
+
+/* WHY: Hide the visible theme title while preserving its accessible name, and place theme choices lower in the mobile drawer. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-theme {
+    margin-top: 68px !important;
+    padding-top: 22px !important;
+  }
+  html[data-theme] .bottom-more-section-heading {
+    display: none !important;
+  }
+}
