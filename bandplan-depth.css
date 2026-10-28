@@ -3690,3 +3690,27 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     padding-top: 24px !important;
   }
 }
+
+
+/* WHY: Pin the theme selector to the bottom INSIDE the More drawer, instead of relying on oversized margins that place it mid-panel or beyond the edge. */
+@media (max-width: 860px) {
+  html[data-theme] .bottom-more-menu {
+    position: fixed !important;
+    overflow-y: auto !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme {
+    position: absolute !important;
+    left: 18px !important;
+    right: 18px !important;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    margin: 0 !important;
+    padding: 18px 0 0 !important;
+    border-top: 1px solid var(--border) !important;
+    box-sizing: border-box !important;
+    background: var(--surf-1) !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme-options {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
