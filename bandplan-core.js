@@ -1400,9 +1400,14 @@ function buildChrome() {
     '<nav class="bottom-more-links" aria-label="Дополнительные разделы">' +
     TABS.filter(n => ['tools', 'settings'].includes(n.k)).map(n =>
       '<a class="bottom-more-link" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
-      '<span class="bottom-more-link-icon">' + navIc(n.i, 21) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong><small>' + (n.k === 'tools' ? 'Метроном, тюнер и полезные инструменты' : 'Профиль, оформление и параметры приложения') + '</small></span>' +
+      '<span class="bottom-more-link-icon">' + navIc(n.i, 20) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong><small>' + (n.k === 'tools' ? 'Метроном, тюнер и полезные инструменты' : 'Профиль и параметры приложения') + '</small></span>' +
       '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
-    '</nav></section>';
+    '</nav>' +
+    '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle">' +
+      '<div class="bottom-more-section-heading"><div><span class="bottom-more-section-kicker">ВНЕШНИЙ ВИД</span><h3 id="bottomMoreThemeTitle">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
+      '<div class="bottom-more-theme-options" role="group" aria-label="Выбрать тему оформления">' +
+      THEMES.map(t => '<button class="bottom-more-theme-option" type="button" data-act="theme-select" data-theme-id="' + t.id + '" aria-pressed="' + (state.settings.theme === t.id ? 'true' : 'false') + '">' + '<span class="bottom-more-theme-icon">' + ic(t.icon, 18) + '</span><span>' + esc(t.label) + '</span></button>').join('') +
+      '</div></section></section>';
 
   const p = state.profile;
   $('#brandBand').textContent = p.bandName || 'Моя группа';
@@ -3324,6 +3329,11 @@ document.addEventListener('click', function (e) {
         location.hash = target;
         routeTransition();
       }
+      break;
+    }
+    case 'theme-select': {
+      stop();
+      setTheme(el.getAttribute('data-theme-id') || 'light');
       break;
     }
     case 'theme-toggle': stop(); cycleTheme(); break;
