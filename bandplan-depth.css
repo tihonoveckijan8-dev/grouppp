@@ -3500,15 +3500,16 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 
 
-/* WHY: Keep square navigation cards scoped to the More drawer; tool tabs retain their original compact, horizontal shape. */
+/* WHY: The drawer renders .bottom-more-links/.bottom-more-link (not card/grid classes); target the real markup so square navigation cards visibly apply only to More. */
 @media (max-width: 860px) {
-  html[data-theme] .bottom-more-menu .bottom-more-grid {
+  html[data-theme] .bottom-more-menu .bottom-more-links {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-items: stretch !important;
     gap: 12px !important;
+    width: 100% !important;
   }
-  html[data-theme] .bottom-more-menu .bottom-more-card {
+  html[data-theme] .bottom-more-menu .bottom-more-link {
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
@@ -3523,27 +3524,31 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     border-radius: 18px !important;
     text-align: center !important;
   }
-  html[data-theme] .bottom-more-menu .bottom-more-card-icon {
+  html[data-theme] .bottom-more-menu .bottom-more-link-icon {
     flex: 0 0 42px !important;
     width: 42px !important;
     height: 42px !important;
   }
-  html[data-theme] .bottom-more-menu .bottom-more-card-copy {
+  html[data-theme] .bottom-more-menu .bottom-more-link-copy {
     display: grid !important;
     justify-items: center !important;
     min-width: 0 !important;
     width: 100% !important;
     gap: 0 !important;
   }
-  html[data-theme] .bottom-more-menu .bottom-more-card-copy strong {
+  html[data-theme] .bottom-more-menu .bottom-more-link-copy strong {
     max-width: 100% !important;
     font-size: 13px !important;
     line-height: 1.2 !important;
     overflow-wrap: anywhere !important;
     text-align: center !important;
   }
-  html[data-theme] .bottom-more-menu .bottom-more-card-copy small,
-  html[data-theme] .bottom-more-menu .bottom-more-card .more-current-mark {
+  html[data-theme] .bottom-more-menu .bottom-more-link-arrow,
+  html[data-theme] .bottom-more-menu .more-current-mark {
     display: none !important;
+  }
+  html[data-theme] .bottom-more-menu .bottom-more-theme {
+    margin-top: 220px !important;
+    padding-top: 24px !important;
   }
 }
