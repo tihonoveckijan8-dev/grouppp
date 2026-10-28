@@ -1404,7 +1404,7 @@ function buildChrome() {
       '<span class="bottom-more-link-icon">' + navIc(n.i, 20) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong></span>' +
       '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
     '</nav>' +
-    '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle" style="margin-top:160px;padding-top:24px">' +
+    '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle" style="margin-top:160px!important;padding-top:24px!important">' +
       '<div class="bottom-more-section-heading"><div><h3 id="bottomMoreThemeTitle" class="sr-only">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
       '<div class="bottom-more-theme-options" role="group" aria-label="Выбрать тему оформления">' +
       THEMES.map(t => '<button class="bottom-more-theme-option" type="button" data-act="theme-select" data-theme-id="' + t.id + '" aria-pressed="' + (state.settings.theme === t.id ? 'true' : 'false') + '">' + '<span class="bottom-more-theme-icon">' + ic(t.icon, 18) + '</span><span>' + esc(t.label) + '</span></button>').join('') +
@@ -1580,7 +1580,7 @@ function toolTabIcon(id) {
 }
 function vTools() {
   const tab = TOOL_TABS.some(x => x[0] === toolTab) ? toolTab : 'guitar-tuner';
-  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'" style="box-sizing:border-box;display:flex;flex:0 0 88px;width:88px;min-width:88px;height:88px;min-height:88px;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:8px 5px;border-radius:12px;text-align:center;white-space:normal;line-height:1.15">'+toolTabIcon(id)+'<span style="display:block;max-width:100%;white-space:normal;overflow-wrap:anywhere;font-size:10px">'+esc(label)+'</span></button>').join('') + '</div>';
+  const tabs = '<div class="tools-tabs" role="tablist" aria-label="Музыкальные инструменты">' + TOOL_TABS.map(([id,label]) => '<button type="button" role="tab" class="tools-tab'+(tab===id?' active':'')+'" aria-selected="'+(tab===id)+'" data-act="tool-tab" data-v="'+id+'" style="box-sizing:border-box!important;display:flex!important;flex:0 0 88px!important;width:88px!important;min-width:88px!important;height:88px!important;min-height:88px!important;max-height:88px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;padding:8px 5px!important;border-radius:12px!important;text-align:center!important;white-space:normal!important;line-height:1.15!important">'+toolTabIcon(id)+'<span style="display:block!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:10px!important">'+esc(label)+'</span></button>').join('') + '</div>';
   let body = '';
   if (tab === 'guitar-tuner' || tab === 'violin-tuner') body = tunerHTML(tab);
   else if (tab === 'metronome') body = '<div data-bp-am-tool-host></div>';
