@@ -1405,7 +1405,7 @@ function buildChrome() {
       '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
     '</nav>' +
     '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle">' +
-      '<div class="bottom-more-section-heading"><div><h3 id="bottomMoreThemeTitle">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
+      '<div class="bottom-more-section-heading"><div><h3 id="bottomMoreThemeTitle" class="sr-only">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
       '<div class="bottom-more-theme-options" role="group" aria-label="Выбрать тему оформления">' +
       THEMES.map(t => '<button class="bottom-more-theme-option" type="button" data-act="theme-select" data-theme-id="' + t.id + '" aria-pressed="' + (state.settings.theme === t.id ? 'true' : 'false') + '">' + '<span class="bottom-more-theme-icon">' + ic(t.icon, 18) + '</span><span>' + esc(t.label) + '</span></button>').join('') +
       '</div></section></section>';
