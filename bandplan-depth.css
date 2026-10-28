@@ -3500,13 +3500,13 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
 }
 
 
-/* WHY: Make More drawer entries large icon-only square controls; labels stay available to assistive tech via visually-hidden text. Tool subtabs remain unchanged. */
+/* WHY: Triple the More drawer control footprint and keep each control perfectly square; labels remain accessible to screen readers. Tool subtabs remain unchanged. */
 @media (max-width: 860px) {
   html[data-theme] .bottom-more-menu .bottom-more-links {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     align-items: stretch !important;
-    gap: 16px !important;
+    gap: 18px !important;
     width: 100% !important;
   }
   html[data-theme] .bottom-more-menu .bottom-more-link {
@@ -3520,17 +3520,17 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     min-width: 0 !important;
     min-height: 0 !important;
     aspect-ratio: 1 / 1 !important;
-    padding: 18px !important;
+    padding: 24px !important;
     border: 0 !important;
     outline: 0 !important;
     box-shadow: none !important;
-    border-radius: 22px !important;
+    border-radius: 28px !important;
     text-align: center !important;
   }
   html[data-theme] .bottom-more-menu .bottom-more-link-icon {
-    flex: 0 0 68px !important;
-    width: 68px !important;
-    height: 68px !important;
+    flex: 0 0 204px !important;
+    width: 204px !important;
+    height: 204px !important;
   }
   html[data-theme] .bottom-more-menu .bottom-more-link-copy {
     position: absolute !important;
