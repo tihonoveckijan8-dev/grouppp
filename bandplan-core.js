@@ -201,6 +201,7 @@ function navIc(n, size) {
     list: '<path d="M9 5.5h11M9 11.5h11M9 17.5h11"/><rect x="3.5" y="4" width="3" height="3" rx=".8"/><path d="m4.2 11.5.9.9 1.7-1.9"/><path d="M4 17.5h2"/>',
     gear: '<path d="m10 3.8 4-.1.8 2.2 2 .9 2.1-1 2 3.4-1.5 1.7v2.2l1.5 1.7-2 3.4-2.1-1-2 .9-.8 2.2h-4l-.8-2.2-2-.9-2.1 1-2-3.4 1.5-1.7v-2.2L3.1 9.2l2-3.4 2.1 1 2-.9z"/><circle cx="12" cy="12" r="3"/>',
     more: '<circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
     tools: '<path d="M4 7.5h5M15 7.5h5M9 7.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M4 16.5h2M12 16.5h8M6 16.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M12 3v1M18 20v1"/>'
   };
   return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" class="nav-icon-clay" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" focusable="false" aria-hidden="true">' + (paths[n] || '') + '</svg>';
