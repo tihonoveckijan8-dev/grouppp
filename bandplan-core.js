@@ -1396,16 +1396,16 @@ function buildChrome() {
     navIc('more', 21) + '<span>Ещё</span></a>' +
     '<div class="bottom-more-backdrop" data-act="more-menu-close" aria-hidden="true" hidden></div>' +
     '<section class="bottom-more-menu" id="bottomMoreMenu" role="dialog" aria-modal="true" aria-labelledby="bottomMoreTitle" hidden>' +
-    '<header class="bottom-more-header"><div><span class="bottom-more-eyebrow">BANDPLAN</span><h2 id="bottomMoreTitle">Ещё</h2><p>Инструменты и настройки группы</p></div>' +
+    '<header class="bottom-more-header"><div><h2 id="bottomMoreTitle">Ещё</h2></div>' +
     '<button class="bottom-more-close" type="button" data-act="more-menu-close" aria-label="Закрыть меню">' + navIc('x', 20) + '</button></header>' +
     '<nav class="bottom-more-links" aria-label="Дополнительные разделы">' +
     TABS.filter(n => ['tools', 'settings'].includes(n.k)).map(n =>
       '<a class="bottom-more-link" href="' + n.h + '" data-nav="' + n.k + '" data-act="nav" data-to="' + n.k + '"' + (cur === n.k ? ' aria-current="page"' : '') + '>' +
-      '<span class="bottom-more-link-icon">' + navIc(n.i, 20) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong><small>' + (n.k === 'tools' ? 'Метроном, тюнер и полезные инструменты' : 'Профиль и параметры приложения') + '</small></span>' +
+      '<span class="bottom-more-link-icon">' + navIc(n.i, 20) + '</span><span class="bottom-more-link-copy"><strong>' + n.t + '</strong></span>' +
       '<span class="bottom-more-link-arrow" aria-hidden="true">' + navIc('right', 17) + '</span>' + (cur === n.k ? '<svg class="more-current-mark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>' : '') + '</a>').join('') +
     '</nav>' +
     '<section class="bottom-more-theme" aria-labelledby="bottomMoreThemeTitle">' +
-      '<div class="bottom-more-section-heading"><div><span class="bottom-more-section-kicker">ВНЕШНИЙ ВИД</span><h3 id="bottomMoreThemeTitle">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
+      '<div class="bottom-more-section-heading"><div><h3 id="bottomMoreThemeTitle">Тема оформления</h3></div><span class="bottom-more-theme-current">' + esc(themeById(state.settings.theme).label) + '</span></div>' +
       '<div class="bottom-more-theme-options" role="group" aria-label="Выбрать тему оформления">' +
       THEMES.map(t => '<button class="bottom-more-theme-option" type="button" data-act="theme-select" data-theme-id="' + t.id + '" aria-pressed="' + (state.settings.theme === t.id ? 'true' : 'false') + '">' + '<span class="bottom-more-theme-icon">' + ic(t.icon, 18) + '</span><span>' + esc(t.label) + '</span></button>').join('') +
       '</div></section></section>';
