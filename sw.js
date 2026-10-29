@@ -31,22 +31,19 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (shell) {
-      // Online: prefer the newest deployed asset immediately.
-      // Offline: fall back to the last known-good cached shell.
+      // WHY: keep one consistent app version for the whole active session.
+      // A new build is installed into a versioned cache by the waiting worker;
+      // it becomes available after the current clients close and the app is reopened.
+      if (cached) return cached;
       try {
-        // WHY: a stalled shell request must not hold startup indefinitely; use the last cached shell after 4 seconds.
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 4000);
-        let response;
-        try { response = await fetch(request, {cache:'no-cache', signal:controller.signal}); }
-        finally { clearTimeout(timeout); }
+        const response = await fetch(request, {cache:'no-cache'});
         if (response && response.ok) {
           const copy = response.clone();
           caches.open(V).then(cache => cache.put(request, copy)).catch(() => {});
         }
         return response;
       } catch (_) {
-        return cached || await caches.match('index.html') || Response.error();
+        return await caches.match('index.html') || Response.error();
       }
     }
     if (cached) return cached;
