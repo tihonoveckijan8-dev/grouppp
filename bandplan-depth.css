@@ -3985,3 +3985,86 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     display: flex !important;
   }
 }
+
+
+/* WHY: Repair the tablet app shell when legacy sidebar sizing wins the cascade: keep the desktop navigation at a usable width and explicitly allocate the remaining viewport to content. Phone layout <=640px remains untouched. */
+@media (min-width: 641px) and (max-width: 1199px) {
+  html body #app.app,
+  html body .app#app,
+  html body .app {
+    display: grid !important;
+    grid-template-columns: 248px minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100dvh !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+  }
+  html body #app.app > .sidebar,
+  html body .app > .sidebar,
+  html body .sidebar {
+    display: flex !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    position: sticky !important;
+    top: 0 !important;
+    width: 248px !important;
+    min-width: 248px !important;
+    max-width: 248px !important;
+    height: 100dvh !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  html body #app.app > .content,
+  html body .app > .content,
+  html body .content {
+    display: block !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+  }
+  html body #app #view,
+  html body .content #view {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+  }
+  html body #app #view > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  html body .bottom-nav {
+    display: none !important;
+  }
+}
+/* WHY: Portrait tablets are narrow enough for bottom navigation, but still need full-width content rather than a collapsed desktop rail. */
+@media (min-width: 641px) and (max-width: 899px) and (orientation: portrait) {
+  html body #app.app,
+  html body .app#app,
+  html body .app {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  html body #app.app > .sidebar,
+  html body .app > .sidebar,
+  html body .sidebar {
+    display: none !important;
+  }
+  html body #app.app > .content,
+  html body .app > .content,
+  html body .content {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    padding: 20px 24px calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  html body .bottom-nav {
+    display: flex !important;
+  }
+}
