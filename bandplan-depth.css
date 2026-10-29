@@ -3939,3 +3939,49 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     overflow-y: auto;
   }
 }
+
+
+/* WHY: Fix tablet viewport collapse reported in portrait/rotated tablet mode: force the app shell and main content to occupy the available width. Phone rules (640px and below) are intentionally untouched. */
+@media (min-width: 641px) and (max-width: 1199px) {
+  html body #app {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  html body #app .app {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    box-sizing: border-box !important;
+  }
+  html body #app .content {
+    display: block !important;
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body #app #view {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body #app #view > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  html body .sidebar {
+    display: none !important;
+  }
+  html body .bottom-nav {
+    display: flex !important;
+  }
+}
