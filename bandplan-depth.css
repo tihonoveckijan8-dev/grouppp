@@ -4068,3 +4068,86 @@ html[data-theme] body[data-route="calendar"] #view .band-overview .band-overview
     display: flex !important;
   }
 }
+
+
+/* WHY: The previous tablet override targeted .content as a direct grid child, but the real shell places .main beside .sidebar. Use a compact 64px icon rail at tablet widths so labels cannot be clipped and .main receives the remaining width. */
+@media (min-width: 641px) and (max-width: 1199px) {
+  html body #app.app {
+    display: grid !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body #app > .sidebar {
+    display: flex !important;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    padding: 10px 6px !important;
+    margin: 0 !important;
+    height: 100dvh !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  html body #app > .sidebar .brand {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+    padding-inline: 0 !important;
+  }
+  html body #app > .sidebar .brand-txt,
+  html body #app > .sidebar .side-profile .nm,
+  html body #app > .sidebar .side-profile .rl,
+  html body #app > .sidebar .nav-item > span:not(.nb),
+  html body #app > .sidebar .nav-item .nav-label,
+  html body #app > .sidebar .side-note {
+    display: none !important;
+  }
+  html body #app > .sidebar .nav {
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: stretch !important;
+  }
+  html body #app > .sidebar .nav-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 10px 0 !important;
+  }
+  html body #app > .sidebar .nav-item .nb {
+    position: absolute !important;
+    top: 2px !important;
+    right: 0 !important;
+    margin: 0 !important;
+  }
+  html body #app > .main {
+    display: flex !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    overflow-x: clip !important;
+  }
+  html body #app > .main > .content {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body #app #view {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  html body .bottom-nav {
+    display: none !important;
+  }
+}
