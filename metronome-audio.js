@@ -14,6 +14,8 @@
   var nextNoteTime = 0;
   var step = 0;
   var visualTimers = [];
+  // WHY: the look-ahead scheduler queues notes slightly ahead; retain their oscillators so stop/background can silence them immediately.
+  var scheduledOscillators = new Set();
   var tapTimes = [];
   var stylesInstalled = false;
 
@@ -114,6 +116,8 @@
     gain.gain.exponentialRampToValueAtTime(0.0001, at + (subdivision ? 0.025 : 0.055));
     oscillator.connect(gain);
     gain.connect(ctx.destination);
+    scheduledOscillators.add(oscillator);
+    oscillator.addEventListener('ended', function () { scheduledOscillators.delete(oscillator); }, { once: true });
     oscillator.start(at);
     oscillator.stop(at + 0.06);
   }
@@ -144,6 +148,11 @@
   function stop() {
     if (timer) clearTimeout(timer);
     timer = 0;
+    // WHY: stopping the scheduler alone leaves already queued Web Audio notes audible for up to the look-ahead window.
+    scheduledOscillators.forEach(function (oscillator) {
+      try { oscillator.stop(); } catch (e) {}
+    });
+    scheduledOscillators.clear();
     activeRoot = null;
     startingRoot = null;
     clearVisualTimers();
