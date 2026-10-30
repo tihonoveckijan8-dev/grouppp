@@ -83,6 +83,9 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/chord-library.js')), null, { timeout: 10_000 });
     await expect(page.locator('#view .chord-picker')).toBeVisible();
     await expect(page.locator('#view .guitar-diagram')).toBeVisible();
+    // WHY: moving the renderer must preserve the existing delegated chord selection and selected-chord state.
+    await page.locator('#view .chord-pick[data-v="Cmaj7"]').click();
+    await expect(page.locator('#view .chord-detail-copy h3')).toHaveText('Cmaj7');
     routeResults.push({
       route: 'tools-guitar-chords',
       transitionToPaintMs: Date.now() - chordStarted,
