@@ -11,7 +11,7 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
   page.on('pageerror', error => pageErrors.push(error.message));
 
   try {
-    await page.goto(BASE + '/?bandplan-test=stability', { waitUntil: 'domcontentloaded' });
+    await page.goto(BASE + '/?bandplan-test=visual', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => typeof window.__bandplanEnsureCore === 'function', { timeout: 15_000 });
     await page.evaluate(() => window.__bandplanEnsureCore());
     await page.waitForFunction(() => typeof window.__bandplanTestHooks?.seedVisualState === 'function', { timeout: 15_000 });
