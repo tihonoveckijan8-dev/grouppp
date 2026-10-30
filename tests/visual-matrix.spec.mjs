@@ -1,7 +1,8 @@
 import { test, expect } from 'playwright/test';
 
 const BASE = 'http://127.0.0.1:4174';
-const SIZES = [[360, 800], [390, 844], [1280, 800]];
+// WHY: cover narrow phones, compact phones, tablet, standard desktop, and wide desktop without changing production code.
+const SIZES = [[360, 800], [390, 844], [768, 1024], [1280, 800], [1920, 1080]];
 const THEMES = ['light', 'dark', 'amoled'];
 const ACCENTS = ['blue', 'red', 'amber'];
 const ROUTES = [
