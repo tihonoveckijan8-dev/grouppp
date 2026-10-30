@@ -674,19 +674,23 @@ async function cleanupEventOfflineSongs() {
   } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
 }
 async function syncEventOfflineSongs() {
-  if(offlineSongSyncBusy || !window.BandPlanCloud?.saveOfflineEventSongs)return;
+  // WHY: a queued callback can fire after the app is backgrounded; do not begin non-urgent storage work then.
+  if(document.hidden || offlineSongSyncBusy || !window.BandPlanCloud?.saveOfflineEventSongs)return;
   const cfg=offlineSongSettings();
   offlineSongSyncBusy=true;
   try {
     await cleanupEventOfflineSongs();
-    if(!cfg.auto) return;
+    if(document.hidden || !cfg.auto) return;
     const eligible=eligibleOfflineEvents();
     for(const ev of eligible) {
+      // WHY: yield the remaining offline-copy work to the foreground if the user switches apps mid-sync.
+      if(document.hidden) return;
       const songs=offlineSongsForEvent(ev);
       const ok=await window.BandPlanCloud.saveOfflineEventSongs({
         eventId:String(ev.id),setlistId:String(ev.setlistId),eventDate:String(ev.date||''),
         eventEnd:new Date(eventEndMs(ev)).toISOString(),songs,savedAt:new Date().toISOString(),version:1
       });
+      if(document.hidden) return;
       if(ok !== false) songs.forEach(song => { if(song?.id) offlineSongIndex.set(String(song.id), cloneValue(song)); });
       if(ok===false && !offlineSongStorageWarned) {
         offlineSongStorageWarned=true;
@@ -700,7 +704,14 @@ async function syncEventOfflineSongs() {
 }
 function scheduleOfflineSongSync(delay=900) {
   clearTimeout(offlineSongSyncTimer);
-  offlineSongSyncTimer=setTimeout(()=>{syncEventOfflineSongs().catch(()=>{});},delay);
+  offlineSongSyncTimer=0;
+  // WHY: discard deferred sync requests while backgrounded; visibilitychange schedules a fresh foreground pass.
+  if(document.hidden) return;
+  offlineSongSyncTimer=setTimeout(()=>{
+    offlineSongSyncTimer=0;
+    if(document.hidden) return;
+    syncEventOfflineSongs().catch(()=>{});
+  },delay);
 }
 // WHY: periodic offline-copy maintenance is unnecessary while the PWA is backgrounded.
 function startOfflineSongSyncInterval() {
@@ -4798,6 +4809,9 @@ function init() {
       // WHY: pause non-urgent expiry polling and offline-copy maintenance while backgrounded.
       stopExpiredEventChecks();
       stopOfflineSongSyncInterval();
+      // WHY: cancel a not-yet-started offline sync too; stopping only the interval leaves this timeout alive.
+      clearTimeout(offlineSongSyncTimer);
+      offlineSongSyncTimer = 0;
       return;
     }
     checkExpiredEventsAndRender();
