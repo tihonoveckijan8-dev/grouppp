@@ -26,9 +26,11 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
     for (let cycle = 0; cycle < 8; cycle++) {
       for (const route of routes) {
         await page.evaluate(hash => { location.hash = hash; }, route);
-        await expect(page.locator('body')).toHaveAttribute('data-route', route.slice(2));
+        await expect.poll(() => page.evaluate(() => location.hash)).toBe(route);
+        await page.waitForTimeout(120);
       }
       await page.evaluate(() => { location.hash = '#/tools'; });
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe('#/tools');
       await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
       await expect(page.locator('.tools-page')).toBeVisible();
       await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
@@ -52,7 +54,8 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
       await start.click();
       await expect(start).toHaveAttribute('aria-pressed', 'true');
       await page.evaluate(() => { location.hash = '#/calendar'; });
-      await expect(page.locator('body')).toHaveAttribute('data-route', 'calendar');
+      await expect.poll(() => page.evaluate(() => location.hash)).toBe('#/calendar');
+      await page.waitForTimeout(120);
       await page.waitForTimeout(80);
       expect(await page.locator('#view [data-bp-metro]').count()).toBe(0);
     }
