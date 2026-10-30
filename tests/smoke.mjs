@@ -377,8 +377,9 @@ try {
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
 
-  // WHY: Escape must fully dismiss the More drawer, including its backdrop and scroll lock, not just hide the panel.
-  assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?moreBackdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'Escape must clear the More drawer backdrop and scroll lock');
+  // WHY: assert the current shared animated close path, rather than depending on the removed legacy backdrop variable.
+  assert.match(sourceCore, /function closeMoreDrawer\([\s\S]*?backdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'More drawer close routine must clear its backdrop and scroll lock');
+  assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?closeMoreDrawer\(true\)/, 'Escape must use the shared More drawer close routine');
 
   // WHY: at phone widths event actions need a dedicated full-width grid row so they stay inside the card and align to the right edge.
   assert.match(sourceDepthCss, /grid-column:\s*1\s*\/\s*-1;/, 'Mobile event actions must span the card instead of being squeezed into a grid column');
