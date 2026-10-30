@@ -258,6 +258,8 @@ try {
           type: '',
           frequency: { setValueAtTime() {} },
           connect() {},
+          // WHY: production tracks scheduled Web Audio nodes until their ended event so stop() can cancel queued notes.
+          addEventListener() {},
           start() { state.scheduled++; },
           stop() {}
         };
