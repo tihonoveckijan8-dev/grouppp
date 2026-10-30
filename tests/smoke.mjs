@@ -229,7 +229,7 @@ try {
   const sourceDepthCss = await readFile(join(root, 'bandplan-depth.css'), 'utf8');
   const serviceWorkerSource = await readFile(join(root, 'sw.js'), 'utf8');
   // WHY: the production HTML versions shell URLs, but install precaches canonical paths; keep query-insensitive shell lookup covered for offline cold starts.
-  assert.match(serviceWorkerSource, /cache\\.match\\(request,\\s*\\{\\s*ignoreSearch:\\s*true\\s*\\}\\)/, 'Versioned app-shell URLs must reuse their precached canonical resources offline');
+  assert.match(serviceWorkerSource, /cache\.match\(request,\s*\{\s*ignoreSearch:\s*true\s*\}\)/, 'Versioned app-shell URLs must reuse their precached canonical resources offline');
   const metronomeSource = await readFile(join(root, 'metronome-audio.js'), 'utf8');
   // WHY: the old file-analysis flow failed on phones; lock in the replacement's manual controls and guard against accidentally shipping the upload/analyzer UI again.
   assert.match(metronomeSource, /data-bp-metro/, 'Manual metronome panel is missing');
