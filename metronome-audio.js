@@ -9,6 +9,8 @@
   var audioContext = null;
   var timer = 0;
   var activeRoot = null;
+  // WHY: prevent rapid repeated taps during AudioContext.resume() from starting parallel scheduler loops.
+  var startingRoot = null;
   var nextNoteTime = 0;
   var step = 0;
   var visualTimers = [];
@@ -143,6 +145,7 @@
     if (timer) clearTimeout(timer);
     timer = 0;
     activeRoot = null;
+    startingRoot = null;
     clearVisualTimers();
     document.querySelectorAll('.bp-metro-dot').forEach(function (dot) { dot.classList.remove('on'); });
     document.querySelectorAll('.bp-metro-beat').forEach(function (dot) { dot.classList.remove('current'); });
@@ -176,11 +179,14 @@
   }
 
   async function start(root) {
-    if (activeRoot === root) { stop(); return; }
+    if (activeRoot === root || startingRoot === root) return;
     stop();
+    startingRoot = root;
     var ctx = getAudioContext();
     await ctx.resume();
+    if (startingRoot !== root) return;
     if (ctx.state !== 'running') throw new Error('Звук не запустился. Проверь громкость устройства и нажми ещё раз.');
+    startingRoot = null;
     activeRoot = root;
     step = 0;
     nextNoteTime = ctx.currentTime + 0.05;
