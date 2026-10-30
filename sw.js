@@ -31,11 +31,14 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  const shell = /(?:^|[/])(?:index[.]html|bandplan[.]js|bandplan-core[.]js|metronome-audio[.]js|supabase[.]js|config[.]js|bandplan[.]css|manifest[.]webmanifest|vendor[/]supabase[.]min[.]js|fonts[/]manrope-[^/]+[.]woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const shell = /(?:^|[/])(?:index[.]html|bandplan[.]js|bandplan-core[.]js|metronome-audio[.]js|supabase[.]js|config[.]js|bandplan[.]css|bandplan-depth[.]css|manifest[.]webmanifest|vendor[/]supabase[.]min[.]js|fonts[/]manrope-[^/]+[.]woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
     // WHY: the active worker must never read assets pre-cached by a newer waiting worker; that would mix app versions mid-session.
     const cache = await caches.open(V);
-    const cached = await cache.match(request);
+    // WHY: app-shell URLs in index.html carry build query strings, while install precaches canonical paths; ignore query strings to reuse the same-version shell offline.
+    const cached = shell
+      ? await cache.match(request, {ignoreSearch:true})
+      : await cache.match(request);
     if (shell) {
       // WHY: keep one consistent app version for the whole active session.
       // A new build is installed into a versioned cache by the waiting worker;

@@ -227,6 +227,10 @@ try {
   const sourceCore = await readFile(join(root, 'bandplan-core.js'), 'utf8');
   const sourceCss = await readFile(join(root, 'bandplan.css'), 'utf8');
   const sourceDepthCss = await readFile(join(root, 'bandplan-depth.css'), 'utf8');
+  const serviceWorkerSource = await readFile(join(root, 'sw.js'), 'utf8');
+  // WHY: the production HTML versions shell URLs, but install precaches canonical paths; keep query-insensitive shell lookup covered for offline cold starts.
+  assert.match(serviceWorkerSource, /cache\.match\(request,\s*\{\s*ignoreSearch:\s*true\s*\}\)/, 'Versioned app-shell URLs must reuse their precached canonical resources offline');
+  assert.ok(serviceWorkerSource.includes('bandplan-depth[.]css'), 'Depth stylesheet must use app-shell cache matching for offline startup');
   const metronomeSource = await readFile(join(root, 'metronome-audio.js'), 'utf8');
   // WHY: the old file-analysis flow failed on phones; lock in the replacement's manual controls and guard against accidentally shipping the upload/analyzer UI again.
   assert.match(metronomeSource, /data-bp-metro/, 'Manual metronome panel is missing');
