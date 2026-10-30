@@ -125,9 +125,9 @@ test('offline shell serves versioned app assets after a cold network loss', asyn
 
   try {
     await page.goto(BASE + '/?offline-shell-test=1', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!navigator.serviceWorker.controller, { timeout: 15_000 });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!navigator.serviceWorker.controller, { timeout: 10_000 });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 10_000 });
 
     // WHY: simulate a cold offline request with version strings different from the HTML and precache entries.
     await context.setOffline(true);
