@@ -356,8 +356,15 @@
     }
   });
 
-  var observer = new MutationObserver(scan);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  // WHY: observe only the routed app content, not the whole document.
+  // Metronome UI updates (status text and beat dots) must not trigger another full scan.
+  var viewRoot = document.getElementById('view');
+  var observer = viewRoot ? new MutationObserver(function (records) {
+    if (records.some(function (record) {
+      return !(record.target.closest && record.target.closest('[data-bp-metro]'));
+    })) scan();
+  }) : null;
+  if (observer && viewRoot) observer.observe(viewRoot, { childList: true, subtree: true });
   window.addEventListener('hashchange', function () {
     stop();
     tapTimes = [];
