@@ -38,6 +38,10 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       window.__bandplanTestHooks.seedVisualState();
     });
 
+    // WHY: the manual metronome is an optional tool; its script must stay out of the initial calendar workspace request set.
+    const eagerMetronomeLoaded = await page.evaluate(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')));
+    expect(eagerMetronomeLoaded, 'Metronome module must not load during initial workspace startup').toBe(false);
+
     const routeResults = [];
     const routes = [
       ['songs', '#/songs'],
@@ -54,6 +58,11 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       // WHY: route rendering is asynchronous but the app does not expose a route marker for every hash; match the established visual-matrix wait instead of asserting an invented DOM contract.
       await page.waitForTimeout(100);
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      if (name === 'song') {
+        // WHY: song-specific metronome controls are injected only after the song detail view exists.
+        await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')));
+        await expect(page.locator('#view [data-bpm-open-song]')).toBeVisible();
+      }
       routeResults.push({
         route: name,
         transitionToPaintMs: Date.now() - started,
@@ -71,6 +80,15 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       route: 'tools',
       transitionToPaintMs: Date.now() - started,
       visibleView: await page.locator('.tools-page').isVisible()
+    });
+
+    const metroStarted = Date.now();
+    await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
+    await expect(page.locator('#view [data-bp-am-tool-host] [data-bp-metro]')).toBeVisible();
+    routeResults.push({
+      route: 'tools-metronome',
+      transitionToPaintMs: Date.now() - metroStarted,
+      visibleView: await page.locator('#view [data-bp-am-tool-host] [data-bp-metro]')).isVisible()
     });
 
     const report = await page.evaluate(routeResults => {
