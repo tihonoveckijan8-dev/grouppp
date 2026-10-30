@@ -60,6 +60,8 @@
     const metronomeLoaderObserver = new MutationObserver(ensureMetronome);
     metronomeLoaderObserver.observe(viewRoot, { childList: true, subtree: true });
     ensureMetronome();
+    // WHY: hash routing may finish a render through a transition path that replaces the view asynchronously; recheck after the route handler has painted so song/tool entry points cannot miss the lazy-load trigger.
+    window.addEventListener('hashchange', () => requestAnimationFrame(ensureMetronome));
   }
 
   // WHY: INITIAL_SESSION may fire before this deferred script executes; notify Auth waiters instead of failing a valid startup.
