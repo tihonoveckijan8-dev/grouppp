@@ -105,8 +105,13 @@ for (const [width, height] of SIZES) {
               await expect(page.locator('.cal-selected-day')).toBeHidden();
               const dayWithEvents = page.locator('.cal-grid > .cal-cell.cal-has-events').first();
               if (await dayWithEvents.count()) {
-                const badgeDisplay = await dayWithEvents.evaluate(el => getComputedStyle(el, '::after').display);
-                expect(badgeDisplay, 'Calendar day count badge should be hidden').toBe('none');
+                const badge = await dayWithEvents.evaluate(el => {
+                  const style = getComputedStyle(el, '::after');
+                  return { display: style.display, content: style.content };
+                });
+                // WHY: Chromium may report an empty display value when no generated pseudo-element exists; test the rendered badge, not an implementation-specific CSSOM default.
+                const noGeneratedBadge = ['none', 'normal', '""', ''].includes(badge.content);
+                expect(badge.display === 'none' || noGeneratedBadge, 'Calendar day count badge should not be visible').toBe(true);
               }
               const tomorrow = await page.evaluate(() => {
                 const d = new Date();
