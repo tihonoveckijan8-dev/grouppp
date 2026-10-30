@@ -507,6 +507,7 @@ const ui = {
 const participationPending = new Set();
 const participationPrevious = new Map();
 let offlineSongSyncTimer = 0;
+let offlineSongSyncInterval = 0;
 let offlineSongSyncBusy = false;
 const offlineSongIndex = new Map();
 let offlineSongStorageWarned = false;
@@ -700,6 +701,16 @@ async function syncEventOfflineSongs() {
 function scheduleOfflineSongSync(delay=900) {
   clearTimeout(offlineSongSyncTimer);
   offlineSongSyncTimer=setTimeout(()=>{syncEventOfflineSongs().catch(()=>{});},delay);
+}
+// WHY: periodic offline-copy maintenance is unnecessary while the PWA is backgrounded.
+function startOfflineSongSyncInterval() {
+  if (offlineSongSyncInterval || document.hidden) return;
+  offlineSongSyncInterval = window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
+}
+function stopOfflineSongSyncInterval() {
+  if (!offlineSongSyncInterval) return;
+  window.clearInterval(offlineSongSyncInterval);
+  offlineSongSyncInterval = 0;
 }
 async function refreshOfflineEventInfo(eventId) {
   const box=document.querySelector('[data-offline-event-songs="' + CSS.escape(String(eventId)) + '"]');
@@ -4724,18 +4735,20 @@ function init() {
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      // WHY: pause non-urgent expiry polling while the app is backgrounded to reduce wakeups.
+      // WHY: pause non-urgent expiry polling and offline-copy maintenance while backgrounded.
       stopExpiredEventChecks();
+      stopOfflineSongSyncInterval();
       return;
     }
     checkExpiredEventsAndRender();
     startExpiredEventChecks();
+    startOfflineSongSyncInterval();
     if ($('#scene').classList.contains('on') && !scene.wake) reqWake();
     scheduleOfflineSongSync(150);
   });
   window.addEventListener('online', () => scheduleOfflineSongSync(150));
-  window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
-  window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
+  startOfflineSongSyncInterval();
+  window.addEventListener('beforeunload', () => { stopOfflineSongSyncInterval(); if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   // WHY: service-worker lifecycle is owned by index.html only, preventing duplicate registrations/reload handlers.
   ui.skeleton = false;
   render();
