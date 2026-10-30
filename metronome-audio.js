@@ -325,7 +325,8 @@
     if (action === 'start') {
       if (activeRoot === panelRoot) stop();
       else start(panelRoot).catch(function (error) {
-        stop();
+        // WHY: a stale start failure must not stop a newer metronome started in another panel.
+        if (startingRoot === panelRoot || activeRoot === panelRoot) stop();
         var status = panelRoot.querySelector('[data-bpm-status]');
         status.textContent = error && error.message ? error.message : 'Не удалось запустить метроном.';
         status.dataset.kind = 'error';
