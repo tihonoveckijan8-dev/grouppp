@@ -1707,6 +1707,11 @@ function stopTuner() {
   if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null;
   const previousAudio = toolAudio; toolAudio = null;
   if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(()=>{});
+  // WHY: visibility changes stop the microphone too; restore controls so the tuner can be started immediately after returning.
+  const start = $('#tunerStart'), stop = $('#tunerStop'), status = $('#tunerStatus');
+  if (start) start.disabled = false;
+  if (stop) stop.disabled = true;
+  if (status) status.textContent = 'Тюнер остановлен';
 }
 function pitchFromBuffer(buf, sampleRate, minHz=55, maxHz=900) {
   // WHY: YIN/CMNDF is less likely than picking the strongest autocorrelation peak to mistake a guitar harmonic for the fundamental.
