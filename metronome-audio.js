@@ -13,7 +13,8 @@
   var startingRoot = null;
   var nextNoteTime = 0;
   var step = 0;
-  var visualTimers = [];
+  // WHY: retain only pending visual callbacks; keeping fired timeout IDs grows memory for the entire rehearsal.
+  var visualTimers = new Set();
   // WHY: the look-ahead scheduler queues notes slightly ahead; retain their oscillators so stop/background can silence them immediately.
   var scheduledOscillators = new Set();
   var tapTimes = [];
@@ -124,12 +125,13 @@
 
   function clearVisualTimers() {
     visualTimers.forEach(function (id) { clearTimeout(id); });
-    visualTimers = [];
+    visualTimers.clear();
   }
 
   function setVisual(root, beatIndex, at, ctx) {
     var delay = Math.max(0, (at - ctx.currentTime) * 1000);
     var timeout = setTimeout(function () {
+      visualTimers.delete(timeout);
       if (activeRoot !== root) return;
       var dots = root.querySelectorAll('.bp-metro-beat');
       dots.forEach(function (dot, index) {
@@ -138,11 +140,12 @@
       var live = root.querySelector('.bp-metro-dot');
       if (live) live.classList.add('on');
       var off = setTimeout(function () {
+        visualTimers.delete(off);
         if (live) live.classList.remove('on');
       }, 75);
-      visualTimers.push(off);
+      visualTimers.add(off);
     }, delay);
-    visualTimers.push(timeout);
+    visualTimers.add(timeout);
   }
 
   function stop() {
