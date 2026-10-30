@@ -17,11 +17,12 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
       const originalObserve = ResizeObserver.prototype.observe;
       const originalUnobserve = ResizeObserver.prototype.unobserve;
       ResizeObserver.prototype.observe = function (target, options) {
-        if (target instanceof HTMLButtonElement) observed.add(target);
+        // WHY: scope the assertion to BandPlan's adaptive-button observer, not unrelated ResizeObserver consumers.
+        if (this === window.__bandplanAdaptiveResizeObserver && target instanceof HTMLButtonElement) observed.add(target);
         return originalObserve.call(this, target, options);
       };
       ResizeObserver.prototype.unobserve = function (target) {
-        observed.delete(target);
+        if (this === window.__bandplanAdaptiveResizeObserver) observed.delete(target);
         return originalUnobserve.call(this, target);
       };
       window.__bandplanObservedButtons = observed;
