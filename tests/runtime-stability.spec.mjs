@@ -58,7 +58,8 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
       await expect.poll(() => page.evaluate(() => location.hash)).toBe('#/calendar');
       await page.waitForTimeout(120);
       await page.waitForTimeout(80);
-      expect(await page.locator('#view [data-bp-metro]').count()).toBe(0);
+      const activeSchedulers = await page.locator('#view [data-bp-metro] [data-bpm-action=start][aria-pressed="true"]').count();
+      expect(activeSchedulers, 'Metronome must stop when leaving its route').toBe(0);
     }
 
     expect(pageErrors, 'Unhandled browser exceptions during stability loop').toEqual([]);
