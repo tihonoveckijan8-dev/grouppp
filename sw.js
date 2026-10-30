@@ -31,7 +31,7 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|metronome-audio\.js|supabase\.js|config\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
+  const shell = /(?:^|\\/)(?:index\\.html|bandplan\\.js|bandplan-core\\.js|metronome-audio\\.js|supabase\\.js|config\\.js|bandplan\\.css|manifest\\.webmanifest|vendor\\/supabase\\.min\\.js|fonts\\/manrope-[^/]+\\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
     // WHY: the active worker must never read assets pre-cached by a newer waiting worker; that would mix app versions mid-session.
     const cache = await caches.open(V);
@@ -41,8 +41,11 @@ self.addEventListener('fetch', event => {
       // A new build is installed into a versioned cache by the waiting worker;
       // it becomes available after the current clients close and the app is reopened.
       if (cached) return cached;
+      // WHY: a missing shell asset must not hold startup indefinitely on a stalled network.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
       try {
-        const response = await fetch(request, {cache:'no-cache'});
+        const response = await fetch(request, {cache:'no-cache', signal:controller.signal});
         if (response && response.ok) {
           const copy = response.clone();
           cache.put(request, copy).catch(() => {});
@@ -50,6 +53,8 @@ self.addEventListener('fetch', event => {
         return response;
       } catch (_) {
         return await cache.match('index.html') || Response.error();
+      } finally {
+        clearTimeout(timeout);
       }
     }
     if (cached) return cached;
