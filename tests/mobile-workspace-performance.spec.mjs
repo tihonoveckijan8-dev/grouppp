@@ -43,24 +43,24 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     expect(eagerMetronomeLoaded, 'Metronome module must not load during initial workspace startup').toBe(false);
 
     const routeResults = [];
-    const routes = [
-      ['songs', '#/songs'],
-      ['song', '#/song/visual-s1'],
-      ['setlists', '#/setlists'],
-      ['setlist', '#/setlist/visual-sl1'],
-      ['settings', '#/settings'],
-      ['calendar', '#/calendar'],
-      ['tools', '#/tools']
-    ];
+    const routes = ['songs', 'song', 'setlists', 'setlist', 'settings', 'calendar', 'tools'];
 
-    for (const [name, hash] of routes) {
+    for (const name of routes) {
       const started = Date.now();
-      await page.evaluate(nextHash => { location.hash = nextHash; }, hash);
-      // WHY: route rendering is asynchronous but the app does not expose a route marker for every hash; match the established visual-matrix wait instead of asserting an invented DOM contract.
-      await page.waitForTimeout(100);
-      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-      // WHY: assert the hash router actually committed this route before attributing a missing lazy asset to its loader.
+      // WHY: use the same visible navigation and cards as a musician instead of assigning location.hash; this guarantees the app's delegated route handler is exercised in the fixture.
+      if (name === 'songs' || name === 'setlists' || name === 'calendar') {
+        await page.locator(`#botNav a[data-to="${name}"]`).click();
+      } else if (name === 'song') {
+        await page.locator('#view .song-card[data-act="open-song"][data-id="visual-s1"]').click();
+      } else if (name === 'setlist') {
+        await page.locator('#view .song-card[data-act="open-setlist"][data-id="visual-sl1"]').click();
+      } else if (name === 'settings' || name === 'tools') {
+        await page.locator('#botNav [data-act="more-menu-toggle"]').click();
+        await page.locator(`#bottomMoreMenu [data-to="${name}"]`).click();
+      }
+
       await page.waitForFunction(expected => document.body.dataset.route === expected, name, { timeout: 10_000 });
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       if (name === 'song') {
         // WHY: song-specific metronome controls are injected only after the song detail view exists.
         await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')), null, { timeout: 10_000 });
@@ -72,9 +72,6 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
         visibleView: await page.locator('#view').isVisible()
       });
     }
-
-    // WHY: route to Tools directly in the performance fixture; the More drawer has its own visual coverage and should not be a hidden prerequisite for measuring lazy audio-module startup.
-    await expect(page.locator('.tools-page')).toBeVisible();
 
     const metroStarted = Date.now();
     await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
