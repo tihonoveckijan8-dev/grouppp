@@ -28,9 +28,9 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
 
   try {
     await page.goto(BASE + '/?bandplan-test=visual', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => typeof window.__bandplanEnsureCore === 'function', { timeout: 15_000 });
+    await page.waitForFunction(() => typeof window.__bandplanEnsureCore === 'function', null, { timeout: 15_000 });
     await page.evaluate(() => window.__bandplanEnsureCore());
-    await page.waitForFunction(() => typeof window.__bandplanTestHooks?.seedVisualState === 'function', { timeout: 15_000 });
+    await page.waitForFunction(() => typeof window.__bandplanTestHooks?.seedVisualState === 'function', null, { timeout: 15_000 });
 
     await page.evaluate(() => {
       // WHY: the existing visual fixture intentionally has no authenticated session; release only its isolated test visibility lock and seed local demo data.
@@ -49,7 +49,8 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       ['setlists', '#/setlists'],
       ['setlist', '#/setlist/visual-sl1'],
       ['settings', '#/settings'],
-      ['calendar', '#/calendar']
+      ['calendar', '#/calendar'],
+      ['tools', '#/tools']
     ];
 
     for (const [name, hash] of routes) {
@@ -60,7 +61,7 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       if (name === 'song') {
         // WHY: song-specific metronome controls are injected only after the song detail view exists.
-        await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')));
+        await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')), null, { timeout: 10_000 });
         await expect(page.locator('#view [data-bpm-open-song]')).toBeVisible();
       }
       routeResults.push({
@@ -70,17 +71,8 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       });
     }
 
-    const started = Date.now();
-    await page.locator('[data-act="more-menu-toggle"]').click();
-    await page.locator('#bottomMoreMenu [data-to="tools"]').click();
-    await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
+    // WHY: route to Tools directly in the performance fixture; the More drawer has its own visual coverage and should not be a hidden prerequisite for measuring lazy audio-module startup.
     await expect(page.locator('.tools-page')).toBeVisible();
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    routeResults.push({
-      route: 'tools',
-      transitionToPaintMs: Date.now() - started,
-      visibleView: await page.locator('.tools-page').isVisible()
-    });
 
     const metroStarted = Date.now();
     await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
