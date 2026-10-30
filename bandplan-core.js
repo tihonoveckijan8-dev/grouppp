@@ -2933,8 +2933,33 @@ function updateBar() {
   const p = max > 0 ? el.scrollTop / max : 0, total = scene.list.length || 1;
   $('#scBar').style.width = clamp(((scene.i + p) / total) * 100, 0, 100) + '%';
 }
-function reqWake() { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(s => { scene.wake = s; }).catch(() => { }); }
-function relWake() { if (scene.wake) { try { scene.wake.release(); } catch (e) { } scene.wake = null; } }
+let sceneWakeRequest = 0;
+function reqWake() {
+  if (!('wakeLock' in navigator) || !$('#scene').classList.contains('on') || document.hidden) return;
+  const requestId = ++sceneWakeRequest;
+  navigator.wakeLock.request('screen').then(lock => {
+    // WHY: a delayed Wake Lock request must not keep the display awake after the scene has closed or been superseded.
+    if (requestId !== sceneWakeRequest || !$('#scene').classList.contains('on') || document.hidden) {
+      lock.release().catch(() => {});
+      return;
+    }
+    if (scene.wake && scene.wake !== lock) scene.wake.release().catch(() => {});
+    scene.wake = lock;
+    lock.addEventListener('release', () => { if (scene.wake === lock) scene.wake = null; }, { once: true });
+  }).catch(() => { });
+}
+function relWake() {
+  // WHY: invalidate any in-flight request before releasing the active lock, preventing a late promise from reviving it.
+  sceneWakeRequest++;
+  const lock = scene.wake;
+  scene.wake = null;
+  if (lock) lock.release().catch(() => {});
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) relWake();
+  else if ($('#scene').classList.contains('on')) reqWake();
+});
+window.addEventListener('pagehide', relWake);
 
 /* ═══ 17. PRINT ═══ */
 function doPrint(html) { $('#printArea').innerHTML = '<div>' + html + '</div>'; setTimeout(() => window.print(), 80); }
