@@ -2961,7 +2961,13 @@ function setAuto(v) {
   scene.auto = v;
   const b = $('[data-act="scene-auto"]');
   if (b) { b.innerHTML = ic(v ? 'pause' : 'play', 19); b.classList.toggle('act', v); b.setAttribute('aria-label', v ? 'Остановить автопрокрутку' : 'Запустить автопрокрутку'); }
-  if (v) { scene.last = performance.now(); loop(); } else if (scene.raf) { cancelAnimationFrame(scene.raf); scene.raf = null; }
+  // WHY: changing songs while auto-scroll is active can call setAuto(true) repeatedly; keep a single RAF chain instead of accelerating parallel loops.
+  if (v) {
+    if (!scene.raf) { scene.last = performance.now(); loop(); }
+  } else if (scene.raf) {
+    cancelAnimationFrame(scene.raf);
+    scene.raf = null;
+  }
 }
 function loop() {
   if (!scene.auto) return;
