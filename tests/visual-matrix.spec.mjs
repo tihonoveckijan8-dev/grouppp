@@ -39,11 +39,11 @@ async function auditViewport(page, label) {
   expect(metrics.visibleOutside, label + ': visible controls/cards outside viewport').toEqual([]);
 }
 
-test('BandPlan visual matrix: responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
-  // WHY: 27 viewport/theme/accent combinations intentionally run sequentially to keep CI stable.
-  test.setTimeout(20 * 60 * 1000);
-  let screenshotIndex = 0;
-  for (const [width, height] of SIZES) {
+// WHY: isolate each viewport as a Playwright test so CI can parallelize the matrix without dropping any theme/accent/route coverage.
+for (const [width, height] of SIZES) {
+  test('BandPlan visual matrix: ' + width + 'x' + height + ' responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
+    test.setTimeout(10 * 60 * 1000);
+    let screenshotIndex = 0;
     for (const theme of THEMES) {
       for (const accent of ACCENTS) {
         const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
@@ -150,5 +150,5 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
         }
       }
     }
-  }
-});
+  });
+}
