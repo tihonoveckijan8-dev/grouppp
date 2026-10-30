@@ -1593,6 +1593,17 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
    WHY: microphone access is opt-in and Web Audio is created only after a user gesture;
    the tuner and metronome work locally without uploading audio or requiring a third-party service. */
 let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0, tunerStartToken = 0;
+// WHY: reference-string playback has its own async fetch/decode lifecycle and must be cancellable on rapid taps or navigation.
+let tunerReferenceAudio = null, tunerReferenceToken = 0, tunerReferenceTimer = 0;
+function stopTunerReferenceAudio() {
+  tunerReferenceToken++;
+  if (tunerReferenceTimer) clearTimeout(tunerReferenceTimer);
+  tunerReferenceTimer = 0;
+  const previousAudio = tunerReferenceAudio;
+  tunerReferenceAudio = null;
+  if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(() => {});
+  document.querySelectorAll('.tuner-string.is-playing').forEach(button => button.classList.remove('is-playing'));
+}
 const TOOL_TABS = [
   ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
 ];
@@ -1702,6 +1713,7 @@ function pianoDiagram(notes) {
 }
 function stopTuner() {
   // WHY: invalidate pending microphone permission/resume promises so they cannot restart audio after navigation or stop.
+  stopTunerReferenceAudio();
   tunerStartToken++;
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
   if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null;
@@ -3426,23 +3438,33 @@ document.addEventListener('click', function (e) {
         const Ctx=window.AudioContext||window.webkitAudioContext;
         if(!Ctx)throw new Error('Звук не поддерживается этим браузером');
         if(!Number.isFinite(freq)||freq<20||freq>2000)throw new Error('Не удалось определить частоту струны');
-        // WHY: play a real recorded acoustic-guitar sample and pitch-shift it to the exact open-string frequency; keep a local synthesis fallback if the sample cannot be reached.
+        // WHY: only the newest reference-string request may play; close the previous context before starting another.
+        stopTunerReferenceAudio();
+        const requestToken=tunerReferenceToken;
         const ctx=new Ctx();
+        tunerReferenceAudio=ctx;
+        const isCurrent=()=>requestToken===tunerReferenceToken&&tunerReferenceAudio===ctx&&ctx.state!=='closed';
         const playBuffer=(buffer,sourceFreq,isRealSample)=>{
+          if(!isCurrent()){if(ctx.state!=='closed')ctx.close().catch(()=>{});return;}
           const source=ctx.createBufferSource(), volume=ctx.createGain();
           source.buffer=buffer;
           source.playbackRate.setValueAtTime(freq/sourceFreq,ctx.currentTime);
           volume.gain.setValueAtTime(0.88,ctx.currentTime);
           volume.gain.setTargetAtTime(0.0001,ctx.currentTime+Math.max(0.05,buffer.duration/(freq/sourceFreq)-0.12),0.045);
           source.connect(volume);volume.connect(ctx.destination);
-          source.onended=()=>{source.disconnect();volume.disconnect();ctx.close().catch(()=>{});};
+          source.onended=()=>{
+            source.disconnect();volume.disconnect();
+            if(tunerReferenceAudio===ctx){tunerReferenceAudio=null;if(ctx.state!=='closed')ctx.close().catch(()=>{});}
+          };
           source.start();
           const status=$('#tunerStatus');if(status)status.textContent=(isRealSample?'Акустическая гитара':'Резервный звук')+' · '+note+' · '+freq.toFixed(2)+' Hz';
           const buttons=Array.from(document.querySelectorAll('.tuner-string'));
           buttons.forEach(b=>b.classList.toggle('is-playing',b===el));
-          setTimeout(()=>el.classList.remove('is-playing'),350);
+          if(tunerReferenceTimer)clearTimeout(tunerReferenceTimer);
+          tunerReferenceTimer=setTimeout(()=>{if(isCurrent())el.classList.remove('is-playing');tunerReferenceTimer=0;},350);
         };
         const playFallback=()=>{
+          if(!isCurrent())return;
           const duration=1.8,rate=ctx.sampleRate,length=Math.floor(duration*rate);
           const buffer=ctx.createBuffer(1,length,rate),data=buffer.getChannelData(0);
           let peak=0;
@@ -3463,13 +3485,18 @@ document.addEventListener('click', function (e) {
             if(!response.ok)throw new Error('Аудиосэмпл недоступен');
             const audioData=await response.arrayBuffer();
             const buffer=await ctx.decodeAudioData(audioData.slice(0));
+            if(!isCurrent())return;
             playBuffer(buffer,nearest[1],true);
           } catch(err) {
-            // WHY: tuning remains usable if a third-party sample host is unavailable or the device is offline before its first cache fill.
-            playFallback();
+            // WHY: tuning remains usable if a third-party sample host is unavailable, but stale requests must never start playback.
+            if(isCurrent())playFallback();
           }
         };
-        ctx.resume().then(playSample).catch(err=>{ctx.close().catch(()=>{});toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');});
+        ctx.resume().then(()=>{if(isCurrent())return playSample();}).catch(err=>{
+          if(!isCurrent())return;
+          stopTunerReferenceAudio();
+          toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');
+        });
       } catch(err){toast(err.message,'err');}
       break;
     }
