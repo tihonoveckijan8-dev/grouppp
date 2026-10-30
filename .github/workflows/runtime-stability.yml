@@ -41,7 +41,9 @@ jobs:
           exit 1
       - name: Run runtime stability test
         run: npx playwright test tests/runtime-stability.spec.mjs --reporter=line --workers=1
-      - name: Upload runtime stability results
+      - name: Run mobile workspace performance audit
+        run: npx playwright test tests/mobile-workspace-performance.spec.mjs --reporter=line --workers=1
+      - name: Upload runtime stability and performance results
         if: always()
         uses: actions/upload-artifact@v4
         with:
