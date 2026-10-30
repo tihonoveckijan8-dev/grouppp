@@ -76,7 +76,8 @@ for (const [width, height] of SIZES) {
             } else {
               await page.evaluate(hash => { location.hash = hash; }, hash);
             }
-            await page.waitForTimeout(100);
+            // WHY: hash assignment and delegated drawer navigation are asynchronous; wait for the router's committed route before measuring layout or taking screenshots.
+            await expect(page.locator('body')).toHaveAttribute('data-route', name, { timeout: 15000 });
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'setlist' && width === 360 && theme === 'light' && accent === 'blue') {
               // WHY: stage mode is a separate full-screen surface; exercise its real open/close flow once to catch regressions without adding fullscreen churn to every matrix combination.
@@ -121,7 +122,8 @@ for (const [width, height] of SIZES) {
           }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });
-          await page.waitForTimeout(100);
+          // WHY: capture the fully rendered calendar, not a transient skeleton during the hash-route transition.
+          await expect(page.locator('body')).toHaveAttribute('data-route', 'calendar', { timeout: 15000 });
           await page.screenshot({
             path: testInfo.outputPath('matrix-' + String(++screenshotIndex).padStart(2, '0') + '-' + width + 'x' + height + '-' + theme + '-' + accent + '.png'),
             fullPage: true
@@ -134,7 +136,8 @@ for (const [width, height] of SIZES) {
           ];
           for (const form of formChecks) {
             await page.evaluate(route => { location.hash = route; }, form.route);
-            await page.waitForTimeout(100);
+            // WHY: open each form only after its target route has finished rendering; fixed sleeps were flaky on slower CI runners.
+            await expect(page.locator('body')).toHaveAttribute('data-route', form.route.slice(2), { timeout: 15000 });
             const trigger = page.locator(form.selector + ':visible').first();
             if (await trigger.count()) {
               await trigger.click();
