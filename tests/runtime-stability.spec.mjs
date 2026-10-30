@@ -133,22 +133,33 @@ test('offline shell serves versioned app assets after a cold network loss', asyn
     await context.setOffline(true);
     const assets = await page.evaluate(async () => {
       const requests = [
-        ['./?offline-shell-test=2', '<title>BandPlan'],
-        ['./bandplan.css?v=offline-shell-regression', '--'],
-        ['./bandplan-depth.css?v=offline-shell-regression', '--'],
-        ['./bandplan.js?v=offline-shell-regression', 'BandPlan']
+        ['./?offline-shell-test=2', 'text/html', '<title>BandPlan'],
+        ['./bandplan.css?v=offline-shell-regression', 'text/css', '@font-face'],
+        ['./bandplan-depth.css?v=offline-shell-regression', 'text/css', '--surface-1'],
+        ['./bandplan.js?v=offline-shell-regression', 'text/javascript', '__bandplanCorePromise']
       ];
       const results = [];
-      for (const [url, expected] of requests) {
+      for (const [url, expectedType, expectedContent] of requests) {
         const response = await fetch(url, { cache: 'no-store' });
         const body = await response.text();
-        results.push({ url, status: response.status, ok: response.ok, hasExpectedContent: body.includes(expected), bytes: body.length });
+        const contentType = response.headers.get('content-type') || '';
+        results.push({
+          url,
+          status: response.status,
+          ok: response.ok,
+          contentType,
+          hasExpectedType: contentType.toLowerCase().includes(expectedType),
+          hasExpectedContent: body.includes(expectedContent),
+          bytes: body.length
+        });
       }
       return results;
     });
 
     for (const asset of assets) {
       expect(asset.ok, `Offline shell request failed: ${asset.url} (${asset.status})`).toBe(true);
+      // WHY: an HTML fallback can contain generic tokens like "--" or "BandPlan"; assert the real asset MIME type to catch false-positive cache misses.
+      expect(asset.hasExpectedType, `Offline shell returned the wrong content type for ${asset.url}: ${asset.contentType}`).toBe(true);
       expect(asset.hasExpectedContent, `Offline shell returned an unexpected body: ${asset.url}`).toBe(true);
       expect(asset.bytes, `Offline shell response was empty: ${asset.url}`).toBeGreaterThan(100);
     }
