@@ -32,7 +32,7 @@ jobs:
         run: npx playwright install chromium
       - name: Start production build server
         run: |
-          python3 -m http.server 4175 --directory dist > /tmp/bandplan-stability.log 2>&1 &
+          node tests/serve-compressed.mjs > /tmp/bandplan-stability.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:4175/ > /dev/null; then exit 0; fi
             sleep 1
