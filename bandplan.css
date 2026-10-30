@@ -13896,7 +13896,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   border: 0 !important;
   border-radius: 17px !important;
   background: var(--surf-2) !important;
-  box-shadow: 5px 5px 12px color-mix(in srgb, #000 20%, transparent),
+  box-shadow: 5px 5px 12px color-mix(in srgb, var(--token-black) 20%, transparent),
               -4px -4px 10px color-mix(in srgb, var(--text) 5%, transparent) !important;
   gap: 4px !important;
 }
@@ -13942,13 +13942,13 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   border-radius: 17px !important;
   background: var(--surf-2) !important;
   color: var(--text) !important;
-  box-shadow: 5px 5px 12px color-mix(in srgb, #000 22%, transparent),
+  box-shadow: 5px 5px 12px color-mix(in srgb, var(--token-black) 22%, transparent),
               -4px -4px 10px color-mix(in srgb, var(--text) 6%, transparent) !important;
   transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
   background: var(--accent) !important;
-  color: #fff !important;
+  color: var(--token-white) !important;
   box-shadow: 0 5px 15px color-mix(in srgb, var(--accent) 30%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"]:active,
@@ -14003,7 +14003,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]),
 #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
-  box-shadow: inset 2px 2px 5px color-mix(in srgb, #000 16%, transparent),
+  box-shadow: inset 2px 2px 5px color-mix(in srgb, var(--token-black) 16%, transparent),
               inset -2px -2px 5px color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]) button,
@@ -14016,7 +14016,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
 #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
-  box-shadow: 4px 4px 9px color-mix(in srgb, #000 20%, transparent),
+  box-shadow: 4px 4px 9px color-mix(in srgb, var(--token-black) 20%, transparent),
               -3px -3px 8px color-mix(in srgb, var(--text) 5%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
@@ -14144,7 +14144,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   padding: 5px 7px !important;
   border-radius: 16px !important;
   background: var(--surf-2) !important;
-  box-shadow: 5px 5px 10px color-mix(in srgb, #000 30%, transparent),
+  box-shadow: 5px 5px 10px color-mix(in srgb, var(--token-black) 30%, transparent),
               -4px -4px 9px color-mix(in srgb, var(--text) 9%, transparent),
               inset 1px 1px 0 color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
@@ -14176,11 +14176,11 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   border-radius: 11px !important;
   background: var(--surf-2) !important;
   color: var(--text) !important;
-  box-shadow: 3px 3px 6px color-mix(in srgb, #000 25%, transparent),
+  box-shadow: 3px 3px 6px color-mix(in srgb, var(--token-black) 25%, transparent),
               -2px -2px 5px color-mix(in srgb, var(--text) 8%, transparent) !important;
 }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) button:active {
-  box-shadow: inset 2px 2px 4px color-mix(in srgb, #000 28%, transparent),
+  box-shadow: inset 2px 2px 4px color-mix(in srgb, var(--token-black) 28%, transparent),
               inset -2px -2px 4px color-mix(in srgb, var(--text) 7%, transparent) !important;
   transform: translateY(1px) !important;
 }
@@ -14188,7 +14188,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 #scene .scene-ctrl .sctl:has(button[data-act="scene-speed"]),
 #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) {
   background: var(--surf-2) !important;
-  box-shadow: 5px 5px 10px color-mix(in srgb, #000 30%, transparent),
+  box-shadow: 5px 5px 10px color-mix(in srgb, var(--token-black) 30%, transparent),
               -4px -4px 9px color-mix(in srgb, var(--text) 9%, transparent),
               inset 1px 1px 0 color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
@@ -14196,19 +14196,19 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 #scene .scene-ctrl .sctl:has(button[data-act="scene-trans"]) button {
   border-radius: 11px !important;
   background: var(--surf-2) !important;
-  box-shadow: 3px 3px 6px color-mix(in srgb, #000 25%, transparent),
+  box-shadow: 3px 3px 6px color-mix(in srgb, var(--token-black) 25%, transparent),
               -2px -2px 5px color-mix(in srgb, var(--text) 8%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
 #scene .scene-ctrl > .sbtn[data-act="scene-next"] {
   border-radius: 16px !important;
   background: var(--surf-2) !important;
-  box-shadow: 5px 5px 10px color-mix(in srgb, #000 30%, transparent),
+  box-shadow: 5px 5px 10px color-mix(in srgb, var(--token-black) 30%, transparent),
               -4px -4px 9px color-mix(in srgb, var(--text) 9%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
   border-radius: 16px !important;
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, #000),
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, var(--token-black)),
               0 7px 13px color-mix(in srgb, var(--accent) 35%, transparent) !important;
 }
 @media (max-width: 420px) {
@@ -14246,8 +14246,8 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   border: 1px solid color-mix(in srgb, var(--text) 7%, transparent) !important;
   border-radius: 17px !important;
   background: var(--surf-2) !important;
-  box-shadow: 0 5px 0 color-mix(in srgb, #000 18%, transparent),
-              0 8px 16px color-mix(in srgb, #000 13%, transparent),
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--token-black) 18%, transparent),
+              0 8px 16px color-mix(in srgb, var(--token-black) 13%, transparent),
               inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent) !important;
 }
 #scene .scene-ctrl .sctl:has(button[data-act="scene-font"]) {
@@ -14270,7 +14270,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   background: var(--surf-3) !important;
   color: var(--text) !important;
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 8%, transparent),
-              0 2px 3px color-mix(in srgb, #000 16%, transparent) !important;
+              0 2px 3px color-mix(in srgb, var(--token-black) 16%, transparent) !important;
   font-size: 14px !important;
   font-weight: 700 !important;
   transform: none !important;
@@ -14294,7 +14294,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 }
 #scene .scene-ctrl .sctl button:active {
   background: var(--surf-1) !important;
-  box-shadow: inset 0 2px 5px color-mix(in srgb, #000 22%, transparent) !important;
+  box-shadow: inset 0 2px 5px color-mix(in srgb, var(--token-black) 22%, transparent) !important;
   transform: translateY(1px) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"],
@@ -14312,22 +14312,22 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   place-items: center !important;
   background: var(--surf-2) !important;
   color: var(--text) !important;
-  box-shadow: 0 4px 0 color-mix(in srgb, #000 20%, transparent),
-              0 7px 13px color-mix(in srgb, #000 12%, transparent),
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--token-black) 20%, transparent),
+              0 7px 13px color-mix(in srgb, var(--token-black) 12%, transparent),
               inset 0 1px 0 color-mix(in srgb, var(--text) 7%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"] {
   background: var(--accent) !important;
-  color: #fff !important;
-  border-color: color-mix(in srgb, var(--accent) 75%, #fff) !important;
-  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, #000),
+  color: var(--token-white) !important;
+  border-color: color-mix(in srgb, var(--accent) 75%, var(--token-white)) !important;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 55%, var(--token-black)),
               0 7px 13px color-mix(in srgb, var(--accent) 25%, transparent) !important;
 }
 #scene .scene-ctrl > .sbtn[data-act="scene-prev"]:active,
 #scene .scene-ctrl > .sbtn[data-act="scene-next"]:active,
 #scene .scene-ctrl > .sbtn[data-act="scene-auto"]:active {
   transform: translateY(2px) !important;
-  box-shadow: 0 2px 0 color-mix(in srgb, #000 18%, transparent) !important;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--token-black) 18%, transparent) !important;
 }
 @media (max-width: 420px) {
   #scene .scene-ctrl {
