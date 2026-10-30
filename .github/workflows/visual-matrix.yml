@@ -41,7 +41,8 @@ jobs:
           cat /tmp/bandplan-visual.log
           exit 1
       - name: Run responsive visual matrix
-        run: npx playwright test tests/visual-matrix.spec.mjs --reporter=line --workers=1
+        # WHY: each viewport is an independent test; bounded parallelism keeps the expanded matrix within the workflow timeout.
+        run: npx playwright test tests/visual-matrix.spec.mjs --reporter=line --workers=3
       - name: Upload screenshots and test results
         if: always()
         uses: actions/upload-artifact@v4
