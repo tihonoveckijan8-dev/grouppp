@@ -597,12 +597,23 @@ function cleanupExpiredEvents() {
 }
 
 
-/* Re-check expiry while the PWA remains open, even if the user does not navigate. */
-setInterval(() => {
+/* WHY: do not wake a backgrounded PWA every minute just to check event expiry. */
+let expiredEventCheckTimer = null;
+function checkExpiredEventsAndRender() {
   if (!cleanupExpiredEvents()) return;
   try { render(); }
   catch (error) { console.warn('BandPlan expired-event view refresh failed:', error); }
-}, 60 * 1000);
+}
+function startExpiredEventChecks() {
+  if (expiredEventCheckTimer || document.hidden) return;
+  expiredEventCheckTimer = window.setInterval(checkExpiredEventsAndRender, 60 * 1000);
+}
+function stopExpiredEventChecks() {
+  if (!expiredEventCheckTimer) return;
+  window.clearInterval(expiredEventCheckTimer);
+  expiredEventCheckTimer = null;
+}
+startExpiredEventChecks();
 
 function eligibleOfflineEvents() {
   const cfg=offlineSongSettings(), now=Date.now(), limit=now+cfg.days*86400000;
@@ -4687,8 +4698,15 @@ function init() {
   $('#scBody').addEventListener('wheel', () => { if (scene.auto) setAuto(false); }, { passive: true });
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake();
-    if (!document.hidden) scheduleOfflineSongSync(150);
+    if (document.hidden) {
+      // WHY: pause non-urgent expiry polling while the app is backgrounded to reduce wakeups.
+      stopExpiredEventChecks();
+      return;
+    }
+    checkExpiredEventsAndRender();
+    startExpiredEventChecks();
+    if ($('#scene').classList.contains('on') && !scene.wake) reqWake();
+    scheduleOfflineSongSync(150);
   });
   window.addEventListener('online', () => scheduleOfflineSongSync(150));
   window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
