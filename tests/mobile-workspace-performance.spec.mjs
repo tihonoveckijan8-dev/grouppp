@@ -41,6 +41,9 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     // WHY: the manual metronome is an optional tool; its script must stay out of the initial calendar workspace request set.
     const eagerMetronomeLoaded = await page.evaluate(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')));
     expect(eagerMetronomeLoaded, 'Metronome module must not load during initial workspace startup').toBe(false);
+    // WHY: chord data and SVG renderers should also stay out of the initial calendar download set.
+    const eagerChordLibraryLoaded = await page.evaluate(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/chord-library.js')));
+    expect(eagerChordLibraryLoaded, 'Chord library module must not load during initial workspace startup').toBe(false);
 
     const routeResults = [];
     const routes = [
@@ -70,6 +73,29 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
         visibleView: await page.locator('#view').isVisible()
       });
     }
+
+    // WHY: entering Tools alone should not fetch the chord catalogue; it is needed only after choosing one of the chord tabs.
+    const chordStillDeferred = await page.evaluate(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/chord-library.js')));
+    expect(chordStillDeferred, 'Chord library module loaded before its tab was selected').toBe(false);
+
+    const chordStarted = Date.now();
+    await page.locator('[data-act="tool-tab"][data-v="guitar-chords"]').click();
+    await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/chord-library.js')), null, { timeout: 10_000 });
+    await expect(page.locator('#view .chord-picker')).toBeVisible();
+    await expect(page.locator('#view .guitar-diagram')).toBeVisible();
+    routeResults.push({
+      route: 'tools-guitar-chords',
+      transitionToPaintMs: Date.now() - chordStarted,
+      visibleView: await page.locator('#view .guitar-diagram').isVisible()
+    });
+
+    await page.locator('[data-act="tool-tab"][data-v="piano-chords"]').click();
+    await expect(page.locator('#view .piano-diagram')).toBeVisible();
+    routeResults.push({
+      route: 'tools-piano-chords',
+      transitionToPaintMs: 0,
+      visibleView: await page.locator('#view .piano-diagram').isVisible()
+    });
 
     const metroStarted = Date.now();
     await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
