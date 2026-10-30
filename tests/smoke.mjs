@@ -47,6 +47,9 @@ try {
   await page.goto('http://127.0.0.1:4173/?bandplan-test=1', {waitUntil:'domcontentloaded'});
   await page.waitForFunction(() => typeof window.BandPlanCloud !== 'undefined', null, {timeout: 15000});
   await page.waitForSelector('#bpAuthGate', {state:'visible', timeout: 15000});
+  // WHY: the default calendar must not download or execute the optional metronome module before a song or its tool tab is opened.
+  const eagerMetronomeLoaded = await page.evaluate(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')));
+  assert.equal(eagerMetronomeLoaded, false, 'Metronome module loaded during initial workspace startup');
   // WHY: auth initialization may legitimately start the core before this assertion; test the public loader contract, not timing/session races.
   const lazyCore = await page.evaluate(() => ({ ensureCore: typeof window.__bandplanEnsureCore === 'function' }));
   assert.equal(lazyCore.ensureCore, true, 'Lazy core loader missing');
@@ -279,6 +282,8 @@ try {
     const host = document.createElement('div');
     host.setAttribute('data-bp-am-tool-host', '1');
     document.querySelector('#view').append(host);
+    // WHY: the lazy loader must react to the first real metronome host, then load the existing standalone audio module.
+    // The module's own MutationObserver fills this host after its script has loaded.
     // WHY: the smoke test starts on the logged-out auth gate; disable only its pointer interception while testing the underlying tool panel.
     const authGate = document.querySelector('#bpAuthGate');
     if (authGate) {
@@ -291,6 +296,7 @@ try {
       node.style.setProperty('visibility', 'visible', 'important');
     }
   });
+  await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')), null, {timeout: 5000});
   await page.waitForSelector('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]', {state:'visible', timeout: 5000});
   const metroStart = page.locator('#view [data-bp-metro][data-metronome-id="__tool__"] [data-bpm-action="start"]');
   // WHY: Playwright's physical pointer hit-test is blocked by the auth gate; DOM click still exercises the actual control handler without changing production auth behavior.
