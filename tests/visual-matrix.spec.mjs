@@ -74,9 +74,9 @@ for (const [width, height] of SIZES) {
               // WHY: desktop users reach tools from the persistent side navigation; the mobile drawer is hidden at this viewport.
               await page.locator('#sideNav [data-to="tools"]').click();
             } else {
-              await page.evaluate(hash => { location.hash = hash; }, hash);
+              await page.evaluate(hash => window.__bandplanTestHooks.navigate(hash), hash);
             }
-            // WHY: hash assignment and delegated drawer navigation are asynchronous; wait for the router's committed route before measuring layout or taking screenshots.
+            // WHY: test-hook navigation bypasses native hashchange timing; delegated drawer navigation remains covered through real clicks.
             await expect(page.locator('body')).toHaveAttribute('data-route', name, { timeout: 15000 });
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'setlist' && width === 360 && theme === 'light' && accent === 'blue') {
@@ -121,7 +121,7 @@ for (const [width, height] of SIZES) {
             }
           }
 
-          await page.evaluate(() => { location.hash = '#/calendar'; });
+          await page.evaluate(() => window.__bandplanTestHooks.navigate('#/calendar'));
           // WHY: capture the fully rendered calendar, not a transient skeleton during the hash-route transition.
           await expect(page.locator('body')).toHaveAttribute('data-route', 'calendar', { timeout: 15000 });
           await page.screenshot({
@@ -135,7 +135,7 @@ for (const [width, height] of SIZES) {
             { route: '#/setlists', selector: '[data-act="new-setlist"]', label: 'setlist form', close: '[data-act="modal-close"]' }
           ];
           for (const form of formChecks) {
-            await page.evaluate(route => { location.hash = route; }, form.route);
+            await page.evaluate(route => window.__bandplanTestHooks.navigate(route), form.route);
             // WHY: open each form only after its target route has finished rendering; fixed sleeps were flaky on slower CI runners.
             await expect(page.locator('body')).toHaveAttribute('data-route', form.route.slice(2), { timeout: 15000 });
             const trigger = page.locator(form.selector + ':visible').first();
