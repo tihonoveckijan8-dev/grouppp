@@ -660,16 +660,22 @@ function shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep) {
   return !keep.has(String(row.eventId)) && eventStartMs(ev) >= now;
 }
 async function cleanupEventOfflineSongs() {
-  if(!window.BandPlanCloud?.listOfflineEventSongs)return;
+  if(document.hidden || !window.BandPlanCloud?.listOfflineEventSongs)return;
   try {
-    const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
+    const rows=await window.BandPlanCloud.listOfflineEventSongs();
+    if(document.hidden) return;
+    const now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
     for(const row of rows||[]) {
+      // WHY: backgrounding during IndexedDB cleanup must stop the remaining non-urgent delete operations.
+      if(document.hidden) return;
       const ev=state.events.find(e=>String(e.id)===String(row.eventId));
       if(shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep)) {
         await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
       }
     }
+    if(document.hidden) return;
     const remaining=await window.BandPlanCloud.listOfflineEventSongs();
+    if(document.hidden) return;
     rebuildOfflineSongIndex(Array.isArray(remaining) ? remaining : []);
   } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
 }
