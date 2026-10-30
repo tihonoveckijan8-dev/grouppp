@@ -19,6 +19,8 @@ async function auditViewport(page, label) {
     const width = innerWidth;
     const visibleOutside = [];
     for (const el of document.querySelectorAll('button, input, select, textarea, .card, .song-card, .sl-item, .ev-row, .page-head, .toolbar')) {
+      // WHY: tools navigation is an intentional horizontal scroller; off-screen tabs are reachable by scrolling and are not page overflow.
+      if (el.closest('.tools-tabs')) continue;
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) continue;
       if (rect.left < -1 || rect.right > width + 1) {
