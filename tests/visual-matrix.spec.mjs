@@ -116,6 +116,7 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await tomorrowCell.locator('.cal-num').click();
               await expect(page.locator('.cal-selected-day')).toBeHidden();
             }
+          }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });
           await page.waitForTimeout(100);
