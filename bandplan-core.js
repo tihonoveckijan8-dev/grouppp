@@ -1381,6 +1381,8 @@ let routeTransitionToken = 0;
 function routeTransition() {
   const view = $('#view');
   if (!view) { render(); return; }
+  // WHY: release microphone/audio resources as soon as navigation leaves the current tool screen.
+  stopTuner();
   // WHY: stale animation callbacks from rapid navigation must not finish a newer route transition.
   const token = ++routeTransitionToken;
   if (routeTransitionFrame) cancelAnimationFrame(routeTransitionFrame);
@@ -1590,7 +1592,7 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 /* ═══ MUSICIAN TOOLS ═══
    WHY: microphone access is opt-in and Web Audio is created only after a user gesture;
    the tuner and metronome work locally without uploading audio or requiring a third-party service. */
-let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0;
+let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0, tunerStartToken = 0;
 const TOOL_TABS = [
   ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
 ];
@@ -1699,6 +1701,8 @@ function pianoDiagram(notes) {
   return '<div class="piano-diagram">'+svg+'</div>';
 }
 function stopTuner() {
+  // WHY: invalidate pending microphone permission/resume promises so they cannot restart audio after navigation or stop.
+  tunerStartToken++;
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
   if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null;
   const previousAudio = toolAudio; toolAudio = null;
@@ -1736,9 +1740,13 @@ function pitchFromBuffer(buf, sampleRate, minHz=55, maxHz=900) {
 }
 async function startTuner() {
   if(!navigator.mediaDevices?.getUserMedia){toast('Браузер не поддерживает доступ к микрофону','err');return;}
+  stopTuner();
+  const startToken = ++tunerStartToken;
   try {
-    stopTuner();
-    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    // WHY: microphone permission may resolve after the user has navigated away or stopped the tuner.
+    if(startToken!==tunerStartToken||!document.querySelector('#view .tools-page')||(toolTab!=='guitar-tuner'&&toolTab!=='violin-tuner')){stream.getTracks().forEach(t=>t.stop());return;}
+    tunerStream=stream;
     const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio недоступен');
     toolAudio=new Ctx({latencyHint:'interactive'});
     const source=toolAudio.createMediaStreamSource(tunerStream),filter=toolAudio.createBiquadFilter(),analyser=toolAudio.createAnalyser();
@@ -1778,8 +1786,15 @@ async function startTuner() {
     };
     const status=$('#tunerStatus');if(status)status.textContent=(toolTab==='violin-tuner'?'Скрипка · диапазон G3–E5':'Гитара · стандартный строй E2–E4')+' · микрофон активен';
     const start=$('#tunerStart'),stop=$('#tunerStop');if(start)start.disabled=true;if(stop)stop.disabled=false;
-    await toolAudio.resume();tick();
-  } catch(err){stopTuner();const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');}
+    await toolAudio.resume();
+    // WHY: AudioContext.resume() is asynchronous too; do not launch a stale animation loop after stop/navigation.
+    if(startToken!==tunerStartToken||!toolAudio||!tunerStream)return;
+    tick();
+  } catch(err){
+    if(startToken!==tunerStartToken)return;
+    stopTuner();
+    const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');
+  }
 }
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
@@ -4739,6 +4754,9 @@ function init() {
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+      // WHY: stop microphone analysis and stage auto-scroll instead of leaving audio/animation work running in a background tab.
+      stopTuner();
+      if (scene.auto) setAuto(false);
       // WHY: pause non-urgent expiry polling and offline-copy maintenance while backgrounded.
       stopExpiredEventChecks();
       stopOfflineSongSyncInterval();
