@@ -4777,6 +4777,12 @@ if (location.search.includes('bandplan-test=visual')) {
       const app=document.getElementById('app'); if(app){app.removeAttribute('inert');app.setAttribute('aria-busy','false');}
       applyTheme(); applyAccentVars(); render();
     },
+    // WHY: performance fixtures need deterministic route rendering without depending on browser hashchange timing or navigation overlays.
+    navigate(hash) {
+      history.replaceState(null, '', hash);
+      ui.skeleton = false;
+      routeTransition();
+    },
     visualPrefs(theme,preset) {
       state.settings.theme=theme;
       state.settings.accentPreset=preset;
