@@ -5056,15 +5056,29 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
   function start() {
     scan(document);
+    // WHY: coalesce bursts of app-render mutations into one animation-frame pass.
+    // Re-scanning/measuring the same buttons for every mutation caused avoidable layout work during navigation.
+    const pendingButtons = new Set();
+    let scanFrame = 0;
+    function queueButton(button) {
+      if (button instanceof HTMLButtonElement) pendingButtons.add(button);
+      if (scanFrame) return;
+      scanFrame = requestAnimationFrame(() => {
+        scanFrame = 0;
+        const batch = Array.from(pendingButtons);
+        pendingButtons.clear();
+        batch.forEach(prepare);
+      });
+    }
+    function queueRoot(root) {
+      if (!(root instanceof Element)) return;
+      if (root.matches('button')) queueButton(root);
+      root.querySelectorAll?.('button').forEach(queueButton);
+    }
     const mutations = new MutationObserver(records => {
       records.forEach(record => {
-        if (record.type === 'childList') record.addedNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) scan(node);
-        });
-        else if (record.type === 'characterData') {
-          const button = record.target.parentElement?.closest('button.btn');
-          if (button) prepare(button);
-        }
+        if (record.type === 'childList') record.addedNodes.forEach(queueRoot);
+        else if (record.type === 'characterData') queueButton(record.target.parentElement?.closest('button.btn'));
       });
     });
     mutations.observe(document.body, {subtree: true, childList: true, characterData: true});
