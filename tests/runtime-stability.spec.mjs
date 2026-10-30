@@ -29,8 +29,9 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
         await expect.poll(() => page.evaluate(() => location.hash)).toBe(route);
         await page.waitForTimeout(120);
       }
-      await page.evaluate(() => { location.hash = '#/tools'; });
-      await expect.poll(() => page.evaluate(() => location.hash)).toBe('#/tools');
+      // WHY: on phones, Tools lives inside the More drawer; use the real user navigation path instead of forcing a hidden route.
+      await page.locator('[data-act="more-menu-toggle"]').click();
+      await page.locator('#bottomMoreMenu [data-to="tools"]').click();
       await expect(page.locator('body')).toHaveAttribute('data-route', 'tools');
       await expect(page.locator('.tools-page')).toBeVisible();
       await page.locator('[data-act="tool-tab"][data-v="metronome"]').click();
