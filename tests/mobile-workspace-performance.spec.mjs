@@ -77,13 +77,29 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       const nav = performance.getEntriesByType('navigation')[0];
       const resources = performance.getEntriesByType('resource');
       const byType = {};
+      const encodedByType = {};
+      const decodedByType = {};
+      const compressedResources = [];
       for (const entry of resources) {
-        const ext = new URL(entry.name).pathname.split('.').pop().toLowerCase();
+        const pathname = new URL(entry.name).pathname;
+        const ext = pathname.split('.').pop().toLowerCase();
         const type = ['js', 'mjs'].includes(ext) ? 'javascript' : ext === 'css' ? 'css' : ext === 'woff2' ? 'font' : 'other';
         byType[type] = (byType[type] || 0) + (entry.transferSize || 0);
+        encodedByType[type] = (encodedByType[type] || 0) + (entry.encodedBodySize || 0);
+        decodedByType[type] = (decodedByType[type] || 0) + (entry.decodedBodySize || 0);
+        // WHY: compare encoded and decoded body sizes to prove compression was actually applied, rather than estimating gzip from local file sizes.
+        if (/\.(css|js|mjs)$/.test(pathname) && entry.encodedBodySize > 0 && entry.decodedBodySize > entry.encodedBodySize) {
+          compressedResources.push({
+            path: pathname,
+            type,
+            encodedBytes: entry.encodedBodySize,
+            decodedBytes: entry.decodedBodySize
+          });
+        }
       }
       return {
         fixture: 'visual-seed; no real Supabase session, account data, or cloud sync',
+        delivery: 'local gzip negotiation; transfer sizes include compressed response bodies',
         viewport: { width: innerWidth, height: innerHeight },
         navigation: nav ? {
           responseStartMs: Math.round(nav.responseStart),
@@ -91,7 +107,10 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
           loadEventMs: Math.round(nav.loadEventEnd)
         } : null,
         transferredBytesByType: byType,
+        encodedBodyBytesByType: encodedByType,
+        decodedBodyBytesByType: decodedByType,
         transferredBytesTotal: Object.values(byType).reduce((sum, value) => sum + value, 0),
+        compressedResources,
         longTasks: window.__bpLongTasks,
         routeResults
       };
@@ -102,6 +121,8 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     await writeFile(outputPath, JSON.stringify(report, null, 2));
     console.log('BANDPLAN_MOBILE_WORKSPACE_PERFORMANCE ' + JSON.stringify(report));
     expect(routeResults.every(item => item.visibleView), 'Every measured route must render its visible view').toBe(true);
+    expect(report.compressedResources.some(item => item.type === 'css'), 'CSS transfer must be gzip-compressed in the measurement server').toBe(true);
+    expect(report.compressedResources.some(item => item.type === 'javascript'), 'JavaScript transfer must be gzip-compressed in the measurement server').toBe(true);
     expect(pageErrors, 'Workspace fixture must not throw unhandled browser exceptions').toEqual([]);
   } finally {
     await context.close();
