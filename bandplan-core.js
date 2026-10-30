@@ -5090,7 +5090,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   };
 
   function prepare(button) {
-    if (!(button instanceof HTMLButtonElement)) return;
+    // WHY: queued mutation batches can outlive a node's DOM attachment; never re-observe a button after it has been detached.
+    if (!(button instanceof HTMLButtonElement) || !button.isConnected) return;
     if (button.matches('.btn-icon, [data-bp-no-collapse], [aria-label=""]') || !isIcon(button)) return;
 
     // Wrap direct text and ordinary text spans without touching icons, badges, or action logic.
