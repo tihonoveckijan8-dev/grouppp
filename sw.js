@@ -33,7 +33,9 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
   const shell = /(?:^|\/)(?:index\.html|bandplan\.js|bandplan-core\.js|metronome-audio\.js|supabase\.js|config\.js|bandplan\.css|manifest\.webmanifest|vendor\/supabase\.min\.js|fonts\/manrope-[^/]+\.woff2)$/.test(url.pathname) || url.pathname.endsWith('/');
   event.respondWith((async () => {
-    const cached = await caches.match(request);
+    // WHY: the active worker must never read assets pre-cached by a newer waiting worker; that would mix app versions mid-session.
+    const cache = await caches.open(V);
+    const cached = await cache.match(request);
     if (shell) {
       // WHY: keep one consistent app version for the whole active session.
       // A new build is installed into a versioned cache by the waiting worker;
@@ -43,11 +45,11 @@ self.addEventListener('fetch', event => {
         const response = await fetch(request, {cache:'no-cache'});
         if (response && response.ok) {
           const copy = response.clone();
-          caches.open(V).then(cache => cache.put(request, copy)).catch(() => {});
+          cache.put(request, copy).catch(() => {});
         }
         return response;
       } catch (_) {
-        return await caches.match('index.html') || Response.error();
+        return await cache.match('index.html') || Response.error();
       }
     }
     if (cached) return cached;
@@ -55,11 +57,11 @@ self.addEventListener('fetch', event => {
       const response = await fetch(request);
       if (response && response.ok) {
         const copy = response.clone();
-        caches.open(V).then(cache => cache.put(request, copy)).catch(() => {});
+        cache.put(request, copy).catch(() => {});
       }
       return response;
     } catch (_) {
-      return await caches.match('index.html') || Response.error();
+      return await cache.match('index.html') || Response.error();
     }
   })());
 });
