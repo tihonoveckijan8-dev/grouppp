@@ -1,0 +1,52 @@
+name: BandPlan Runtime Stability
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-stability:
+    # WHY: pin the runner and browser installation environment to match the existing visual matrix workflow.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install project dependencies
+        run: npm install --no-package-lock
+      - name: Build production
+        run: npm run build
+      - name: Install pinned Playwright
+        run: npm install --no-save --package-lock=false playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Start production build server
+        run: |
+          python3 -m http.server 4175 --directory dist > /tmp/bandplan-stability.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4175/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/bandplan-stability.log
+          exit 1
+      - name: Run runtime stability test
+        run: npx playwright test tests/runtime-stability.spec.mjs --reporter=line --workers=1
+      - name: Upload runtime stability results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandplan-runtime-stability
+          path: |
+            test-results/
+            /tmp/bandplan-stability.log
+          if-no-files-found: ignore
