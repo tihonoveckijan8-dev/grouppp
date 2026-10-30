@@ -13,6 +13,8 @@ const mime = {
   '.mjs':'text/javascript; charset=utf-8',
   '.json':'application/json; charset=utf-8',
   '.webmanifest':'application/manifest+json; charset=utf-8',
+  // WHY: serve preloaded Manrope assets with their real font MIME type so Lighthouse measures production-like font loading.
+  '.woff2':'font/woff2',
   '.svg':'image/svg+xml',
   '.txt':'text/plain; charset=utf-8'
 };
