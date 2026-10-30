@@ -59,6 +59,8 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
       // WHY: route rendering is asynchronous but the app does not expose a route marker for every hash; match the established visual-matrix wait instead of asserting an invented DOM contract.
       await page.waitForTimeout(100);
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      // WHY: assert the hash router actually committed this route before attributing a missing lazy asset to its loader.
+      await page.waitForFunction(expected => document.body.dataset.route === expected, name, { timeout: 10_000 });
       if (name === 'song') {
         // WHY: song-specific metronome controls are injected only after the song detail view exists.
         await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => new URL(entry.name).pathname.endsWith('/metronome-audio.js')), null, { timeout: 10_000 });
