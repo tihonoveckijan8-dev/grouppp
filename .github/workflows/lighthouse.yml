@@ -112,6 +112,11 @@ jobs:
           if (!manifestResponse.ok) throw new Error('PWA manifest is not reachable');
           const manifest = await manifestResponse.json();
           if (!manifest.name || !manifest.start_url || !manifest.display) throw new Error('PWA manifest is incomplete');
+          const fontResponse = await fetch(base + '/fonts/manrope-latin-wght-normal.woff2');
+          if (!fontResponse.ok) throw new Error('Preloaded Manrope font is not reachable');
+          if (!String(fontResponse.headers.get('content-type') || '').toLowerCase().startsWith('font/woff2')) {
+            throw new Error('Preloaded Manrope font has an invalid MIME type: ' + fontResponse.headers.get('content-type'));
+          }
           const swResponse = await fetch(base + '/sw.js');
           if (!swResponse.ok) throw new Error('Service worker is not reachable');
           const sw = await swResponse.text();
