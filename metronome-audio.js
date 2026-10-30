@@ -369,7 +369,11 @@
   var observer = viewRoot ? new MutationObserver(function (records) {
     if (records.some(function (record) {
       return !(record.target.closest && record.target.closest('[data-bp-metro]'));
-    })) scan();
+    })) {
+      // WHY: tool tabs can replace #view content without changing the hash; stop active or pending audio when its panel is detached.
+      if ((activeRoot && !viewRoot.contains(activeRoot)) || (startingRoot && !viewRoot.contains(startingRoot))) stop();
+      scan();
+    }
   }) : null;
   if (observer && viewRoot) observer.observe(viewRoot, { childList: true, subtree: true });
   window.addEventListener('hashchange', function () {
