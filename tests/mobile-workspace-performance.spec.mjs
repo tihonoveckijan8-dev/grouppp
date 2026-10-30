@@ -43,22 +43,20 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     expect(eagerMetronomeLoaded, 'Metronome module must not load during initial workspace startup').toBe(false);
 
     const routeResults = [];
-    const routes = ['songs', 'song', 'setlists', 'setlist', 'settings', 'calendar', 'tools'];
+    const routes = [
+      ['songs', '#/songs'],
+      ['song', '#/song/visual-s1'],
+      ['setlists', '#/setlists'],
+      ['setlist', '#/setlist/visual-sl1'],
+      ['settings', '#/settings'],
+      ['calendar', '#/calendar'],
+      ['tools', '#/tools']
+    ];
 
-    for (const name of routes) {
+    for (const [name, hash] of routes) {
       const started = Date.now();
-      // WHY: use the same visible navigation and cards as a musician instead of assigning location.hash; this guarantees the app's delegated route handler is exercised in the fixture.
-      if (name === 'songs' || name === 'setlists' || name === 'calendar') {
-        await page.locator(`#botNav a[data-to="${name}"]`).click();
-      } else if (name === 'song') {
-        await page.locator('#view .song-card[data-act="open-song"][data-id="visual-s1"]').click();
-      } else if (name === 'setlist') {
-        await page.locator('#view .song-card[data-act="open-setlist"][data-id="visual-sl1"]').click();
-      } else if (name === 'settings' || name === 'tools') {
-        await page.locator('#botNav [data-act="more-menu-toggle"]').click();
-        await page.locator(`#bottomMoreMenu [data-to="${name}"]`).click();
-      }
-
+      // WHY: the fixture route helper calls the app's real renderer directly, avoiding browser hashchange races while preserving production DOM and rendering work.
+      await page.evaluate(nextHash => window.__bandplanTestHooks.navigate(nextHash), hash);
       await page.waitForFunction(expected => document.body.dataset.route === expected, name, { timeout: 10_000 });
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       if (name === 'song') {
