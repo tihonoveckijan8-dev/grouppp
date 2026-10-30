@@ -39,13 +39,13 @@ async function auditViewport(page, label) {
   expect(metrics.visibleOutside, label + ': visible controls/cards outside viewport').toEqual([]);
 }
 
-// WHY: isolate every viewport/theme/accent combination so CI can parallelize all 45 cases without serial waits inside a single test.
+// WHY: isolate each viewport as a Playwright test so CI can parallelize the matrix without dropping any theme/accent/route coverage.
 for (const [width, height] of SIZES) {
-  for (const theme of THEMES) {
-    for (const accent of ACCENTS) {
-      test('BandPlan visual matrix: ' + width + 'x' + height + ' ' + theme + '/' + accent + ' responsive routes and key forms', async ({ browser }, testInfo) => {
-        test.setTimeout(5 * 60 * 1000);
-        let screenshotIndex = 0;
+  test('BandPlan visual matrix: ' + width + 'x' + height + ' responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
+    test.setTimeout(10 * 60 * 1000);
+    let screenshotIndex = 0;
+    for (const theme of THEMES) {
+      for (const accent of ACCENTS) {
         const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
         const page = await context.newPage();
         const errors = [];
@@ -148,7 +148,7 @@ for (const [width, height] of SIZES) {
         } finally {
           await context.close();
         }
-      });
+      }
     }
-  }
+  });
 }
