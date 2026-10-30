@@ -8,6 +8,29 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   const pageErrors = [];
+  // WHY: count only pending timeouts scheduled by the metronome module, so the test measures visual-timer retention directly without counting unrelated app timers.
+  await page.addInitScript(() => {
+    const nativeSetTimeout = window.setTimeout.bind(window);
+    const nativeClearTimeout = window.clearTimeout.bind(window);
+    const metronomeTimers = new Set();
+    window.__bpMetronomePendingTimers = () => metronomeTimers.size;
+    window.setTimeout = (callback, delay, ...args) => {
+      const stack = new Error().stack || '';
+      const isMetronomeTimer = stack.includes('metronome-audio.js');
+      let timerId;
+      const wrapped = (...callbackArgs) => {
+        if (isMetronomeTimer) metronomeTimers.delete(timerId);
+        return callback(...callbackArgs);
+      };
+      timerId = nativeSetTimeout(wrapped, delay, ...args);
+      if (isMetronomeTimer) metronomeTimers.add(timerId);
+      return timerId;
+    };
+    window.clearTimeout = timerId => {
+      metronomeTimers.delete(timerId);
+      return nativeClearTimeout(timerId);
+    };
+  });
   page.on('pageerror', error => pageErrors.push(error.message));
 
   try {
@@ -45,9 +68,14 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
         const start = metro.locator('[data-bpm-action="start"]');
         await start.click();
         await expect(start).toHaveAttribute('aria-pressed', 'true');
-        await page.waitForTimeout(90);
+        await page.waitForTimeout(400);
+        const pendingVisualTimers = await page.evaluate(() => window.__bpMetronomePendingTimers());
+        expect(pendingVisualTimers, 'Metronome visual timers must remain bounded while running').toBeLessThanOrEqual(12);
         await start.click();
         await expect(start).toHaveAttribute('aria-pressed', 'false');
+        await page.waitForTimeout(100);
+        const retainedVisualTimers = await page.evaluate(() => window.__bpMetronomePendingTimers());
+        expect(retainedVisualTimers, 'Stopping the metronome must release every visual timeout').toBe(0);
       }
 
       // WHY: leaving the tools route while active must release the scheduler before the panel is detached.
