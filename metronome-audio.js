@@ -9,9 +9,13 @@
   var audioContext = null;
   var timer = 0;
   var activeRoot = null;
+  // WHY: prevent rapid repeated taps during AudioContext.resume() from starting parallel scheduler loops.
+  var startingRoot = null;
   var nextNoteTime = 0;
   var step = 0;
   var visualTimers = [];
+  // WHY: the look-ahead scheduler queues notes slightly ahead; retain their oscillators so stop/background can silence them immediately.
+  var scheduledOscillators = new Set();
   var tapTimes = [];
   var stylesInstalled = false;
 
@@ -112,6 +116,8 @@
     gain.gain.exponentialRampToValueAtTime(0.0001, at + (subdivision ? 0.025 : 0.055));
     oscillator.connect(gain);
     gain.connect(ctx.destination);
+    scheduledOscillators.add(oscillator);
+    oscillator.addEventListener('ended', function () { scheduledOscillators.delete(oscillator); }, { once: true });
     oscillator.start(at);
     oscillator.stop(at + 0.06);
   }
@@ -142,7 +148,13 @@
   function stop() {
     if (timer) clearTimeout(timer);
     timer = 0;
+    // WHY: stopping the scheduler alone leaves already queued Web Audio notes audible for up to the look-ahead window.
+    scheduledOscillators.forEach(function (oscillator) {
+      try { oscillator.stop(); } catch (e) {}
+    });
+    scheduledOscillators.clear();
     activeRoot = null;
+    startingRoot = null;
     clearVisualTimers();
     document.querySelectorAll('.bp-metro-dot').forEach(function (dot) { dot.classList.remove('on'); });
     document.querySelectorAll('.bp-metro-beat').forEach(function (dot) { dot.classList.remove('current'); });
@@ -176,11 +188,14 @@
   }
 
   async function start(root) {
-    if (activeRoot === root) { stop(); return; }
+    if (activeRoot === root || startingRoot === root) return;
     stop();
+    startingRoot = root;
     var ctx = getAudioContext();
     await ctx.resume();
+    if (startingRoot !== root) return;
     if (ctx.state !== 'running') throw new Error('Звук не запустился. Проверь громкость устройства и нажми ещё раз.');
+    startingRoot = null;
     activeRoot = root;
     step = 0;
     nextNoteTime = ctx.currentTime + 0.05;
@@ -319,7 +334,8 @@
     if (action === 'start') {
       if (activeRoot === panelRoot) stop();
       else start(panelRoot).catch(function (error) {
-        stop();
+        // WHY: a stale start failure must not stop a newer metronome started in another panel.
+        if (startingRoot === panelRoot || activeRoot === panelRoot) stop();
         var status = panelRoot.querySelector('[data-bpm-status]');
         status.textContent = error && error.message ? error.message : 'Не удалось запустить метроном.';
         status.dataset.kind = 'error';
@@ -356,8 +372,19 @@
     }
   });
 
-  var observer = new MutationObserver(scan);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  // WHY: observe only the routed app content, not the whole document.
+  // Metronome UI updates (status text and beat dots) must not trigger another full scan.
+  var viewRoot = document.getElementById('view');
+  var observer = viewRoot ? new MutationObserver(function (records) {
+    if (records.some(function (record) {
+      return !(record.target.closest && record.target.closest('[data-bp-metro]'));
+    })) {
+      // WHY: tool tabs can replace #view content without changing the hash; stop active or pending audio when its panel is detached.
+      if ((activeRoot && !viewRoot.contains(activeRoot)) || (startingRoot && !viewRoot.contains(startingRoot))) stop();
+      scan();
+    }
+  }) : null;
+  if (observer && viewRoot) observer.observe(viewRoot, { childList: true, subtree: true });
   window.addEventListener('hashchange', function () {
     stop();
     tapTimes = [];

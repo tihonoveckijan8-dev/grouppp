@@ -507,6 +507,7 @@ const ui = {
 const participationPending = new Set();
 const participationPrevious = new Map();
 let offlineSongSyncTimer = 0;
+let offlineSongSyncInterval = 0;
 let offlineSongSyncBusy = false;
 const offlineSongIndex = new Map();
 let offlineSongStorageWarned = false;
@@ -597,12 +598,23 @@ function cleanupExpiredEvents() {
 }
 
 
-/* Re-check expiry while the PWA remains open, even if the user does not navigate. */
-setInterval(() => {
+/* WHY: do not wake a backgrounded PWA every minute just to check event expiry. */
+let expiredEventCheckTimer = null;
+function checkExpiredEventsAndRender() {
   if (!cleanupExpiredEvents()) return;
   try { render(); }
   catch (error) { console.warn('BandPlan expired-event view refresh failed:', error); }
-}, 60 * 1000);
+}
+function startExpiredEventChecks() {
+  if (expiredEventCheckTimer || document.hidden) return;
+  expiredEventCheckTimer = window.setInterval(checkExpiredEventsAndRender, 60 * 1000);
+}
+function stopExpiredEventChecks() {
+  if (!expiredEventCheckTimer) return;
+  window.clearInterval(expiredEventCheckTimer);
+  expiredEventCheckTimer = null;
+}
+startExpiredEventChecks();
 
 function eligibleOfflineEvents() {
   const cfg=offlineSongSettings(), now=Date.now(), limit=now+cfg.days*86400000;
@@ -648,33 +660,43 @@ function shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep) {
   return !keep.has(String(row.eventId)) && eventStartMs(ev) >= now;
 }
 async function cleanupEventOfflineSongs() {
-  if(!window.BandPlanCloud?.listOfflineEventSongs)return;
+  if(document.hidden || !window.BandPlanCloud?.listOfflineEventSongs)return;
   try {
-    const rows=await window.BandPlanCloud.listOfflineEventSongs(), now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
+    const rows=await window.BandPlanCloud.listOfflineEventSongs();
+    if(document.hidden) return;
+    const now=Date.now(), keep=new Set(eligibleOfflineEvents().map(e=>String(e.id))), cfg=offlineSongSettings();
     for(const row of rows||[]) {
+      // WHY: backgrounding during IndexedDB cleanup must stop the remaining non-urgent delete operations.
+      if(document.hidden) return;
       const ev=state.events.find(e=>String(e.id)===String(row.eventId));
       if(shouldCleanupOfflineEventSongRow(row, ev, now, cfg, keep)) {
         await window.BandPlanCloud.deleteOfflineEventSongs(String(row.eventId));
       }
     }
+    if(document.hidden) return;
     const remaining=await window.BandPlanCloud.listOfflineEventSongs();
+    if(document.hidden) return;
     rebuildOfflineSongIndex(Array.isArray(remaining) ? remaining : []);
   } catch(error) { console.warn('BandPlan offline song cleanup failed:',error); }
 }
 async function syncEventOfflineSongs() {
-  if(offlineSongSyncBusy || !window.BandPlanCloud?.saveOfflineEventSongs)return;
+  // WHY: a queued callback can fire after the app is backgrounded; do not begin non-urgent storage work then.
+  if(document.hidden || offlineSongSyncBusy || !window.BandPlanCloud?.saveOfflineEventSongs)return;
   const cfg=offlineSongSettings();
   offlineSongSyncBusy=true;
   try {
     await cleanupEventOfflineSongs();
-    if(!cfg.auto) return;
+    if(document.hidden || !cfg.auto) return;
     const eligible=eligibleOfflineEvents();
     for(const ev of eligible) {
+      // WHY: yield the remaining offline-copy work to the foreground if the user switches apps mid-sync.
+      if(document.hidden) return;
       const songs=offlineSongsForEvent(ev);
       const ok=await window.BandPlanCloud.saveOfflineEventSongs({
         eventId:String(ev.id),setlistId:String(ev.setlistId),eventDate:String(ev.date||''),
         eventEnd:new Date(eventEndMs(ev)).toISOString(),songs,savedAt:new Date().toISOString(),version:1
       });
+      if(document.hidden) return;
       if(ok !== false) songs.forEach(song => { if(song?.id) offlineSongIndex.set(String(song.id), cloneValue(song)); });
       if(ok===false && !offlineSongStorageWarned) {
         offlineSongStorageWarned=true;
@@ -688,7 +710,24 @@ async function syncEventOfflineSongs() {
 }
 function scheduleOfflineSongSync(delay=900) {
   clearTimeout(offlineSongSyncTimer);
-  offlineSongSyncTimer=setTimeout(()=>{syncEventOfflineSongs().catch(()=>{});},delay);
+  offlineSongSyncTimer=0;
+  // WHY: discard deferred sync requests while backgrounded; visibilitychange schedules a fresh foreground pass.
+  if(document.hidden) return;
+  offlineSongSyncTimer=setTimeout(()=>{
+    offlineSongSyncTimer=0;
+    if(document.hidden) return;
+    syncEventOfflineSongs().catch(()=>{});
+  },delay);
+}
+// WHY: periodic offline-copy maintenance is unnecessary while the PWA is backgrounded.
+function startOfflineSongSyncInterval() {
+  if (offlineSongSyncInterval || document.hidden) return;
+  offlineSongSyncInterval = window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
+}
+function stopOfflineSongSyncInterval() {
+  if (!offlineSongSyncInterval) return;
+  window.clearInterval(offlineSongSyncInterval);
+  offlineSongSyncInterval = 0;
 }
 async function refreshOfflineEventInfo(eventId) {
   const box=document.querySelector('[data-offline-event-songs="' + CSS.escape(String(eventId)) + '"]');
@@ -1353,16 +1392,18 @@ function renderWithTransition(fn) {
   fn();
 }
 
+let routeTransitionFrame = 0;
+let routeTransitionTimer = 0;
+let routeTransitionToken = 0;
 function routeTransition() {
   const view = $('#view');
   if (!view) { render(); return; }
-  /*
-    A navigation click must never be swallowed by an animation that is
-    already running. Previously the guard returned while transitioning,
-    leaving location.hash changed but the old screen rendered until a
-    second click. Cancel the previous transition and render the new route
-    immediately instead.
-  */
+  // WHY: release microphone/audio resources as soon as navigation leaves the current tool screen.
+  stopTuner();
+  // WHY: stale animation callbacks from rapid navigation must not finish a newer route transition.
+  const token = ++routeTransitionToken;
+  if (routeTransitionFrame) cancelAnimationFrame(routeTransitionFrame);
+  if (routeTransitionTimer) clearTimeout(routeTransitionTimer);
   if (view.dataset.transitioning === '1') {
     view.classList.remove('route-enter', 'route-enter-active');
     delete view.dataset.transitioning;
@@ -1372,11 +1413,15 @@ function routeTransition() {
   void view.offsetWidth;
   view.classList.add('route-enter');
   renderWithTransition(render);
-  requestAnimationFrame(() => {
+  routeTransitionFrame = requestAnimationFrame(() => {
+    routeTransitionFrame = 0;
+    if (token !== routeTransitionToken || !view.isConnected) return;
     view.classList.add('route-enter-active');
-    setTimeout(() => {
+    routeTransitionTimer = setTimeout(() => {
+      if (token !== routeTransitionToken || !view.isConnected) return;
       view.classList.remove('route-enter', 'route-enter-active');
       delete view.dataset.transitioning;
+      routeTransitionTimer = 0;
     }, 170);
   });
 }
@@ -1564,7 +1609,18 @@ function scrollTimeGrid() { const sc = $('#tgScroll'); if (sc) { const n = new D
 /* ═══ MUSICIAN TOOLS ═══
    WHY: microphone access is opt-in and Web Audio is created only after a user gesture;
    the tuner and metronome work locally without uploading audio or requiring a third-party service. */
-let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0;
+let toolTab = 'guitar-tuner', toolAudio = null, tunerStream = null, tunerFrame = 0, tunerStartToken = 0;
+// WHY: reference-string playback has its own async fetch/decode lifecycle and must be cancellable on rapid taps or navigation.
+let tunerReferenceAudio = null, tunerReferenceToken = 0, tunerReferenceTimer = 0;
+function stopTunerReferenceAudio() {
+  tunerReferenceToken++;
+  if (tunerReferenceTimer) clearTimeout(tunerReferenceTimer);
+  tunerReferenceTimer = 0;
+  const previousAudio = tunerReferenceAudio;
+  tunerReferenceAudio = null;
+  if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(() => {});
+  document.querySelectorAll('.tuner-string.is-playing').forEach(button => button.classList.remove('is-playing'));
+}
 const TOOL_TABS = [
   ['guitar-tuner','Тюнер гитары'],['violin-tuner','Тюнер скрипки'],['metronome','Метроном'],['guitar-chords','Аккорды · гитара'],['piano-chords','Аккорды · пианино']
 ];
@@ -1673,10 +1729,18 @@ function pianoDiagram(notes) {
   return '<div class="piano-diagram">'+svg+'</div>';
 }
 function stopTuner() {
+  // WHY: invalidate pending microphone permission/resume promises so they cannot restart audio after navigation or stop.
+  stopTunerReferenceAudio();
+  tunerStartToken++;
   if (tunerFrame) cancelAnimationFrame(tunerFrame); tunerFrame = 0;
   if (tunerStream) tunerStream.getTracks().forEach(t=>t.stop()); tunerStream = null;
   const previousAudio = toolAudio; toolAudio = null;
   if (previousAudio && previousAudio.state !== 'closed') previousAudio.close().catch(()=>{});
+  // WHY: visibility changes stop the microphone too; restore controls so the tuner can be started immediately after returning.
+  const start = $('#tunerStart'), stop = $('#tunerStop'), status = $('#tunerStatus');
+  if (start) start.disabled = false;
+  if (stop) stop.disabled = true;
+  if (status) status.textContent = 'Тюнер остановлен';
 }
 function pitchFromBuffer(buf, sampleRate, minHz=55, maxHz=900) {
   // WHY: YIN/CMNDF is less likely than picking the strongest autocorrelation peak to mistake a guitar harmonic for the fundamental.
@@ -1710,9 +1774,13 @@ function pitchFromBuffer(buf, sampleRate, minHz=55, maxHz=900) {
 }
 async function startTuner() {
   if(!navigator.mediaDevices?.getUserMedia){toast('Браузер не поддерживает доступ к микрофону','err');return;}
+  stopTuner();
+  const startToken = ++tunerStartToken;
   try {
-    stopTuner();
-    tunerStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});
+    // WHY: microphone permission may resolve after the user has navigated away or stopped the tuner.
+    if(startToken!==tunerStartToken||!document.querySelector('#view .tools-page')||(toolTab!=='guitar-tuner'&&toolTab!=='violin-tuner')){stream.getTracks().forEach(t=>t.stop());return;}
+    tunerStream=stream;
     const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)throw new Error('Web Audio недоступен');
     toolAudio=new Ctx({latencyHint:'interactive'});
     const source=toolAudio.createMediaStreamSource(tunerStream),filter=toolAudio.createBiquadFilter(),analyser=toolAudio.createAnalyser();
@@ -1752,8 +1820,15 @@ async function startTuner() {
     };
     const status=$('#tunerStatus');if(status)status.textContent=(toolTab==='violin-tuner'?'Скрипка · диапазон G3–E5':'Гитара · стандартный строй E2–E4')+' · микрофон активен';
     const start=$('#tunerStart'),stop=$('#tunerStop');if(start)start.disabled=true;if(stop)stop.disabled=false;
-    await toolAudio.resume();tick();
-  } catch(err){stopTuner();const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');}
+    await toolAudio.resume();
+    // WHY: AudioContext.resume() is asynchronous too; do not launch a stale animation loop after stop/navigation.
+    if(startToken!==tunerStartToken||!toolAudio||!tunerStream)return;
+    tick();
+  } catch(err){
+    if(startToken!==tunerStartToken)return;
+    stopTuner();
+    const status=$('#tunerStatus');if(status)status.textContent=err.name==='NotAllowedError'?'Нет доступа к микрофону. Разрешите его в настройках браузера.':'Не удалось включить тюнер: '+(err.message||'ошибка устройства');
+  }
 }
 /* ═══ 11. CALENDAR + HERO ═══ */
 function heroHTML() {
@@ -2903,7 +2978,13 @@ function setAuto(v) {
   scene.auto = v;
   const b = $('[data-act="scene-auto"]');
   if (b) { b.innerHTML = ic(v ? 'pause' : 'play', 19); b.classList.toggle('act', v); b.setAttribute('aria-label', v ? 'Остановить автопрокрутку' : 'Запустить автопрокрутку'); }
-  if (v) { scene.last = performance.now(); loop(); } else if (scene.raf) { cancelAnimationFrame(scene.raf); scene.raf = null; }
+  // WHY: changing songs while auto-scroll is active can call setAuto(true) repeatedly; keep a single RAF chain instead of accelerating parallel loops.
+  if (v) {
+    if (!scene.raf) { scene.last = performance.now(); loop(); }
+  } else if (scene.raf) {
+    cancelAnimationFrame(scene.raf);
+    scene.raf = null;
+  }
 }
 function loop() {
   if (!scene.auto) return;
@@ -2922,8 +3003,33 @@ function updateBar() {
   const p = max > 0 ? el.scrollTop / max : 0, total = scene.list.length || 1;
   $('#scBar').style.width = clamp(((scene.i + p) / total) * 100, 0, 100) + '%';
 }
-function reqWake() { if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(s => { scene.wake = s; }).catch(() => { }); }
-function relWake() { if (scene.wake) { try { scene.wake.release(); } catch (e) { } scene.wake = null; } }
+let sceneWakeRequest = 0;
+function reqWake() {
+  if (!('wakeLock' in navigator) || !$('#scene').classList.contains('on') || document.hidden) return;
+  const requestId = ++sceneWakeRequest;
+  navigator.wakeLock.request('screen').then(lock => {
+    // WHY: a delayed Wake Lock request must not keep the display awake after the scene has closed or been superseded.
+    if (requestId !== sceneWakeRequest || !$('#scene').classList.contains('on') || document.hidden) {
+      lock.release().catch(() => {});
+      return;
+    }
+    if (scene.wake && scene.wake !== lock) scene.wake.release().catch(() => {});
+    scene.wake = lock;
+    lock.addEventListener('release', () => { if (scene.wake === lock) scene.wake = null; }, { once: true });
+  }).catch(() => { });
+}
+function relWake() {
+  // WHY: invalidate any in-flight request before releasing the active lock, preventing a late promise from reviving it.
+  sceneWakeRequest++;
+  const lock = scene.wake;
+  scene.wake = null;
+  if (lock) lock.release().catch(() => {});
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) relWake();
+  else if ($('#scene').classList.contains('on')) reqWake();
+});
+window.addEventListener('pagehide', relWake);
 
 /* ═══ 17. PRINT ═══ */
 function doPrint(html) { $('#printArea').innerHTML = '<div>' + html + '</div>'; setTimeout(() => window.print(), 80); }
@@ -3355,23 +3461,33 @@ document.addEventListener('click', function (e) {
         const Ctx=window.AudioContext||window.webkitAudioContext;
         if(!Ctx)throw new Error('Звук не поддерживается этим браузером');
         if(!Number.isFinite(freq)||freq<20||freq>2000)throw new Error('Не удалось определить частоту струны');
-        // WHY: play a real recorded acoustic-guitar sample and pitch-shift it to the exact open-string frequency; keep a local synthesis fallback if the sample cannot be reached.
+        // WHY: only the newest reference-string request may play; close the previous context before starting another.
+        stopTunerReferenceAudio();
+        const requestToken=tunerReferenceToken;
         const ctx=new Ctx();
+        tunerReferenceAudio=ctx;
+        const isCurrent=()=>requestToken===tunerReferenceToken&&tunerReferenceAudio===ctx&&ctx.state!=='closed';
         const playBuffer=(buffer,sourceFreq,isRealSample)=>{
+          if(!isCurrent()){if(ctx.state!=='closed')ctx.close().catch(()=>{});return;}
           const source=ctx.createBufferSource(), volume=ctx.createGain();
           source.buffer=buffer;
           source.playbackRate.setValueAtTime(freq/sourceFreq,ctx.currentTime);
           volume.gain.setValueAtTime(0.88,ctx.currentTime);
           volume.gain.setTargetAtTime(0.0001,ctx.currentTime+Math.max(0.05,buffer.duration/(freq/sourceFreq)-0.12),0.045);
           source.connect(volume);volume.connect(ctx.destination);
-          source.onended=()=>{source.disconnect();volume.disconnect();ctx.close().catch(()=>{});};
+          source.onended=()=>{
+            source.disconnect();volume.disconnect();
+            if(tunerReferenceAudio===ctx){tunerReferenceAudio=null;if(ctx.state!=='closed')ctx.close().catch(()=>{});}
+          };
           source.start();
           const status=$('#tunerStatus');if(status)status.textContent=(isRealSample?'Акустическая гитара':'Резервный звук')+' · '+note+' · '+freq.toFixed(2)+' Hz';
           const buttons=Array.from(document.querySelectorAll('.tuner-string'));
           buttons.forEach(b=>b.classList.toggle('is-playing',b===el));
-          setTimeout(()=>el.classList.remove('is-playing'),350);
+          if(tunerReferenceTimer)clearTimeout(tunerReferenceTimer);
+          tunerReferenceTimer=setTimeout(()=>{if(isCurrent())el.classList.remove('is-playing');tunerReferenceTimer=0;},350);
         };
         const playFallback=()=>{
+          if(!isCurrent())return;
           const duration=1.8,rate=ctx.sampleRate,length=Math.floor(duration*rate);
           const buffer=ctx.createBuffer(1,length,rate),data=buffer.getChannelData(0);
           let peak=0;
@@ -3392,13 +3508,18 @@ document.addEventListener('click', function (e) {
             if(!response.ok)throw new Error('Аудиосэмпл недоступен');
             const audioData=await response.arrayBuffer();
             const buffer=await ctx.decodeAudioData(audioData.slice(0));
+            if(!isCurrent())return;
             playBuffer(buffer,nearest[1],true);
           } catch(err) {
-            // WHY: tuning remains usable if a third-party sample host is unavailable or the device is offline before its first cache fill.
-            playFallback();
+            // WHY: tuning remains usable if a third-party sample host is unavailable, but stale requests must never start playback.
+            if(isCurrent())playFallback();
           }
         };
-        ctx.resume().then(playSample).catch(err=>{ctx.close().catch(()=>{});toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');});
+        ctx.resume().then(()=>{if(isCurrent())return playSample();}).catch(err=>{
+          if(!isCurrent())return;
+          stopTunerReferenceAudio();
+          toast('Не удалось воспроизвести звук: '+(err.message||'проверьте громкость устройства'),'err');
+        });
       } catch(err){toast(err.message,'err');}
       break;
     }
@@ -4687,12 +4808,27 @@ function init() {
   $('#scBody').addEventListener('wheel', () => { if (scene.auto) setAuto(false); }, { passive: true });
   $('#scBody').addEventListener('touchstart', () => { if (scene.auto) setAuto(false); }, { passive: true });
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && $('#scene').classList.contains('on') && !scene.wake) reqWake();
-    if (!document.hidden) scheduleOfflineSongSync(150);
+    if (document.hidden) {
+      // WHY: stop microphone analysis and stage auto-scroll instead of leaving audio/animation work running in a background tab.
+      stopTuner();
+      if (scene.auto) setAuto(false);
+      // WHY: pause non-urgent expiry polling and offline-copy maintenance while backgrounded.
+      stopExpiredEventChecks();
+      stopOfflineSongSyncInterval();
+      // WHY: cancel a not-yet-started offline sync too; stopping only the interval leaves this timeout alive.
+      clearTimeout(offlineSongSyncTimer);
+      offlineSongSyncTimer = 0;
+      return;
+    }
+    checkExpiredEventsAndRender();
+    startExpiredEventChecks();
+    startOfflineSongSyncInterval();
+    if ($('#scene').classList.contains('on') && !scene.wake) reqWake();
+    scheduleOfflineSongSync(150);
   });
   window.addEventListener('online', () => scheduleOfflineSongSync(150));
-  window.setInterval(() => scheduleOfflineSongSync(150), 15 * 60 * 1000);
-  window.addEventListener('beforeunload', () => { if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
+  startOfflineSongSyncInterval();
+  window.addEventListener('beforeunload', () => { stopOfflineSongSyncInterval(); if (scene.raf) cancelAnimationFrame(scene.raf); relWake(); });
   // WHY: service-worker lifecycle is owned by index.html only, preventing duplicate registrations/reload handlers.
   ui.skeleton = false;
   render();
@@ -5038,15 +5174,30 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
   function start() {
     scan(document);
+    // WHY: coalesce bursts of app-render mutations into one animation-frame pass.
+    // Re-scanning/measuring the same buttons for every mutation caused avoidable layout work during navigation.
+    const pendingButtons = new Set();
+    let scanFrame = 0;
+    function queueButton(button) {
+      if (!(button instanceof HTMLButtonElement)) return;
+      pendingButtons.add(button);
+      if (scanFrame) return;
+      scanFrame = requestAnimationFrame(() => {
+        scanFrame = 0;
+        const batch = Array.from(pendingButtons);
+        pendingButtons.clear();
+        batch.forEach(prepare);
+      });
+    }
+    function queueRoot(root) {
+      if (!(root instanceof Element)) return;
+      if (root.matches('button')) queueButton(root);
+      root.querySelectorAll?.('button').forEach(queueButton);
+    }
     const mutations = new MutationObserver(records => {
       records.forEach(record => {
-        if (record.type === 'childList') record.addedNodes.forEach(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) scan(node);
-        });
-        else if (record.type === 'characterData') {
-          const button = record.target.parentElement?.closest('button.btn');
-          if (button) prepare(button);
-        }
+        if (record.type === 'childList') record.addedNodes.forEach(queueRoot);
+        else if (record.type === 'characterData') queueButton(record.target.parentElement?.closest('button.btn'));
       });
     });
     mutations.observe(document.body, {subtree: true, childList: true, characterData: true});

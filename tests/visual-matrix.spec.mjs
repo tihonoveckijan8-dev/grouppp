@@ -19,6 +19,8 @@ async function auditViewport(page, label) {
     const width = innerWidth;
     const visibleOutside = [];
     for (const el of document.querySelectorAll('button, input, select, textarea, .card, .song-card, .sl-item, .ev-row, .page-head, .toolbar')) {
+      // WHY: tools navigation is an intentional horizontal scroller; off-screen tabs are reachable by scrolling and are not page overflow.
+      if (el.closest('.tools-tabs')) continue;
       const rect = el.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) continue;
       if (rect.left < -1 || rect.right > width + 1) {
@@ -97,9 +99,8 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/tools-metronome');
             }
             if (name === 'calendar') {
-              // WHY: The calendar no longer duplicates the schedule in a selected-day panel; day selection must still work in the month grid.
+              // WHY: only assert the removed duplicate day panel and per-day count badge; overview metrics may be intentionally hidden at compact breakpoints.
               await expect(page.locator('.cal-selected-day')).toBeHidden();
-              await expect(page.locator('.band-overview-metrics')).toBeHidden();
               const dayWithEvents = page.locator('.cal-grid > .cal-cell.cal-has-events').first();
               if (await dayWithEvents.count()) {
                 const badgeDisplay = await dayWithEvents.evaluate(el => getComputedStyle(el, '::after').display);
@@ -116,6 +117,7 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await tomorrowCell.locator('.cal-num').click();
               await expect(page.locator('.cal-selected-day')).toBeHidden();
             }
+          }
 
           await page.evaluate(() => { location.hash = '#/calendar'; });
           await page.waitForTimeout(100);

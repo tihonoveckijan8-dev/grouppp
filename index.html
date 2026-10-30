@@ -28,7 +28,9 @@ try{
       if (!bpHadController) { bpHadController = true; bpController = nextController; return; }
       if (!nextController || nextController === bpController) return;
       bpController = nextController;
-      location.reload();
+      // WHY: activating a new Service Worker must not interrupt an active rehearsal/session.
+      // Apply the update on the user's next normal reload or app restart instead.
+      window.dispatchEvent(new CustomEvent('bandplan:update-ready'));
     });
   }
 }catch(e){}

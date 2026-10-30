@@ -258,6 +258,8 @@ try {
           type: '',
           frequency: { setValueAtTime() {} },
           connect() {},
+          // WHY: production tracks scheduled Web Audio nodes until their ended event so stop() can cancel queued notes.
+          addEventListener() {},
           start() { state.scheduled++; },
           stop() {}
         };
@@ -377,8 +379,9 @@ try {
   assert.match(sourceCore, /s\.id === preselectedSongId \? ' checked' : ''/, 'The chosen song must be preselected in the new setlist form');
   assert.match(sourceCore, /confirmBox\('Сет-листов пока нет'[\s\S]*?setlistModal\(null, songId\)/, 'Creating the first setlist from a song must preserve that song');
 
-  // WHY: Escape must fully dismiss the More drawer, including its backdrop and scroll lock, not just hide the panel.
-  assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?moreBackdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'Escape must clear the More drawer backdrop and scroll lock');
+  // WHY: assert the current shared animated close path, rather than depending on the removed legacy backdrop variable.
+  assert.match(sourceCore, /function closeMoreDrawer\([\s\S]*?backdrop\.hidden = true[\s\S]*?classList\.remove\('more-menu-open'\)/, 'More drawer close routine must clear its backdrop and scroll lock');
+  assert.match(sourceCore, /if \(e\.key === 'Escape'\)[\s\S]*?closeMoreDrawer\(true\)/, 'Escape must use the shared More drawer close routine');
 
   // WHY: at phone widths event actions need a dedicated full-width grid row so they stay inside the card and align to the right edge.
   assert.match(sourceDepthCss, /grid-column:\s*1\s*\/\s*-1;/, 'Mobile event actions must span the card instead of being squeezed into a grid column');
@@ -405,8 +408,8 @@ try {
     else delete document.body.dataset.route;
     return result;
   });
-  assert.match(eventCountBadge.countContent, /4/, 'Calendar badge does not expose the day event count');
-  assert.equal(eventCountBadge.countDisplay, 'grid', 'Calendar event count badge is not visible');
+  // WHY: the pseudo-element may retain its data attribute content, but display:none keeps the removed numeric badge out of the UI.
+  assert.equal(eventCountBadge.countDisplay, 'none', 'Calendar event count badge must remain hidden');
   assert.equal(eventCountBadge.outsideDisplay, 'none', 'Out-of-month cells should not show count badges');
 
   // WHY: exercise the real mobile lyric CSS against a long unbroken line; checking selectors alone misses overflow regressions.
