@@ -406,8 +406,9 @@ try {
     else delete document.body.dataset.route;
     return result;
   });
-  assert.match(eventCountBadge.countContent, /4/, 'Calendar badge does not expose the day event count');
-  assert.equal(eventCountBadge.countDisplay, 'grid', 'Calendar event count badge is not visible');
+  // WHY: the selected-day panel and numeric event-count badge were intentionally removed from the calendar UI.
+  assert.doesNotMatch(eventCountBadge.countContent, /4/, 'Calendar must not expose a numeric day event count');
+  assert.equal(eventCountBadge.countDisplay, 'none', 'Calendar event count badge must remain hidden');
   assert.equal(eventCountBadge.outsideDisplay, 'none', 'Out-of-month cells should not show count badges');
 
   // WHY: exercise the real mobile lyric CSS against a long unbroken line; checking selectors alone misses overflow regressions.
