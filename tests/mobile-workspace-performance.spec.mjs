@@ -88,7 +88,7 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
     routeResults.push({
       route: 'tools-metronome',
       transitionToPaintMs: Date.now() - metroStarted,
-      visibleView: await page.locator('#view [data-bp-am-tool-host] [data-bp-metro]')).isVisible()
+      visibleView: await page.locator('#view [data-bp-am-tool-host] [data-bp-metro]').isVisible()
     });
 
     const report = await page.evaluate(routeResults => {
