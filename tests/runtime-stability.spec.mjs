@@ -115,3 +115,44 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
     await context.close();
   }
 });
+
+
+test('offline shell serves versioned app assets after a cold network loss', async ({ browser }) => {
+  test.setTimeout(45_000);
+  // WHY: exercise the real production Service Worker and Cache API in Chromium; source-pattern checks cannot prove query-versioned URLs work offline.
+  const context = await browser.newContext({ serviceWorkers: 'allow' });
+  const page = await context.newPage();
+
+  try {
+    await page.goto(BASE + '/?offline-shell-test=1', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 10_000 });
+
+    // WHY: simulate a cold offline request with version strings different from the HTML and precache entries.
+    await context.setOffline(true);
+    const assets = await page.evaluate(async () => {
+      const requests = [
+        ['./?offline-shell-test=2', '<title>BandPlan'],
+        ['./bandplan.css?v=offline-shell-regression', '--'],
+        ['./bandplan-depth.css?v=offline-shell-regression', '--'],
+        ['./bandplan.js?v=offline-shell-regression', 'BandPlan']
+      ];
+      const results = [];
+      for (const [url, expected] of requests) {
+        const response = await fetch(url, { cache: 'no-store' });
+        const body = await response.text();
+        results.push({ url, status: response.status, ok: response.ok, hasExpectedContent: body.includes(expected), bytes: body.length });
+      }
+      return results;
+    });
+
+    for (const asset of assets) {
+      expect(asset.ok, `Offline shell request failed: ${asset.url} (${asset.status})`).toBe(true);
+      expect(asset.hasExpectedContent, `Offline shell returned an unexpected body: ${asset.url}`).toBe(true);
+      expect(asset.bytes, `Offline shell response was empty: ${asset.url}`).toBeGreaterThan(100);
+    }
+  } finally {
+    await context.close();
+  }
+});
