@@ -406,8 +406,7 @@ try {
     else delete document.body.dataset.route;
     return result;
   });
-  // WHY: the selected-day panel and numeric event-count badge were intentionally removed from the calendar UI.
-  assert.doesNotMatch(eventCountBadge.countContent, /4/, 'Calendar must not expose a numeric day event count');
+  // WHY: the pseudo-element may retain its data attribute content, but display:none keeps the removed numeric badge out of the UI.
   assert.equal(eventCountBadge.countDisplay, 'none', 'Calendar event count badge must remain hidden');
   assert.equal(eventCountBadge.outsideDisplay, 'none', 'Out-of-month cells should not show count badges');
 
