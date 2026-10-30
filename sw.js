@@ -1,18 +1,23 @@
 /* BandPlan offline app shell — resilient cache install and safe updates */
 // WHY: scripts/build.mjs replaces this token on every production build to invalidate stale app-shell caches.
 const V = 'bandplan-__BANDPLAN_CACHE_VERSION__';
-const SHELL = ['https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-acoustic/A2.mp3', 'https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-acoustic/A3.mp3', 'https://raw.githubusercontent.com/nbrosowsky/tonejs-instruments/622c2f1c32c8cfce4158ddc3eb26e518ddef37e5/samples/guitar-acoustic/A4.mp3', './', 'index.html', 'bandplan.css', 'bandplan-depth.css?v=20261028-more-square-cards-v45', 'bandplan.js', 'bandplan-core.js', 'metronome-audio.js', 'manifest.webmanifest', 'icon-bandplan.svg?v=__BANDPLAN_ASSET_VERSION__', 'icon-maskable.svg?v=__BANDPLAN_ASSET_VERSION__', 'logo-bandplan.svg?v=__BANDPLAN_ASSET_VERSION__', 'icon-192.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-512.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-maskable-512.png?v=__BANDPLAN_ASSET_VERSION__', 'apple-touch-icon.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-splash.svg', 'icon-maskable-splash.svg', 'config.js', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
+const SHELL = ['./', 'index.html', 'bandplan.css', 'bandplan-depth.css?v=20261028-more-square-cards-v45', 'bandplan.js', 'bandplan-core.js', 'metronome-audio.js', 'manifest.webmanifest', 'icon-bandplan.svg?v=__BANDPLAN_ASSET_VERSION__', 'icon-maskable.svg?v=__BANDPLAN_ASSET_VERSION__', 'logo-bandplan.svg?v=__BANDPLAN_ASSET_VERSION__', 'icon-192.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-512.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-maskable-512.png?v=__BANDPLAN_ASSET_VERSION__', 'apple-touch-icon.png?v=__BANDPLAN_ASSET_VERSION__', 'icon-splash.svg', 'icon-maskable-splash.svg', 'config.js', 'supabase.js', 'vendor/supabase.min.js', 'fonts/manrope-latin-wght-normal.woff2', 'fonts/manrope-cyrillic-wght-normal.woff2'];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(V);
-    // A single unavailable optional icon must not prevent the whole app from
-    // installing its offline shell.
-    await Promise.all(SHELL.map(async path => {
-      try {
-        const response = await fetch(path, {cache:'reload'});
-        if (response && response.ok) await cache.put(path, response);
-      } catch (_) { return null; }
-    }));
+    // WHY: limit install-time network and disk pressure so a background app update cannot cause random UI stalls.
+    // Audio samples are cached lazily by the fetch handler after first use; they are not required to boot the app.
+    let nextIndex = 0;
+    const workers = Array.from({length: 3}, async () => {
+      while (nextIndex < SHELL.length) {
+        const path = SHELL[nextIndex++];
+        try {
+          const response = await fetch(path);
+          if (response && response.ok) await cache.put(path, response);
+        } catch (_) { /* WHY: one unavailable optional asset must not block the offline shell. */ }
+      }
+    });
+    await Promise.all(workers);
   })());
 });
 self.addEventListener('activate', event => {
