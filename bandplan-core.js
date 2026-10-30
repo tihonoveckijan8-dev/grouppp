@@ -1375,16 +1375,16 @@ function renderWithTransition(fn) {
   fn();
 }
 
+let routeTransitionFrame = 0;
+let routeTransitionTimer = 0;
+let routeTransitionToken = 0;
 function routeTransition() {
   const view = $('#view');
   if (!view) { render(); return; }
-  /*
-    A navigation click must never be swallowed by an animation that is
-    already running. Previously the guard returned while transitioning,
-    leaving location.hash changed but the old screen rendered until a
-    second click. Cancel the previous transition and render the new route
-    immediately instead.
-  */
+  // WHY: stale animation callbacks from rapid navigation must not finish a newer route transition.
+  const token = ++routeTransitionToken;
+  if (routeTransitionFrame) cancelAnimationFrame(routeTransitionFrame);
+  if (routeTransitionTimer) clearTimeout(routeTransitionTimer);
   if (view.dataset.transitioning === '1') {
     view.classList.remove('route-enter', 'route-enter-active');
     delete view.dataset.transitioning;
@@ -1394,11 +1394,15 @@ function routeTransition() {
   void view.offsetWidth;
   view.classList.add('route-enter');
   renderWithTransition(render);
-  requestAnimationFrame(() => {
+  routeTransitionFrame = requestAnimationFrame(() => {
+    routeTransitionFrame = 0;
+    if (token !== routeTransitionToken || !view.isConnected) return;
     view.classList.add('route-enter-active');
-    setTimeout(() => {
+    routeTransitionTimer = setTimeout(() => {
+      if (token !== routeTransitionToken || !view.isConnected) return;
       view.classList.remove('route-enter', 'route-enter-active');
       delete view.dataset.transitioning;
+      routeTransitionTimer = 0;
     }, 170);
   });
 }
