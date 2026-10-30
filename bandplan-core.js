@@ -5177,27 +5177,50 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     // WHY: coalesce bursts of app-render mutations into one animation-frame pass.
     // Re-scanning/measuring the same buttons for every mutation caused avoidable layout work during navigation.
     const pendingButtons = new Set();
+    const pendingRemovedButtons = new Set();
     let scanFrame = 0;
-    function queueButton(button) {
-      if (!(button instanceof HTMLButtonElement)) return;
-      pendingButtons.add(button);
+    function scheduleScan() {
       if (scanFrame) return;
       scanFrame = requestAnimationFrame(() => {
         scanFrame = 0;
+        const removed = Array.from(pendingRemovedButtons);
+        pendingRemovedButtons.clear();
+        removed.forEach(button => {
+          // WHY: ResizeObserver retains observed elements; release buttons removed by route renders to prevent detached-DOM retention.
+          if (!button.isConnected) {
+            pendingButtons.delete(button);
+            observer.unobserve(button);
+          }
+        });
         const batch = Array.from(pendingButtons);
         pendingButtons.clear();
         batch.forEach(prepare);
       });
+    }
+    function queueButton(button) {
+      if (!(button instanceof HTMLButtonElement)) return;
+      pendingButtons.add(button);
+      scheduleScan();
     }
     function queueRoot(root) {
       if (!(root instanceof Element)) return;
       if (root.matches('button')) queueButton(root);
       root.querySelectorAll?.('button').forEach(queueButton);
     }
+    function queueRemovedRoot(root) {
+      if (!(root instanceof Element)) return;
+      if (root.matches('button[data-bp-adaptive="1"]')) pendingRemovedButtons.add(root);
+      root.querySelectorAll?.('button[data-bp-adaptive="1"]').forEach(button => pendingRemovedButtons.add(button));
+      scheduleScan();
+    }
     const mutations = new MutationObserver(records => {
       records.forEach(record => {
-        if (record.type === 'childList') record.addedNodes.forEach(queueRoot);
-        else if (record.type === 'characterData') queueButton(record.target.parentElement?.closest('button.btn'));
+        if (record.type === 'childList') {
+          record.addedNodes.forEach(queueRoot);
+          record.removedNodes.forEach(queueRemovedRoot);
+        } else if (record.type === 'characterData') {
+          queueButton(record.target.parentElement?.closest('button.btn'));
+        }
       });
     });
     mutations.observe(document.body, {subtree: true, childList: true, characterData: true});
