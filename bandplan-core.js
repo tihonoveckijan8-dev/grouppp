@@ -5114,7 +5114,10 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     }
     button.dataset.bpAdaptive = '1';
     measure(button);
-    if (window.__bandplanAdaptiveResizeObserver) window.__bandplanAdaptiveResizeObserver.observe(button);
+    if (window.__bandplanAdaptiveResizeObserver) {
+      window.__bandplanAdaptiveResizeObserver.observe(button);
+      observedAdaptiveButtons.add(button);
+    }
   }
 
   function measure(button) {
@@ -5165,6 +5168,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   const observer = new ResizeObserver(entries => {
     entries.forEach(entry => measure(entry.target));
   });
+  // WHY: keep our own inventory because MutationObserver removal records can miss detached descendants when a whole render root is replaced.
+  const observedAdaptiveButtons = new Set();
   window.__bandplanAdaptiveResizeObserver = observer;
 
   function scan(root) {
@@ -5183,15 +5188,15 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
       if (scanFrame) return;
       scanFrame = requestAnimationFrame(() => {
         scanFrame = 0;
-        const removed = Array.from(pendingRemovedButtons);
-        pendingRemovedButtons.clear();
-        removed.forEach(button => {
-          // WHY: ResizeObserver retains observed elements; release buttons removed by route renders to prevent detached-DOM retention.
+        // WHY: sweep the observer's own inventory so every detached adaptive button is released, even if its removal record was nested or coalesced.
+        observedAdaptiveButtons.forEach(button => {
           if (!button.isConnected) {
             pendingButtons.delete(button);
             observer.unobserve(button);
+            observedAdaptiveButtons.delete(button);
           }
         });
+        pendingRemovedButtons.clear();
         const batch = Array.from(pendingButtons);
         pendingButtons.clear();
         batch.forEach(prepare);
