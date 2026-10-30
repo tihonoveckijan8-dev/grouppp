@@ -88,7 +88,7 @@ test('mobile workspace performance: deterministic UI fixture route timings', asy
         encodedByType[type] = (encodedByType[type] || 0) + (entry.encodedBodySize || 0);
         decodedByType[type] = (decodedByType[type] || 0) + (entry.decodedBodySize || 0);
         // WHY: compare encoded and decoded body sizes to prove compression was actually applied, rather than estimating gzip from local file sizes.
-        if (/\\.(css|js|mjs)$/.test(pathname) && entry.encodedBodySize > 0 && entry.decodedBodySize > entry.encodedBodySize) {
+        if (/\.(css|js|mjs)$.test(pathname) && entry.encodedBodySize > 0 && entry.decodedBodySize > entry.encodedBodySize) {
           compressedResources.push({
             path: pathname,
             type,
