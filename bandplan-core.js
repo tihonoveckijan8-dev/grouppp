@@ -5182,7 +5182,6 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     // WHY: coalesce bursts of app-render mutations into one animation-frame pass.
     // Re-scanning/measuring the same buttons for every mutation caused avoidable layout work during navigation.
     const pendingButtons = new Set();
-    const pendingRemovedButtons = new Set();
     let scanFrame = 0;
     function scheduleScan() {
       if (scanFrame) return;
@@ -5196,7 +5195,6 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
             observedAdaptiveButtons.delete(button);
           }
         });
-        pendingRemovedButtons.clear();
         const batch = Array.from(pendingButtons);
         pendingButtons.clear();
         batch.forEach(prepare);
@@ -5214,8 +5212,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     }
     function queueRemovedRoot(root) {
       if (!(root instanceof Element)) return;
-      if (root.matches('button[data-bp-adaptive="1"]')) pendingRemovedButtons.add(root);
-      root.querySelectorAll?.('button[data-bp-adaptive="1"]').forEach(button => pendingRemovedButtons.add(button));
+      // WHY: any removed subtree can contain observed adaptive buttons; the scheduled inventory sweep handles nested roots safely.
       scheduleScan();
     }
     const mutations = new MutationObserver(records => {
