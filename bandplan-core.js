@@ -5090,7 +5090,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   };
 
   function prepare(button) {
-    if (!(button instanceof HTMLButtonElement)) return;
+    // WHY: queued mutation batches can outlive a node's DOM attachment; never re-observe a button after it has been detached.
+    if (!(button instanceof HTMLButtonElement) || !button.isConnected) return;
     if (button.matches('.btn-icon, [data-bp-no-collapse], [aria-label=""]') || !isIcon(button)) return;
 
     // Wrap direct text and ordinary text spans without touching icons, badges, or action logic.
@@ -5114,7 +5115,10 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     }
     button.dataset.bpAdaptive = '1';
     measure(button);
-    if (window.__bandplanAdaptiveResizeObserver) window.__bandplanAdaptiveResizeObserver.observe(button);
+    if (window.__bandplanAdaptiveResizeObserver) {
+      window.__bandplanAdaptiveResizeObserver.observe(button);
+      observedAdaptiveButtons.add(button);
+    }
   }
 
   function measure(button) {
@@ -5165,6 +5169,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
   const observer = new ResizeObserver(entries => {
     entries.forEach(entry => measure(entry.target));
   });
+  // WHY: keep our own inventory because MutationObserver removal records can miss detached descendants when a whole render root is replaced.
+  const observedAdaptiveButtons = new Set();
   window.__bandplanAdaptiveResizeObserver = observer;
 
   function scan(root) {
@@ -5178,26 +5184,46 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     // Re-scanning/measuring the same buttons for every mutation caused avoidable layout work during navigation.
     const pendingButtons = new Set();
     let scanFrame = 0;
-    function queueButton(button) {
-      if (!(button instanceof HTMLButtonElement)) return;
-      pendingButtons.add(button);
+    function scheduleScan() {
       if (scanFrame) return;
       scanFrame = requestAnimationFrame(() => {
         scanFrame = 0;
+        // WHY: sweep the observer's own inventory so every detached adaptive button is released, even if its removal record was nested or coalesced.
+        observedAdaptiveButtons.forEach(button => {
+          if (!button.isConnected) {
+            pendingButtons.delete(button);
+            observer.unobserve(button);
+            observedAdaptiveButtons.delete(button);
+          }
+        });
         const batch = Array.from(pendingButtons);
         pendingButtons.clear();
         batch.forEach(prepare);
       });
+    }
+    function queueButton(button) {
+      if (!(button instanceof HTMLButtonElement)) return;
+      pendingButtons.add(button);
+      scheduleScan();
     }
     function queueRoot(root) {
       if (!(root instanceof Element)) return;
       if (root.matches('button')) queueButton(root);
       root.querySelectorAll?.('button').forEach(queueButton);
     }
+    function queueRemovedRoot(root) {
+      if (!(root instanceof Element)) return;
+      // WHY: any removed subtree can contain observed adaptive buttons; the scheduled inventory sweep handles nested roots safely.
+      scheduleScan();
+    }
     const mutations = new MutationObserver(records => {
       records.forEach(record => {
-        if (record.type === 'childList') record.addedNodes.forEach(queueRoot);
-        else if (record.type === 'characterData') queueButton(record.target.parentElement?.closest('button.btn'));
+        if (record.type === 'childList') {
+          record.addedNodes.forEach(queueRoot);
+          record.removedNodes.forEach(queueRemovedRoot);
+        } else if (record.type === 'characterData') {
+          queueButton(record.target.parentElement?.closest('button.btn'));
+        }
       });
     });
     mutations.observe(document.body, {subtree: true, childList: true, characterData: true});

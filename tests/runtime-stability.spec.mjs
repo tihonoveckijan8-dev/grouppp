@@ -34,6 +34,22 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
   page.on('pageerror', error => pageErrors.push(error.message));
 
   try {
+    // WHY: track adaptive buttons held by ResizeObserver so route churn catches detached-DOM retention, not just visible UI errors.
+    await page.addInitScript(() => {
+      const observed = new Set();
+      const originalObserve = ResizeObserver.prototype.observe;
+      const originalUnobserve = ResizeObserver.prototype.unobserve;
+      ResizeObserver.prototype.observe = function (target, options) {
+        // WHY: scope the assertion to BandPlan's adaptive-button observer, not unrelated ResizeObserver consumers.
+        if (this === window.__bandplanAdaptiveResizeObserver && target instanceof HTMLButtonElement) observed.add(target);
+        return originalObserve.call(this, target, options);
+      };
+      ResizeObserver.prototype.unobserve = function (target) {
+        if (this === window.__bandplanAdaptiveResizeObserver) observed.delete(target);
+        return originalUnobserve.call(this, target);
+      };
+      window.__bandplanObservedButtons = observed;
+    });
     await page.goto(BASE + '/?bandplan-test=visual', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => typeof window.__bandplanEnsureCore === 'function', { timeout: 15_000 });
     await page.evaluate(() => window.__bandplanEnsureCore());
@@ -51,6 +67,10 @@ test('runtime stability: repeated navigation and metronome start/stop', async ({
         await page.evaluate(hash => { location.hash = hash; }, route);
         await expect.poll(() => page.evaluate(() => location.hash)).toBe(route);
         await page.waitForTimeout(120);
+        const detachedObservedButtons = await page.evaluate(() =>
+          Array.from(window.__bandplanObservedButtons || []).filter(button => !button.isConnected).length
+        );
+        expect(detachedObservedButtons, 'ResizeObserver must release adaptive buttons removed by route rendering').toBe(0);
       }
       // WHY: on phones, Tools lives inside the More drawer; use the real user navigation path instead of forcing a hidden route.
       await page.locator('[data-act="more-menu-toggle"]').click();
