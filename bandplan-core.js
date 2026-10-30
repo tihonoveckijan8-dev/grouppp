@@ -5061,7 +5061,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     const pendingButtons = new Set();
     let scanFrame = 0;
     function queueButton(button) {
-      if (button instanceof HTMLButtonElement) pendingButtons.add(button);
+      if (!(button instanceof HTMLButtonElement)) return;
+      pendingButtons.add(button);
       if (scanFrame) return;
       scanFrame = requestAnimationFrame(() => {
         scanFrame = 0;
