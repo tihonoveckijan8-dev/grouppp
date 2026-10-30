@@ -53,7 +53,7 @@ for (const dir of ['assets', 'fonts', 'vendor']) {
   if (existsSync(source)) await cp(source, path.join(out, dir), {recursive:true});
 }
 
-for (const file of ['bandplan.js','bandplan-core.js','metronome-audio.js','config.js','supabase.js','sw.js','bandplan.css','bandplan-depth.css']) {
+for (const file of ['bandplan.js','bandplan-core.js','metronome-audio.js','chord-library.js','config.js','supabase.js','sw.js','bandplan.css','bandplan-depth.css']) {
   // WHY: generate a fresh shell cache namespace on every build instead of relying on manual SW edits.
   if (file === 'sw.js') {
     const source = await readFile(path.join(root, file), 'utf8');
@@ -69,6 +69,8 @@ for (const file of ['bandplan.js','bandplan-core.js','metronome-audio.js','confi
     entryPoints:[path.join(root,file)],
     outfile:path.join(out,file),
     bundle:false,
+    // WHY: the lazy chord renderer is loaded with import() and therefore must retain ESM exports in the production build.
+    ...(file === 'chord-library.js' ? {format:'esm'} : {}),
     minify:true,
     target:['es2020','safari15'],
     legalComments:'none',

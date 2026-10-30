@@ -234,6 +234,11 @@ try {
   // WHY: the production HTML versions shell URLs, but install precaches canonical paths; keep query-insensitive shell lookup covered for offline cold starts.
   assert.match(serviceWorkerSource, /cache\.match\(request,\s*\{\s*ignoreSearch:\s*true\s*\}\)/, 'Versioned app-shell URLs must reuse their precached canonical resources offline');
   assert.ok(serviceWorkerSource.includes('bandplan-depth[.]css'), 'Depth stylesheet must use app-shell cache matching for offline startup');
+  // WHY: the chord module is fetched on demand by the UI but must remain in the offline shell for already-installed musicians.
+  assert.ok(serviceWorkerSource.includes("'chord-library.js'"), 'Chord module is missing from the offline precache list');
+  assert.ok(serviceWorkerSource.includes('chord-library[.]js'), 'Chord module is missing from app-shell cache matching');
+  const chordModuleSource = await readFile(join(root, 'chord-library.js'), 'utf8');
+  assert.match(chordModuleSource, /export function renderChordLibraryHTML/, 'Lazy chord module must expose its renderer as an ES module');
   const metronomeSource = await readFile(join(root, 'metronome-audio.js'), 'utf8');
   // WHY: the old file-analysis flow failed on phones; lock in the replacement's manual controls and guard against accidentally shipping the upload/analyzer UI again.
   assert.match(metronomeSource, /data-bp-metro/, 'Manual metronome panel is missing');
