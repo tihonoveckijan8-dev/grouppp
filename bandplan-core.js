@@ -489,7 +489,7 @@ function defaults() {
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
-    personalSongs: [], groupMemberships: [], activeGroupId: null,
+    personalSongs: [], personalSetlists: [], groupMemberships: [], activeGroupId: null,
     settings: {
       theme: bootTheme, accent: bootAccent, accentPreset: bootPreset || null, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
@@ -502,7 +502,7 @@ let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
-  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '', songLibrary: 'group',
+  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '', songLibrary: 'group', setlistLibrary: 'group',
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
@@ -2447,6 +2447,7 @@ function filteredSetlists() {
 }
 function vSetlists() {
   const list = filteredSetlists();
+  if(ui.setlistLibrary==='personal')return vPersonalSetlists();
   let h = '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
@@ -4610,6 +4611,7 @@ function normalizeCloudState(d) {
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
   state.personalSongs = Array.isArray(x.personalSongs) ? x.personalSongs : [];
+  state.personalSetlists = Array.isArray(x.personalSetlists) ? x.personalSetlists : [];
   state.groupMemberships = Array.isArray(x.groupMemberships) ? x.groupMemberships : [];
   state.activeGroupId = x.activeGroupId || state.profile.groupId || null;
   return state;
@@ -4618,6 +4620,7 @@ function hasMeaningfulState(s) {
   return !!(s && (
     (Array.isArray(s.songs) && s.songs.length) ||
     (Array.isArray(s.personalSongs) && s.personalSongs.length) ||
+    (Array.isArray(s.personalSetlists) && s.personalSetlists.length) ||
     (Array.isArray(s.events) && s.events.length) ||
     (Array.isArray(s.members) && s.members.length) ||
     (Array.isArray(s.setlists) && s.setlists.length) ||
