@@ -14924,3 +14924,9 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   .song-library-tabs { width: 100%; }
   .song-library-tab { flex: 1; min-width: 0; padding-inline: 9px; font-size: 12px; }
 }
+
+
+/* WHY: personal setlist templates use the same compact collection switcher
+   as songs, keeping group programs and reusable account templates distinct. */
+.setlist-library-tabs { margin: 0 0 14px; }
+.personal-setlists-list .song-acts { align-items: center; }
