@@ -4043,6 +4043,44 @@ document.addEventListener('click', function (e) {
       }, 'Удалить сет-лист', true);
       break;
     }
+    case 'setlist-library-group': stop(); ui.setlistLibrary='group'; ui.setlistQuery=''; render(); break;
+    case 'setlist-library-personal': stop(); ui.setlistLibrary='personal'; ui.setlistQuery=''; render(); break;
+    case 'save-setlist-template': {
+      stop();
+      const sl=slById(id);if(!sl)break;
+      const songMap=new Map();
+      (sl.items||[]).forEach(item=>{const song=songById(item.songId);if(song&&!songMap.has(String(song.id)))songMap.set(String(song.id),{sourceSongId:String(song.id),song:cloneValue(song)});});
+      const template={id:'',name:sl.name,note:sl.note||'',songs:Array.from(songMap.values()),items:(sl.items||[]).map(item=>({sourceSongId:String(item.songId),shift:Number(item.shift||0),note:item.note||''})).filter(item=>songMap.has(item.sourceSongId)),sourceGroupId:state.activeGroupId||null,sourceSetlistId:sl.id,updatedAt:new Date().toISOString()};
+      let existing=(state.personalSetlists||[]).find(x=>x.sourceGroupId===template.sourceGroupId&&x.sourceSetlistId===template.sourceSetlistId);
+      if(existing){template.id=existing.id;Object.assign(existing,template);}else{template.id=uid('pst');state.personalSetlists.push(template);}
+      save();ui.setlistLibrary='personal';go('#/setlists');render();toast('Сет-лист сохранён в личные шаблоны','ok');
+      break;
+    }
+    case 'personal-setlist-add-group': {
+      stop();
+      const template=(state.personalSetlists||[]).find(x=>String(x.id)===String(id));if(!template)break;
+      if(!state.activeGroupId){toast('Сначала создайте или выберите группу','warn');break;}
+      if(state.setlists.some(x=>x.personalTemplateId===template.id)){toast('Этот шаблон уже добавлен в текущую группу','info');break;}
+      const copies=new Map();
+      (template.songs||[]).forEach(entry=>{
+        const source=entry.song;if(!source)return;
+        const existing=source.personalSongId?state.songs.find(x=>x.personalSongId===source.personalSongId):null;
+        if(existing){copies.set(String(entry.sourceSongId),existing.id);return;}
+        const copy=cloneValue(source);copy.id=uid('s');copy.templateSourceSongId=entry.sourceSongId;
+        state.songs.push(copy);copies.set(String(entry.sourceSongId),copy.id);
+      });
+      const imported={id:uid('sl'),name:template.name,note:template.note||'',eventId:'',personalTemplateId:template.id,items:(template.items||[]).filter(item=>copies.has(String(item.sourceSongId))).map(item=>({id:uid('i'),songId:copies.get(String(item.sourceSongId)),shift:Number(item.shift||0),note:item.note||''})),updatedAt:new Date().toISOString()};
+      state.setlists.push(imported);save();ui.setlistLibrary='group';go('#/setlist/'+imported.id);render();toast('Шаблон и песни добавлены в текущую группу','ok');
+      break;
+    }
+    case 'personal-setlist-delete': {
+      stop();
+      const template=(state.personalSetlists||[]).find(x=>String(x.id)===String(id));if(!template)break;
+      confirmBox('Удалить личный шаблон?', 'Групповые сет-листы, ранее созданные из этого шаблона, останутся без изменений.',function(){
+        state.personalSetlists=state.personalSetlists.filter(x=>String(x.id)!==String(id));save();ui.setlistLibrary='personal';render();toast('Личный шаблон удалён','ok');
+      },'Удалить шаблон',true);
+      break;
+    }
     case 'dup-setlist': {
       stop();
       const sl = slById(id); if (!sl) break;
