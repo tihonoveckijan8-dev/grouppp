@@ -15017,3 +15017,69 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   .group-library-actions { gap:7px; margin:0 0 12px; }
   .group-library-actions .btn { flex:1 1 calc(50% - 7px); justify-content:center; min-height:44px; padding:9px 8px; font-size:13px; }
 }
+
+
+/* WHY: The selected workspace must remain visible on calendar, songs and setlists,
+   while switching bands stays one tap away and never mixes their shared records. */
+.group-workspace-picker {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  min-width:0;
+  margin:0 0 14px;
+  padding:10px 13px;
+  border-radius:14px;
+  background:var(--surface-2, var(--surface));
+}
+.group-workspace-current {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+  color:var(--text);
+}
+.group-workspace-current > svg { flex:0 0 auto; color:var(--accent); }
+.group-workspace-current strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:700;
+}
+.group-workspace-caption {
+  color:var(--text-muted);
+  font-size:12px;
+  white-space:nowrap;
+}
+.group-workspace-switches {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.group-workspace-chip {
+  min-height:34px;
+  max-width:180px;
+  padding:6px 11px;
+  border:0;
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+  font:inherit;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+.group-workspace-chip:active { transform:scale(.98); }
+.group-invite-row { flex:0 0 auto; }
+@media(max-width:600px) {
+  .group-workspace-picker { align-items:flex-start; flex-direction:column; gap:8px; padding:10px 11px; }
+  .group-workspace-current { width:100%; flex-wrap:wrap; }
+  .group-workspace-caption { font-size:11px; }
+  .group-workspace-current strong { flex:1 1 100%; padding-left:26px; }
+  .group-workspace-switches { width:100%; }
+  .group-workspace-chip { max-width:100%; min-height:38px; }
+}
