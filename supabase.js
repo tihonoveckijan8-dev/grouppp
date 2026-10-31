@@ -1069,6 +1069,12 @@
       lastUpdated=row.updated_at||'';
       load().then(x=>{if(x?.state)onState(x.state,row.updated_at||'');}).catch(e=>console.warn('Personal sync refresh failed',e));
     }).subscribe(status => handleStatus('personal', status));
+    // WHY: a detached account still needs personal-state realtime, but must not
+    // create invalid shared subscriptions with a null group_id after leaving its last group.
+    if(!activeGroupId){
+      groupChannel=null;
+      return ()=>disposeRealtime();
+    }
     let live=client.channel('bp-shared-'+uid);
     const refreshShared=()=>{if(!activeGroupId)return;clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{
       load().then(x=>{if(x?.state)onState(x.state,x.updatedAt||'');}).catch(e=>console.warn('Shared sync refresh failed',e));
