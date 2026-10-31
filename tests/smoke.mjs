@@ -183,7 +183,7 @@ try {
     const render = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
     if (typeof render !== 'function') return null;
     const host = document.createElement('div');
-    host.innerHTML = render({lyrics:'C       G       Am      F\\nСолнце встаёт над рекой'}, 0, []);
+    host.innerHTML = render({lyrics:'C       G       Am      F\nСолнце встаёт над рекой'}, 0, []);
     return {
       words: [...host.querySelectorAll('.scene-lyric-word')].map(node => node.textContent),
       chords: [...host.querySelectorAll('.scene-chord-stack b.ch')].map(node => node.textContent),
