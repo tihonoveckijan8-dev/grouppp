@@ -2226,31 +2226,39 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
   }
   if (!words.length) return '<span class="ln scene-chord-lyric-row">' + esc(lyricLine) + '</span>';
 
-  // WHY: Chord sheets commonly align chord starts with lyric word starts using
-  // source spaces. Match those original columns directly; proportional mapping
-  // drifts whenever the chord and lyric rows contain different word lengths.
+  // WHY: Source columns preserve the user's manual chord placement; a word-ratio
+  // fallback is used only when the chord line has no meaningful column alignment.
   const lyricWordStarts = [];
-  const lyricRe = /\\S+/g;
+  const lyricRe = /\S+/g;
   let lyricMatch;
   while ((lyricMatch = lyricRe.exec(lyricLine)) !== null) lyricWordStarts.push(lyricMatch.index);
-  const chordRe = /\\S+/g;
+  const chordTokens = [];
+  const chordRe = /\S+/g;
   let chordMatch;
-  let previousWord = 0;
   while ((chordMatch = chordRe.exec(chordLine)) !== null) {
-    if (!isChord(chordMatch[0])) continue;
+    if (isChord(chordMatch[0])) chordTokens.push({ chord: chordMatch[0], column: chordMatch.index });
+  }
+  let previousWord = 0;
+  chordTokens.forEach(function(token, tokenIndex) {
     let wordIndex = 0;
     let nearestDistance = Infinity;
     for (let i = 0; i < lyricWordStarts.length; i++) {
-      const distance = Math.abs(lyricWordStarts[i] - chordMatch.index);
+      const distance = Math.abs(lyricWordStarts[i] - token.column);
       if (distance < nearestDistance) {
         nearestDistance = distance;
         wordIndex = i;
       }
     }
-    wordIndex = Math.max(previousWord, wordIndex);
-    words[wordIndex].chords.push(transposeChord(chordMatch[0], shift));
+    // WHY: If source rows have no useful spacing, keep chord order distributed
+    // monotonically rather than stacking every chord on the first lyric word.
+    const expected = chordTokens.length > 1
+      ? Math.round(tokenIndex * (words.length - 1) / (chordTokens.length - 1))
+      : wordIndex;
+    if (nearestDistance > Math.max(3, Math.floor(lyricLine.length * 0.18))) wordIndex = expected;
+    wordIndex = Math.max(previousWord, Math.min(words.length - 1, wordIndex));
+    words[wordIndex].chords.push(transposeChord(token.chord, shift));
     previousWord = wordIndex;
-  }
+  });
 
   return '<span class="ln scene-chord-lyric-row">' + words.map(function(word) {
     const chordHTML = word.chords.length
