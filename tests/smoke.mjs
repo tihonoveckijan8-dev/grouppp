@@ -164,7 +164,7 @@ try {
   const stageChordIntegration = await page.evaluate(() => {
     const render = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
     if (typeof render !== 'function') return null;
-    const html = render({lyrics:'C       G       Am      F\\nСолнце встаёт над рекой'}, 0, []);
+    const html = render({lyrics:'[Куплет]\nC       G       Am      F\nСолнце встаёт над рекой'}, 0, []);
     const host = document.createElement('div');
     host.innerHTML = html;
     return {
