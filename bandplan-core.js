@@ -489,6 +489,7 @@ function defaults() {
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
+    groupMemberships: [], activeGroupId: null,
     settings: {
       theme: bootTheme, accent: bootAccent, accentPreset: bootPreset || null, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
@@ -2632,8 +2633,24 @@ function vSettings() {
 
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '</div>';
+  const groupMemberships = Array.isArray(state.groupMemberships) ? state.groupMemberships : [];
+  const activeGroupId = String(state.activeGroupId || state.profile.groupId || '');
+  h += '<div class="group-workspaces"><div class="field-label">Мои группы · ' + groupMemberships.length + '</div>';
+  if (groupMemberships.length) {
+    groupMemberships.forEach(function (group) {
+      const gid = String(group.group_id || '');
+      const active = gid && gid === activeGroupId;
+      h += '<button class="btn btn-secondary group-workspace-row' + (active ? ' on' : '') + '" type="button" data-act="group-switch" data-id="' + esc(gid) + '"' + (active ? ' aria-current="true" disabled' : '') + '>' +
+        '<span class="grow" style="text-align:left">' + esc(group.group_name || 'Без названия') + '<span class="t-xs t-muted" style="display:block">' + (group.role === 'owner' ? 'Владелец' : 'Участник') + '</span></span>' +
+        (active ? '<span class="member-you">Текущая</span>' : '<span class="t-muted">' + ic('arrowLeftRight', 15) + '</span>') +
+      '</button>';
+    });
+  } else {
+    h += '<div class="t-xs t-muted">Пока нет групп. Создайте свою или вступите по приглашению.</div>';
+  }
+  h += '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="group-create">' + ic('plus', 16) + 'Создать группу</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></div>';
   h += '<div class="group-settings-controls">' +
-    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
+    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button></div>' +
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
@@ -3419,20 +3436,15 @@ document.addEventListener('click', function (e) {
     }
     case 'group-leave': {
       stop();
-      confirmBox('Выйти из группы?', 'Вы потеряете доступ к её песням, событиям и сет-листам.', async function () {
+      const leavingGroupId = state.activeGroupId || state.profile.groupId || '';
+      confirmBox('Выйти из группы?', 'Вы потеряете доступ только к этой группе. Остальные группы и их данные сохранятся.', async function () {
         try {
-          await window.BandPlanCloud.leaveGroup();
-          state.songs = [];
-          state.events = [];
-          state.setlists = [];
-          state.members = [];
-          state.profile.bandName = 'Моя группа';
-          state.profile.bandDesc = '';
-          state.profile.eventParticipation = {};
-          state.profile.groupDetached = true;
+          const result = await window.BandPlanCloud.leaveGroup(leavingGroupId,state);
+          if (result?.loaded?.state) normalizeCloudState(result.loaded.state);
+          else state = defaults();
           state.onboardingDone = true;
           if (!syncIsCurrent()) return;
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+          try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
           hardClose(modalRoot);
           render();
           toast('Вы вышли из группы', 'ok');
@@ -4103,12 +4115,47 @@ document.addEventListener('click', function (e) {
       openModal({title:'Вступить в группу',sub:'Введите код приглашения, который вам отправил участник группы.',body:'<div class="field"><label class="field-label" for="f_group_code">Код приглашения</label><input class="input" id="f_group_code" maxlength="20" autocomplete="off" placeholder="Например, 7A2F91C0B4"><span class="hint">После вступления песни, события и состав группы загрузятся из общего пространства.</span></div>',footer:'<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="group-join-confirm">Вступить</button>'});
       break;
     }
+    case 'group-create': {
+      stop();
+      openModal({title:'Создать группу',sub:'Новая независимая группа со своим репертуаром, календарём и сет-листами.',body:'<div class="field"><label class="field-label" for="f_group_name">Название группы</label><input class="input" id="f_group_name" maxlength="50" autocomplete="off" placeholder="Например, Северный звук"></div>',footer:'<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="group-create-confirm">Создать группу</button>'});
+      break;
+    }
+    case 'group-create-confirm': {
+      stop();
+      const name=String(fv('f_group_name')||'').trim();
+      if(name.length<3||name.length>50){fieldError('f_group_name','Введите название от 3 до 50 символов');break;}
+      el.disabled=true;el.classList.add('loading');
+      window.BandPlanCloud.createGroup(name,state.profile.name,myRoles(),state).then(result=>{
+        if(!result?.loaded?.state)throw new Error('Группа создана, но не удалось загрузить её данные.');
+        normalizeCloudState(result.loaded.state);
+        state.onboardingDone=true;
+        modalDirty=false;hardClose(modalRoot);
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+        applyTheme();applyAccentVars();render();
+        toast('Создана группа «'+name+'»','ok',4500);
+      }).catch(err=>toast('Не удалось создать группу: '+(err.message||'Ошибка'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
+      break;
+    }
+    case 'group-switch': {
+      stop();
+      const targetGroupId=String(id||'').trim();
+      if(!targetGroupId)break;
+      el.disabled=true;el.classList.add('loading');
+      window.BandPlanCloud.switchGroup(targetGroupId,state).then(loaded=>{
+        if(!loaded?.state)throw new Error('Не удалось загрузить выбранную группу.');
+        normalizeCloudState(loaded.state);
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+        applyTheme();applyAccentVars();render();
+        toast('Переключились на «'+(state.profile.bandName||'группу')+'»','ok',3500);
+      }).catch(err=>toast('Не удалось переключить группу: '+(err.message||'Ошибка'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
+      break;
+    }
     case 'group-join-confirm': {
       stop();
       const code=String(fv('f_group_code')||'').toUpperCase().replace(/[^0-9A-F]/g,'');
       if(!code){fieldError('f_group_code','Введите код приглашения');break;}
       el.disabled=true;el.classList.add('loading');
-      window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles()).then(async result=>{
+      window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles(),state).then(async result=>{
         if(!result)throw new Error('Группа не найдена.');
         const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
         normalizeCloudState(loaded.state);
@@ -4498,6 +4545,8 @@ function normalizeCloudState(d) {
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
+  state.groupMemberships = Array.isArray(x.groupMemberships) ? x.groupMemberships : [];
+  state.activeGroupId = x.activeGroupId || state.profile.groupId || null;
   return state;
 }
 function hasMeaningfulState(s) {
