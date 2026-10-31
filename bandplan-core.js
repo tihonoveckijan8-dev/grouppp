@@ -2107,7 +2107,7 @@ function vSongs() {
     '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
   if(ui.songLibrary==='personal')return groupWorkspacePicker()+libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = groupWorkspacePicker() + libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">'
+  let h = groupWorkspacePicker() + libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -4245,7 +4245,15 @@ document.addEventListener('click', function (e) {
         break;
       }
       Promise.resolve().then(async()=>{
-        const selectedGroup=(Array.isArray(state.groupMemberships)?state.groupMemberships:[]).find(group=>String(group.group_id||'')===String(id||state.activeGroupId||''));
+        const targetGroupId=String(id||state.activeGroupId||'');
+        if(targetGroupId && targetGroupId!==String(state.activeGroupId||'')){
+          const switched=await cloud.switchGroup(targetGroupId,state);
+          if(!switched?.state)throw new Error('Не удалось открыть выбранную группу.');
+          normalizeCloudState(switched.state);
+          try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+          applyTheme();applyAccentVars();render();
+        }
+        const selectedGroup=(Array.isArray(state.groupMemberships)?state.groupMemberships:[]).find(group=>String(group.group_id||'')===targetGroupId);
         const result=await cloud.getInviteCode(selectedGroup?.group_name||state.profile?.bandName||'Моя группа',myRoles(),id||state.activeGroupId||null);
         const code=typeof result==='string'?result:result?.code;
         if(!code)throw new Error('Сервер не вернул код приглашения.');
