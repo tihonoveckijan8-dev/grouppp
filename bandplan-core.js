@@ -2252,6 +2252,16 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
       column: visualColumnAt(chordLine, chordMatch.index)
     });
   }
+  // WHY: A compact chord list has no usable horizontal alignment; distribute
+  // its changes across the lyric words instead of clustering them at the beginning.
+  const chordSpan = chordTokens.length > 1
+    ? chordTokens[chordTokens.length - 1].column - chordTokens[0].column
+    : 0;
+  const lyricSpan = lyricWordStarts.length > 1
+    ? lyricWordStarts[lyricWordStarts.length - 1] - lyricWordStarts[0]
+    : 0;
+  const hasMeaningfulColumnSpacing = chordTokens.length < 2 || lyricWordStarts.length < 2 ||
+    chordSpan >= lyricSpan * 0.65;
   let previousWord = 0;
   chordTokens.forEach(function(token, tokenIndex) {
     let wordIndex = 0;
@@ -2268,7 +2278,7 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
     const expected = chordTokens.length > 1
       ? Math.round(tokenIndex * (words.length - 1) / (chordTokens.length - 1))
       : wordIndex;
-    if (nearestDistance > Math.max(3, Math.floor(lyricLine.length * 0.18))) wordIndex = expected;
+    if (!hasMeaningfulColumnSpacing || nearestDistance > Math.max(3, Math.floor(lyricLine.length * 0.18))) wordIndex = expected;
     wordIndex = Math.max(previousWord, Math.min(words.length - 1, wordIndex));
     words[wordIndex].chords.push(transposeChord(token.chord, shift));
     previousWord = wordIndex;
