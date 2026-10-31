@@ -2081,13 +2081,20 @@ function vPersonalSongs() {
   });
   return h+'</div>';
 }
+/* WHY: Put group creation and invite entry beside the libraries users need to share. */
+function groupLibraryActions() {
+  return '<div class="group-library-actions" aria-label="Управление группой">' +
+    '<button class="btn btn-secondary" type="button" data-act="group-create">' + ic('plus',15) + '<span>Создать группу</span></button>' +
+    '<button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users',15) + '<span>Вступить по коду</span></button>' +
+    '</div>';
+}
 function vSongs() {
   const libraryTabs='<div class="song-library-tabs" role="tablist" aria-label="Библиотека песен">'+
     '<button class="song-library-tab'+(ui.songLibrary==='group'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='group')+'" data-act="song-library-group">Репертуар группы <span>'+state.songs.length+'</span></button>'+
     '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
-  if(ui.songLibrary==='personal')return libraryTabs+vPersonalSongs();
+  if(ui.songLibrary==='personal')return libraryTabs+groupLibraryActions()+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = libraryTabs + groupLibraryActions() + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -2466,10 +2473,10 @@ function vPersonalSetlists() {
 }
 function vSetlists() {
   const list = filteredSetlists();
-  if(ui.setlistLibrary==='personal')return vPersonalSetlists();
+  if(ui.setlistLibrary==='personal')return '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' + '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' + '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' + groupLibraryActions() + vPersonalSetlists();
   let h = '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
     '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
-    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' +
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' + groupLibraryActions() +
     '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
@@ -4280,6 +4287,7 @@ document.addEventListener('click', function (e) {
       window.BandPlanCloud.createGroup(name,state.profile.name,myRoles(),state).then(result=>{
         if(!result?.loaded?.state)throw new Error('Группа создана, но не удалось загрузить её данные.');
         normalizeCloudState(result.loaded.state);
+        ui.songLibrary='group';ui.setlistLibrary='group';
         state.onboardingDone=true;
         modalDirty=false;hardClose(modalRoot);
         try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
@@ -4311,6 +4319,7 @@ document.addEventListener('click', function (e) {
         if(!result)throw new Error('Группа не найдена.');
         const loaded=result.loaded||await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
         normalizeCloudState(loaded.state);
+        ui.songLibrary='group';ui.setlistLibrary='group';
         state.profile.bandName=result.group_name||state.profile.bandName;
         state.profile.groupDetached=false;
         state.onboardingDone=true;
