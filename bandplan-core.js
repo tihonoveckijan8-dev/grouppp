@@ -2054,9 +2054,40 @@ function filteredSongs() {
   return l.sort(cmp);
 }
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
+function personalSongMatches() {
+  const q=String(ui.songQuery||'').toLowerCase().trim();
+  return (state.personalSongs||[]).filter(song=>!q||((song.title||'')+' '+(song.artist||'')+' '+(song.tags||[]).join(' ')+' '+(song.lyrics||'')).toLowerCase().includes(q))
+    .sort((a,b)=>(a.title||'').localeCompare(b.title||'','ru'));
+}
+function vPersonalSongs() {
+  const list=personalSongMatches();
+  let h='<div class="toolbar songs-search-row songs-search-action-row"><div class="tb-search">'+ic('search',18)+
+    '<label class="sr-only" for="songQ">Поиск в личной библиотеке</label><input id="songQ" class="bare-input" type="search" placeholder="Найти личную песню…" value="'+esc(ui.songQuery)+'">'+
+    (ui.songQuery?'<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск">'+ic('x',15)+'</button>':'')+'</div>'+
+    '<div class="songs-search-actions"><button class="btn btn-primary songs-add-btn" type="button" data-act="new-personal-song">'+ic('plus',17)+'<span>Новая личная песня</span></button></div></div>'+
+    '<p class="t-sm t-muted mb">'+list.length+' '+plural(list.length,'песня','песни','песен')+' · хранится в аккаунте и доступна во всех ваших группах</p>';
+  if(!list.length)return h+'<div class="card">'+stateHTML(state.personalSongs.length||ui.songQuery?'search':'empty',state.personalSongs.length||ui.songQuery?'Ничего не найдено':'Личная библиотека пока пуста',
+    state.personalSongs.length||ui.songQuery?'Попробуйте изменить запрос.':'Добавьте песню сюда один раз, а затем копируйте её в репертуар любой своей группы.',
+    '<button class="btn btn-primary" type="button" data-act="new-personal-song">'+ic('plus',17)+'Добавить личную песню</button>')+'</div>';
+  h+='<div class="collection-grid collection-list songs-list personal-songs-list">';
+  list.forEach(function(song){
+    const already=(state.songs||[]).some(x=>x.personalSongId===song.id);
+    h+='<article class="song-card personal-song-card"><div class="song-top"><div class="key-badge" aria-hidden="true">'+esc(song.key||'—')+'</div>'+
+      '<div class="song-title-wrap"><h3 class="song-name">'+esc(song.title)+'</h3><div class="song-meta">'+(song.artist?'<span>'+esc(song.artist)+'</span>':'')+
+      (song.bpm?'<span class="badge b-muted num">'+song.bpm+' BPM</span>':'')+(song.tags||[]).slice(0,2).map(t=>'<span class="badge b-muted">'+esc(t)+'</span>').join('')+'</div></div></div>'+
+      '<div class="song-acts"><button class="icon-btn song-quick-action" type="button" data-act="edit-personal-song" data-id="'+esc(song.id)+'">'+ic('edit',15)+'<span class="btn-txt">Изменить</span></button>'+
+      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-add-group" data-id="'+esc(song.id)+'"'+(!state.activeGroupId?' disabled title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+'<span class="btn-txt">'+(already?'Уже в группе':'В репертуар')+'</span></button>'+
+      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-delete" data-id="'+esc(song.id)+'">'+ic('trash',15)+'<span class="btn-txt">Удалить</span></button></div></article>';
+  });
+  return h+'</div>';
+}
 function vSongs() {
+  const libraryTabs='<div class="song-library-tabs" role="tablist" aria-label="Библиотека песен">'+
+    '<button class="song-library-tab'+(ui.songLibrary==='group'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='group')+'" data-act="song-library-group">Репертуар группы <span>'+state.songs.length+'</span></button>'+
+    '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
+  if(ui.songLibrary==='personal')return libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
