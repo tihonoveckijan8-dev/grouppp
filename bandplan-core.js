@@ -2340,12 +2340,12 @@ function renderSceneLyrics(song, shift, userRoles) {
     // WHY: Chord rows and the lyric row immediately below are rendered as one
     // compact, horizontally scrollable unit; neither row can wrap independently.
     if (isChordLine(line)) {
-      if (state.settings.showChords === false) return '';
-      // WHY: Inferred stanza boundaries can point at a chord row; retain that label
-      // when the chord row is paired with its lyric line instead of silently dropping it.
+      // WHY: Keep inferred stanza labels visible even when the user hides chord symbols;
+      // chord visibility must not control whether the lyric section is identified.
       const inferredChordHeading = inferredSection
         ? '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label)
         : '';
+      if (state.settings.showChords === false) return inferredChordHeading;
       const nextLine = lines[lineIndex + 1];
       if (nextLine && nextLine.trim() && !isChordLine(nextLine) &&
           !parseSectionHeading(nextLine) && !byLine[lineIndex + 1] &&
