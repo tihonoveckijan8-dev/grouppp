@@ -2470,7 +2470,7 @@ function vPersonalSetlists() {
   let h='<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">'+
     '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-group">Сет-листы группы <span>'+state.setlists.length+'</span></button>'+
     '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-personal">Мои шаблоны <span>'+list.length+'</span></button></div>'+
-    groupLibraryActions()+'<p class="t-sm t-muted mb">Личные шаблоны хранят копии песен и структуры программы. Их можно независимо импортировать в любую вашу группу.</p>';
+    '<p class="t-sm t-muted mb">Личные шаблоны хранят копии песен и структуры программы. Их можно независимо импортировать в любую вашу группу.</p>';
   if(!list.length)return h+'<div class="card">'+stateHTML('empty','Личных шаблонов пока нет','Откройте сет-лист группы и сохраните его как личный шаблон.','<button class="btn btn-primary" type="button" data-act="setlist-library-group">Открыть сет-листы группы</button>')+'</div>';
   h+='<div class="collection-grid collection-list songs-list setlists-list personal-setlists-list">';
   list.forEach(function(template){
@@ -2489,7 +2489,7 @@ function vSetlists() {
   if(ui.setlistLibrary==='personal')return groupWorkspacePicker()+vPersonalSetlists();
   let h = '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
     '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
-    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' + groupLibraryActions() +
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' + groupWorkspacePicker() +
     '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
