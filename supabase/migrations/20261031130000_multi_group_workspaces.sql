@@ -31,10 +31,10 @@ begin
     where user_id = v_uid and group_id = p_group_id
   ) then raise exception 'GROUP_MEMBERSHIP_REQUIRED'; end if;
 
-  insert into public.bandplan_user_state(user_id, state)
+  insert into public.bandplan_user_state as current_state(user_id, state)
   values (v_uid, jsonb_build_object('activeGroupId', p_group_id::text))
   on conflict (user_id) do update
-    set state = coalesce(public.bandplan_user_state.state, '{}'::jsonb)
+    set state = coalesce(current_state.state, '{}'::jsonb)
                 || jsonb_build_object('activeGroupId', p_group_id::text),
         updated_at = now();
   return p_group_id;
@@ -194,6 +194,7 @@ begin
     select coalesce(nullif(trim(display_name),''),'Моя группа'), coalesce(roles,'{}')
       into v_name, v_roles
     from public.bandplan_accounts where user_id=v_uid;
+    v_name := coalesce(nullif(trim(v_name),''),'Моя группа');
     select c.group_id into v_gid
     from public.bandplan_create_group(v_name, '', coalesce(v_roles,'{}')) c;
   end if;
