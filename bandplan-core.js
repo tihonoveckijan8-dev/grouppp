@@ -2226,14 +2226,28 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
   }
   if (!words.length) return '<span class="ln scene-chord-lyric-row">' + esc(lyricLine) + '</span>';
 
-  const chordRe = /\S+/g;
+  // WHY: Chord sheets commonly align chord starts with lyric word starts using
+  // source spaces. Match those original columns directly; proportional mapping
+  // drifts whenever the chord and lyric rows contain different word lengths.
+  const lyricWordStarts = [];
+  const lyricRe = /\\S+/g;
+  let lyricMatch;
+  while ((lyricMatch = lyricRe.exec(lyricLine)) !== null) lyricWordStarts.push(lyricMatch.index);
+  const chordRe = /\\S+/g;
   let chordMatch;
-  const sourceLength = Math.max(1, chordLine.length - 1);
   let previousWord = 0;
   while ((chordMatch = chordRe.exec(chordLine)) !== null) {
     if (!isChord(chordMatch[0])) continue;
-    const ratio = chordMatch.index / sourceLength;
-    const wordIndex = Math.max(previousWord, Math.min(words.length - 1, Math.round(ratio * (words.length - 1))));
+    let wordIndex = 0;
+    let nearestDistance = Infinity;
+    for (let i = 0; i < lyricWordStarts.length; i++) {
+      const distance = Math.abs(lyricWordStarts[i] - chordMatch.index);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        wordIndex = i;
+      }
+    }
+    wordIndex = Math.max(previousWord, wordIndex);
     words[wordIndex].chords.push(transposeChord(chordMatch[0], shift));
     previousWord = wordIndex;
   }
