@@ -2308,7 +2308,9 @@ function renderSceneLyrics(song, shift, userRoles) {
     }
 
     const inferredSection = byLine[lineIndex];
-    if (inferredSection) {
+    // WHY: A chord-only first row is content, not an inferred section heading;
+    // process it first so pasted sheets without explicit headings still pair correctly.
+    if (inferredSection && !isChordLine(line)) {
       return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
     }
     // WHY: Chord rows and the lyric row immediately below are rendered as one
