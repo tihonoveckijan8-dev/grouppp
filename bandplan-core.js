@@ -4617,6 +4617,7 @@ function normalizeCloudState(d) {
 function hasMeaningfulState(s) {
   return !!(s && (
     (Array.isArray(s.songs) && s.songs.length) ||
+    (Array.isArray(s.personalSongs) && s.personalSongs.length) ||
     (Array.isArray(s.events) && s.events.length) ||
     (Array.isArray(s.members) && s.members.length) ||
     (Array.isArray(s.setlists) && s.setlists.length) ||
