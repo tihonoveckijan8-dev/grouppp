@@ -2722,9 +2722,9 @@ function vSettings() {
       '</button><button class="btn btn-tertiary btn-sm group-invite-row" type="button" data-act="invite" data-id="' + esc(gid) + '" aria-label="Код приглашения группы ' + esc(group.group_name || '') + '">' + ic('link',14) + 'Код</button>';
     });
   } else {
-    h += '<div class="t-xs t-muted">Пока нет групп. Создайте свою или вступите по приглашению.</div>';
+    h += '<div class="t-xs t-muted">Пока нет групп.</div>';
   }
-  h += '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="group-create">' + ic('plus', 16) + 'Создать группу</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></div>';
+  h += '</div>';
   h += '<div class="group-settings-controls">' +
     '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button></div>' +
     '</div>';
