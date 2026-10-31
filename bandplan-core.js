@@ -2642,7 +2642,7 @@ function vSettings() {
       const active = gid && gid === activeGroupId;
       h += '<button class="btn btn-secondary group-workspace-row' + (active ? ' on' : '') + '" type="button" data-act="group-switch" data-id="' + esc(gid) + '"' + (active ? ' aria-current="true" disabled' : '') + '>' +
         '<span class="grow" style="text-align:left">' + esc(group.group_name || 'Без названия') + '<span class="t-xs t-muted" style="display:block">' + (group.role === 'owner' ? 'Владелец' : 'Участник') + '</span></span>' +
-        (active ? '<span class="member-you">Текущая</span>' : '<span class="t-muted">' + ic('arrowLeftRight', 15) + '</span>') +
+        (active ? '<span class="member-you">Текущая</span>' : '<span class="t-muted">' + ic('repeat', 15) + '</span>') +
       '</button>';
     });
   } else {
