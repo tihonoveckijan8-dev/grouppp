@@ -194,6 +194,23 @@ try {
   assert.deepEqual(headinglessChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Headingless song did not pair chord row with the following lyric row');
   assert.deepEqual(headinglessChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Headingless song lost or reordered pasted chords');
   assert.equal(headinglessChordIntegration.pairedRows, 1, 'Headingless song did not create exactly one paired chord/lyric row');
+  // WHY: Inferred stanza labels must survive when a stanza starts with a chord-only row.
+  const inferredChordSectionIntegration = await page.evaluate(() => {
+    const render = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
+    if (typeof render !== 'function') return null;
+    const host = document.createElement('div');
+    host.innerHTML = render({lyrics:'C       G\\nПервая строка куплета\\n\\nD       A\\nВторая строка куплета'}, 0, []);
+    return {
+      headings: [...host.querySelectorAll('.ln.sec')].map(node => node.textContent),
+      words: [...host.querySelectorAll('.scene-lyric-word')].map(node => node.textContent),
+      chords: [...host.querySelectorAll('.scene-chord-stack b.ch')].map(node => node.textContent)
+    };
+  });
+  assert.ok(inferredChordSectionIntegration, 'Inferred chord section integration hook missing');
+  assert.deepEqual(inferredChordSectionIntegration.headings, ['Куплет 1', 'Куплет 2'], 'Inferred section labels disappeared when stanzas started with chord rows');
+  assert.deepEqual(inferredChordSectionIntegration.words, ['Первая', 'строка', 'куплета', 'Вторая', 'строка', 'куплета'], 'Inferred section handling changed paired lyric words');
+  assert.deepEqual(inferredChordSectionIntegration.chords, ['C', 'G', 'D', 'A'], 'Inferred section handling lost chord labels');
+
 
   // WHY: Verify the real Stage Mode CSS at a phone-sized viewport, not only the generated markup.
   const narrowStageLayout = await page.evaluate(() => {
