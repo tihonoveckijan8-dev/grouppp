@@ -66,8 +66,8 @@ for (const [width, height] of SIZES) {
           }, { theme, accent });
 
           for (const [name, hash] of ROUTES) {
-            if (name === 'tools' && width <= 767) {
-              // WHY: tools is intentionally nested under the "Ещё" drawer on mobile; use the real navigation control so the test covers the same delegated route flow as users.
+            if (name === 'tools' && width <= 900) {
+              // WHY: the app switches to bottom navigation at 900px; use the real "Ещё" drawer throughout that responsive layout, including 768px tablets.
               await page.locator('[data-act="more-menu-toggle"]').click();
               await page.locator('#bottomMoreMenu [data-to="tools"]').click();
             } else if (name === 'tools') {
