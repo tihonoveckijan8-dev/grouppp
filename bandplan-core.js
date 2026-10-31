@@ -3500,8 +3500,26 @@ document.addEventListener('click', function (e) {
       confirmBox('Выйти из группы?', 'Вы потеряете доступ только к этой группе. Остальные группы и их данные сохранятся.', async function () {
         try {
           const result = await window.BandPlanCloud.leaveGroup(leavingGroupId,state);
-          if (result?.loaded?.state) normalizeCloudState(result.loaded.state);
-          else state = defaults();
+          if (result?.loaded?.state) {
+            normalizeCloudState(result.loaded.state);
+          } else {
+            // WHY: leaving a workspace must never reset the personal account or its settings.
+            const personalProfile = Object.assign({}, state.profile || {});
+            delete personalProfile.groupId;
+            personalProfile.groupDetached = true;
+            personalProfile.eventParticipation = {};
+            state = Object.assign({}, state, {
+              profile: personalProfile,
+              songs: [],
+              events: [],
+              setlists: [],
+              members: [],
+              groupMemberships: [],
+              activeGroupId: null,
+              personalSongs: Array.isArray(state.personalSongs) ? state.personalSongs : [],
+              personalSetlists: Array.isArray(state.personalSetlists) ? state.personalSetlists : []
+            });
+          }
           state.onboardingDone = true;
           if (!syncIsCurrent()) return;
           try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
