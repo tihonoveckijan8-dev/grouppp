@@ -136,6 +136,29 @@ try {
   assert.doesNotMatch(dynamicsFiltering.unassignedLyrics, /Гитара вступает после первой строки|Ударные входят на второй такт/, 'Song lyrics exposed dynamics without a matching role');
   assert.match(dynamicsFiltering.localizedRoleLyrics, /Гитара вступает после первой строки/, 'Localized profile role did not match the guitar instrument');
 
+  // WHY: chord alignment is content-sensitive; verify that pasted chord columns attach to the intended lyric words.
+  const chordAlignment = await page.evaluate(() => {
+    const renderLyrics = window.__bandplanTestHooks?.renderSceneLyrics;
+    if (typeof renderLyrics !== 'function') return null;
+    const song = {lyrics: 'C       G       Am      F\\nСолнце встаёт над рекой'};
+    const html = renderLyrics(song, 0, []);
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    const pairs = [...host.querySelectorAll('.scene-chord-word')].map(node => ({
+      word: node.querySelector('.scene-lyric-word')?.textContent || '',
+      chords: [...node.querySelectorAll('.scene-chord-stack b.ch')].map(chord => chord.textContent)
+    }));
+    const transposedHost = document.createElement('div');
+    transposedHost.innerHTML = renderLyrics(song, 2, []);
+    const transposed = [...transposedHost.querySelectorAll('.scene-chord-stack b.ch')].map(chord => chord.textContent);
+    return {pairs, transposed, lyricCount: host.querySelectorAll('.scene-lyric-word').length};
+  });
+  assert.ok(chordAlignment, 'Stage chord alignment test hook missing');
+  assert.deepEqual(chordAlignment.pairs.map(pair => pair.word), ['Солнце', 'встаёт', 'над', 'рекой'], 'Chord/lyric pairing changed the source word order');
+  assert.deepEqual(chordAlignment.pairs.map(pair => pair.chords), [['C'], ['G'], ['Am'], ['F']], 'Pasted chord columns are not anchored to their intended lyric words');
+  assert.deepEqual(chordAlignment.transposed, ['D', 'A', 'Bm', 'G'], 'Stage chord alignment bypassed song transposition');
+  assert.equal(chordAlignment.lyricCount, 4, 'Paired lyric row was rendered more than once');
+
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
       const req = indexedDB.open('bandplan-cloud-v1');
