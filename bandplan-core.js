@@ -2290,7 +2290,7 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
       : '<span class="scene-chord-stack scene-chord-empty" aria-hidden="true"></span>';
     // WHY: Inline chord notation may coexist with a separate chord row; keep
     // those inline symbols styled and transposed instead of escaping them as plain text.
-    const lyricHTML = esc(word.text).replace(/\\[([A-G][^\\]\\s]*)\\]/g, (match, chord) =>
+    const lyricHTML = esc(word.text).replace(/\[([A-G][^\s\]]*)\]/g, (match, chord) =>
       isChord(chord) ? '<b class="ch inl">' + esc(transposeChord(chord, shift)) + '</b>' : match
     );
     return '<span class="scene-chord-word">' + chordHTML + '<span class="scene-lyric-word">' + lyricHTML + '</span></span>';
