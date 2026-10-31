@@ -2721,7 +2721,11 @@ function vSettings() {
       (!m.accountId ? '<span class="member-actions"><button class="icon-btn" type="button" data-act="mem-edit" data-id="' + m.id + '" aria-label="Изменить участника">' + ic('edit', 15) + '</button><button class="icon-btn" type="button" data-act="mem-del" data-id="' + m.id + '" aria-label="Удалить участника">' + ic('trash', 15) + '</button></span>' : '') +
       '</div>';
   });
-  if (window.BandPlanCloud?.user?.() && state.members.some(m => m.accountId === window.BandPlanCloud.user().id)) {
+  // WHY: membership is authoritative in groupMemberships; the display roster may omit an account with an incomplete profile.
+  const isActiveGroupMember = !!window.BandPlanCloud?.user?.() && groupMemberships.some(function (group) {
+    return String(group.group_id || '') === activeGroupId;
+  });
+  if (isActiveGroupMember) {
     h += '<div class="settings-member-footer"><button class="btn btn-danger settings-leave" type="button" data-act="group-leave">' + ic('x', 16) + '<span>Выйти из группы</span></button></div>';
   }
   h += '</section>';
