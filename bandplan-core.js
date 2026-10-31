@@ -4309,7 +4309,7 @@ document.addEventListener('click', function (e) {
       el.disabled=true;el.classList.add('loading');
       window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles(),state).then(async result=>{
         if(!result)throw new Error('Группа не найдена.');
-        const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
+        const loaded=result.loaded||await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
         normalizeCloudState(loaded.state);
         state.profile.bandName=result.group_name||state.profile.bandName;
         state.profile.groupDetached=false;
