@@ -238,7 +238,7 @@ try {
     const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
     if (typeof renderRow !== 'function') return null;
     const host = document.createElement('div');
-    host.innerHTML = renderRow('C\tG\tAm\tF', 'Солнце\tвстаёт\tнад\tрекой', 0);
+    host.innerHTML = renderRow('C\t\tG\t\tAm\t\tF', 'Солнце\tвстаёт\tнад\tрекой', 0);
     return [...host.querySelectorAll('.scene-chord-word')].map(node => ({
       word: node.querySelector('.scene-lyric-word')?.textContent,
       chord: node.querySelector('.scene-chord-stack b.ch')?.textContent || ''
