@@ -247,6 +247,24 @@ try {
   });
   assert.deepEqual(stackedChordAlignment, {word:'да', chords:['C','G']}, 'Multiple chord changes over one word were dropped or reordered');
 
+  // WHY: When pasted chords have no alignment whitespace, spread them across lyric words rather than clustering at the start.
+  const compactChordAlignment = await page.evaluate(() => {
+    const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
+    if (typeof renderRow !== 'function') return null;
+    const host = document.createElement('div');
+    host.innerHTML = renderRow('C G Am F', 'Солнце встаёт над рекой', 0);
+    return [...host.querySelectorAll('.scene-chord-word')].map(node => ({
+      word: node.querySelector('.scene-lyric-word')?.textContent,
+      chord: node.querySelector('.scene-chord-stack b.ch')?.textContent || ''
+    }));
+  });
+  assert.deepEqual(compactChordAlignment, [
+    {word:'Солнце', chord:'C'},
+    {word:'встаёт', chord:'G'},
+    {word:'над', chord:'Am'},
+    {word:'рекой', chord:'F'}
+  ], 'Compact chord list was clustered instead of distributed across lyric words');
+
   // WHY: Chord sheets copied from editors may use tabs instead of runs of spaces.
   const tabbedChordAlignment = await page.evaluate(() => {
     const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
