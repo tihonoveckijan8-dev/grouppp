@@ -233,6 +233,20 @@ try {
   assert.ok(narrowStageLayout.wordWhiteSpace.every(value => value === 'nowrap'), 'A chord/lyric word can wrap on a phone-sized screen');
   assert.equal(new Set(narrowStageLayout.wordTopPositions).size, 1, 'Chord/lyric word groups are split across multiple visual rows');
 
+  // WHY: A chord sheet can place multiple changes over one short word; retain all of them in source order.
+  const stackedChordAlignment = await page.evaluate(() => {
+    const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
+    if (typeof renderRow !== 'function') return null;
+    const host = document.createElement('div');
+    host.innerHTML = renderRow('C G', 'да', 0);
+    const word = host.querySelector('.scene-chord-word');
+    return {
+      word: word?.querySelector('.scene-lyric-word')?.textContent || '',
+      chords: [...(word?.querySelectorAll('.scene-chord-stack b.ch') || [])].map(node => node.textContent)
+    };
+  });
+  assert.deepEqual(stackedChordAlignment, {word:'да', chords:['C','G']}, 'Multiple chord changes over one word were dropped or reordered');
+
   // WHY: Chord sheets copied from editors may use tabs instead of runs of spaces.
   const tabbedChordAlignment = await page.evaluate(() => {
     const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
