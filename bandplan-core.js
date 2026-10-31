@@ -4776,15 +4776,7 @@ if (location.search.includes('bandplan-test=1')) {
     rebuildOfflineSongIndex,
     offlineSongLookup: id => offlineSongIndex.get(String(id || '')) || null,
     dynamicsHTML,
-    renderSceneLyrics,
-    renderStageChordLyricRow,
-    // WHY: smoke fixtures must test chord rendering independently of a persisted user preference.
-    renderSceneLyricsWithChords(song, shift, userRoles) {
-      const previous = state.settings.showChords;
-      state.settings.showChords = true;
-      try { return renderSceneLyrics(song, shift, userRoles); }
-      finally { state.settings.showChords = previous; }
-    }
+    renderSceneLyrics
   };
 }
 
