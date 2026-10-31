@@ -178,6 +178,22 @@ try {
   assert.deepEqual(stageChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Stage Mode renderer did not pair chord row with the following lyric row: ' + JSON.stringify(stageChordIntegration));
   assert.deepEqual(stageChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Stage Mode renderer lost or reordered pasted chords');
   assert.equal(stageChordIntegration.pairedRows, 1, 'Stage Mode renderer did not create exactly one paired chord/lyric row');
+  // WHY: Many pasted song sheets start directly with chords and have no explicit section heading.
+  const headinglessChordIntegration = await page.evaluate(() => {
+    const render = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
+    if (typeof render !== 'function') return null;
+    const host = document.createElement('div');
+    host.innerHTML = render({lyrics:'C       G       Am      F\\nСолнце встаёт над рекой'}, 0, []);
+    return {
+      words: [...host.querySelectorAll('.scene-lyric-word')].map(node => node.textContent),
+      chords: [...host.querySelectorAll('.scene-chord-stack b.ch')].map(node => node.textContent),
+      pairedRows: host.querySelectorAll('.scene-chord-lyric-row').length
+    };
+  });
+  assert.ok(headinglessChordIntegration, 'Headingless Stage Mode integration hook missing');
+  assert.deepEqual(headinglessChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Headingless song did not pair chord row with the following lyric row');
+  assert.deepEqual(headinglessChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Headingless song lost or reordered pasted chords');
+  assert.equal(headinglessChordIntegration.pairedRows, 1, 'Headingless song did not create exactly one paired chord/lyric row');
 
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
