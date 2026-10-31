@@ -489,7 +489,7 @@ function defaults() {
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
-    groupMemberships: [], activeGroupId: null,
+    personalSongs: [], groupMemberships: [], activeGroupId: null,
     settings: {
       theme: bootTheme, accent: bootAccent, accentPreset: bootPreset || null, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
@@ -502,7 +502,7 @@ let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
-  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '',
+  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '', songLibrary: 'group',
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
@@ -1087,6 +1087,7 @@ const songById = id => {
   if (navigator.onLine === false && offlineSongIndex.has(key)) return offlineSongIndex.get(key);
   return state.songs.find(s => String(s.id) === key);
 };
+const personalSongById = id => state.personalSongs.find(s => String(s.id) === String(id || ''));
 const evById = id => state.events.find(e => String(e.id) === String(id));
 const slById = id => state.setlists.find(s => s.id === id);
 const memById = id => state.members.find(m => m.id === id);
@@ -2875,8 +2876,8 @@ function readEventForm(id) {
 }
 let dynDraft = null;
 /* WHY: The complete song importer was removed at the user's request; regular song creation/editing remains available. */
-function songModal(id) {
-  const s = id ? songById(id) : null;
+function songModal(id, personalLibrary) {
+  const s = id ? (personalLibrary ? personalSongById(id) : songById(id)) : null;
   const d = s || { title: '', artist: '', key: 'Am', bpm: '', duration: '', tags: [], lyrics: '', fav: false };
   dynDraft = normalizeDynamics(s && s.dynamics);
   const tpl = '[Куплет 1]\nAm      F       C       G\nСтрока текста песни\nAm      F       G\nВторая строка\n\n[Припев]\nF       G       Em      Am\nТекст припева';
@@ -2897,8 +2898,8 @@ function songModal(id) {
     '<div class="song-dynamics-sections"><span class="field-label">Динамика по частям песни</span><div id="dynBlock"></div></div>' +
     '</div></section></div>';
   openModal({
-    title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', fullscreen: true, editor: true, body: body,
-    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="song-save" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : 'Добавить песню') + '</button>',
+    title: (s ? 'Изменить песню' : 'Новая песня') + (personalLibrary ? ' · личная библиотека' : ''), size: 'lg', fullscreen: true, editor: true, body: body,
+    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="' + (personalLibrary ? 'personal-song-save' : 'song-save') + '" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : (personalLibrary ? 'Сохранить в библиотеку' : 'Добавить песню')) + '</button>',
     onMount: function () { syncDynamicsSections(dynDraft, $('#f_slyr', modalRoot)?.value || ''); renderDynBlock(); }
   });
 }
@@ -2935,10 +2936,10 @@ function renderDynBlock() {
 
   box.innerHTML = html + '</div>';
 }
-function readSongForm(id) {
+function readSongForm(id, personalLibrary) {
   const w = modalRoot; if (!w) return null;
   const title = fv('f_stitle'); if (!title) { fieldError('f_stitle', 'Введите название песни'); return null; }
-  const old = id ? songById(id) : null;
+  const old = id ? (personalLibrary ? personalSongById(id) : songById(id)) : null;
   return {
     id: id || uid('s'), title: title, artist: old ? (old.artist || '') : '', key: $('#f_skey', w).value,
     bpm: old ? (old.bpm ?? null) : null, duration: old ? (old.duration ?? 0) : 0,
@@ -4545,6 +4546,7 @@ function normalizeCloudState(d) {
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
+  state.personalSongs = Array.isArray(x.personalSongs) ? x.personalSongs : [];
   state.groupMemberships = Array.isArray(x.groupMemberships) ? x.groupMemberships : [];
   state.activeGroupId = x.activeGroupId || state.profile.groupId || null;
   return state;
