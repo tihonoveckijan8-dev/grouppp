@@ -2108,7 +2108,7 @@ function vSongs() {
     '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
   if(ui.songLibrary==='personal')return groupWorkspacePanel()+libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = groupWorkspacePanel()+libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
