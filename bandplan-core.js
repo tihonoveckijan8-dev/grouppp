@@ -489,6 +489,7 @@ function defaults() {
   return {
     profile: { name: '', role: '', bandName: 'Моя группа', bandDesc: '', defaultParticipation: 'yes', roles: [] },
     members: [], events: [], songs: [], setlists: [],
+    personalSongs: [], personalSetlists: [], groupMemberships: [], activeGroupId: null,
     settings: {
       theme: bootTheme, accent: bootAccent, accentPreset: bootPreset || null, notation: 'auto', weekStart: 1,
       lyricsSize: 15, sceneSize: 26, sceneSpeed: 60, autoscroll: true, reduced: false, calView: 'month', toastMode: 'off', showChords: true,
@@ -501,7 +502,7 @@ let state = defaults(), uiInitialized = false;
 const ui = {
   month: new Date(), selDate: today(), calView: 'month',
   evQuery: '', evTypes: [], evMine: false, evMineMode: 'yes', evRepeat: false,
-  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '',
+  songQuery: '', setlistQuery: '', songKey: '', songTag: '', songSort: 'title', songFav: false, songSelectedId: '', setlistSelectedId: '', songLibrary: 'group', setlistLibrary: 'group',
   libQuery: '', detailTrans: {}, searchQ: '', searchIdx: 0, searchFlat: [], skeleton: false, skeletonTimer: 0, skeletonToken: 0, skeletonShownAt: 0
 };
 const participationPending = new Set();
@@ -1086,6 +1087,7 @@ const songById = id => {
   if (navigator.onLine === false && offlineSongIndex.has(key)) return offlineSongIndex.get(key);
   return state.songs.find(s => String(s.id) === key);
 };
+const personalSongById = id => state.personalSongs.find(s => String(s.id) === String(id || ''));
 const evById = id => state.events.find(e => String(e.id) === String(id));
 const slById = id => state.setlists.find(s => s.id === id);
 const memById = id => state.members.find(m => m.id === id);
@@ -2052,9 +2054,40 @@ function filteredSongs() {
   return l.sort(cmp);
 }
 function songFilterActive() { return !!(ui.songKey || ui.songTag || ui.songFav || ui.songSort !== 'title'); }
+function personalSongMatches() {
+  const q=String(ui.songQuery||'').toLowerCase().trim();
+  return (state.personalSongs||[]).filter(song=>!q||((song.title||'')+' '+(song.artist||'')+' '+(song.tags||[]).join(' ')+' '+(song.lyrics||'')).toLowerCase().includes(q))
+    .sort((a,b)=>(a.title||'').localeCompare(b.title||'','ru'));
+}
+function vPersonalSongs() {
+  const list=personalSongMatches();
+  let h='<div class="toolbar songs-search-row songs-search-action-row"><div class="tb-search">'+ic('search',18)+
+    '<label class="sr-only" for="songQ">Поиск в личной библиотеке</label><input id="songQ" class="bare-input" type="search" placeholder="Найти личную песню…" value="'+esc(ui.songQuery)+'">'+
+    (ui.songQuery?'<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск">'+ic('x',15)+'</button>':'')+'</div>'+
+    '<div class="songs-search-actions"><button class="btn btn-primary songs-add-btn" type="button" data-act="new-personal-song">'+ic('plus',17)+'<span>Новая личная песня</span></button></div></div>'+
+    '<p class="t-sm t-muted mb">'+list.length+' '+plural(list.length,'песня','песни','песен')+' · хранится в аккаунте и доступна во всех ваших группах</p>';
+  if(!list.length)return h+'<div class="card">'+stateHTML(state.personalSongs.length||ui.songQuery?'search':'empty',state.personalSongs.length||ui.songQuery?'Ничего не найдено':'Личная библиотека пока пуста',
+    state.personalSongs.length||ui.songQuery?'Попробуйте изменить запрос.':'Добавьте песню сюда один раз, а затем копируйте её в репертуар любой своей группы.',
+    '<button class="btn btn-primary" type="button" data-act="new-personal-song">'+ic('plus',17)+'Добавить личную песню</button>')+'</div>';
+  h+='<div class="collection-grid collection-list songs-list personal-songs-list">';
+  list.forEach(function(song){
+    const already=(state.songs||[]).some(x=>x.personalSongId===song.id);
+    h+='<article class="song-card personal-song-card"><div class="song-top"><div class="key-badge" aria-hidden="true">'+esc(song.key||'—')+'</div>'+
+      '<div class="song-title-wrap"><h3 class="song-name">'+esc(song.title)+'</h3><div class="song-meta">'+(song.artist?'<span>'+esc(song.artist)+'</span>':'')+
+      (song.bpm?'<span class="badge b-muted num">'+song.bpm+' BPM</span>':'')+(song.tags||[]).slice(0,2).map(t=>'<span class="badge b-muted">'+esc(t)+'</span>').join('')+'</div></div></div>'+
+      '<div class="song-acts"><button class="icon-btn song-quick-action" type="button" data-act="edit-personal-song" data-id="'+esc(song.id)+'">'+ic('edit',15)+'<span class="btn-txt">Изменить</span></button>'+
+      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-add-group" data-id="'+esc(song.id)+'"'+((!state.activeGroupId||already)?' disabled':'')+(!state.activeGroupId?' title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+'<span class="btn-txt">'+(already?'Уже в группе':'В репертуар')+'</span></button>'+
+      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-delete" data-id="'+esc(song.id)+'">'+ic('trash',15)+'<span class="btn-txt">Удалить</span></button></div></article>';
+  });
+  return h+'</div>';
+}
 function vSongs() {
+  const libraryTabs='<div class="song-library-tabs" role="tablist" aria-label="Библиотека песен">'+
+    '<button class="song-library-tab'+(ui.songLibrary==='group'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='group')+'" data-act="song-library-group">Репертуар группы <span>'+state.songs.length+'</span></button>'+
+    '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
+  if(ui.songLibrary==='personal')return libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -2412,9 +2445,32 @@ function filteredSetlists() {
   if (q) list = list.filter(sl => String(sl.name || '').toLowerCase().indexOf(q) >= 0);
   return list.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
 }
+function vPersonalSetlists() {
+  const list=(state.personalSetlists||[]).slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+  let h='<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">'+
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-group">Сет-листы группы <span>'+state.setlists.length+'</span></button>'+
+    '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-personal">Мои шаблоны <span>'+list.length+'</span></button></div>'+
+    '<p class="t-sm t-muted mb">Личные шаблоны хранят копии песен и структуры программы. Их можно независимо импортировать в любую вашу группу.</p>';
+  if(!list.length)return h+'<div class="card">'+stateHTML('empty','Личных шаблонов пока нет','Откройте сет-лист группы и сохраните его как личный шаблон.','<button class="btn btn-primary" type="button" data-act="setlist-library-group">Открыть сет-листы группы</button>')+'</div>';
+  h+='<div class="collection-grid collection-list songs-list setlists-list personal-setlists-list">';
+  list.forEach(function(template){
+    const count=(template.items||[]).length;
+    const alreadyInGroup=state.setlists.some(sl=>sl.personalTemplateId===template.id);
+    h+='<article class="song-card"><div class="song-top"><div class="key-badge" aria-hidden="true">'+count+'</div><div class="song-title-wrap"><h3 class="song-name">'+esc(template.name||'Без названия')+'</h3>'+
+      '<div class="song-meta"><span class="badge b-muted">'+count+' '+plural(count,'песня','песни','песен')+'</span>'+(template.updatedAt?'<span class="badge b-muted">'+esc(pdateShort(String(template.updatedAt).slice(0,10)))+'</span>':'')+'</div></div></div>'+
+      (template.note?'<p class="t-sm t-muted">'+esc(template.note)+'</p>':'')+
+      '<div class="song-acts"><button class="btn btn-primary btn-sm" type="button" data-act="personal-setlist-add-group" data-id="'+esc(template.id)+'"'+((!state.activeGroupId||alreadyInGroup)?' disabled':'')+(!state.activeGroupId?' title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+(alreadyInGroup?'Уже в группе':'Добавить в группу')+'</button>'+
+      '<button class="icon-btn danger" type="button" data-act="personal-setlist-delete" data-id="'+esc(template.id)+'" aria-label="Удалить шаблон">'+ic('trash',15)+'</button></div></article>';
+  });
+  return h+'</div>';
+}
 function vSetlists() {
   const list = filteredSetlists();
-  let h = '<div class="toolbar songs-search-row setlists-search-row">' +
+  if(ui.setlistLibrary==='personal')return vPersonalSetlists();
+  let h = '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
+    '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' +
+    '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
@@ -2484,6 +2540,7 @@ function vSetlist(id) {
     '<button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки" title="Редактировать">' + ic('edit', 16) + '</button>' +
     '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить сет-лист">' + ic('trash', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
+    '<button class="icon-btn" type="button" data-act="save-setlist-template" data-id="' + sl.id + '" aria-label="Сохранить как личный шаблон" title="В личные шаблоны">' + ic('star', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
     '</div></div>' +
 
@@ -2632,8 +2689,24 @@ function vSettings() {
 
   h += '<section class="card rise settings-card" data-settings-panel="group" style="animation-delay:.04s"><div class="card-h"><div><h2>Состав группы</h2><div class="sub">' + state.members.length + ' ' + plural(state.members.length, 'участник', 'участника', 'участников') + '</div></div>' +
     '</div>';
+  const groupMemberships = Array.isArray(state.groupMemberships) ? state.groupMemberships : [];
+  const activeGroupId = String(state.activeGroupId || state.profile.groupId || '');
+  h += '<div class="group-workspaces"><div class="field-label">Мои группы · ' + groupMemberships.length + '</div>';
+  if (groupMemberships.length) {
+    groupMemberships.forEach(function (group) {
+      const gid = String(group.group_id || '');
+      const active = gid && gid === activeGroupId;
+      h += '<button class="btn btn-secondary group-workspace-row' + (active ? ' on' : '') + '" type="button" data-act="group-switch" data-id="' + esc(gid) + '"' + (active ? ' aria-current="true" disabled' : '') + '>' +
+        '<span class="grow" style="text-align:left">' + esc(group.group_name || 'Без названия') + '<span class="t-xs t-muted" style="display:block">' + (group.role === 'owner' ? 'Владелец' : 'Участник') + '</span></span>' +
+        (active ? '<span class="member-you">Текущая</span>' : '<span class="t-muted">' + ic('repeat', 15) + '</span>') +
+      '</button>';
+    });
+  } else {
+    h += '<div class="t-xs t-muted">Пока нет групп. Создайте свою или вступите по приглашению.</div>';
+  }
+  h += '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="group-create">' + ic('plus', 16) + 'Создать группу</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div></div>';
   h += '<div class="group-settings-controls">' +
-    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button><button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users', 16) + 'Вступить в группу</button></div>' +
+    '<div class="profile-actions"><button class="btn btn-secondary" type="button" data-act="invite">' + ic('link', 16) + 'Код приглашения</button></div>' +
     '</div>';
   if (!state.members.length) h += stateHTML('empty', 'Состав пока пуст', 'После приглашения участники появятся здесь автоматически. Имя и роли каждого участника управляются его собственным аккаунтом.');
   state.members.forEach(function (m) {
@@ -2858,8 +2931,8 @@ function readEventForm(id) {
 }
 let dynDraft = null;
 /* WHY: The complete song importer was removed at the user's request; regular song creation/editing remains available. */
-function songModal(id) {
-  const s = id ? songById(id) : null;
+function songModal(id, personalLibrary) {
+  const s = id ? (personalLibrary ? personalSongById(id) : songById(id)) : null;
   const d = s || { title: '', artist: '', key: 'Am', bpm: '', duration: '', tags: [], lyrics: '', fav: false };
   dynDraft = normalizeDynamics(s && s.dynamics);
   const tpl = '[Куплет 1]\nAm      F       C       G\nСтрока текста песни\nAm      F       G\nВторая строка\n\n[Припев]\nF       G       Em      Am\nТекст припева';
@@ -2880,8 +2953,8 @@ function songModal(id) {
     '<div class="song-dynamics-sections"><span class="field-label">Динамика по частям песни</span><div id="dynBlock"></div></div>' +
     '</div></section></div>';
   openModal({
-    title: s ? 'Изменить песню' : 'Новая песня', size: 'lg', fullscreen: true, editor: true, body: body,
-    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="song-save" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : 'Добавить песню') + '</button>',
+    title: (s ? 'Изменить песню' : 'Новая песня') + (personalLibrary ? ' · личная библиотека' : ''), size: 'lg', fullscreen: true, editor: true, body: body,
+    footer: '<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" id="songSaveBtn" data-act="' + (personalLibrary ? 'personal-song-save' : 'song-save') + '" data-id="' + (s ? s.id : '') + '">' + ic('check', 16) + (s ? 'Сохранить изменения' : (personalLibrary ? 'Сохранить в библиотеку' : 'Добавить песню')) + '</button>',
     onMount: function () { syncDynamicsSections(dynDraft, $('#f_slyr', modalRoot)?.value || ''); renderDynBlock(); }
   });
 }
@@ -2918,10 +2991,10 @@ function renderDynBlock() {
 
   box.innerHTML = html + '</div>';
 }
-function readSongForm(id) {
+function readSongForm(id, personalLibrary) {
   const w = modalRoot; if (!w) return null;
   const title = fv('f_stitle'); if (!title) { fieldError('f_stitle', 'Введите название песни'); return null; }
-  const old = id ? songById(id) : null;
+  const old = id ? (personalLibrary ? personalSongById(id) : songById(id)) : null;
   return {
     id: id || uid('s'), title: title, artist: old ? (old.artist || '') : '', key: $('#f_skey', w).value,
     bpm: old ? (old.bpm ?? null) : null, duration: old ? (old.duration ?? 0) : 0,
@@ -3419,20 +3492,15 @@ document.addEventListener('click', function (e) {
     }
     case 'group-leave': {
       stop();
-      confirmBox('Выйти из группы?', 'Вы потеряете доступ к её песням, событиям и сет-листам.', async function () {
+      const leavingGroupId = state.activeGroupId || state.profile.groupId || '';
+      confirmBox('Выйти из группы?', 'Вы потеряете доступ только к этой группе. Остальные группы и их данные сохранятся.', async function () {
         try {
-          await window.BandPlanCloud.leaveGroup();
-          state.songs = [];
-          state.events = [];
-          state.setlists = [];
-          state.members = [];
-          state.profile.bandName = 'Моя группа';
-          state.profile.bandDesc = '';
-          state.profile.eventParticipation = {};
-          state.profile.groupDetached = true;
+          const result = await window.BandPlanCloud.leaveGroup(leavingGroupId,state);
+          if (result?.loaded?.state) normalizeCloudState(result.loaded.state);
+          else state = defaults();
           state.onboardingDone = true;
           if (!syncIsCurrent()) return;
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+          try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
           hardClose(modalRoot);
           render();
           toast('Вы вышли из группы', 'ok');
@@ -3879,6 +3947,40 @@ document.addEventListener('click', function (e) {
     case 'ev-reset': stop(); ui.evTypes = []; ui.evMine = false; ui.evMineMode = 'yes'; ui.evRepeat = false; ui.evQuery = ''; render(); if ($('#modalOverlay').classList.contains('on')) { const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'new-song': stop(); songModal(null); break;
     case 'edit-song': stop(); songModal(id); break;
+    case 'song-library-group': stop(); ui.songLibrary='group'; ui.songQuery=''; render(); break;
+    case 'song-library-personal': stop(); ui.songLibrary='personal'; ui.songQuery=''; render(); break;
+    case 'new-personal-song': stop(); songModal(null,true); break;
+    case 'edit-personal-song': stop(); songModal(id,true); break;
+    case 'personal-song-save': {
+      stop(); btnLoading(el);
+      const data=readSongForm(id,true); if(!data)break;
+      const index=state.personalSongs.findIndex(x=>String(x.id)===String(id||''));
+      if(index>=0)state.personalSongs[index]=data;else state.personalSongs.push(data);
+      modalDirty=false;hardClose(modalRoot);save();ui.songLibrary='personal';render();
+      toast(id?'Личная песня обновлена':'Песня сохранена в личную библиотеку','ok');
+      break;
+    }
+    case 'personal-song-add-group': {
+      // WHY: a personal song is a source, not a live shared record; give every
+      // group its own ID so edits and setlist references stay isolated.
+      stop();
+      const source=personalSongById(id);if(!source)break;
+      if(!state.activeGroupId){toast('Сначала создайте или выберите группу','warn');break;}
+      if(state.songs.some(song=>song.personalSongId===source.id)){toast('Эта личная песня уже добавлена в текущую группу','info');break;}
+      const copy=cloneValue(source);copy.id=uid('s');copy.personalSongId=source.id;copy.addedAt=today();
+      state.songs.push(copy);save();ui.songLibrary='personal';render();
+      toast('Независимая копия добавлена в репертуар группы','ok');
+      break;
+    }
+    case 'personal-song-delete': {
+      stop();
+      const source=personalSongById(id);if(!source)break;
+      confirmBox('Удалить личную песню?','«'+source.title+'» будет удалена только из вашей личной библиотеки. Копии в групповых репертуарах и сет-листах останутся без изменений.',function(){
+        state.personalSongs=state.personalSongs.filter(song=>String(song.id)!==String(id));
+        save();ui.songLibrary='personal';render();toast('Песня удалена из личной библиотеки','ok');
+      },'Удалить',true);
+      break;
+    }
     case 'song-save': {
       stop(); btnLoading(el);
       const data = readSongForm(id); if (!data) break;
@@ -3942,6 +4044,46 @@ document.addEventListener('click', function (e) {
         state.events.forEach(ev => { if (ev.setlistId === id) ev.setlistId = ''; });
         save(); go('#/setlists'); render(); toast('Сет-лист удалён', 'ok');
       }, 'Удалить сет-лист', true);
+      break;
+    }
+    case 'setlist-library-group': stop(); ui.setlistLibrary='group'; ui.setlistQuery=''; render(); break;
+    case 'setlist-library-personal': stop(); ui.setlistLibrary='personal'; ui.setlistQuery=''; render(); break;
+    case 'save-setlist-template': {
+      // WHY: snapshot song content into the account template so later edits in
+      // the source group cannot silently rewrite programs in other groups.
+      stop();
+      const sl=slById(id);if(!sl)break;
+      const songMap=new Map();
+      (sl.items||[]).forEach(item=>{const song=songById(item.songId);if(song&&!songMap.has(String(song.id)))songMap.set(String(song.id),{sourceSongId:String(song.id),song:cloneValue(song)});});
+      const template={id:'',name:sl.name,note:sl.note||'',songs:Array.from(songMap.values()),items:(sl.items||[]).map(item=>({sourceSongId:String(item.songId),shift:Number(item.shift||0),note:item.note||''})).filter(item=>songMap.has(item.sourceSongId)),sourceGroupId:state.activeGroupId||null,sourceSetlistId:sl.id,updatedAt:new Date().toISOString()};
+      let existing=(state.personalSetlists||[]).find(x=>x.sourceGroupId===template.sourceGroupId&&x.sourceSetlistId===template.sourceSetlistId);
+      if(existing){template.id=existing.id;Object.assign(existing,template);}else{template.id=uid('pst');state.personalSetlists.push(template);}
+      save();ui.setlistLibrary='personal';go('#/setlists');render();toast('Сет-лист сохранён в личные шаблоны','ok');
+      break;
+    }
+    case 'personal-setlist-add-group': {
+      stop();
+      const template=(state.personalSetlists||[]).find(x=>String(x.id)===String(id));if(!template)break;
+      if(!state.activeGroupId){toast('Сначала создайте или выберите группу','warn');break;}
+      if(state.setlists.some(x=>x.personalTemplateId===template.id)){toast('Этот шаблон уже добавлен в текущую группу','info');break;}
+      const copies=new Map();
+      (template.songs||[]).forEach(entry=>{
+        const source=entry.song;if(!source)return;
+        const existing=source.personalSongId?state.songs.find(x=>x.personalSongId===source.personalSongId):null;
+        if(existing){copies.set(String(entry.sourceSongId),existing.id);return;}
+        const copy=cloneValue(source);copy.id=uid('s');copy.templateSourceSongId=entry.sourceSongId;
+        state.songs.push(copy);copies.set(String(entry.sourceSongId),copy.id);
+      });
+      const imported={id:uid('sl'),name:template.name,note:template.note||'',eventId:'',personalTemplateId:template.id,items:(template.items||[]).filter(item=>copies.has(String(item.sourceSongId))).map(item=>({id:uid('i'),songId:copies.get(String(item.sourceSongId)),shift:Number(item.shift||0),note:item.note||''})),updatedAt:new Date().toISOString()};
+      state.setlists.push(imported);save();ui.setlistLibrary='group';go('#/setlist/'+imported.id);render();toast('Шаблон и песни добавлены в текущую группу','ok');
+      break;
+    }
+    case 'personal-setlist-delete': {
+      stop();
+      const template=(state.personalSetlists||[]).find(x=>String(x.id)===String(id));if(!template)break;
+      confirmBox('Удалить личный шаблон?', 'Групповые сет-листы, ранее созданные из этого шаблона, останутся без изменений.',function(){
+        state.personalSetlists=state.personalSetlists.filter(x=>String(x.id)!==String(id));save();ui.setlistLibrary='personal';render();toast('Личный шаблон удалён','ok');
+      },'Удалить шаблон',true);
       break;
     }
     case 'dup-setlist': {
@@ -4103,12 +4245,47 @@ document.addEventListener('click', function (e) {
       openModal({title:'Вступить в группу',sub:'Введите код приглашения, который вам отправил участник группы.',body:'<div class="field"><label class="field-label" for="f_group_code">Код приглашения</label><input class="input" id="f_group_code" maxlength="20" autocomplete="off" placeholder="Например, 7A2F91C0B4"><span class="hint">После вступления песни, события и состав группы загрузятся из общего пространства.</span></div>',footer:'<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="group-join-confirm">Вступить</button>'});
       break;
     }
+    case 'group-create': {
+      stop();
+      openModal({title:'Создать группу',sub:'Новая независимая группа со своим репертуаром, календарём и сет-листами.',body:'<div class="field"><label class="field-label" for="f_group_name">Название группы</label><input class="input" id="f_group_name" maxlength="50" autocomplete="off" placeholder="Например, Северный звук"></div>',footer:'<button class="btn btn-secondary" type="button" data-act="modal-close">Отмена</button><button class="btn btn-primary" type="button" data-act="group-create-confirm">Создать группу</button>'});
+      break;
+    }
+    case 'group-create-confirm': {
+      stop();
+      const name=String(fv('f_group_name')||'').trim();
+      if(name.length<3||name.length>50){fieldError('f_group_name','Введите название от 3 до 50 символов');break;}
+      el.disabled=true;el.classList.add('loading');
+      window.BandPlanCloud.createGroup(name,state.profile.name,myRoles(),state).then(result=>{
+        if(!result?.loaded?.state)throw new Error('Группа создана, но не удалось загрузить её данные.');
+        normalizeCloudState(result.loaded.state);
+        state.onboardingDone=true;
+        modalDirty=false;hardClose(modalRoot);
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+        applyTheme();applyAccentVars();render();
+        toast('Создана группа «'+name+'»','ok',4500);
+      }).catch(err=>toast('Не удалось создать группу: '+(err.message||'Ошибка'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
+      break;
+    }
+    case 'group-switch': {
+      stop();
+      const targetGroupId=String(id||'').trim();
+      if(!targetGroupId)break;
+      el.disabled=true;el.classList.add('loading');
+      window.BandPlanCloud.switchGroup(targetGroupId,state).then(loaded=>{
+        if(!loaded?.state)throw new Error('Не удалось загрузить выбранную группу.');
+        normalizeCloudState(loaded.state);
+        try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+        applyTheme();applyAccentVars();render();
+        toast('Переключились на «'+(state.profile.bandName||'группу')+'»','ok',3500);
+      }).catch(err=>toast('Не удалось переключить группу: '+(err.message||'Ошибка'),'err',7000)).finally(()=>{el.disabled=false;el.classList.remove('loading');});
+      break;
+    }
     case 'group-join-confirm': {
       stop();
       const code=String(fv('f_group_code')||'').toUpperCase().replace(/[^0-9A-F]/g,'');
       if(!code){fieldError('f_group_code','Введите код приглашения');break;}
       el.disabled=true;el.classList.add('loading');
-      window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles()).then(async result=>{
+      window.BandPlanCloud.joinGroup(code,state.profile.name,myRoles(),state).then(async result=>{
         if(!result)throw new Error('Группа не найдена.');
         const loaded=await window.BandPlanCloud.load();if(!loaded?.state)throw new Error('Не удалось загрузить данные группы.');
         normalizeCloudState(loaded.state);
@@ -4151,8 +4328,10 @@ document.addEventListener('click', function (e) {
       stop();
       confirmBox('Загрузить демо-данные?', 'Текущие песни, события и сет-листы будут заменены демонстрационными. Профиль, состав и настройки сохранятся.', function () {
         const keepP = state.profile, keepM = state.members, keepS = state.settings, keepO = state.onboardingDone;
+        const keepPersonalSongs = state.personalSongs || [], keepPersonalSetlists = state.personalSetlists || [];
         state = defaults();
         state.profile = keepP; state.members = keepM; state.settings = keepS; state.onboardingDone = keepO;
+        state.personalSongs = keepPersonalSongs; state.personalSetlists = keepPersonalSetlists;
         seedDemo(); state.profile = keepP; if (keepM.length) state.members = keepM;
         applyTheme(); applyAccentVars(); save(); hardClose(modalRoot); ui.skeleton = true; go('#/calendar');
         toast('Демо-данные загружены', 'ok');
@@ -4498,11 +4677,17 @@ function normalizeCloudState(d) {
   state.events = Array.isArray(x.events) ? x.events : [];
   state.songs = Array.isArray(x.songs) ? x.songs : [];
   state.setlists = Array.isArray(x.setlists) ? x.setlists : [];
+  state.personalSongs = Array.isArray(x.personalSongs) ? x.personalSongs : [];
+  state.personalSetlists = Array.isArray(x.personalSetlists) ? x.personalSetlists : [];
+  state.groupMemberships = Array.isArray(x.groupMemberships) ? x.groupMemberships : [];
+  state.activeGroupId = x.activeGroupId || state.profile.groupId || null;
   return state;
 }
 function hasMeaningfulState(s) {
   return !!(s && (
     (Array.isArray(s.songs) && s.songs.length) ||
+    (Array.isArray(s.personalSongs) && s.personalSongs.length) ||
+    (Array.isArray(s.personalSetlists) && s.personalSetlists.length) ||
     (Array.isArray(s.events) && s.events.length) ||
     (Array.isArray(s.members) && s.members.length) ||
     (Array.isArray(s.setlists) && s.setlists.length) ||
