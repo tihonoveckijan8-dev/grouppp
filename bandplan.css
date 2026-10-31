@@ -14930,3 +14930,36 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
    as songs, keeping group programs and reusable account templates distinct. */
 .setlist-library-tabs { margin: 0 0 14px; }
 .personal-setlists-list .song-acts { align-items: center; }
+
+
+/* Group workspace entry point: visible on both shared and personal libraries. */
+.group-workspace-panel{display:flex;flex-direction:column;gap:14px;margin:0 0 18px;padding:18px;border-radius:20px;background:var(--surf-2);border:1px solid var(--border-2);box-shadow:var(--shadow-1)}
+.group-workspace-panel-main,.group-workspace-empty{display:flex;align-items:center;gap:14px;min-width:0}
+.group-workspace-folder{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:15px;background:var(--accent-soft);color:var(--accent)}
+.group-workspace-panel-copy{min-width:0;flex:1}
+.group-workspace-panel-copy .field-label{font-size:10px;letter-spacing:.09em}
+.group-workspace-panel-copy h2{font-size:18px;line-height:1.25;margin:2px 0 3px;overflow-wrap:anywhere}
+.group-workspace-panel-copy p{margin:0}
+.group-workspace-active{flex:none;padding:5px 9px;border-radius:999px;background:var(--ok-bg);color:var(--ok);font-size:11px;font-weight:750}
+.group-workspace-panel-actions{display:flex;flex-wrap:wrap;gap:9px}
+.group-workspace-panel-actions .btn{min-height:44px}
+.group-workspace-switches{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding-top:2px}
+.group-workspace-switches>.field-label{width:100%;margin-bottom:0}
+.group-workspace-switch{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:7px 11px;border-radius:11px;background:var(--surf-3);color:var(--text-2);font-size:13px;font-weight:650}
+.group-workspace-switch:active{transform:scale(.98)}
+@media(max-width:640px){
+  .group-workspace-panel{padding:15px;gap:12px;margin-bottom:14px}
+  .group-workspace-panel-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .group-workspace-panel-actions .btn{width:100%;min-width:0;padding-inline:9px;font-size:13px}
+  .group-workspace-panel-main,.group-workspace-empty{align-items:flex-start}
+  .group-workspace-active{font-size:10px}
+}
+/* Keep bottom-tab captions legible and consistently visible on phones. */
+@media(max-width:767px){
+  #app .bottom-nav{align-items:stretch;gap:3px}
+  #app .bottom-nav>a{min-width:0;min-height:60px;justify-content:center;gap:4px;padding:7px 2px}
+  #app .bottom-nav>a>span:not(.nb){display:block!important;font-size:11.5px;line-height:1.25;white-space:nowrap;overflow:visible;text-overflow:clip;font-weight:650}
+}
+@media(max-width:380px){
+  #app .bottom-nav>a>span:not(.nb){font-size:10.5px}
+}
