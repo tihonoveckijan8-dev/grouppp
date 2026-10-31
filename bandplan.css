@@ -14963,3 +14963,37 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 @media(max-width:380px){
   #app .bottom-nav>a>span:not(.nb){font-size:10.5px}
 }
+
+
+/* WHY: Keep mobile navigation captions readable instead of shrinking them until they disappear. */
+@media (max-width: 700px) {
+  .bottom-nav > a {
+    min-height: 58px;
+    gap: 5px;
+    padding: 6px 2px;
+    font-size: 12px !important;
+    line-height: 1.2;
+  }
+  .bottom-nav > a > span:not(.nb) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+    font-size: 12px !important;
+    line-height: 1.2;
+  }
+  .bottom-nav > a > svg {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+  }
+  .song-library-tabs .song-library-tab {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+}
