@@ -2219,14 +2219,14 @@ function dynamicsHTML(song, userRoles) {
 // fragile whitespace-based positioning and keeps every chord attached to a word.
 function renderStageChordLyricRow(chordLine, lyricLine, shift) {
   const words = [];
-  const wordRe = /\\S+/g;
+  const wordRe = /\S+/g;
   let wordMatch;
   while ((wordMatch = wordRe.exec(lyricLine)) !== null) {
     words.push({ text: wordMatch[0], chords: [] });
   }
   if (!words.length) return '<span class="ln scene-chord-lyric-row">' + esc(lyricLine) + '</span>';
 
-  const chordRe = /\\S+/g;
+  const chordRe = /\S+/g;
   let chordMatch;
   const sourceLength = Math.max(1, chordLine.length - 1);
   let previousWord = 0;
@@ -2247,7 +2247,7 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
 }
 function renderSceneLyrics(song, shift, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
-  const lines = String(song && song.lyrics || '').split('\\n');
+  const lines = String(song && song.lyrics || '').split('\n');
   const occurrences = extractSectionOccurrences(song && song.lyrics || '');
   const inferred = occurrences.length && !occurrences[0].explicit;
   const byLine = Object.create(null);
@@ -2257,7 +2257,7 @@ function renderSceneLyrics(song, shift, userRoles) {
   function renderNotes(key) {
     const cues = dynamicsVisibleInstruments(d, userRoles).map(ins => {
       const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
-      return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\\n/g, '<br>') + '</span>' : '';
+      return noteText ? '<span class="ln scene-dyn-note scene-instrument-note"><b>' + esc(dynamicsInstrumentLabel(ins)) + '</b> ' + esc(noteText).replace(/\n/g, '<br>') + '</span>' : '';
     }).join('');
     return cues;
   }
@@ -2274,7 +2274,7 @@ function renderSceneLyrics(song, shift, userRoles) {
     // first lyric on the same line, e.g. "[Припев] Текст..." or "Бридж: Текст...".
     // Split the label from the lyric instead of letting the whole line disappear
     // into plain text or being misread as a chord row.
-    const sectionPrefix = /^\\s*(?:\\[([^\\]]+)\\]|(куплет(?:\\s*\\d+)?|припев(?:\\s*\\d+)?|предприпев|постприпев|бридж|переход|связка|verse(?:\\s*\\d+)?|chorus(?:\\s*\\d+)?|pre[ -]?chorus|post[ -]?chorus|bridge))\\s*(?::|：|[-—])?\\s*(.+)$/i.exec(line);
+    const sectionPrefix = /^\s*(?:\[([^\]]+)\]|(куплет(?:\s*\d+)?|припев(?:\s*\d+)?|предприпев|постприпев|бридж|переход|связка|verse(?:\s*\d+)?|chorus(?:\s*\d+)?|pre[ -]?chorus|post[ -]?chorus|bridge))\s*(?::|：|[-—])?\s*(.+)$/i.exec(line);
     if (sectionPrefix) {
       const sectionText = sectionPrefix[1] || sectionPrefix[2];
       const parsedPrefix = parseSectionHeading(sectionText);
@@ -2296,11 +2296,11 @@ function renderSceneLyrics(song, shift, userRoles) {
       const nextLine = lines[lineIndex + 1];
       if (nextLine && nextLine.trim() && !isChordLine(nextLine) &&
           !parseSectionHeading(nextLine) && !byLine[lineIndex + 1] &&
-          !/^\\s*(?:\\[[^\\]]+\\]|(куплет|припев|предприпев|постприпев|бридж|переход|связка|verse|chorus|bridge))\\b/i.test(nextLine)) {
+          !/^\s*(?:\[[^\]]+\]|(куплет|припев|предприпев|постприпев|бридж|переход|связка|verse|chorus|bridge))\b/i.test(nextLine)) {
         pairedLyricLines.add(lineIndex + 1);
         return renderStageChordLyricRow(line, nextLine, shift);
       }
-      return '<span class="ln scene-chord-line">' + line.trim().split(/\\s+/).map(function(part) {
+      return '<span class="ln scene-chord-line">' + line.trim().split(/\s+/).map(function(part) {
         return isChord(part) ? '<b class="ch">' + esc(transposeChord(part, shift)) + '</b>' : esc(part);
       }).join(' ') + '</span>';
     }
