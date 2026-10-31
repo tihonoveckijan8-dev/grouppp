@@ -195,6 +195,45 @@ try {
   assert.deepEqual(headinglessChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Headingless song lost or reordered pasted chords');
   assert.equal(headinglessChordIntegration.pairedRows, 1, 'Headingless song did not create exactly one paired chord/lyric row');
 
+  // WHY: Verify the real Stage Mode CSS at a phone-sized viewport, not only the generated markup.
+  const narrowStageLayout = await page.evaluate(() => {
+    const render = window.__bandplanTestHooks?.renderStageChordLyricRow;
+    if (typeof render !== 'function') return null;
+    const scene = document.createElement('div');
+    scene.id = 'scene';
+    scene.className = 'on';
+    scene.style.cssText = 'position:fixed;left:-10000px;top:0;width:320px;height:400px;display:flex;';
+    const body = document.createElement('div');
+    body.id = 'scBody';
+    body.className = 'scene-body';
+    body.style.cssText = 'display:block;flex:none;width:320px;height:300px;font-size:26px;';
+    body.innerHTML = render(
+      'C       G       Am      F       Dm      Em      G       C',
+      'Солнце встаёт над рекой и снова освещает весь наш путь домой', 0
+    );
+    scene.append(body);
+    document.body.append(scene);
+    const row = body.querySelector('.scene-chord-lyric-row');
+    const words = [...body.querySelectorAll('.scene-chord-word')];
+    const result = row ? {
+      clientWidth: row.clientWidth,
+      scrollWidth: row.scrollWidth,
+      overflowX: getComputedStyle(row).overflowX,
+      whiteSpace: getComputedStyle(row).whiteSpace,
+      wordWhiteSpace: words.map(word => getComputedStyle(word).whiteSpace),
+      wordTopPositions: words.map(word => Math.round(word.getBoundingClientRect().top))
+    } : null;
+    scene.remove();
+    return result;
+  });
+  assert.ok(narrowStageLayout, 'Narrow Stage Mode layout fixture could not be rendered');
+  assert.equal(narrowStageLayout.overflowX, 'auto', 'Long Stage Mode chord/lyric rows cannot scroll horizontally');
+  assert.equal(narrowStageLayout.whiteSpace, 'nowrap', 'Stage Mode chord/lyric row can wrap onto another line');
+  assert.ok(narrowStageLayout.scrollWidth > narrowStageLayout.clientWidth, 'Long Stage Mode chord/lyric row does not overflow horizontally for scrolling');
+  assert.ok(narrowStageLayout.wordWhiteSpace.every(value => value === 'nowrap'), 'A chord/lyric word can wrap on a phone-sized screen');
+  assert.equal(new Set(narrowStageLayout.wordTopPositions).size, 1, 'Chord/lyric word groups are split across multiple visual rows');
+
+
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
       const req = indexedDB.open('bandplan-cloud-v1');
