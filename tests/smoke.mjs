@@ -233,6 +233,25 @@ try {
   assert.ok(narrowStageLayout.wordWhiteSpace.every(value => value === 'nowrap'), 'A chord/lyric word can wrap on a phone-sized screen');
   assert.equal(new Set(narrowStageLayout.wordTopPositions).size, 1, 'Chord/lyric word groups are split across multiple visual rows');
 
+  // WHY: Chord sheets copied from editors may use tabs instead of runs of spaces.
+  const tabbedChordAlignment = await page.evaluate(() => {
+    const renderRow = window.__bandplanTestHooks?.renderStageChordLyricRow;
+    if (typeof renderRow !== 'function') return null;
+    const host = document.createElement('div');
+    host.innerHTML = renderRow('C\\tG\\tAm\\tF', 'Солнце\\tвстаёт\\tнад\\tрекой', 0);
+    return [...host.querySelectorAll('.scene-chord-word')].map(node => ({
+      word: node.querySelector('.scene-lyric-word')?.textContent,
+      chord: node.querySelector('.scene-chord-stack b.ch')?.textContent || ''
+    }));
+  });
+  assert.deepEqual(tabbedChordAlignment, [
+    {word:'Солнце', chord:'C'},
+    {word:'встаёт', chord:'G'},
+    {word:'над', chord:'Am'},
+    {word:'рекой', chord:'F'}
+  ], 'Tabbed chord sheet did not preserve chord-to-word alignment');
+
+
 
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
