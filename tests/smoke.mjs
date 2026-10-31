@@ -140,7 +140,7 @@ try {
   const chordAlignment = await page.evaluate(() => {
     const renderLyrics = window.__bandplanTestHooks?.renderSceneLyrics;
     if (typeof renderLyrics !== 'function') return null;
-    const song = {lyrics: 'C       G       Am      F\\nСолнце встаёт над рекой'};
+    const song = {lyrics: 'C       G       Am      F\nСолнце встаёт над рекой'};
     const html = renderLyrics(song, 0, []);
     const host = document.createElement('div');
     host.innerHTML = html;
