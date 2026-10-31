@@ -882,7 +882,7 @@
       return {
         state:Object.assign({},hydratedPersonal,{
           profile:personalEvents.profile,
-          personalSongs:Array.isArray(pstate.personalSongs)?pstate.personalSongs:[],
+          personalSongs:Array.isArray(pstate.personalSongs)?pstate.personalSongs:[],personalSetlists:Array.isArray(pstate.personalSetlists)?pstate.personalSetlists:[],
           songs:[],
           events:[],
           setlists:[],
@@ -935,7 +935,7 @@
       return copy;
     });
     const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
-    return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,personalSongs:Array.isArray(pstate.personalSongs)?pstate.personalSongs:[],songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster,groupMemberships,activeGroupId}),updatedAt:lastUpdated};
+    return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,personalSongs:Array.isArray(pstate.personalSongs)?pstate.personalSongs:[],personalSetlists:Array.isArray(pstate.personalSetlists)?pstate.personalSetlists:[],songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster,groupMemberships,activeGroupId}),updatedAt:lastUpdated};
   }
   function assertSessionOwner(userId){
     if(!currentSession?.user?.id || currentSession.user.id!==userId){
@@ -1031,7 +1031,7 @@
       };
     }
     assertSessionOwner(uid);
-    const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone,activeGroupId:activeGroupId||null,personalSongs:Array.isArray(snapshot.personalSongs)?snapshot.personalSongs:[]};
+    const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone,activeGroupId:activeGroupId||null,personalSongs:Array.isArray(snapshot.personalSongs)?snapshot.personalSongs:[],personalSetlists:Array.isArray(snapshot.personalSetlists)?snapshot.personalSetlists:[]};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
     if(error){pending=snapshot;await writeDurableState(uid,snapshot,updatedAt,true);throw error;}
     assertSessionOwner(uid);
