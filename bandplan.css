@@ -14785,3 +14785,68 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     min-height: 50px !important;
   }
 }
+
+
+/* WHY: Keep pasted chord/lyric pairs compact and on one visual row in Stage Mode.
+   Each word owns its chord label, so font scaling cannot pull chords away from lyrics. */
+#scene #scBody .scene-chord-lyric-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: .34em !important;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+  margin-block: .12em .24em !important;
+  padding: 0 0 3px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+#scene #scBody .scene-chord-lyric-row::-webkit-scrollbar { display: none; }
+#scene #scBody .scene-chord-word {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  min-width: 0;
+  white-space: nowrap !important;
+  line-height: 1.12 !important;
+}
+#scene #scBody .scene-chord-stack {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: .12em !important;
+  min-height: 1.02em;
+  margin: 0 0 .04em !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+#scene #scBody .scene-chord-stack.scene-chord-empty { visibility: hidden; }
+#scene #scBody .scene-chord-lyric-row .scene-chord-stack b.ch {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 .08em !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--accent) !important;
+  font-size: .72em !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+#scene #scBody .scene-lyric-word {
+  display: inline-block !important;
+  white-space: nowrap !important;
+  line-height: 1.22 !important;
+}

@@ -2215,6 +2215,87 @@ function dynamicsHTML(song, userRoles) {
     return '<div class="song-dynamics-section"><strong>' + esc(name) + '</strong>' + instruments + '</div>';
   }).join('') + '</div>';
 }
+// WHY: Pair a chord-only source row with the lyric row beneath it. This removes
+// fragile whitespace-based positioning and keeps every chord attached to a word.
+function renderStageChordLyricRow(chordLine, lyricLine, shift) {
+  const words = [];
+  const wordRe = /\S+/g;
+  let wordMatch;
+  while ((wordMatch = wordRe.exec(lyricLine)) !== null) {
+    words.push({ text: wordMatch[0], chords: [] });
+  }
+  if (!words.length) return '<span class="ln scene-chord-lyric-row">' + esc(lyricLine) + '</span>';
+
+  // WHY: Source columns preserve the user's manual chord placement; a word-ratio
+  // fallback is used only when the chord line has no meaningful column alignment.
+  // WHY: Tabs occupy tab-stop columns, not one character; normalize their visual
+  // positions before comparing chord columns with lyric word starts.
+  function visualColumnAt(source, endIndex) {
+    let column = 0;
+    for (let i = 0; i < endIndex; i++) {
+      column = source[i] === '\t' ? column + (4 - column % 4) : column + 1;
+    }
+    return column;
+  }
+  const lyricWordStarts = [];
+  const lyricRe = /\S+/g;
+  let lyricMatch;
+  while ((lyricMatch = lyricRe.exec(lyricLine)) !== null) {
+    lyricWordStarts.push(visualColumnAt(lyricLine, lyricMatch.index));
+  }
+  const chordTokens = [];
+  const chordRe = /\S+/g;
+  let chordMatch;
+  while ((chordMatch = chordRe.exec(chordLine)) !== null) {
+    if (isChord(chordMatch[0])) chordTokens.push({
+      chord: chordMatch[0],
+      column: visualColumnAt(chordLine, chordMatch.index)
+    });
+  }
+  // WHY: A compact chord list has no usable horizontal alignment; distribute
+  // its changes across the lyric words instead of clustering them at the beginning.
+  const chordSpan = chordTokens.length > 1
+    ? chordTokens[chordTokens.length - 1].column - chordTokens[0].column
+    : 0;
+  const lyricSpan = lyricWordStarts.length > 1
+    ? lyricWordStarts[lyricWordStarts.length - 1] - lyricWordStarts[0]
+    : 0;
+  const hasMeaningfulColumnSpacing = chordTokens.length < 2 || lyricWordStarts.length < 2 ||
+    chordSpan >= lyricSpan * 0.65;
+  let previousWord = 0;
+  chordTokens.forEach(function(token, tokenIndex) {
+    let wordIndex = 0;
+    let nearestDistance = Infinity;
+    for (let i = 0; i < lyricWordStarts.length; i++) {
+      const distance = Math.abs(lyricWordStarts[i] - token.column);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        wordIndex = i;
+      }
+    }
+    // WHY: If source rows have no useful spacing, keep chord order distributed
+    // monotonically rather than stacking every chord on the first lyric word.
+    const expected = chordTokens.length > 1
+      ? Math.round(tokenIndex * (words.length - 1) / (chordTokens.length - 1))
+      : wordIndex;
+    if (!hasMeaningfulColumnSpacing || nearestDistance > Math.max(3, Math.floor(lyricLine.length * 0.18))) wordIndex = expected;
+    wordIndex = Math.max(previousWord, Math.min(words.length - 1, wordIndex));
+    words[wordIndex].chords.push(transposeChord(token.chord, shift));
+    previousWord = wordIndex;
+  });
+
+  return '<span class="ln scene-chord-lyric-row">' + words.map(function(word) {
+    const chordHTML = word.chords.length
+      ? '<span class="scene-chord-stack">' + word.chords.map(chord => '<b class="ch">' + esc(chord) + '</b>').join('') + '</span>'
+      : '<span class="scene-chord-stack scene-chord-empty" aria-hidden="true"></span>';
+    // WHY: Inline chord notation may coexist with a separate chord row; keep
+    // those inline symbols styled and transposed instead of escaping them as plain text.
+    const lyricHTML = esc(word.text).replace(/\[([A-G][^\s\]]*)\]/g, (match, chord) =>
+      isChord(chord) ? '<b class="ch inl">' + esc(transposeChord(chord, shift)) + '</b>' : match
+    );
+    return '<span class="scene-chord-word">' + chordHTML + '<span class="scene-lyric-word">' + lyricHTML + '</span></span>';
+  }).join('') + '</span>';
+}
 function renderSceneLyrics(song, shift, userRoles) {
   const d = normalizeDynamics(song && song.dynamics);
   const lines = String(song && song.lyrics || '').split('\n');
@@ -2223,6 +2304,7 @@ function renderSceneLyrics(song, shift, userRoles) {
   const byLine = Object.create(null);
   if (inferred) occurrences.forEach(section => { byLine[section.lineIndex] = section; });
   let sectionIndex = 0;
+  const pairedLyricLines = new Set();
   function renderNotes(key) {
     const cues = dynamicsVisibleInstruments(d, userRoles).map(ins => {
       const noteText = String((d.instrumentNotes[ins] || {})[key] || '').trim();
@@ -2231,6 +2313,7 @@ function renderSceneLyrics(song, shift, userRoles) {
     return cues;
   }
   return lines.map(function(line, lineIndex) {
+    if (pairedLyricLines.has(lineIndex)) return '';
     const heading = parseSectionHeading(line);
     if (heading) {
       const occurrence = occurrences[sectionIndex++];
@@ -2254,17 +2337,30 @@ function renderSceneLyrics(song, shift, userRoles) {
     }
 
     const inferredSection = byLine[lineIndex];
-    if (inferredSection) {
+    // WHY: A chord-only first row is content, not an inferred section heading;
+    // process it first so pasted sheets without explicit headings still pair correctly.
+    if (inferredSection && !isChordLine(line)) {
       return '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label) + renderLyrics(line, shift);
     }
-    // In Stage Mode, keep a copied chord-only row in its original left-to-right order.
-    // Do not split chords into separate blocks or normalize their spacing/order.
+    // WHY: Chord rows and the lyric row immediately below are rendered as one
+    // compact, horizontally scrollable unit; neither row can wrap independently.
     if (isChordLine(line)) {
-      if (state.settings.showChords === false) return '';
-      return '<span class="ln scene-chord-line">' + line.split(/(\s+)/).map(function(part) {
-        if (/^\s+$/.test(part)) return part;
+      // WHY: Keep inferred stanza labels visible even when the user hides chord symbols;
+      // chord visibility must not control whether the lyric section is identified.
+      const inferredChordHeading = inferredSection
+        ? '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label)
+        : '';
+      if (state.settings.showChords === false) return inferredChordHeading;
+      const nextLine = lines[lineIndex + 1];
+      if (nextLine && nextLine.trim() && !isChordLine(nextLine) &&
+          !parseSectionHeading(nextLine) && !byLine[lineIndex + 1] &&
+          !/^\s*(?:\[[^\]]+\]|(куплет|припев|предприпев|постприпев|бридж|переход|связка|verse|chorus|bridge))\b/i.test(nextLine)) {
+        pairedLyricLines.add(lineIndex + 1);
+        return inferredChordHeading + renderStageChordLyricRow(line, nextLine, shift);
+      }
+      return inferredChordHeading + '<span class="ln scene-chord-line">' + line.trim().split(/\s+/).map(function(part) {
         return isChord(part) ? '<b class="ch">' + esc(transposeChord(part, shift)) + '</b>' : esc(part);
-      }).join('') + '</span>';
+      }).join(' ') + '</span>';
     }
     return renderLyrics(line, shift);
   }).join('');
