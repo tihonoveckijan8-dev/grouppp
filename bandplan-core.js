@@ -2228,15 +2228,29 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
 
   // WHY: Source columns preserve the user's manual chord placement; a word-ratio
   // fallback is used only when the chord line has no meaningful column alignment.
+  // WHY: Tabs occupy tab-stop columns, not one character; normalize their visual
+  // positions before comparing chord columns with lyric word starts.
+  function visualColumnAt(source, endIndex) {
+    let column = 0;
+    for (let i = 0; i < endIndex; i++) {
+      column = source[i] === '\\t' ? column + (4 - column % 4) : column + 1;
+    }
+    return column;
+  }
   const lyricWordStarts = [];
   const lyricRe = /\S+/g;
   let lyricMatch;
-  while ((lyricMatch = lyricRe.exec(lyricLine)) !== null) lyricWordStarts.push(lyricMatch.index);
+  while ((lyricMatch = lyricRe.exec(lyricLine)) !== null) {
+    lyricWordStarts.push(visualColumnAt(lyricLine, lyricMatch.index));
+  }
   const chordTokens = [];
   const chordRe = /\S+/g;
   let chordMatch;
   while ((chordMatch = chordRe.exec(chordLine)) !== null) {
-    if (isChord(chordMatch[0])) chordTokens.push({ chord: chordMatch[0], column: chordMatch.index });
+    if (isChord(chordMatch[0])) chordTokens.push({
+      chord: chordMatch[0],
+      column: visualColumnAt(chordLine, chordMatch.index)
+    });
   }
   let previousWord = 0;
   chordTokens.forEach(function(token, tokenIndex) {
