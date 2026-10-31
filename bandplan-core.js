@@ -2059,27 +2059,6 @@ function personalSongMatches() {
   return (state.personalSongs||[]).filter(song=>!q||((song.title||'')+' '+(song.artist||'')+' '+(song.tags||[]).join(' ')+' '+(song.lyrics||'')).toLowerCase().includes(q))
     .sort((a,b)=>(a.title||'').localeCompare(b.title||'','ru'));
 }
-/* WHY: Make group actions discoverable directly from the song and setlist libraries. */
-function groupWorkspacePanel(){
-  const memberships=Array.isArray(state.groupMemberships)?state.groupMemberships:[];
-  const activeId=String(state.activeGroupId||state.profile.groupId||'');
-  const active=memberships.find(group=>String(group.group_id||'')===activeId);
-  const groupName=active?.group_name||state.profile.bandName||'Ваша группа';
-  let h='<section class="group-workspace-panel card" aria-label="Рабочее пространство группы">';
-  if(activeId){
-    h+='<div class="group-workspace-panel-main"><div class="group-workspace-folder" aria-hidden="true">'+ic('folder',22)+'</div><div class="group-workspace-panel-copy"><span class="field-label">РАБОЧЕЕ ПРОСТРАНСТВО</span><h2>'+esc(groupName)+'</h2><p class="t-sm t-muted">Общие песни, сет-листы и участники группы</p></div><span class="group-workspace-active">Активна</span></div>';
-    if(memberships.length>1){
-      h+='<div class="group-workspace-switches"><span class="field-label">Переключить группу</span>';
-      memberships.forEach(group=>{const gid=String(group.group_id||'');if(!gid||gid===activeId)return;h+='<button class="group-workspace-switch" type="button" data-act="group-switch" data-id="'+esc(gid)+'">'+ic('repeat',14)+esc(group.group_name||'Без названия')+'</button>';});
-      h+='</div>';
-    }
-    h+='<div class="group-workspace-panel-actions"><button class="btn btn-secondary" type="button" data-act="invite">'+ic('link',16)+'Код приглашения</button><button class="btn btn-secondary" type="button" data-act="group-create">'+ic('plus',16)+'Создать ещё группу</button><button class="btn btn-secondary" type="button" data-act="group-join">'+ic('users',16)+'Вступить в группу</button></div>';
-  }else{
-    h+='<div class="group-workspace-empty"><div class="group-workspace-folder" aria-hidden="true">'+ic('folder-plus',24)+'</div><div class="group-workspace-panel-copy"><h2>Подключите свою группу</h2><p class="t-sm t-muted">Создайте общее пространство или вступите по коду приглашения. Здесь появятся общие песни и сет-листы.</p></div></div>';
-    h+='<div class="group-workspace-panel-actions"><button class="btn btn-primary" type="button" data-act="group-create">'+ic('plus',17)+'Создать группу</button><button class="btn btn-secondary" type="button" data-act="group-join">'+ic('users',17)+'Вступить по коду</button></div>';
-  }
-  return h+'</section>';
-}
 function vPersonalSongs() {
   const list=personalSongMatches();
   let h='<div class="toolbar songs-search-row songs-search-action-row"><div class="tb-search">'+ic('search',18)+
@@ -2106,9 +2085,9 @@ function vSongs() {
   const libraryTabs='<div class="song-library-tabs" role="tablist" aria-label="Библиотека песен">'+
     '<button class="song-library-tab'+(ui.songLibrary==='group'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='group')+'" data-act="song-library-group">Репертуар группы <span>'+state.songs.length+'</span></button>'+
     '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
-  if(ui.songLibrary==='personal')return groupWorkspacePanel()+libraryTabs+vPersonalSongs();
+  if(ui.songLibrary==='personal')return libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = groupWorkspacePanel()+libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">' +
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -2487,8 +2466,8 @@ function vPersonalSetlists() {
 }
 function vSetlists() {
   const list = filteredSetlists();
-  if(ui.setlistLibrary==='personal')return groupWorkspacePanel()+vPersonalSetlists();
-  let h = groupWorkspacePanel()+'<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
+  if(ui.setlistLibrary==='personal')return vPersonalSetlists();
+  let h = '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
     '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
     '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' +
     '<div class="toolbar songs-search-row setlists-search-row">' +
