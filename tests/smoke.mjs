@@ -138,7 +138,7 @@ try {
 
   // WHY: chord alignment is content-sensitive; verify that pasted chord columns attach to the intended lyric words.
   const chordAlignment = await page.evaluate(() => {
-    const renderLyrics = window.__bandplanTestHooks?.renderSceneLyrics;
+    const renderLyrics = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
     if (typeof renderLyrics !== 'function') return null;
     const song = {lyrics: 'C       G       Am      F\nСолнце встаёт над рекой'};
     const html = renderLyrics(song, 0, []);
