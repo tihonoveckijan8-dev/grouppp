@@ -12,9 +12,14 @@ permissions:
 
 jobs:
   visual-matrix:
-    # WHY: Playwright is pinned to 1.56.1; keep CI on Ubuntu 24.04 while ubuntu-latest migrates to Ubuntu 26 and browser install compatibility is verified.
+    # WHY: Playwright is pinned to 1.56.1; keep CI on Ubuntu 24.04 while browser compatibility is verified.
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      # WHY: separate viewport jobs prevent one slow viewport from holding the entire matrix hostage; each runner handles only its nine theme/accent cases.
+      matrix:
+        viewport: ['360x800', '390x844', '768x1024', '1280x800', '1920x1080']
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +34,7 @@ jobs:
       - name: Install pinned Playwright
         run: npm install --no-save --package-lock=false playwright@1.56.1
       - name: Install Chromium
-        # WHY: GitHub-hosted Ubuntu runners already include the browser's system libraries; avoid a second apt/dependency install that can stall CI before visual tests start.
+        # WHY: GitHub-hosted Ubuntu runners already include the browser's system libraries; avoid a second apt/dependency install.
         run: npx playwright install chromium
       - name: Start static server
         run: |
@@ -41,12 +46,13 @@ jobs:
           cat /tmp/bandplan-visual.log
           exit 1
       - name: Run responsive visual matrix
-        run: npx playwright test tests/visual-matrix.spec.mjs --reporter=line --workers=1
+        # WHY: each viewport job runs its nine theme/accent cases with bounded browser concurrency; all 45 combinations remain covered.
+        run: npx playwright test tests/visual-matrix.spec.mjs --reporter=line --grep "${{ matrix.viewport }}" --workers=2
       - name: Upload screenshots and test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bandplan-visual-matrix
+          name: bandplan-visual-matrix-${{ matrix.viewport }}
           path: |
             test-results/
             /tmp/bandplan-visual.log

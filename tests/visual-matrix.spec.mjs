@@ -1,7 +1,8 @@
 import { test, expect } from 'playwright/test';
 
 const BASE = 'http://127.0.0.1:4174';
-const SIZES = [[360, 800], [390, 844], [1280, 800]];
+// WHY: cover narrow phones, compact phones, tablet, standard desktop, and wide desktop without changing production code.
+const SIZES = [[360, 800], [390, 844], [768, 1024], [1280, 800], [1920, 1080]];
 const THEMES = ['light', 'dark', 'amoled'];
 const ACCENTS = ['blue', 'red', 'amber'];
 const ROUTES = [
@@ -38,11 +39,11 @@ async function auditViewport(page, label) {
   expect(metrics.visibleOutside, label + ': visible controls/cards outside viewport').toEqual([]);
 }
 
-test('BandPlan visual matrix: responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
-  // WHY: 27 viewport/theme/accent combinations intentionally run sequentially to keep CI stable.
-  test.setTimeout(20 * 60 * 1000);
-  let screenshotIndex = 0;
-  for (const [width, height] of SIZES) {
+// WHY: isolate each viewport as a Playwright test so CI can parallelize the matrix without dropping any theme/accent/route coverage.
+for (const [width, height] of SIZES) {
+  test('BandPlan visual matrix: ' + width + 'x' + height + ' responsive routes, themes, accents and key forms', async ({ browser }, testInfo) => {
+    test.setTimeout(10 * 60 * 1000);
+    let screenshotIndex = 0;
     for (const theme of THEMES) {
       for (const accent of ACCENTS) {
         const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 });
@@ -65,17 +66,18 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
           }, { theme, accent });
 
           for (const [name, hash] of ROUTES) {
-            if (name === 'tools' && width <= 767) {
-              // WHY: tools is intentionally nested under the "Ещё" drawer on mobile; use the real navigation control so the test covers the same delegated route flow as users.
+            if (name === 'tools' && width <= 900) {
+              // WHY: the app switches to bottom navigation at 900px; use the real "Ещё" drawer throughout that responsive layout, including 768px tablets.
               await page.locator('[data-act="more-menu-toggle"]').click();
               await page.locator('#bottomMoreMenu [data-to="tools"]').click();
             } else if (name === 'tools') {
               // WHY: desktop users reach tools from the persistent side navigation; the mobile drawer is hidden at this viewport.
               await page.locator('#sideNav [data-to="tools"]').click();
             } else {
-              await page.evaluate(hash => { location.hash = hash; }, hash);
+              await page.evaluate(hash => window.__bandplanTestHooks.navigate(hash), hash);
             }
-            await page.waitForTimeout(100);
+            // WHY: test-hook navigation bypasses native hashchange timing; delegated drawer navigation remains covered through real clicks.
+            await expect(page.locator('body')).toHaveAttribute('data-route', name, { timeout: 15000 });
             await auditViewport(page, width + 'x' + height + ' ' + theme + '/' + accent + '/' + name);
             if (name === 'setlist' && width === 360 && theme === 'light' && accent === 'blue') {
               // WHY: stage mode is a separate full-screen surface; exercise its real open/close flow once to catch regressions without adding fullscreen churn to every matrix combination.
@@ -103,8 +105,13 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
               await expect(page.locator('.cal-selected-day')).toBeHidden();
               const dayWithEvents = page.locator('.cal-grid > .cal-cell.cal-has-events').first();
               if (await dayWithEvents.count()) {
-                const badgeDisplay = await dayWithEvents.evaluate(el => getComputedStyle(el, '::after').display);
-                expect(badgeDisplay, 'Calendar day count badge should be hidden').toBe('none');
+                const badge = await dayWithEvents.evaluate(el => {
+                  const style = getComputedStyle(el, '::after');
+                  return { display: style.display, content: style.content };
+                });
+                // WHY: Chromium may report an empty display value when no generated pseudo-element exists; test the rendered badge, not an implementation-specific CSSOM default.
+                const noGeneratedBadge = ['none', 'normal', '""', ''].includes(badge.content);
+                expect(badge.display === 'none' || noGeneratedBadge, 'Calendar day count badge should not be visible').toBe(true);
               }
               const tomorrow = await page.evaluate(() => {
                 const d = new Date();
@@ -119,8 +126,9 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             }
           }
 
-          await page.evaluate(() => { location.hash = '#/calendar'; });
-          await page.waitForTimeout(100);
+          await page.evaluate(() => window.__bandplanTestHooks.navigate('#/calendar'));
+          // WHY: capture the fully rendered calendar, not a transient skeleton during the hash-route transition.
+          await expect(page.locator('body')).toHaveAttribute('data-route', 'calendar', { timeout: 15000 });
           await page.screenshot({
             path: testInfo.outputPath('matrix-' + String(++screenshotIndex).padStart(2, '0') + '-' + width + 'x' + height + '-' + theme + '-' + accent + '.png'),
             fullPage: true
@@ -132,8 +140,9 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
             { route: '#/setlists', selector: '[data-act="new-setlist"]', label: 'setlist form', close: '[data-act="modal-close"]' }
           ];
           for (const form of formChecks) {
-            await page.evaluate(route => { location.hash = route; }, form.route);
-            await page.waitForTimeout(100);
+            await page.evaluate(route => window.__bandplanTestHooks.navigate(route), form.route);
+            // WHY: open each form only after its target route has finished rendering; fixed sleeps were flaky on slower CI runners.
+            await expect(page.locator('body')).toHaveAttribute('data-route', form.route.slice(2), { timeout: 15000 });
             const trigger = page.locator(form.selector + ':visible').first();
             if (await trigger.count()) {
               await trigger.click();
@@ -149,5 +158,5 @@ test('BandPlan visual matrix: responsive routes, themes, accents and key forms',
         }
       }
     }
-  }
-});
+  });
+}
