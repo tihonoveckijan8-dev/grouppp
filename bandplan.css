@@ -14907,7 +14907,7 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
 .song-library-tab.on {
   background: var(--surface-1);
   color: var(--text-primary);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.08));
+  box-shadow: var(--shadow-sm);
 }
 .song-library-tab span {
   min-width: 20px;
