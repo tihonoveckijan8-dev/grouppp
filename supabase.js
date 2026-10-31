@@ -1129,18 +1129,37 @@
     if(snapshot&&activeGroupId)await saveNow(snapshot);
     const normalizedCode=String(code||'').toUpperCase().replace(/[^0-9A-F]/g,'');
     if(!normalizedCode)throw new Error('Введите код приглашения.');
+    const uid=currentSession.user.id;
     const {data,error}=await client.rpc('bandplan_join_group',{
       p_code:normalizedCode,
       p_display_name:String(name||'').trim(),
       p_roles:Array.isArray(roles)?roles:[]
     });
     if(error)throw error;
-    activeGroupId=data?.[0]?.group_id||null;
-    const loaded=await load();
-    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
-    if(activeGroupId && subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
-    return data?.[0]||null;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row?.group_id)throw new Error('Supabase не вернул группу после вступления.');
+
+    // WHY: joining changes the active workspace server-side; rebuild every
+    // group-scoped cache and realtime channel before reporting success.
+    activeGroupId=row.group_id;
+    lastUpdated='';
+    sharedBaseline={songs:{},events:{},setlists:{}};
+    let loaded;
+    try{
+      loaded=await load();
+    }catch(firstError){
+      try{loaded=await load();}
+      catch(recoveryError){
+        console.warn('BandPlan join workspace recovery failed:',recoveryError);
+        throw firstError;
+      }
+    }
+    if(!loaded?.state)throw new Error('Вы вступили в группу, но не удалось загрузить её данные. Обновите приложение.');
+    await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
+    if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+    return Object.assign({},row,{loaded});
   }
+
   async function writeEventParticipation(eventId,status,updatedAt,groupIdValue){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const uid=String(currentSession.user.id);
@@ -1316,6 +1335,7 @@
     if(snapshot&&activeGroupId)await saveNow(snapshot);
     const groupName=String(name||'').trim();
     if(groupName.length<3||groupName.length>50)throw new Error('Название группы должно содержать от 3 до 50 символов.');
+    const uid=currentSession.user.id;
     const {data,error}=await client.rpc('bandplan_create_group',{
       p_name:groupName,
       p_display_name:String(displayName||'').trim(),
@@ -1323,13 +1343,27 @@
     });
     if(error)throw error;
     const row=Array.isArray(data)?data[0]:data;
-    activeGroupId=row?.group_id||null;
+    if(!row?.group_id)throw new Error('Supabase не вернул созданную группу.');
+
+    // WHY: do not expose a newly-created workspace until its authoritative
+    // server state and subscriptions have both been refreshed.
+    activeGroupId=row.group_id;
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
-    const loaded=await load();
-    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
-    if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
-    return {groupId:activeGroupId,groupName,inviteCode:row?.invite_code||'',loaded};
+    let loaded;
+    try{
+      loaded=await load();
+    }catch(firstError){
+      try{loaded=await load();}
+      catch(recoveryError){
+        console.warn('BandPlan create workspace recovery failed:',recoveryError);
+        throw firstError;
+      }
+    }
+    if(!loaded?.state)throw new Error('Группа создана, но её данные не удалось загрузить. Обновите приложение.');
+    await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
+    if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+    return {groupId:activeGroupId,groupName,inviteCode:row.invite_code||'',loaded};
   }
 
   async function switchGroup(groupIdValue,snapshot){
