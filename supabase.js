@@ -1255,28 +1255,54 @@
   async function leaveGroup(groupIdValue,snapshot){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     if(snapshot&&activeGroupId)await saveNow(snapshot);
+    const uid=currentSession.user.id;
+    const previousGroupId=activeGroupId;
+    const leavingGroupId=String(groupIdValue||activeGroupId||'').trim();
+    if(!leavingGroupId)throw new Error('Не выбрана группа для выхода.');
+
     clearTimeout(timer);
     pending=null;
     disposeRealtime();
-    const uid=currentSession.user.id;
-    const leavingGroupId=groupIdValue||activeGroupId||null;
-    const {data,error}=await client.rpc('bandplan_leave_group',{p_group_id:leavingGroupId});
-    if(error)throw error;
+    let serverChanged=false;
+    try{
+      const {data,error}=await client.rpc('bandplan_leave_group',{p_group_id:leavingGroupId});
+      if(error)throw error;
+      serverChanged=true;
 
-    // WHY: membership is removed only from the requested group; other memberships
-    // and their cached group data must survive leaving the current workspace.
-    const check=await client.from('bandplan_group_members').select('group_id')
-      .eq('user_id',uid).eq('group_id',leavingGroupId).maybeSingle();
-    if(check.error)throw check.error;
-    if(check.data?.group_id)throw new Error('Не удалось удалить членство в группе.');
+      // WHY: verify the exact membership removed; other group memberships must remain untouched.
+      const check=await client.from('bandplan_group_members').select('group_id')
+        .eq('user_id',uid).eq('group_id',leavingGroupId).maybeSingle();
+      if(check.error)throw check.error;
+      if(check.data?.group_id)throw new Error('Не удалось удалить членство в группе.');
 
-    activeGroupId=null;
-    lastUpdated='';
-    sharedBaseline={songs:{},events:{},setlists:{}};
-    const loaded=await load();
-    if(loaded?.state)await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
-    if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
-    return {left:Array.isArray(data)?(data[0]||null):(data||null),loaded};
+      activeGroupId=null;
+      lastUpdated='';
+      sharedBaseline={songs:{},events:{},setlists:{}};
+      const loaded=await load();
+      if(!loaded?.state)throw new Error('Членство удалено, но профиль не удалось восстановить. Повторите загрузку приложения.');
+      await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
+      if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+      return {left:Array.isArray(data)?(data[0]||null):(data||null),loaded};
+    }catch(error){
+      // WHY: a failed leave must not leave the current account disconnected from Realtime.
+      try{
+        const recovered=await load();
+        if(recovered?.state){
+          await writeDurableState(uid,recovered.state,new Date().toISOString(),false);
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }else if(!serverChanged&&previousGroupId){
+          activeGroupId=previousGroupId;
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }
+      }catch(recoveryError){
+        console.warn('BandPlan group-leave recovery failed:',recoveryError);
+        if(!serverChanged&&previousGroupId){
+          activeGroupId=previousGroupId;
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }
+      }
+      throw error;
+    }
   }
 
   async function createGroup(name,displayName,roles,snapshot){
@@ -1306,19 +1332,46 @@
     if(!nextGroupId)throw new Error('Не выбрана группа.');
     if(nextGroupId===activeGroupId)return await load();
     if(snapshot&&activeGroupId)await saveNow(snapshot);
+    const uid=currentSession.user.id;
+    const previousGroupId=activeGroupId;
     clearTimeout(timer);
     pending=null;
     disposeRealtime();
-    const {error}=await client.rpc('bandplan_set_active_group',{p_group_id:nextGroupId});
-    if(error)throw error;
-    activeGroupId=nextGroupId;
-    lastUpdated='';
-    sharedBaseline={songs:{},events:{},setlists:{}};
-    const loaded=await load();
-    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
-    if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
-    return loaded;
+    let serverChanged=false;
+    try{
+      const {error}=await client.rpc('bandplan_set_active_group',{p_group_id:nextGroupId});
+      if(error)throw error;
+      serverChanged=true;
+      activeGroupId=nextGroupId;
+      lastUpdated='';
+      sharedBaseline={songs:{},events:{},setlists:{}};
+      const loaded=await load();
+      if(!loaded?.state)throw new Error('Группа выбрана, но её данные не удалось загрузить.');
+      await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
+      if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+      return loaded;
+    }catch(error){
+      // WHY: restore the server-selected workspace and its subscriptions after a failed switch.
+      try{
+        const recovered=await load();
+        if(recovered?.state){
+          await writeDurableState(uid,recovered.state,new Date().toISOString(),false);
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }else if(!serverChanged&&previousGroupId){
+          activeGroupId=previousGroupId;
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }
+      }catch(recoveryError){
+        console.warn('BandPlan group-switch recovery failed:',recoveryError);
+        if(!serverChanged&&previousGroupId){
+          activeGroupId=previousGroupId;
+          if(subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
+        }
+      }
+      throw error;
+    }
   }
+
   async function signOut(){
     clearTimeout(timer);pending=null;disposeRealtime();
     const uid=currentSession?.user?.id;
