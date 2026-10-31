@@ -2445,10 +2445,31 @@ function filteredSetlists() {
   if (q) list = list.filter(sl => String(sl.name || '').toLowerCase().indexOf(q) >= 0);
   return list.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
 }
+function vPersonalSetlists() {
+  const list=(state.personalSetlists||[]).slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+  let h='<div class="setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">'+
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-group">Сет-листы группы <span>'+state.setlists.length+'</span></button>'+
+    '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-personal">Мои шаблоны <span>'+list.length+'</span></button></div>'+
+    '<p class="t-sm t-muted mb">Личные шаблоны хранят копии песен и структуры программы. Их можно независимо импортировать в любую вашу группу.</p>';
+  if(!list.length)return h+'<div class="card">'+stateHTML('empty','Личных шаблонов пока нет','Откройте сет-лист группы и сохраните его как личный шаблон.','<button class="btn btn-primary" type="button" data-act="setlist-library-group">Открыть сет-листы группы</button>')+'</div>';
+  h+='<div class="collection-grid collection-list songs-list setlists-list personal-setlists-list">';
+  list.forEach(function(template){
+    const count=(template.items||[]).length;
+    h+='<article class="song-card"><div class="song-top"><div class="key-badge" aria-hidden="true">'+count+'</div><div class="song-title-wrap"><h3 class="song-name">'+esc(template.name||'Без названия')+'</h3>'+
+      '<div class="song-meta"><span class="badge b-muted">'+count+' '+plural(count,'песня','песни','песен')+'</span>'+(template.updatedAt?'<span class="badge b-muted">'+esc(pdateShort(String(template.updatedAt).slice(0,10)))+'</span>':'')+'</div></div></div>'+
+      (template.note?'<p class="t-sm t-muted">'+esc(template.note)+'</p>':'')+
+      '<div class="song-acts"><button class="btn btn-primary btn-sm" type="button" data-act="personal-setlist-add-group" data-id="'+esc(template.id)+'"'+(!state.activeGroupId?' disabled title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+'Добавить в группу</button>'+
+      '<button class="icon-btn danger" type="button" data-act="personal-setlist-delete" data-id="'+esc(template.id)+'" aria-label="Удалить шаблон">'+ic('trash',15)+'</button></div></article>';
+  });
+  return h+'</div>';
+}
 function vSetlists() {
   const list = filteredSetlists();
   if(ui.setlistLibrary==='personal')return vPersonalSetlists();
-  let h = '<div class="toolbar songs-search-row setlists-search-row">' +
+  let h = '<div class="setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
+    '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
+    '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' +
+    '<div class="toolbar songs-search-row setlists-search-row">' +
     '<div class="tb-search">' + ic('search', 18) +
     '<label class="sr-only" for="setlistQ">Поиск сет-листов</label>' +
     '<input id="setlistQ" class="bare-input" type="search" placeholder="Название сет-листа" value="' + esc(ui.setlistQuery) + '">' +
@@ -2518,6 +2539,7 @@ function vSetlist(id) {
     '<button class="icon-btn" type="button" data-act="sl-rename" data-id="' + sl.id + '" aria-label="Название и заметки" title="Редактировать">' + ic('edit', 16) + '</button>' +
     '<button class="icon-btn danger" type="button" data-act="sl-del" data-id="' + sl.id + '" aria-label="Удалить сет-лист" title="Удалить сет-лист">' + ic('trash', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="print-setlist" data-id="' + sl.id + '" aria-label="Печать сет-листа" title="Печать">' + ic('print', 16) + '</button>' +
+    '<button class="icon-btn" type="button" data-act="save-setlist-template" data-id="' + sl.id + '" aria-label="Сохранить как личный шаблон" title="В личные шаблоны">' + ic('star', 16) + '</button>' +
     '<button class="icon-btn" type="button" data-act="dup-setlist" data-id="' + sl.id + '" aria-label="Дублировать сет-лист" title="Дублировать">' + ic('copy', 16) + '</button>' +
     '</div></div>' +
 
