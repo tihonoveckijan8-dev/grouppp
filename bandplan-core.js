@@ -2341,14 +2341,19 @@ function renderSceneLyrics(song, shift, userRoles) {
     // compact, horizontally scrollable unit; neither row can wrap independently.
     if (isChordLine(line)) {
       if (state.settings.showChords === false) return '';
+      // WHY: Inferred stanza boundaries can point at a chord row; retain that label
+      // when the chord row is paired with its lyric line instead of silently dropping it.
+      const inferredChordHeading = inferredSection
+        ? '<span class="ln sec">' + esc(inferredSection.label) + '</span>' + renderNotes(inferredSection.label)
+        : '';
       const nextLine = lines[lineIndex + 1];
       if (nextLine && nextLine.trim() && !isChordLine(nextLine) &&
           !parseSectionHeading(nextLine) && !byLine[lineIndex + 1] &&
           !/^\s*(?:\[[^\]]+\]|(куплет|припев|предприпев|постприпев|бридж|переход|связка|verse|chorus|bridge))\b/i.test(nextLine)) {
         pairedLyricLines.add(lineIndex + 1);
-        return renderStageChordLyricRow(line, nextLine, shift);
+        return inferredChordHeading + renderStageChordLyricRow(line, nextLine, shift);
       }
-      return '<span class="ln scene-chord-line">' + line.trim().split(/\s+/).map(function(part) {
+      return inferredChordHeading + '<span class="ln scene-chord-line">' + line.trim().split(/\s+/).map(function(part) {
         return isChord(part) ? '<b class="ch">' + esc(transposeChord(part, shift)) + '</b>' : esc(part);
       }).join(' ') + '</span>';
     }
