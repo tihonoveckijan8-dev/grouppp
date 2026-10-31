@@ -2233,7 +2233,7 @@ function renderStageChordLyricRow(chordLine, lyricLine, shift) {
   function visualColumnAt(source, endIndex) {
     let column = 0;
     for (let i = 0; i < endIndex; i++) {
-      column = source[i] === '\\t' ? column + (4 - column % 4) : column + 1;
+      column = source[i] === '\t' ? column + (4 - column % 4) : column + 1;
     }
     return column;
   }
