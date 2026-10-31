@@ -3923,6 +3923,38 @@ document.addEventListener('click', function (e) {
     case 'ev-reset': stop(); ui.evTypes = []; ui.evMine = false; ui.evMineMode = 'yes'; ui.evRepeat = false; ui.evQuery = ''; render(); if ($('#modalOverlay').classList.contains('on')) { const c = $('#evFilterDone'); if (c) c.textContent = 'Показать ' + filteredUpcoming().length; } break;
     case 'new-song': stop(); songModal(null); break;
     case 'edit-song': stop(); songModal(id); break;
+    case 'song-library-group': stop(); ui.songLibrary='group'; ui.songQuery=''; render(); break;
+    case 'song-library-personal': stop(); ui.songLibrary='personal'; ui.songQuery=''; render(); break;
+    case 'new-personal-song': stop(); songModal(null,true); break;
+    case 'edit-personal-song': stop(); songModal(id,true); break;
+    case 'personal-song-save': {
+      stop(); btnLoading(el);
+      const data=readSongForm(id,true); if(!data)break;
+      const index=state.personalSongs.findIndex(x=>String(x.id)===String(id||''));
+      if(index>=0)state.personalSongs[index]=data;else state.personalSongs.push(data);
+      modalDirty=false;hardClose(modalRoot);save();ui.songLibrary='personal';render();
+      toast(id?'Личная песня обновлена':'Песня сохранена в личную библиотеку','ok');
+      break;
+    }
+    case 'personal-song-add-group': {
+      stop();
+      const source=personalSongById(id);if(!source)break;
+      if(!state.activeGroupId){toast('Сначала создайте или выберите группу','warn');break;}
+      if(state.songs.some(song=>song.personalSongId===source.id)){toast('Эта личная песня уже добавлена в текущую группу','info');break;}
+      const copy=cloneValue(source);copy.id=uid('s');copy.personalSongId=source.id;copy.addedAt=today();
+      state.songs.push(copy);save();ui.songLibrary='personal';render();
+      toast('Независимая копия добавлена в репертуар группы','ok');
+      break;
+    }
+    case 'personal-song-delete': {
+      stop();
+      const source=personalSongById(id);if(!source)break;
+      confirmBox('Удалить личную песню?','«'+source.title+'» будет удалена только из вашей личной библиотеки. Копии в групповых репертуарах и сет-листах останутся без изменений.',function(){
+        state.personalSongs=state.personalSongs.filter(song=>String(song.id)!==String(id));
+        save();ui.songLibrary='personal';render();toast('Песня удалена из личной библиотеки','ok');
+      },'Удалить',true);
+      break;
+    }
     case 'song-save': {
       stop(); btnLoading(el);
       const data = readSongForm(id); if (!data) break;
