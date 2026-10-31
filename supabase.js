@@ -1031,6 +1031,8 @@
       };
     }
     assertSessionOwner(uid);
+    // WHY: personal libraries belong to the account, not the active group; persist
+    // them beside profile/settings while group-owned records sync through group_id deltas.
     const personalState={profile:snapshot.profile||{},settings:snapshot.settings||{},onboardingDone:!!snapshot.onboardingDone,activeGroupId:activeGroupId||null,personalSongs:Array.isArray(snapshot.personalSongs)?snapshot.personalSongs:[],personalSetlists:Array.isArray(snapshot.personalSetlists)?snapshot.personalSetlists:[]};
     const {data,error}=await client.from(TABLE).upsert({user_id:uid,state:personalState,updated_at:updatedAt},{onConflict:'user_id'}).select('updated_at').single();
     if(error){pending=snapshot;await writeDurableState(uid,snapshot,updatedAt,true);throw error;}
