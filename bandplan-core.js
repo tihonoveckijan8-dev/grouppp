@@ -2076,7 +2076,7 @@ function vPersonalSongs() {
       '<div class="song-title-wrap"><h3 class="song-name">'+esc(song.title)+'</h3><div class="song-meta">'+(song.artist?'<span>'+esc(song.artist)+'</span>':'')+
       (song.bpm?'<span class="badge b-muted num">'+song.bpm+' BPM</span>':'')+(song.tags||[]).slice(0,2).map(t=>'<span class="badge b-muted">'+esc(t)+'</span>').join('')+'</div></div></div>'+
       '<div class="song-acts"><button class="icon-btn song-quick-action" type="button" data-act="edit-personal-song" data-id="'+esc(song.id)+'">'+ic('edit',15)+'<span class="btn-txt">Изменить</span></button>'+
-      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-add-group" data-id="'+esc(song.id)+'"'+(!state.activeGroupId?' disabled title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+'<span class="btn-txt">'+(already?'Уже в группе':'В репертуар')+'</span></button>'+
+      '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-add-group" data-id="'+esc(song.id)+'"'+((!state.activeGroupId||already)?' disabled':'')+(!state.activeGroupId?' title="Сначала создайте или выберите группу"':'')+'>'+ic('plus',15)+'<span class="btn-txt">'+(already?'Уже в группе':'В репертуар')+'</span></button>'+
       '<button class="icon-btn song-quick-action" type="button" data-act="personal-song-delete" data-id="'+esc(song.id)+'">'+ic('trash',15)+'<span class="btn-txt">Удалить</span></button></div></article>';
   });
   return h+'</div>';
