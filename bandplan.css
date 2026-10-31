@@ -14997,3 +14997,23 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
     white-space: normal;
   }
 }
+
+
+/* WHY: Keep group actions visible beside library tabs without restoring a separate workspace card. */
+.group-library-actions {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:0 0 14px;
+}
+.group-library-actions .btn {
+  min-height:40px;
+  padding:8px 13px;
+  gap:7px;
+  white-space:nowrap;
+}
+@media(max-width:520px) {
+  .group-library-actions { gap:7px; margin:0 0 12px; }
+  .group-library-actions .btn { flex:1 1 calc(50% - 7px); justify-content:center; min-height:44px; padding:9px 8px; font-size:13px; }
+}
