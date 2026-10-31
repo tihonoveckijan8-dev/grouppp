@@ -4324,8 +4324,10 @@ document.addEventListener('click', function (e) {
       stop();
       confirmBox('Загрузить демо-данные?', 'Текущие песни, события и сет-листы будут заменены демонстрационными. Профиль, состав и настройки сохранятся.', function () {
         const keepP = state.profile, keepM = state.members, keepS = state.settings, keepO = state.onboardingDone;
+        const keepPersonalSongs = state.personalSongs || [], keepPersonalSetlists = state.personalSetlists || [];
         state = defaults();
         state.profile = keepP; state.members = keepM; state.settings = keepS; state.onboardingDone = keepO;
+        state.personalSongs = keepPersonalSongs; state.personalSetlists = keepPersonalSetlists;
         seedDemo(); state.profile = keepP; if (keepM.length) state.members = keepM;
         applyTheme(); applyAccentVars(); save(); hardClose(modalRoot); ui.skeleton = true; go('#/calendar');
         toast('Демо-данные загружены', 'ok');
