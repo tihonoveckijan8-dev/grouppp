@@ -3961,6 +3961,8 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'personal-song-add-group': {
+      // WHY: a personal song is a source, not a live shared record; give every
+      // group its own ID so edits and setlist references stay isolated.
       stop();
       const source=personalSongById(id);if(!source)break;
       if(!state.activeGroupId){toast('Сначала создайте или выберите группу','warn');break;}
@@ -4047,6 +4049,8 @@ document.addEventListener('click', function (e) {
     case 'setlist-library-group': stop(); ui.setlistLibrary='group'; ui.setlistQuery=''; render(); break;
     case 'setlist-library-personal': stop(); ui.setlistLibrary='personal'; ui.setlistQuery=''; render(); break;
     case 'save-setlist-template': {
+      // WHY: snapshot song content into the account template so later edits in
+      // the source group cannot silently rewrite programs in other groups.
       stop();
       const sl=slById(id);if(!sl)break;
       const songMap=new Map();
