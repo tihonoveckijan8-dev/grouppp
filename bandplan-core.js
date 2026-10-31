@@ -1811,7 +1811,7 @@ function heroHTML() {
 function heroMetric(v, l) { return '<div class="hero-metric"><div class="v">' + v + '</div><div class="l">' + esc(l) + '</div></div>'; }
 function vCalendar() {
   const m = ui.month, y = m.getFullYear(), mo = m.getMonth();
-  let h = heroHTML();
+  let h = groupWorkspacePicker() + heroHTML();
   h += '<section class="card rise" style="animation-delay:.04s" aria-labelledby="calH"><div class="cal-head">' +
     '<div class="row-ns" style="gap:var(--s2)">' +
     '<button class="icon-btn lg" type="button" data-act="cal-nav" data-d="-1" aria-label="Предыдущий период">' + ic('left', 18) + '</button>' +
@@ -2081,20 +2081,33 @@ function vPersonalSongs() {
   });
   return h+'</div>';
 }
-/* WHY: Put group creation and invite entry beside the libraries users need to share. */
-function groupLibraryActions() {
-  return '<div class="group-library-actions" aria-label="Управление группой">' +
-    '<button class="btn btn-secondary" type="button" data-act="group-create">' + ic('plus',15) + '<span>Создать группу</span></button>' +
-    '<button class="btn btn-secondary" type="button" data-act="group-join">' + ic('users',15) + '<span>Вступить по коду</span></button>' +
-    '</div>';
+/* WHY: Keep the active band's identity and every membership visible where shared content is used. */
+function groupWorkspacePicker() {
+  const groups = Array.isArray(state.groupMemberships) ? state.groupMemberships : [];
+  const activeId = String(state.activeGroupId || state.profile?.groupId || '');
+  const active = groups.find(group => String(group.group_id || '') === activeId);
+  let html = '<section class="group-workspace-picker" aria-label="Текущая группа">' +
+    '<div class="group-workspace-current">' + ic('users',17) +
+    '<span class="group-workspace-caption">Текущая группа</span>' +
+    '<strong>' + esc(active?.group_name || (activeId ? state.profile?.bandName || 'Группа' : 'Личная область')) + '</strong></div>';
+  if (groups.length > 1) {
+    html += '<div class="group-workspace-switches" aria-label="Переключить группу">';
+    groups.forEach(group => {
+      const gid = String(group.group_id || '');
+      if (!gid || gid === activeId) return;
+      html += '<button class="group-workspace-chip" type="button" data-act="group-switch" data-id="' + esc(gid) + '">' + esc(group.group_name || 'Без названия') + '</button>';
+    });
+    html += '</div>';
+  }
+  return html + '</section>';
 }
 function vSongs() {
   const libraryTabs='<div class="song-library-tabs" role="tablist" aria-label="Библиотека песен">'+
     '<button class="song-library-tab'+(ui.songLibrary==='group'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='group')+'" data-act="song-library-group">Репертуар группы <span>'+state.songs.length+'</span></button>'+
     '<button class="song-library-tab'+(ui.songLibrary==='personal'?' on':'')+'" type="button" role="tab" aria-selected="'+(ui.songLibrary==='personal')+'" data-act="song-library-personal">Моя библиотека <span>'+(state.personalSongs||[]).length+'</span></button></div>';
-  if(ui.songLibrary==='personal')return libraryTabs+groupLibraryActions()+vPersonalSongs();
+  if(ui.songLibrary==='personal')return groupWorkspacePicker()+libraryTabs+vPersonalSongs();
   const list = filteredSongs(), tags = allTags();
-  let h = libraryTabs + groupLibraryActions() + '<div class="toolbar songs-search-row songs-search-action-row">' +
+  let h = groupWorkspacePicker() + libraryTabs + '<div class="toolbar songs-search-row songs-search-action-row">'
     '<div class="tb-search">' + ic('search', 18) + '<label class="sr-only" for="songQ">Поиск песен</label>' +
     '<input id="songQ" class="bare-input" type="search" placeholder="Название, автор, текст, тег" value="' + esc(ui.songQuery) + '">' +
     (ui.songQuery ? '<button class="icon-btn" type="button" data-act="song-clear" aria-label="Очистить поиск" style="width:var(--tap);height:var(--tap)">' + ic('x', 15) + '</button>' : '') + '</div>' +
@@ -2473,7 +2486,7 @@ function vPersonalSetlists() {
 }
 function vSetlists() {
   const list = filteredSetlists();
-  if(ui.setlistLibrary==='personal')return vPersonalSetlists();
+  if(ui.setlistLibrary==='personal')return groupWorkspacePicker()+vPersonalSetlists();
   let h = '<div class="song-library-tabs setlist-library-tabs" role="tablist" aria-label="Коллекция сет-листов">' +
     '<button class="song-library-tab on" type="button" role="tab" aria-selected="true" data-act="setlist-library-group">Сет-листы группы <span>' + state.setlists.length + '</span></button>' +
     '<button class="song-library-tab" type="button" role="tab" aria-selected="false" data-act="setlist-library-personal">Мои шаблоны <span>' + (state.personalSetlists||[]).length + '</span></button></div>' + groupLibraryActions() +
@@ -2706,7 +2719,7 @@ function vSettings() {
       h += '<button class="btn btn-secondary group-workspace-row' + (active ? ' on' : '') + '" type="button" data-act="group-switch" data-id="' + esc(gid) + '"' + (active ? ' aria-current="true" disabled' : '') + '>' +
         '<span class="grow" style="text-align:left">' + esc(group.group_name || 'Без названия') + '<span class="t-xs t-muted" style="display:block">' + (group.role === 'owner' ? 'Владелец' : 'Участник') + '</span></span>' +
         (active ? '<span class="member-you">Текущая</span>' : '<span class="t-muted">' + ic('repeat', 15) + '</span>') +
-      '</button>';
+      '</button><button class="btn btn-tertiary btn-sm group-invite-row" type="button" data-act="invite" data-id="' + esc(gid) + '" aria-label="Код приглашения группы ' + esc(group.group_name || '') + '">' + ic('link',14) + 'Код</button>';
     });
   } else {
     h += '<div class="t-xs t-muted">Пока нет групп. Создайте свою или вступите по приглашению.</div>';
@@ -4232,7 +4245,8 @@ document.addEventListener('click', function (e) {
         break;
       }
       Promise.resolve().then(async()=>{
-        const result=await cloud.getInviteCode(state.profile?.bandName||'Моя группа',myRoles());
+        const selectedGroup=(Array.isArray(state.groupMemberships)?state.groupMemberships:[]).find(group=>String(group.group_id||'')===String(id||state.activeGroupId||''));
+        const result=await cloud.getInviteCode(selectedGroup?.group_name||state.profile?.bandName||'Моя группа',myRoles(),id||state.activeGroupId||null);
         const code=typeof result==='string'?result:result?.code;
         if(!code)throw new Error('Сервер не вернул код приглашения.');
         if(result?.groupName)state.profile.bandName=result.groupName;
