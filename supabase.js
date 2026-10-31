@@ -229,17 +229,19 @@
       tx.onabort=()=>resolve();
     });
   }
-  async function queueEventParticipation(eventId,status,updatedAt){
+  async function queueEventParticipation(eventId,status,updatedAt,groupIdValue){
     const uid=String(currentSession?.user?.id||'');
     const id=String(eventId||'').trim();
+    const groupId=String(groupIdValue||activeGroupId||'');
     if(!uid||!id) throw new Error('Требуется вход в аккаунт.');
+    if(!groupId) throw new Error('Не выбрана группа для отметки участия.');
     const cleanStatus=String(status||'');
     if(cleanStatus&&!['yes','maybe','no'].includes(cleanStatus)) throw new Error('Некорректный статус участия.');
     const stamp=updatedAt||new Date().toISOString();
     await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.put({
-      key:uid+':'+id,user_id:uid,event_id:id,status:cleanStatus,updated_at:stamp,group_id:activeGroupId||null
+      key:uid+':'+groupId+':'+id,user_id:uid,event_id:id,status:cleanStatus,updated_at:stamp,group_id:groupId
     }));
-    return {queued:true,event_id:id,status:cleanStatus,updated_at:stamp};
+    return {queued:true,event_id:id,status:cleanStatus,updated_at:stamp,group_id:groupId};
   }
   async function participationQueueRows(){
     const uid=String(currentSession?.user?.id||'');
@@ -258,7 +260,7 @@
     const msg=String(error?.message||error||'').toLowerCase();
     return !['EVENT_NOT_FOUND','GROUP_REQUIRED','AUTH_REQUIRED','INVALID_PARTICIPATION_STATUS'].includes(code) &&
       !msg.includes('event_not_found') && !msg.includes('group_required') && !msg.includes('auth_required') &&
-      !msg.includes('invalid_participation_status') && !msg.includes('permission denied') && !msg.includes('row-level security');
+      !msg.includes('invalid_participation_status') && !msg.includes('group_membership_required') && !msg.includes('permission denied') && !msg.includes('row-level security');
   }
   async function flushEventParticipationQueue(){
     if(!currentSession?.user || navigator.onLine===false) return {sent:0,failed:0};
@@ -266,7 +268,7 @@
     let sent=0,failed=0;
     for(const row of rows){
       try{
-        const remote=await writeEventParticipation(row.event_id,row.status,row.updated_at);
+        const remote=await writeEventParticipation(row.event_id,row.status,row.updated_at,row.group_id);
         await idbRequest(IDB_PARTICIPATION,'readwrite',store=>store.delete(row.key));
         window.dispatchEvent(new CustomEvent('bandplan:participation-synced',{detail:{
           eventId:row.event_id,status:String(remote?.status||''),updatedAt:String(remote?.updated_at||row.updated_at||'')
@@ -1115,7 +1117,7 @@
   }
   async function joinGroup(code,name,roles,snapshot){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    if(snapshot)await saveNow(snapshot);
+    if(snapshot&&activeGroupId)await saveNow(snapshot);
     const normalizedCode=String(code||'').toUpperCase().replace(/[^0-9A-F]/g,'');
     if(!normalizedCode)throw new Error('Введите код приглашения.');
     const {data,error}=await client.rpc('bandplan_join_group',{
@@ -1125,40 +1127,41 @@
     });
     if(error)throw error;
     activeGroupId=data?.[0]?.group_id||null;
-    if(activeGroupId && subscriptionCallback){
-      try { await load(); } catch(e) { console.warn('BandPlan group hydration after join deferred:',e); }
-      subscribe(subscriptionCallback,participationCallback);
-    }
+    const loaded=await load();
+    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
+    if(activeGroupId && subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
     return data?.[0]||null;
   }
-  async function writeEventParticipation(eventId,status,updatedAt){
+  async function writeEventParticipation(eventId,status,updatedAt,groupIdValue){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
     const uid=String(currentSession.user.id);
     const id=String(eventId||'').trim();
     const cleanStatus=String(status||'');
+    const targetGroupId=String(groupIdValue||activeGroupId||'');
     if(!id)throw new Error('Не удалось определить событие.');
+    if(!targetGroupId)throw new Error('Не выбрана группа для отметки участия.');
     if(cleanStatus&&!['yes','maybe','no'].includes(cleanStatus))throw new Error('Некорректный статус участия.');
     const stamp=updatedAt||new Date().toISOString();
     const {data,error}=await client.rpc('bandplan_set_event_participation',{
       p_event_id:id,
       p_status:cleanStatus,
       p_updated_at:stamp,
-      p_group_id:activeGroupId
+      p_group_id:targetGroupId
     });
     if(error)throw error;
     // Postgres functions returning TABLE produce an array, while scalar/json
     // functions may return an object. Normalize both before broadcasting.
     const row=Array.isArray(data)?data[0]:data;
     const result=Object.assign({
-      group_id:activeGroupId,event_id:id,user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()
+      group_id:targetGroupId,event_id:id,user_id:uid,status:cleanStatus,updated_at:new Date().toISOString()
     },row&&typeof row==='object'?row:{});
     result.event_id=String(result.event_id||id);
     result.user_id=String(result.user_id||uid);
     result.status=String(result.status||'');
-    if(participationChannel){
+    if(participationChannel&&targetGroupId===activeGroupId){
       try{
         await participationChannel.send({type:'broadcast',event:'participation',payload:{
-          group_id:result.group_id||activeGroupId,event_id:result.event_id,user_id:result.user_id,
+          group_id:result.group_id||targetGroupId,event_id:result.event_id,user_id:result.user_id,
           status:result.status,updated_at:result.updated_at||new Date().toISOString(),deleted:!result.status
         }});
       }catch(broadcastError){
@@ -1168,9 +1171,9 @@
     }
     return result;
   }
-  async function setEventParticipation(eventId,status,updatedAt){
+  async function setEventParticipation(eventId,status,updatedAt,groupIdValue){
     const stamp=updatedAt||new Date().toISOString();
-    return writeEventParticipation(eventId,status,stamp);
+    return writeEventParticipation(eventId,status,stamp,groupIdValue);
   }
   async function deleteAccount(){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
@@ -1248,7 +1251,7 @@
   }
   async function leaveGroup(groupIdValue,snapshot){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    if(snapshot)await saveNow(snapshot);
+    if(snapshot&&activeGroupId)await saveNow(snapshot);
     clearTimeout(timer);
     pending=null;
     disposeRealtime();
@@ -1268,13 +1271,14 @@
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
     const loaded=await load();
+    if(loaded?.state)await writeDurableState(uid,loaded.state,new Date().toISOString(),false);
     if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
     return {left:Array.isArray(data)?(data[0]||null):(data||null),loaded};
   }
 
   async function createGroup(name,displayName,roles,snapshot){
     if(!currentSession?.user)throw new Error('Требуется вход в аккаунт.');
-    if(snapshot)await saveNow(snapshot);
+    if(snapshot&&activeGroupId)await saveNow(snapshot);
     const groupName=String(name||'').trim();
     if(groupName.length<3||groupName.length>50)throw new Error('Название группы должно содержать от 3 до 50 символов.');
     const {data,error}=await client.rpc('bandplan_create_group',{
@@ -1288,6 +1292,7 @@
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
     const loaded=await load();
+    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
     if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
     return {groupId:activeGroupId,groupName,inviteCode:row?.invite_code||'',loaded};
   }
@@ -1297,7 +1302,7 @@
     const nextGroupId=String(groupIdValue||'').trim();
     if(!nextGroupId)throw new Error('Не выбрана группа.');
     if(nextGroupId===activeGroupId)return await load();
-    if(snapshot)await saveNow(snapshot);
+    if(snapshot&&activeGroupId)await saveNow(snapshot);
     clearTimeout(timer);
     pending=null;
     disposeRealtime();
@@ -1307,6 +1312,7 @@
     lastUpdated='';
     sharedBaseline={songs:{},events:{},setlists:{}};
     const loaded=await load();
+    if(loaded?.state)await writeDurableState(currentSession.user.id,loaded.state,new Date().toISOString(),false);
     if(loaded?.state&&subscriptionCallback)subscribe(subscriptionCallback,participationCallback);
     return loaded;
   }
