@@ -175,7 +175,7 @@ try {
     };
   });
   assert.ok(stageChordIntegration, 'Stage Mode renderer integration hook missing');
-  assert.deepEqual(stageChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Stage Mode renderer did not pair chord row with the following lyric row');
+  assert.deepEqual(stageChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Stage Mode renderer did not pair chord row with the following lyric row: ' + JSON.stringify(stageChordIntegration));
   assert.deepEqual(stageChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Stage Mode renderer lost or reordered pasted chords');
   assert.equal(stageChordIntegration.pairedRows, 1, 'Stage Mode renderer did not create exactly one paired chord/lyric row');
 
