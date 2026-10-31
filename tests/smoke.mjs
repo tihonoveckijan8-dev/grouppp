@@ -160,6 +160,25 @@ try {
   assert.deepEqual(chordAlignment.transposed, ['D', 'A', 'Bm', 'G'], 'Stage chord alignment bypassed song transposition');
   assert.equal(chordAlignment.lyricCount, 4, 'Paired lyric row was rendered more than once');
 
+  // WHY: Exercise the complete Stage Mode renderer as well as the isolated row helper.
+  const stageChordIntegration = await page.evaluate(() => {
+    const render = window.__bandplanTestHooks?.renderSceneLyricsWithChords;
+    if (typeof render !== 'function') return null;
+    const html = render({lyrics:'C       G       Am      F\\nСолнце встаёт над рекой'}, 0, []);
+    const host = document.createElement('div');
+    host.innerHTML = html;
+    return {
+      html,
+      words: [...host.querySelectorAll('.scene-lyric-word')].map(node => node.textContent),
+      chords: [...host.querySelectorAll('.scene-chord-stack b.ch')].map(node => node.textContent),
+      pairedRows: host.querySelectorAll('.scene-chord-lyric-row').length
+    };
+  });
+  assert.ok(stageChordIntegration, 'Stage Mode renderer integration hook missing');
+  assert.deepEqual(stageChordIntegration.words, ['Солнце', 'встаёт', 'над', 'рекой'], 'Stage Mode renderer did not pair chord row with the following lyric row');
+  assert.deepEqual(stageChordIntegration.chords, ['C', 'G', 'Am', 'F'], 'Stage Mode renderer lost or reordered pasted chords');
+  assert.equal(stageChordIntegration.pairedRows, 1, 'Stage Mode renderer did not create exactly one paired chord/lyric row');
+
   const accountIsolation = await page.evaluate(async () => {
     return await new Promise((resolve, reject) => {
       const req = indexedDB.open('bandplan-cloud-v1');
