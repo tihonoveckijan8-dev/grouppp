@@ -14850,3 +14850,26 @@ body[data-route="settings"] .profile-role-options .profile-role-option-icon {
   white-space: nowrap !important;
   line-height: 1.22 !important;
 }
+
+
+/* WHY: group workspaces need a compact, tappable switcher without changing
+   the established settings-card or button visual language. */
+.group-workspaces {
+  display: grid;
+  gap: 9px;
+  margin: 12px 0 14px;
+}
+.group-workspace-row {
+  width: 100%;
+  min-height: 58px;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+.group-workspace-row .grow {
+  min-width: 0;
+}
+.group-workspace-row:disabled {
+  opacity: 1;
+  cursor: default;
+}
