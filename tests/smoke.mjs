@@ -75,6 +75,24 @@ try {
   assert.equal(offlineStore.hasEventOfflineSongs, true, 'Offline event songs store missing');
   assert.equal(offlineStore.hasSyncQueue, true, 'Existing sync_queue was not preserved');
   assert.ok(offlineStore.version >= 3, 'IndexedDB schema was not upgraded to v3');
+  const queueSafety = await page.evaluate(() => {
+    const check = window.__bandplanCloudTestHooks?.shouldClearDurableQueue;
+    if (typeof check !== 'function') return null;
+    const stamp = '2026-11-03T10:00:00.000Z';
+    const older = {updated_at:stamp};
+    const newer = {updated_at:'2026-11-03T10:00:01.000Z'};
+    return {
+      exactMatch:check(older,older,stamp),
+      newerQueue:check(newer,older,stamp),
+      newerSnapshot:check(older,newer,stamp),
+      missingExpected:check(older,older,'')
+    };
+  });
+  assert.ok(queueSafety, 'Durable queue safety test hook missing');
+  assert.equal(queueSafety.exactMatch, true, 'Matching durable snapshot should be clearable');
+  assert.equal(queueSafety.newerQueue, false, 'A newer queued edit must never be cleared by an older save');
+  assert.equal(queueSafety.newerSnapshot, false, 'A newer durable snapshot must never be marked synced by an older save');
+  assert.equal(queueSafety.missingExpected, false, 'Queue clear must require an expected save timestamp');
   const offlineCleanup = await page.evaluate(() => {
     const fn = window.__bandplanTestHooks?.shouldCleanupOfflineEventSongRow;
     if (typeof fn !== 'function') return null;
