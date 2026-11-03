@@ -840,6 +840,7 @@
   async function load() {
     if(!currentSession?.user) throw new Error('Требуется вход в аккаунт.');
     const uid=currentSession.user.id;
+    try {
     const personal=await client.from(TABLE).select('state,updated_at').eq('user_id',uid).maybeSingle();
     if(personal.error) throw personal.error;
     const pstate=personal.data?.state||{};lastUpdated=personal.data?.updated_at||'';
@@ -936,6 +937,28 @@
     });
     const hydratedEvents=hydratePersonalEventParticipation(baseEvents,groupProfile);
     return {state:Object.assign({},pstate,{profile:hydratedEvents.profile,personalSongs:Array.isArray(pstate.personalSongs)?pstate.personalSongs:[],personalSetlists:Array.isArray(pstate.personalSetlists)?pstate.personalSetlists:[],songs:(songs.data||[]).map(x=>x.data),events:hydratedEvents.events,setlists:(setlists.data||[]).map(x=>x.data),members:roster,groupMemberships,activeGroupId}),updatedAt:lastUpdated};
+    } catch(error) {
+      // WHY: an authenticated user must be able to reopen the last durable workspace without a network;
+      // the previous implementation queried Supabase before consulting IndexedDB and failed before rendering.
+      const message=String(error?.message||error||'').toLowerCase();
+      const networkFailure=navigator.onLine===false || error?.name==='TypeError' ||
+        ['failed to fetch','networkerror','network request failed','load failed','timeout','aborted'].some(part=>message.includes(part));
+      if(!networkFailure) throw error;
+      const cached=await hydrateLocalCache();
+      if(!cached?.state) throw error;
+      const state=Object.assign({},cached.state);
+      activeGroupId=String(state.activeGroupId||state.profile?.groupId||'').trim()||null;
+      lastUpdated=cached.updatedAt||'';
+      const songs=Array.isArray(state.songs)?state.songs:[];
+      const events=Array.isArray(state.events)?state.events:[];
+      const setlists=Array.isArray(state.setlists)?state.setlists:[];
+      const toMap=items=>Object.fromEntries(items.map(item=>{const id=String(item?.id||'').trim();return id?[id,JSON.stringify(item)]:null;}).filter(Boolean));
+      sharedBaseline={songs:toMap(songs),events:toMap(events),setlists:toMap(setlists)};
+      activeMemberIds=(Array.isArray(state.members)?state.members:[])
+        .map(member=>String(member?.accountId||member?.id||'').trim()).filter(Boolean).slice(0,100);
+      state.activeGroupId=activeGroupId;
+      return {state,updatedAt:lastUpdated,offline:true,pendingSync:!!cached.pendingSync};
+    }
   }
   function assertSessionOwner(userId){
     if(!currentSession?.user?.id || currentSession.user.id!==userId){
