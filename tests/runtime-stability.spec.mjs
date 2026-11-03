@@ -304,9 +304,8 @@ test('cold offline launch restores an authenticated workspace from IndexedDB', a
     expect(offlineEdit.snapshotPending, 'The offline snapshot was not marked pending').toBe(true);
 
     const supabaseUrl = await page.evaluate(() => window.BANDPLAN_CONFIG.supabaseUrl);
-    await page.route(supabaseUrl.replace(/\\/$/, '') + '/rest/v1/**', async route => {
+    await page.route(supabaseUrl.replace(/\/$/, '') + '/rest/v1/**', async route => {
       const url = new URL(route.request().url());
-      const rpc = url.pathname.split('/').pop();
       if (url.pathname.endsWith('/rpc/bandplan_get_my_group')) {
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ group_id: 'offline-fixture-group' }]) });
       } else if (url.pathname.endsWith('/rpc/bandplan_rename_group') || url.pathname.endsWith('/rpc/bandplan_sync_group')) {
