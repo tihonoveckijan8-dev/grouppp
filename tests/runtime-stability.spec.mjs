@@ -254,6 +254,11 @@ test('cold offline launch restores an authenticated workspace from IndexedDB', a
     await context.setOffline(true);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.__bandplanAppReady === true, null, { timeout: 20_000 });
+    // WHY: app readiness precedes the asynchronous Supabase fallback; wait for the final offline sync state before asserting its badge.
+    await page.waitForFunction(() => {
+      const status = document.querySelector('#syncStatus');
+      return !!status && !status.hidden && status.textContent.includes('Офлайн');
+    }, null, { timeout: 15_000 });
 
     const restored = await page.evaluate(({ userId }) => {
       const raw = localStorage.getItem('bandplan.premium.v6:' + userId);
@@ -262,7 +267,7 @@ test('cold offline launch restores an authenticated workspace from IndexedDB', a
         appReady: window.__bandplanAppReady === true,
         authUserId: window.__bandplanAuthUserId || null,
         authGateHidden: document.querySelector('#bpAuthGate')?.hidden === true,
-        offlineVisible: document.body.innerText.includes('Офлайн'),
+        offlineVisible: document.querySelector('#syncStatus')?.hidden === false && document.querySelector('#syncStatus')?.textContent.includes('Офлайн'),
         restoredSong: state?.songs?.some(song => song.title === 'Offline Fixture Song') || false,
         restoredEvent: state?.events?.some(event => event.title === 'Offline Rehearsal') || false
       };
