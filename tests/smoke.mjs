@@ -93,6 +93,49 @@ try {
   assert.equal(queueSafety.newerQueue, false, 'A newer queued edit must never be cleared by an older save');
   assert.equal(queueSafety.newerSnapshot, false, 'A newer durable snapshot must never be marked synced by an older save');
   assert.equal(queueSafety.missingExpected, false, 'Queue clear must require an expected save timestamp');
+  const durableQueueTransaction = await page.evaluate(async () => {
+    const hooks = window.__bandplanCloudTestHooks;
+    const db = await new Promise((resolve,reject) => {
+      const request = indexedDB.open('bandplan-cloud-v1');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const put = (userId, queueStamp, snapshotStamp) => new Promise((resolve,reject) => {
+      const tx = db.transaction(['sync_queue','snapshots'],'readwrite');
+      tx.objectStore('sync_queue').put({user_id:userId,state:{marker:'queued'},updated_at:queueStamp});
+      tx.objectStore('snapshots').put({user_id:userId,state:{marker:'snapshot'},updated_at:snapshotStamp,pending_sync:true});
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+    });
+    const read = userId => new Promise((resolve,reject) => {
+      const tx = db.transaction(['sync_queue','snapshots'],'readonly');
+      const queue = tx.objectStore('sync_queue').get(userId);
+      const snapshot = tx.objectStore('snapshots').get(userId);
+      tx.oncomplete = () => resolve({queue:queue.result||null,snapshot:snapshot.result||null});
+      tx.onerror = () => reject(tx.error);
+    });
+    const exactId='queue-test-exact', newerQueueId='queue-test-newer-queue', newerSnapshotId='queue-test-newer-snapshot';
+    const stamp='2026-11-03T10:00:00.000Z', newer='2026-11-03T10:00:01.000Z';
+    await put(exactId,stamp,stamp);
+    const exactCleared=await hooks.clearDurableQueue(exactId,stamp);
+    const exactAfter=await read(exactId);
+    await put(newerQueueId,newer,stamp);
+    const newerQueueCleared=await hooks.clearDurableQueue(newerQueueId,stamp);
+    const newerQueueAfter=await read(newerQueueId);
+    await put(newerSnapshotId,stamp,newer);
+    const newerSnapshotCleared=await hooks.clearDurableQueue(newerSnapshotId,stamp);
+    const newerSnapshotAfter=await read(newerSnapshotId);
+    db.close();
+    return {
+      exactCleared,exactQueueRemaining:!!exactAfter.queue,exactPending:exactAfter.snapshot?.pending_sync,
+      newerQueueCleared,newerQueueRemaining:!!newerQueueAfter.queue,newerQueuePending:newerQueueAfter.snapshot?.pending_sync,
+      newerSnapshotCleared,newerSnapshotQueueRemaining:!!newerSnapshotAfter.queue,newerSnapshotPending:newerSnapshotAfter.snapshot?.pending_sync
+    };
+  });
+  assert.deepEqual(durableQueueTransaction, {
+    exactCleared:true,exactQueueRemaining:false,exactPending:false,
+    newerQueueCleared:false,newerQueueRemaining:true,newerQueuePending:true,
+    newerSnapshotCleared:false,newerSnapshotQueueRemaining:true,newerSnapshotPending:true
+  }, 'Atomic durable queue cleanup must only clear the exact snapshot that was successfully saved');
   const offlineCleanup = await page.evaluate(() => {
     const fn = window.__bandplanTestHooks?.shouldCleanupOfflineEventSongRow;
     if (typeof fn !== 'function') return null;
