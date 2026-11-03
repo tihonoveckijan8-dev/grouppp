@@ -167,3 +167,114 @@ test('offline shell serves versioned app assets after a cold network loss', asyn
     await context.close();
   }
 });
+
+
+test('cold offline launch restores an authenticated workspace from IndexedDB', async ({ browser }) => {
+  test.setTimeout(45_000);
+  // WHY: a real cold reload verifies the persisted Supabase session and durable account snapshot together, without using a real account or weakening production Auth.
+  const context = await browser.newContext({ serviceWorkers: 'allow', viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  const userId = 'offline-fixture-user-0001';
+  const savedSongTitle = 'Offline Fixture Song';
+
+  try {
+    await page.goto(BASE + '/?offline-auth-fixture=1', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => !!window.BANDPLAN_CONFIG && !!window.BandPlanCloud, null, { timeout: 15_000 });
+    await page.evaluate(async ({ userId, savedSongTitle }) => {
+      const projectRef = new URL(window.BANDPLAN_CONFIG.supabaseUrl).hostname.split('.')[0];
+      const authKey = 'sb-' + projectRef + '-auth-token';
+      // Supabase reads this unexpired persisted session locally; no credentials or real user are involved.
+      localStorage.setItem(authKey, JSON.stringify({
+        access_token: 'offline-fixture-access-token',
+        token_type: 'bearer',
+        expires_in: 3600,
+        expires_at: 4102444800,
+        refresh_token: 'offline-fixture-refresh-token',
+        user: {
+          id: userId,
+          aud: 'authenticated',
+          role: 'authenticated',
+          email: 'offline-fixture@example.invalid',
+          app_metadata: { provider: 'email', providers: ['email'] },
+          user_metadata: { name: 'Offline Fixture' },
+          created_at: '2026-01-01T00:00:00.000Z'
+        }
+      }));
+
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('bandplan-cloud-v1', 3);
+        request.onupgradeneeded = () => {
+          const database = request.result;
+          if (!database.objectStoreNames.contains('snapshots')) database.createObjectStore('snapshots', { keyPath: 'user_id' });
+          if (!database.objectStoreNames.contains('sync_queue')) database.createObjectStore('sync_queue', { keyPath: 'user_id' });
+          if (!database.objectStoreNames.contains('participation_queue')) {
+            const store = database.createObjectStore('participation_queue', { keyPath: 'key' });
+            store.createIndex('user_id', 'user_id', { unique: false });
+            store.createIndex('event_id', 'event_id', { unique: false });
+          }
+          if (!database.objectStoreNames.contains('event_offline_songs')) {
+            const store = database.createObjectStore('event_offline_songs', { keyPath: 'key' });
+            store.createIndex('account_id', 'accountId', { unique: false });
+            store.createIndex('event_id', 'eventId', { unique: false });
+            store.createIndex('event_date', 'eventDate', { unique: false });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('snapshots', 'readwrite');
+        tx.objectStore('snapshots').put({
+          user_id: userId,
+          updated_at: '2026-11-03T08:00:00.000Z',
+          pending_sync: false,
+          state: {
+            profile: { name: 'Offline Fixture', bandName: 'Offline Test Band' },
+            settings: { theme: 'light', accent: '#1554FF' },
+            songs: [{ id: 'offline-song-1', title: savedSongTitle, artist: 'Fixture Artist', lyrics: 'Saved locally' }],
+            events: [{ id: 'offline-event-1', title: 'Offline Rehearsal', date: '2026-11-04' }],
+            setlists: [],
+            members: [],
+            personalSongs: [],
+            personalSetlists: [],
+            groupMemberships: [],
+            activeGroupId: null,
+            onboardingDone: true
+          }
+        });
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+      db.close();
+    }, { userId, savedSongTitle });
+
+    // The service worker must already control the page before the cold offline reload.
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 15_000 });
+    await context.setOffline(true);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.__bandplanAppReady === true, null, { timeout: 20_000 });
+
+    const restored = await page.evaluate(({ userId }) => {
+      const raw = localStorage.getItem('bandplan.premium.v6:' + userId);
+      const state = raw ? JSON.parse(raw) : null;
+      return {
+        appReady: window.__bandplanAppReady === true,
+        authUserId: window.__bandplanAuthUserId || null,
+        authGateHidden: document.querySelector('#bpAuthGate')?.hidden === true,
+        offlineVisible: document.body.innerText.includes('Офлайн'),
+        restoredSong: state?.songs?.some(song => song.title === 'Offline Fixture Song') || false,
+        restoredEvent: state?.events?.some(event => event.title === 'Offline Rehearsal') || false
+      };
+    }, { userId });
+
+    expect(restored.appReady, 'The authenticated offline workspace did not start').toBe(true);
+    expect(restored.authUserId, 'The existing persisted session was not restored').toBe(userId);
+    expect(restored.authGateHidden, 'The login gate remained visible after restoring the session').toBe(true);
+    expect(restored.offlineVisible, 'The workspace did not report its offline state').toBe(true);
+    expect(restored.restoredSong, 'The song from the IndexedDB snapshot was not restored').toBe(true);
+    expect(restored.restoredEvent, 'The event from the IndexedDB snapshot was not restored').toBe(true);
+  } finally {
+    await context.close();
+  }
+});
