@@ -4821,6 +4821,10 @@ async function bootCloudSync(hadLocal, durableInfo) {
   }
   try {
     const local = cloneValue(state);
+    // WHY: a local IndexedDB fallback is a successful workspace restore, not a successful cloud sync.
+    let offlineFallback = false;
+    const isNetworkFailure = error => navigator.onLine === false || error?.name === 'TypeError' ||
+      ['failed to fetch','networkerror','network request failed','load failed','timeout','aborted'].some(part => String(error?.message || error || '').toLowerCase().includes(part));
     /*
       If IndexedDB contains a pending snapshot, it is newer than the last
       confirmed cloud state. Never overwrite it with remote data on boot.
@@ -4836,6 +4840,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
           pendingConfirmed = true;
         } catch (syncError) {
           console.warn('BandPlan pending offline sync deferred:', syncError);
+          offlineFallback = isNetworkFailure(syncError);
         }
       }
       if (pendingConfirmed) {
@@ -4844,6 +4849,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
           const confirmed = await window.BandPlanCloud.load();
           if (!syncIsCurrent()) return;
           if (confirmed?.state && hasMeaningfulState(confirmed.state)) normalizeCloudState(confirmed.state);
+          if (confirmed?.offline) offlineFallback = true;
         } catch (loadError) {
           console.warn('BandPlan remote confirmation deferred:', loadError);
         }
@@ -4851,6 +4857,7 @@ async function bootCloudSync(hadLocal, durableInfo) {
     } else {
       if (!syncIsCurrent()) return;
       const remote = await window.BandPlanCloud.load();
+      if (remote?.offline) offlineFallback = true;
       const remoteState = remote && remote.state && typeof remote.state === 'object' ? remote.state : null;
       if (remoteState && hasMeaningfulState(remoteState)) {
         if (isKnownDemoState(remoteState) && hasMeaningfulState(local) && !isKnownDemoState(local)) {
@@ -4888,6 +4895,18 @@ async function bootCloudSync(hadLocal, durableInfo) {
       openOnboarding();
     }
     if (!syncIsCurrent()) return;
+    if (offlineFallback) {
+      // WHY: don't label cached data as server-confirmed or start Realtime while Supabase is unreachable.
+      setSyncStatus('offline', 'Офлайн', 0);
+      if (!window.__bandplanSyncRetryBound) {
+        window.__bandplanSyncRetryBound = true;
+        window.addEventListener('online', () => {
+          window.__bandplanSyncRetryBound = false;
+          bootCloudSync(true, window.__bandplanDurable || durableInfo || null);
+        }, {once:true});
+      }
+      return;
+    }
     setSyncStatus('ok', 'Синхронизировано', 2200);
     if (!syncIsCurrent()) return;
     window.BandPlanCloud.subscribe(function (incoming) {
