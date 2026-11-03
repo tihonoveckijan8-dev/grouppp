@@ -5212,7 +5212,26 @@ async function startBandPlanInternal(forceOffline) {
       only that user's account-scoped local cache.
     */
     KEY = 'bandplan.premium.v6:' + offlineUser.id;
-    const hadLocal = load();
+    // WHY: restore the durable account snapshot before reading localStorage; the latter may be missing after browser storage cleanup while IndexedDB still holds the last saved workspace.
+    try {
+      window.__bandplanDurable = await window.BandPlanCloud.hydrateLocalCache();
+      if (window.__bandplanDurable?.state) {
+        try { localStorage.setItem(KEY, JSON.stringify(window.__bandplanDurable.state)); } catch (storageError) {
+          // WHY: keep the durable IndexedDB snapshot usable even when localStorage is unavailable or full.
+          state = Object.assign(defaults(), window.__bandplanDurable.state);
+          state.profile = Object.assign(defaults().profile, window.__bandplanDurable.state.profile || {});
+          state.settings = Object.assign(defaults().settings, window.__bandplanDurable.state.settings || {});
+          state.members = window.__bandplanDurable.state.members || [];
+          state.events = window.__bandplanDurable.state.events || [];
+          state.songs = window.__bandplanDurable.state.songs || [];
+          state.setlists = window.__bandplanDurable.state.setlists || [];
+        }
+      }
+    } catch (error) {
+      window.__bandplanDurable = null;
+      console.warn('BandPlan durable offline restore unavailable:', error);
+    }
+    const hadLocal = load() || !!window.__bandplanDurable?.state;
     try { init(); } catch (e) {
       Boot.fail({title:'Не удалось открыть локальные данные',text:'Сохранённые данные аккаунта не изменены. Повторите запуск.'});
       return;
