@@ -273,6 +273,86 @@ test('cold offline launch restores an authenticated workspace from IndexedDB', a
     expect(restored.networkOffline, 'The browser context did not remain offline during the cold launch').toBe(true);
     expect(restored.restoredSong, 'The song from the IndexedDB snapshot was not restored').toBe(true);
     expect(restored.restoredEvent, 'The event from the IndexedDB snapshot was not restored').toBe(true);
+
+    // WHY: exercise the real durable write path offline, then let the registered online listener flush it against a deterministic PostgREST fixture.
+    const offlineEdit = await page.evaluate(async ({ userId }) => {
+      const raw = localStorage.getItem('bandplan.premium.v6:' + userId);
+      const state = JSON.parse(raw);
+      state.songs[0].title = 'Offline Edited Fixture Song';
+      try { await window.BandPlanCloud.saveNow(state); } catch (error) {
+        // A network failure is expected; saveNow must have committed the snapshot and queue before attempting RPC.
+      }
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('bandplan-cloud-v1', 3);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const records = await new Promise((resolve, reject) => {
+        const tx = db.transaction(['sync_queue', 'snapshots'], 'readonly');
+        const queueRequest = tx.objectStore('sync_queue').get(userId);
+        const snapshotRequest = tx.objectStore('snapshots').get(userId);
+        tx.oncomplete = () => resolve({ queue: queueRequest.result || null, snapshot: snapshotRequest.result || null });
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+      return {
+        queued: records.queue?.state?.songs?.[0]?.title === 'Offline Edited Fixture Song',
+        snapshotPending: records.snapshot?.pending_sync === true
+      };
+    }, { userId });
+    expect(offlineEdit.queued, 'The offline edit was not written to the durable sync queue').toBe(true);
+    expect(offlineEdit.snapshotPending, 'The offline snapshot was not marked pending').toBe(true);
+
+    const supabaseUrl = await page.evaluate(() => window.BANDPLAN_CONFIG.supabaseUrl);
+    await page.route(supabaseUrl.replace(/\\/$/, '') + '/rest/v1/**', async route => {
+      const url = new URL(route.request().url());
+      const rpc = url.pathname.split('/').pop();
+      if (url.pathname.endsWith('/rpc/bandplan_get_my_group')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ group_id: 'offline-fixture-group' }]) });
+      } else if (url.pathname.endsWith('/rpc/bandplan_rename_group') || url.pathname.endsWith('/rpc/bandplan_sync_group')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+      } else if (url.pathname.endsWith('/bandplan_user_state')) {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ updated_at: '2026-11-03T09:00:00.000Z' }) });
+      } else {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+      }
+    });
+    await context.setOffline(false);
+    await page.waitForFunction(async ({ userId }) => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('bandplan-cloud-v1', 3);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const queue = await new Promise((resolve, reject) => {
+        const tx = db.transaction('sync_queue', 'readonly');
+        const request = tx.objectStore('sync_queue').get(userId);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return !queue;
+    }, { userId }, { timeout: 20_000 });
+    const synced = await page.evaluate(async ({ userId }) => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('bandplan-cloud-v1', 3);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const snapshot = await new Promise((resolve, reject) => {
+        const tx = db.transaction('snapshots', 'readonly');
+        const request = tx.objectStore('snapshots').get(userId);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return {
+        pending: snapshot?.pending_sync === true,
+        title: snapshot?.state?.songs?.[0]?.title || null
+      };
+    }, { userId });
+    expect(synced.pending, 'The successfully uploaded offline snapshot remained pending').toBe(false);
+    expect(synced.title, 'The synced snapshot lost the offline edit').toBe('Offline Edited Fixture Song');
   } finally {
     await context.close();
   }
