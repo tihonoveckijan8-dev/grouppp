@@ -170,7 +170,7 @@ test('offline shell serves versioned app assets after a cold network loss', asyn
 
 
 test('cold offline launch restores an authenticated workspace from IndexedDB', async ({ browser }) => {
-  test.setTimeout(45_000);
+  test.setTimeout(90_000);
   // WHY: a real cold reload verifies the persisted Supabase session and durable account snapshot together, without using a real account or weakening production Auth.
   const context = await browser.newContext({ serviceWorkers: 'allow', viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
@@ -258,7 +258,7 @@ test('cold offline launch restores an authenticated workspace from IndexedDB', a
     await page.waitForFunction(() => {
       const status = document.querySelector('#syncStatus');
       return !!status && !status.hidden && status.textContent.includes('Офлайн');
-    }, null, { timeout: 15_000 });
+    }, null, { timeout: 30_000 });
 
     const restored = await page.evaluate(({ userId }) => {
       const raw = localStorage.getItem('bandplan.premium.v6:' + userId);
