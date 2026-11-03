@@ -152,10 +152,37 @@
     if(pendingSync)pending=state;
     return {state,updatedAt:record.updated_at||'',pendingSync};
   }
-  async function clearDurableQueue(userId){
-    await idbRequest(IDB_QUEUE,'readwrite',store=>store.delete(userId));
-    const snapshot=await durableSnapshot(userId);
-    if(snapshot)await idbRequest(IDB_SNAPSHOT,'readwrite',store=>store.put(Object.assign({},snapshot,{pending_sync:false})));
+  function shouldClearDurableQueue(queueRecord,snapshotRecord,expectedUpdatedAt){
+    const expected=String(expectedUpdatedAt||'');
+    return !!expected && queueRecord?.updated_at===expected && snapshotRecord?.updated_at===expected;
+  }
+  async function clearDurableQueue(userId,expectedUpdatedAt){
+    // WHY: read, compare and clear in one transaction so a newer offline edit cannot be deleted by an older save finishing late.
+    const db=await openOfflineDb();
+    if(!db)return false;
+    return new Promise(resolve=>{
+      let tx;
+      try{tx=db.transaction([IDB_QUEUE,IDB_SNAPSHOT],'readwrite');}
+      catch(error){console.warn('BandPlan durable queue transaction failed:',error);resolve(false);return;}
+      const queueStore=tx.objectStore(IDB_QUEUE),snapshotStore=tx.objectStore(IDB_SNAPSHOT);
+      const queueRequest=queueStore.get(userId),snapshotRequest=snapshotStore.get(userId);
+      let queueRecord,snapshotRecord,ready=0,cleared=false;
+      const compareAndClear=()=>{
+        ready++;
+        if(ready!==2)return;
+        if(!shouldClearDurableQueue(queueRecord,snapshotRecord,expectedUpdatedAt))return;
+        queueStore.delete(userId);
+        snapshotStore.put(Object.assign({},snapshotRecord,{pending_sync:false}));
+        cleared=true;
+      };
+      queueRequest.onsuccess=()=>{queueRecord=queueRequest.result;compareAndClear();};
+      snapshotRequest.onsuccess=()=>{snapshotRecord=snapshotRequest.result;compareAndClear();};
+      queueRequest.onerror=()=>{try{tx.abort();}catch(_){}};
+      snapshotRequest.onerror=()=>{try{tx.abort();}catch(_){}};
+      tx.oncomplete=()=>resolve(cleared);
+      tx.onerror=()=>resolve(false);
+      tx.onabort=()=>resolve(false);
+    });
   }
   async function saveOfflineEventSongs(record){
     const uid=String(currentSession?.user?.id||'');
@@ -1063,7 +1090,12 @@
     lastUpdated=data?.updated_at||updatedAt;
     const latestPending=pending&&JSON.stringify(pending)!==JSON.stringify(snapshot)?JSON.parse(JSON.stringify(pending)):null;
     if(latestPending)await writeDurableState(uid,latestPending,new Date().toISOString(),true);
-    else{pending=null;await clearDurableQueue(uid);}
+    else{
+      const cleared=await clearDurableQueue(uid,updatedAt);
+      // WHY: a save may finish after a newer edit was scheduled; retain that edit for the next sync pass.
+      if(cleared&&JSON.stringify(pending)===JSON.stringify(snapshot))pending=null;
+      else if(pending&&JSON.stringify(pending)!==JSON.stringify(snapshot))await writeDurableState(uid,pending,new Date().toISOString(),true);
+    }
     return lastUpdated;
   }
   function schedule(state) {
@@ -1444,6 +1476,9 @@
   }
   requestStoragePersistence();
   openOfflineDb().catch(error=>console.warn('BandPlan IndexedDB initialization deferred:',error));
+  if(location.search.includes('bandplan-test=1')){
+    window.__bandplanCloudTestHooks={shouldClearDurableQueue};
+  }
   window.BandPlanCloud={client,initialize,user:()=>currentSession?.user||null,authState:()=>authState,load,saveNow,schedule,subscribe,signOut,leaveGroup,createGroup,switchGroup,clearLocalCache,joinGroup,getInviteCode,setEventParticipation,queueEventParticipation,flushEventParticipationQueue,saveOfflineEventSongs,listOfflineEventSongs,getOfflineEventSongs,deleteOfflineEventSongs,clearOfflineEventSongs,offlineEventSongsBytes,deleteAccount,hydrateLocalCache,hasAccountIdentity,markOnboardingComplete,isJustRegistered:hasJustRegisteredFlag,clearJustRegistered:clearJustRegisteredFlag};
   initialize().catch(error=>console.error('BandPlan auth initialization failed:',error));
 })();
